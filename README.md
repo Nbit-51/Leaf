@@ -1,4 +1,4 @@
-# Kestrel
+# Leaf
 
 **A CPU-native neural network inference optimization engine — making complex models runnable on hardware without a GPU.**
 
