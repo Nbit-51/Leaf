@@ -2,9 +2,6 @@
 
 **A CPU-native neural network inference optimization engine — making complex models runnable on hardware without a GPU.**
 
-> Name is a working title (easy to rename via find-replace across the repo if the team lands on something else — LEAN was the runner-up).
-
----
 
 ## 1. Problem Statement
 
