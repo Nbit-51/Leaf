@@ -1,3 +1,3 @@
-# C++-side tests will land here. Empty for now -- populated once we
-# have a proper test framework wired in (Catch2 or GoogleTest); the
-# main_parse_info CLI serves as the initial manual smoke test.
+add_executable(test_gemm test_gemm.cpp ${CMAKE_SOURCE_DIR}/kernels/gemm.cpp)
+target_include_directories(test_gemm PRIVATE ${CMAKE_SOURCE_DIR})
+add_test(NAME test_gemm COMMAND test_gemm)
