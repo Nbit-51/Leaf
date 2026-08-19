@@ -1,4 +1,4 @@
-﻿"""
+"""
 Leaf Reference Executor (test-only)
 ====================================
 
@@ -10,7 +10,10 @@ before and after a rewrite, on the same input, and assert the outputs
 match. A structural check alone ("the BN node is gone") does not prove
 the rewrite preserves behavior -- running both graphs does.
 
-Supports exactly the ops needed for the Conv/BatchNorm/Relu fusion tests.
+Supports the ops needed for Conv/BatchNorm/Relu fusion tests, plus the
+extra ops (Add, MaxPool, GlobalAveragePool, Flatten, Gemm) needed for
+full end-to-end numerical verification on real classifier architectures
+like ResNet-18 (residual adds, pooling, and the final FC head).
 Extend as new op types are added to the passes under test.
 """
 
@@ -73,6 +76,67 @@ def _relu(x):
     return np.maximum(x, 0)
 
 
+def _maxpool2d(x, kernel_shape, pads, strides):
+    """Direct MaxPool2D reference implementation.
+    x: (N, C, H, W)
+    pads: [pad_h_begin, pad_w_begin, pad_h_end, pad_w_end] (ONNX order)
+    """
+    n_batch, c, in_h, in_w = x.shape
+    kh, kw = kernel_shape
+    pad_h0, pad_w0, pad_h1, pad_w1 = pads
+    sh, sw = strides
+
+    x_padded = np.pad(
+        x, ((0, 0), (0, 0), (pad_h0, pad_h1), (pad_w0, pad_w1)),
+        mode="constant", constant_values=-np.inf,
+    )
+
+    padded_h = x_padded.shape[2]
+    padded_w = x_padded.shape[3]
+    out_h = (padded_h - kh) // sh + 1
+    out_w = (padded_w - kw) // sw + 1
+
+    out = np.full((n_batch, c, out_h, out_w), -np.inf, dtype=np.float32)
+    for i in range(kh):
+        for j in range(kw):
+            patch = x_padded[
+                :, :,
+                i: i + out_h * sh: sh,
+                j: j + out_w * sw: sw,
+            ]
+            out = np.maximum(out, patch)
+
+    return out
+
+
+def _global_average_pool(x):
+    """x: (N, C, H, W) -> (N, C, 1, 1), mean over spatial dims."""
+    return x.mean(axis=(2, 3), keepdims=True)
+
+
+def _flatten(x, axis):
+    """Flatten all dims from `axis` onward into one, keeping dims before
+    `axis` as-is -- matches ONNX Flatten semantics."""
+    shape = x.shape
+    outer = int(np.prod(shape[:axis])) if axis > 0 else 1
+    inner = int(np.prod(shape[axis:])) if axis < len(shape) else 1
+    return x.reshape(outer, inner)
+
+
+def _gemm(a, b, c, alpha, beta, trans_a, trans_b):
+    """General matrix multiply: out = alpha * (A' @ B') + beta * C,
+    matching ONNX Gemm semantics (transA/transB optionally transpose
+    A/B before multiplying)."""
+    if trans_a:
+        a = a.T
+    if trans_b:
+        b = b.T
+    out = alpha * (a @ b)
+    if c is not None:
+        out = out + beta * c
+    return out
+
+
 _ACTIVATIONS = {"Relu": _relu}
 
 
@@ -111,6 +175,37 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
 
         elif node.op_type == "Relu":
             tensors[node.outputs[0]] = _relu(tensors[node.inputs[0]])
+
+        elif node.op_type == "Add":
+            a = tensors[node.inputs[0]]
+            b = tensors[node.inputs[1]]
+            tensors[node.outputs[0]] = a + b
+
+        elif node.op_type == "MaxPool":
+            x = tensors[node.inputs[0]]
+            kernel_shape = list(node.attributes.get("kernel_shape"))
+            pads = list(node.attributes.get("pads", [0, 0, 0, 0]))
+            strides = list(node.attributes.get("strides", [1, 1]))
+            tensors[node.outputs[0]] = _maxpool2d(x, kernel_shape, pads, strides)
+
+        elif node.op_type == "GlobalAveragePool":
+            x = tensors[node.inputs[0]]
+            tensors[node.outputs[0]] = _global_average_pool(x)
+
+        elif node.op_type == "Flatten":
+            x = tensors[node.inputs[0]]
+            axis = int(node.attributes.get("axis", 1))
+            tensors[node.outputs[0]] = _flatten(x, axis)
+
+        elif node.op_type == "Gemm":
+            a = tensors[node.inputs[0]]
+            b = tensors[node.inputs[1]]
+            c = tensors[node.inputs[2]] if len(node.inputs) > 2 else None
+            alpha = float(node.attributes.get("alpha", 1.0))
+            beta = float(node.attributes.get("beta", 1.0))
+            trans_a = bool(node.attributes.get("transA", 0))
+            trans_b = bool(node.attributes.get("transB", 0))
+            tensors[node.outputs[0]] = _gemm(a, b, c, alpha, beta, trans_a, trans_b)
 
         else:
             raise NotImplementedError(f"reference executor: unsupported op '{node.op_type}'")
