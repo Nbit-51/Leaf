@@ -137,6 +137,10 @@ const InitializerMeta& Graph::initializer_meta(const std::string& name) const {
     return init_meta_[it->second];
 }
 
+bool Graph::has_initializer(const std::string& name) const {
+    return init_index_.find(name) != init_index_.end();
+}
+
 const float* Graph::initializer_data(const std::string& name) const {
     const InitializerMeta& meta = initializer_meta(name);
     size_t absolute_offset = data_block_start_ + meta.byte_offset;

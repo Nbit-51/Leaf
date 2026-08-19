@@ -16,6 +16,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mavx2 -mfma -DNDEBUG")
 
 add_library(leaf_core
   src/graph_parser.cpp
+  src/executor.cpp
 )
 target_include_directories(leaf_core PUBLIC include)
 
@@ -24,5 +25,18 @@ add_executable(leaf_parse_info
 )
 target_link_libraries(leaf_parse_info PRIVATE leaf_core)
 
+add_executable(leaf_infer
+  src/main_infer.cpp
+)
+target_link_libraries(leaf_infer PRIVATE leaf_core)
+
+add_executable(leaf_bench
+  src/main_bench.cpp
+)
+target_link_libraries(leaf_bench PRIVATE leaf_core)
+
 enable_testing()
 add_subdirectory(tests)
+
+target_sources(leaf_core PRIVATE kernels/im2col.cpp kernels/gemm.cpp kernels/conv2d.cpp)
+target_include_directories(leaf_core PUBLIC kernels)

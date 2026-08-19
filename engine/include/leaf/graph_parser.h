@@ -38,6 +38,7 @@ public:
     // any pointer obtained this way.
     const float* initializer_data(const std::string& name) const;
     const InitializerMeta& initializer_meta(const std::string& name) const;
+    bool has_initializer(const std::string& name) const;
 
     uint32_t version() const { return version_; }
     const std::vector<std::string>& inputs() const { return inputs_; }

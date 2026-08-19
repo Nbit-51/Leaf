@@ -4,3 +4,4 @@ venv/
 qwen_onnx/
 *.onnx
 *.safetensors
+work/

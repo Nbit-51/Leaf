@@ -60,6 +60,37 @@ int main() {
         std::cout << "PASS: alpha/beta accumulation\n";
     }
 
+    // General non-square case: exercises the 4x8 micro-kernel, its M-row
+    // remainder, its N-column remainder, and non-trivial alpha/beta values.
+    {
+        const size_t M = 5, K = 13, N = 17;
+        std::vector<float> A(M * K);
+        std::vector<float> B(K * N);
+        std::vector<float> C(M * N);
+        std::vector<float> expected(M * N);
+        for (size_t i = 0; i < A.size(); ++i) A[i] = static_cast<float>(static_cast<int>((i * 7) % 19) - 9) / 7.0f;
+        for (size_t i = 0; i < B.size(); ++i) B[i] = static_cast<float>(static_cast<int>((i * 5) % 23) - 11) / 11.0f;
+        for (size_t i = 0; i < C.size(); ++i) C[i] = static_cast<float>(static_cast<int>((i * 3) % 13) - 6) / 13.0f;
+        expected = C;
+
+        const float alpha = 0.75f;
+        const float beta = -0.5f;
+        for (size_t row = 0; row < M; ++row) {
+            for (size_t column = 0; column < N; ++column) {
+                float sum = 0.0f;
+                for (size_t k = 0; k < K; ++k) {
+                    sum += A[row * K + k] * B[k * N + column];
+                }
+                expected[row * N + column] = alpha * sum + beta * expected[row * N + column];
+            }
+        }
+        leaf::gemm_f32(A.data(), B.data(), C.data(), M, K, N, alpha, beta);
+        for (size_t index = 0; index < C.size(); ++index) {
+            assert(close(C[index], expected[index], 1e-4f));
+        }
+        std::cout << "PASS: tiled GEMM general-shape correctness\n";
+    }
+
     std::cout << "\nAll GEMM tests passed.\n";
     return 0;
 }
