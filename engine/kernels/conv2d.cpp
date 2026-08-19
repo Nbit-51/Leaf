@@ -24,8 +24,16 @@ void conv2d(
 
     size_t out_spatial = out_h * out_w;
     size_t patch_size = in_c * kh * kw;
+    size_t needed = patch_size * out_spatial;
 
-    std::vector<float> col(patch_size * out_spatial);
+    // Reused across calls instead of a fresh heap allocation per layer per
+    // forward pass. Every call fully overwrites [0, needed) before it's
+    // read, so growing-only reuse is safe: no stale data ever leaks through.
+    static thread_local std::vector<float> col;
+    if (col.size() < needed) {
+        col.resize(needed);
+    }
+
     im2col(
         input, in_c, in_h, in_w, kh, kw,
         pad_h0, pad_w0, pad_h1, pad_w1,
