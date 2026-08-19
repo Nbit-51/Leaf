@@ -208,3 +208,42 @@ cmake --build build
 ```
 
 Full dev-machine setup (model export, quantization, pruning) is documented separately in `docs/architecture.md` once the `tools/` scripts are in place.
+
+What is AI inference?
+AI inference is the "doing" part of artificial intelligence. It's the moment a trained model stops learning and starts working, turning its knowledge into real-world results.
+
+AI Training
+    ↓
+Model learns weights
+    ↓
+Fine-tuning
+    ↓
+Adapt model for a specific task
+    ↓
+AI Inference
+    ↓
+Give input → model predicts
+    ↓
+Inference Serving
+    ↓
+Make that prediction available to users/apps
+
+Our project is mainly here:
+                 AI MODEL
+                    ↓
+              ┌───────────┐
+              │   LEAF    │
+              └───────────┘
+                    ↓
+             Optimize model
+                    ↓
+        ┌───────────┬───────────┐
+        ↓           ↓           ↓
+   Quantization   Pruning    Graph Opt.
+        └───────────┬───────────┘
+                    ↓
+             Efficient Model
+                    ↓
+              CPU Inference
+                    ↓
+              Prediction
