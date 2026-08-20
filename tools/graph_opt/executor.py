@@ -20,6 +20,7 @@ Extend as new op types are added to the passes under test.
 from __future__ import annotations
 
 import numpy as np
+from onnx import numpy_helper
 
 from ir import Graph
 
@@ -206,6 +207,49 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
             trans_a = bool(node.attributes.get("transA", 0))
             trans_b = bool(node.attributes.get("transB", 0))
             tensors[node.outputs[0]] = _gemm(a, b, c, alpha, beta, trans_a, trans_b)
+
+        elif node.op_type == "Constant":
+            value = node.attributes.get("value")
+            tensors[node.outputs[0]] = numpy_helper.to_array(value)
+
+        elif node.op_type == "Cast":
+            # Leaf's runtime is fp32 throughout -- exporter Cast round-trips
+            # are treated as identity (matches fusion.py's RMSNorm docstring
+            # rationale for absorbing these Casts rather than preserving them).
+            tensors[node.outputs[0]] = tensors[node.inputs[0]].astype(np.float32)
+
+        elif node.op_type == "Pow":
+            base = tensors[node.inputs[0]]
+            exponent = tensors[node.inputs[1]]
+            tensors[node.outputs[0]] = np.power(base, exponent)
+
+        elif node.op_type == "ReduceMean":
+            x = tensors[node.inputs[0]]
+            axes = tensors[node.inputs[1]] if len(node.inputs) > 1 else node.attributes.get("axes")
+            keepdims = bool(node.attributes.get("keepdims", 1))
+            axes_tuple = tuple(int(a) for a in np.asarray(axes).reshape(-1))
+            tensors[node.outputs[0]] = np.mean(x, axis=axes_tuple, keepdims=keepdims)
+
+        elif node.op_type == "Sqrt":
+            tensors[node.outputs[0]] = np.sqrt(tensors[node.inputs[0]])
+
+        elif node.op_type == "Div":
+            a = tensors[node.inputs[0]]
+            b = tensors[node.inputs[1]]
+            tensors[node.outputs[0]] = a / b
+
+        elif node.op_type == "Mul":
+            a = tensors[node.inputs[0]]
+            b = tensors[node.inputs[1]]
+            tensors[node.outputs[0]] = a * b
+
+        elif node.op_type == "RMSNorm":
+            x = tensors[node.inputs[0]]
+            weight = tensors[node.inputs[1]]
+            eps = float(node.attributes.get("eps", 1e-6))
+            variance = np.mean(np.power(x.astype(np.float32), 2), axis=-1, keepdims=True)
+            normed = x.astype(np.float32) / np.sqrt(variance + eps)
+            tensors[node.outputs[0]] = (weight * normed).astype(np.float32)
 
         else:
             raise NotImplementedError(f"reference executor: unsupported op '{node.op_type}'")

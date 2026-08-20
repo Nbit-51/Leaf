@@ -131,8 +131,19 @@ def _constant_array(producer: dict[str, Node], tensor_name: str):
 
 
 def _single_consumer(consumers: dict[str, list[Node]], tensor_name: str):
+    """Returns the single node that consumes tensor_name, or None if zero
+    or more-than-one *distinct* nodes consume it. Dedupes by node identity
+    before counting: _build_producer_consumer_maps appends once per input
+    *slot*, so a node that legitimately lists the same tensor twice as its
+    own input (e.g. Concat([t, t], axis=-1), as RoPE_Table's own pattern
+    requires) would otherwise show up as 2 entries for what is really one
+    consuming node. Confirmed bug (found the same session as the RMSNorm
+    single-consumer contradiction): _try_match_rope_table's concat_node
+    lookup failed on every real instance of its own documented pattern
+    for exactly this reason -- see docs/handover.md."""
     cons = consumers.get(tensor_name, [])
-    return cons[0] if len(cons) == 1 else None
+    distinct = list({id(n): n for n in cons}.values())
+    return distinct[0] if len(distinct) == 1 else None
 
 
 def _collect_backward(tensor_name: str, producer: dict[str, Node],
@@ -295,8 +306,20 @@ def fuse_conv_activation(graph: Graph) -> Graph:
 def _try_match_rmsnorm(graph: Graph, cast_node: Node, producer, consumers):
     x_name = cast_node.inputs[0]
 
-    pow_node = _single_consumer(consumers, cast_node.outputs[0])
-    if pow_node is None or pow_node.op_type != "Pow":
+    # cast_node.outputs[0] is legitimately consumed twice in a correct
+    # RMSNorm instance: once by Pow (the x^2 step) and again later by
+    # mul1_node (the "x * (1/sqrt(...))" step). Requiring a single
+    # consumer here was the original bug -- it could never match real
+    # RMSNorm graphs, since the pattern's own second Mul step requires
+    # this same tensor to also feed a different node (verified below,
+    # where mul1_node is found). Fixed the same way Attention's IsNaN
+    # lookup was fixed: search consumers by op_type instead of requiring
+    # exactly one. Consumer-count safety (no unexpected third consumer)
+    # is verified later, once mul1_node is known -- see the check next to
+    # "cast_node.outputs[0] not in mul1_node.inputs" below.
+    cast1_consumers = consumers.get(cast_node.outputs[0], [])
+    pow_node = next((n for n in cast1_consumers if n.op_type == "Pow"), None)
+    if pow_node is None:
         return None
     exponent = _constant_array(producer, pow_node.inputs[1])
     if exponent is None or not np.allclose(exponent, 2.0):
@@ -339,6 +362,13 @@ def _try_match_rmsnorm(graph: Graph, cast_node: Node, producer, consumers):
     if mul1_node is None or mul1_node.op_type != "Mul":
         return None
     if cast_node.outputs[0] not in mul1_node.inputs:
+        return None
+    # Safety check (mirrors Attention's Bug D fix): cast_node is about to
+    # be deleted as part of the fused pattern, so its output tensor must
+    # have *exactly* these two consumers -- pow_node and mul1_node -- and
+    # nothing else. If some other node also reads cast_node.outputs[0],
+    # deleting cast_node would leave that node with a dangling reference.
+    if {n.name for n in cast1_consumers} != {pow_node.name, mul1_node.name}:
         return None
 
     cast2_node = _single_consumer(consumers, mul1_node.outputs[0])
@@ -732,12 +762,57 @@ def fuse_attention(graph: Graph) -> Graph:
 # Pass 7: SwiGLU MLP
 # ---------------------------------------------------------------------------
 
+def _run_two_pass_fusion(graph: Graph, trigger_op_type: str, match_fn) -> Graph:
+    """Generic two-pass fusion runner.
+
+    A single forward walk (skip-as-you-go) only works when a pattern's
+    trigger node is the FIRST node of the pattern in graph.nodes order --
+    RMSNorm, RoPE_Table, and Attention all have this shape by construction.
+    SwiGLU does not: its trigger is Sigmoid, but gate_matmul (part of the
+    same pattern) sits earlier in node order. A forward walk already
+    emits gate_matmul before the Sigmoid trigger is even reached, so
+    updating skip_names at match time is too late. See docs/handover.md
+    section 3 for the full diagnosis.
+
+    Pass 1: walk once, collect every match (keyed by trigger node name)
+    without emitting anything.
+    Pass 2: walk again; emit the fused node at each trigger position,
+    skip every other node named in any match's skip set.
+    """
+    producer, consumers = _build_producer_consumer_maps(graph)
+
+    matches: dict[str, tuple[Node, set[str]]] = {}
+    all_skip: set[str] = set()
+    for node in graph.nodes:
+        if node.op_type == trigger_op_type:
+            match = match_fn(node, producer, consumers)
+            if match is not None:
+                fused, skip = match
+                matches[node.name] = (fused, skip)
+                all_skip.update(skip)
+
+    new_nodes: list[Node] = []
+    for node in graph.nodes:
+        if node.name in matches:
+            fused, _skip = matches[node.name]
+            new_nodes.append(fused)
+            continue
+        if node.name in all_skip:
+            continue
+        new_nodes.append(node)
+
+    new_graph = _shallow_copy_graph_shell(graph)
+    new_graph.nodes = new_nodes
+    return new_graph
+
+
 def _try_match_swiglu(sigmoid_node: Node, producer, consumers):
     gate_matmul = producer.get(sigmoid_node.inputs[0])
     if gate_matmul is None or gate_matmul.op_type != "MatMul" or len(gate_matmul.inputs) < 2:
         return None
 
-    gate_cons = consumers.get(gate_matmul.outputs[0], [])
+    gate_cons_raw = consumers.get(gate_matmul.outputs[0], [])
+    gate_cons = list({id(n): n for n in gate_cons_raw}.values())
     if len(gate_cons) != 2 or sigmoid_node not in gate_cons:
         return None
     silu_mul = next((n for n in gate_cons if n is not sigmoid_node), None)
@@ -789,26 +864,11 @@ def _try_match_swiglu(sigmoid_node: Node, producer, consumers):
 
 
 def fuse_swiglu_mlp(graph: Graph) -> Graph:
-    producer, consumers = _build_producer_consumer_maps(graph)
-    new_graph = _shallow_copy_graph_shell(graph)
-
-    skip_names: set[str] = set()
-    new_nodes: list[Node] = []
-
-    for node in graph.nodes:
-        if node.name in skip_names:
-            continue
-        if node.op_type == "Sigmoid":
-            match = _try_match_swiglu(node, producer, consumers)
-            if match is not None:
-                fused, skip = match
-                new_nodes.append(fused)
-                skip_names.update(skip)
-                continue
-        new_nodes.append(node)
-
-    new_graph.nodes = new_nodes
-    return new_graph
+    # Two-pass runner required here -- see _run_two_pass_fusion's
+    # docstring and docs/handover.md section 3. Sigmoid triggers the
+    # match but gate_matmul (part of the pattern) precedes it in node
+    # order, which a single forward skip-as-you-go walk mishandles.
+    return _run_two_pass_fusion(graph, "Sigmoid", _try_match_swiglu)
 
 
 # ---------------------------------------------------------------------------
