@@ -1,3 +1,4 @@
 stage,model,mean_ms,p50_ms,p95_ms,min_ms,throughput_img_s,max_abs_diff_vs_pytorch,warmup_runs,measured_runs,date,notes
 fp32_avx2_gemm_4x8,resnet18,140.904,,,,7.097,3.93e-06,1,10,2026-08-XX,M5a baseline; AVX2 4x8 GEMM micro-kernel
 fp32_im2col_buffer_reuse,resnet18,106.812,106.046,115.989,99.238,9.362,3.93e-06,3,20,2026-08-19,thread_local static scratch buffer in conv2d.cpp; grow-only reuse across calls; queue item 3 (partial)
+fp32_executor_buffer_pool,resnet18,126.314,124.268,137.941,120.715,7.917,3.93e-06,3,20,2026-08-20,thread_local activation-buffer pool in executor.cpp; A/B vs unpatched same-session via git stash (unpatched: 129.620ms mean); queue item 3 complete

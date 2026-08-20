@@ -18,3 +18,8 @@ add_executable(test_executor test_executor.cpp)
 target_link_libraries(test_executor PRIVATE leaf_core)
 target_include_directories(test_executor PRIVATE ${CMAKE_SOURCE_DIR}/include)
 add_test(NAME test_executor COMMAND test_executor)
+
+add_executable(test_executor_buffer_pool test_executor_buffer_pool.cpp)
+target_link_libraries(test_executor_buffer_pool PRIVATE leaf_core)
+target_include_directories(test_executor_buffer_pool PRIVATE ${CMAKE_SOURCE_DIR}/include)
+add_test(NAME test_executor_buffer_pool COMMAND test_executor_buffer_pool)

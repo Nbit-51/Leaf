@@ -117,6 +117,57 @@ std::string string_attribute(const Node& node, const std::string& key) {
     return node.attributes_json.substr(quote_begin + 1, quote_end - quote_begin - 1);
 }
 
+// Grow-only pool of retired activation buffers, reused across nodes within
+// a run() call (and across repeated run() calls on the same thread)
+// instead of a fresh heap allocation per node per pass. Mirrors the
+// thread_local scratch buffer already used by conv2d() (see ADR-002) but
+// sized per-tensor rather than per-conv-layer, since intermediate
+// activation shapes vary node to node through the graph.
+//
+// Every op that acquires a buffer here either fully overwrites every
+// element before any value is read back out (Conv -- conv2d() memsets
+// internally; MaxPool, GlobalAveragePool, Add -- every index assigned
+// exactly once by the loop), copies the full input range in before
+// modifying in place (Relu, Flatten, BatchNormalization), or explicitly
+// zero-fills before an accumulating write (Gemm's beta*C term). So reused
+// content never leaks between nodes or runs.
+thread_local std::vector<std::vector<float>> g_buffer_pool;
+
+std::vector<float> acquire_buffer(size_t needed) {
+    // Best-fit: reuse the freed buffer whose capacity is closest to (but
+    // not below) what's needed, so a right-sized buffer already in the
+    // pool isn't passed over in favor of growing an oversized one.
+    size_t best = g_buffer_pool.size();
+    for (size_t i = 0; i < g_buffer_pool.size(); ++i) {
+        if (g_buffer_pool[i].capacity() >= needed &&
+            (best == g_buffer_pool.size() ||
+             g_buffer_pool[i].capacity() < g_buffer_pool[best].capacity())) {
+            best = i;
+        }
+    }
+    if (best == g_buffer_pool.size()) {
+        // Nothing large enough: grow the largest available buffer instead
+        // of discarding pool space, or allocate fresh if the pool is empty.
+        if (g_buffer_pool.empty()) {
+            return std::vector<float>(needed);
+        }
+        best = 0;
+        for (size_t i = 1; i < g_buffer_pool.size(); ++i) {
+            if (g_buffer_pool[i].capacity() > g_buffer_pool[best].capacity()) {
+                best = i;
+            }
+        }
+    }
+    std::vector<float> buffer = std::move(g_buffer_pool[best]);
+    g_buffer_pool.erase(g_buffer_pool.begin() + static_cast<std::ptrdiff_t>(best));
+    buffer.resize(needed);
+    return buffer;
+}
+
+void release_buffer(std::vector<float>&& buffer) {
+    g_buffer_pool.push_back(std::move(buffer));
+}
+
 TensorView tensor_for(const Graph& graph,
                       const std::unordered_map<std::string, Tensor>& intermediates,
                       const std::unordered_map<std::string, TensorView>& graph_inputs,
@@ -168,7 +219,7 @@ Tensor execute_conv(const Graph& graph, const Node& node, const TensorView& inpu
                         pads[0], pads[1], pads[2], pads[3], strides[0], strides[1],
                         dilations[0], dilations[1], out_h, out_w);
     Tensor output{{1, weights.shape[0], out_h, out_w},
-                  std::vector<float>(weights.shape[0] * out_h * out_w)};
+                  acquire_buffer(weights.shape[0] * out_h * out_w)};
     conv2d(input.data, input.shape[1], input.shape[2], input.shape[3],
            weights.data, weights.shape[0], weights.shape[2], weights.shape[3], bias,
            pads[0], pads[1], pads[2], pads[3], strides[0], strides[1],
@@ -204,7 +255,7 @@ Tensor execute_maxpool(const Node& node, const TensorView& input) {
                         pads[0], pads[1], pads[2], pads[3], strides[0], strides[1],
                         1, 1, out_h, out_w);
     Tensor output{{1, input.shape[1], out_h, out_w},
-                  std::vector<float>(input.shape[1] * out_h * out_w)};
+                  acquire_buffer(input.shape[1] * out_h * out_w)};
     for (size_t channel = 0; channel < input.shape[1]; ++channel) {
         for (size_t oh = 0; oh < out_h; ++oh) {
             for (size_t ow = 0; ow < out_w; ++ow) {
@@ -233,7 +284,7 @@ Tensor execute_global_average_pool(const TensorView& input) {
     require(input.shape.size() == 4 && input.shape[0] == 1,
             "GlobalAveragePool currently supports one NCHW image at a time");
     const size_t spatial = input.shape[2] * input.shape[3];
-    Tensor output{{1, input.shape[1], 1, 1}, std::vector<float>(input.shape[1])};
+    Tensor output{{1, input.shape[1], 1, 1}, acquire_buffer(input.shape[1])};
     for (size_t channel = 0; channel < input.shape[1]; ++channel) {
         float sum = 0.0f;
         const float* channel_data = input.data + channel * spatial;
@@ -259,7 +310,9 @@ Tensor execute_flatten(const Node& node, const TensorView& input) {
     for (size_t i = axis; i < rank; ++i) {
         inner *= input.shape[i];
     }
-    return {{outer, inner}, std::vector<float>(input.data, input.data + element_count(input.shape))};
+    std::vector<float> buffer = acquire_buffer(element_count(input.shape));
+    std::copy(input.data, input.data + buffer.size(), buffer.begin());
+    return {{outer, inner}, std::move(buffer)};
 }
 
 Tensor execute_gemm(const Graph& graph, const Node& node, const TensorView& a,
@@ -293,7 +346,9 @@ Tensor execute_gemm(const Graph& graph, const Node& node, const TensorView& a,
         }
     }
 
-    Tensor output{{m, n}, std::vector<float>(m * n, 0.0f)};
+    std::vector<float> out_buffer = acquire_buffer(m * n);
+    std::fill(out_buffer.begin(), out_buffer.end(), 0.0f);
+    Tensor output{{m, n}, std::move(out_buffer)};
     if (node.inputs.size() >= 3 && !node.inputs[2].empty()) {
         const TensorView c = tensor_for(graph, intermediates, graph_inputs, node.inputs[2]);
         if (element_count(c.shape) == 1) {
@@ -340,18 +395,20 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
         if (node.op_type == "Conv") {
             output = execute_conv(graph, node, first_input, intermediates, graph_inputs);
         } else if (node.op_type == "Relu") {
-            output = {first_input.shape, std::vector<float>(first_input.data,
-                      first_input.data + element_count(first_input.shape))};
-            for (float& value : output.values) {
+            std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
+            std::copy(first_input.data, first_input.data + buffer.size(), buffer.begin());
+            for (float& value : buffer) {
                 value = std::max(value, 0.0f);
             }
+            output = {first_input.shape, std::move(buffer)};
         } else if (node.op_type == "Add") {
             const TensorView second_input = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
             require(first_input.shape == second_input.shape, "Add requires equal input shapes");
-            output = {first_input.shape, std::vector<float>(element_count(first_input.shape))};
-            for (size_t i = 0; i < output.values.size(); ++i) {
-                output.values[i] = first_input.data[i] + second_input.data[i];
+            std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
+            for (size_t i = 0; i < buffer.size(); ++i) {
+                buffer[i] = first_input.data[i] + second_input.data[i];
             }
+            output = {first_input.shape, std::move(buffer)};
         } else if (node.op_type == "MaxPool") {
             output = execute_maxpool(node, first_input);
         } else if (node.op_type == "GlobalAveragePool") {
@@ -371,17 +428,18 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
             require(scale.shape == std::vector<size_t>{channels} && bias.shape == scale.shape &&
                     mean.shape == scale.shape && variance.shape == scale.shape,
                     "BatchNormalization parameter shape mismatch");
-            output = {first_input.shape, std::vector<float>(first_input.data,
-                      first_input.data + element_count(first_input.shape))};
+            std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
+            std::copy(first_input.data, first_input.data + buffer.size(), buffer.begin());
             const size_t spatial = first_input.shape[2] * first_input.shape[3];
             const float epsilon = float_attribute(node, "epsilon", 1e-5f);
             for (size_t channel = 0; channel < channels; ++channel) {
                 const float factor = scale.data[channel] / std::sqrt(variance.data[channel] + epsilon);
                 for (size_t i = 0; i < spatial; ++i) {
-                    float& value = output.values[channel * spatial + i];
+                    float& value = buffer[channel * spatial + i];
                     value = factor * (value - mean.data[channel]) + bias.data[channel];
                 }
             }
+            output = {first_input.shape, std::move(buffer)};
         } else {
             throw std::runtime_error("leaf::Executor: unsupported operation: " + node.op_type);
         }
@@ -391,7 +449,11 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
             auto use = remaining_uses.find(name);
             if (use != remaining_uses.end() && --use->second == 0 &&
                 graph_outputs.find(name) == graph_outputs.end()) {
-                intermediates.erase(name);
+                auto retiring = intermediates.find(name);
+                if (retiring != intermediates.end()) {
+                    release_buffer(std::move(retiring->second.values));
+                    intermediates.erase(retiring);
+                }
             }
         }
     }
