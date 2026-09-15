@@ -75,7 +75,8 @@ def _batchnorm(x, scale, bias, mean, var, eps):
 
 def _relu(x):
     return np.maximum(x, 0)
-
+def _sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 def _maxpool2d(x, kernel_shape, pads, strides):
     """Direct MaxPool2D reference implementation.
@@ -176,7 +177,8 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
 
         elif node.op_type == "Relu":
             tensors[node.outputs[0]] = _relu(tensors[node.inputs[0]])
-
+        elif node.op_type == "Sigmoid":
+            tensors[node.outputs[0]] = _sigmoid(tensors[node.inputs[0]])
         elif node.op_type == "Add":
             a = tensors[node.inputs[0]]
             b = tensors[node.inputs[1]]
