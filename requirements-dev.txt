@@ -1,0 +1,4 @@
+numpy>=2.0
+onnx>=1.16
+pytest>=8.0
+torch>=2.2

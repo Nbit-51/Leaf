@@ -26,9 +26,10 @@ torchvision = pytest.importorskip("torchvision")
 def resnet18_leaf_path(tmp_path_factory):
     import torchvision.models as models
 
-    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    torch.manual_seed(123)
+    model = models.resnet18(weights=None)
     model.eval()
-    dummy_input = torch.randn(1, 3, 224, 224)
+    dummy_input = torch.randn(1, 3, 32, 32)
 
     onnx_path = tmp_path_factory.mktemp("onnx") / "resnet18.onnx"
     torch.onnx.export(

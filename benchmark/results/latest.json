@@ -1,0 +1,78 @@
+{
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.2",
+    "numpy": "2.4.6",
+    "torch": "2.12.0+cpu",
+    "torch_threads": 1
+  },
+  "note": "NumPy timings are reference-oracle measurements; production latency is measured by leaf_bench.",
+  "workloads": [
+    {
+      "name": "cnn",
+      "dataset_samples": 6,
+      "calibration_samples": 32,
+      "correctness": {
+        "leaf_fp32_vs_pytorch_max_abs": 5.960464477539062e-07,
+        "leaf_int8_vs_pytorch_max_abs": 0.020336493849754333
+      },
+      "latency_ms_per_sample": {
+        "pytorch_cpu": 0.03886666666666667,
+        "leaf_numpy_reference_fp32": 0.7518166666666667,
+        "leaf_numpy_quantized_simulation": 0.8210666666666667
+      },
+      "optimized_nodes": 1,
+      "memory_plan": {
+        "format": "leaf-memory-plan-v1",
+        "graph_fingerprint": "042706746ae5aca9",
+        "alignment": 64,
+        "arena_size": 8192,
+        "naive_size": 8192,
+        "bytes_saved": 0,
+        "allocations": [
+          {
+            "tensor": "y",
+            "offset": 0,
+            "size": 8192,
+            "first_node": 0,
+            "last_node": 1
+          }
+        ],
+        "unplanned_tensors": []
+      }
+    },
+    {
+      "name": "transformer_ffn",
+      "dataset_samples": 6,
+      "calibration_samples": 32,
+      "correctness": {
+        "leaf_fp32_vs_pytorch_max_abs": 2.70869648266725e-07,
+        "leaf_int8_vs_pytorch_max_abs": 0.0951790452932284
+      },
+      "latency_ms_per_sample": {
+        "pytorch_cpu": 0.015183333333333333,
+        "leaf_numpy_reference_fp32": 0.023083333333333334,
+        "leaf_numpy_quantized_simulation": 0.03403333333333333
+      },
+      "optimized_nodes": 1,
+      "memory_plan": {
+        "format": "leaf-memory-plan-v1",
+        "graph_fingerprint": "141e88fb29088c38",
+        "alignment": 64,
+        "arena_size": 1024,
+        "naive_size": 1024,
+        "bytes_saved": 0,
+        "allocations": [
+          {
+            "tensor": "y",
+            "offset": 0,
+            "size": 1024,
+            "first_node": 0,
+            "last_node": 1
+          }
+        ],
+        "unplanned_tensors": []
+      }
+    }
+  ]
+}

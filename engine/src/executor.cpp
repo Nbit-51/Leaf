@@ -401,6 +401,10 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
                 value = std::max(value, 0.0f);
             }
             output = {first_input.shape, std::move(buffer)};
+        } else if (node.op_type == "Identity") {
+            std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
+            std::copy(first_input.data, first_input.data + buffer.size(), buffer.begin());
+            output = {first_input.shape, std::move(buffer)};
         } else if (node.op_type == "Add") {
             const TensorView second_input = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
             require(first_input.shape == second_input.shape, "Add requires equal input shapes");

@@ -30,8 +30,10 @@ from ir import Graph
 def export_resnet18(artifact_path: Path, input_path: Path, expected_path: Path) -> None:
     """Export one deterministic ResNet-18 inference case and its reference."""
     torch.manual_seed(42)
-    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT).eval()
-    input_tensor = torch.randn(1, 3, 224, 224)
+    # Architecture coverage does not require a network download. A fixed seed
+    # makes this full-runtime parity check deterministic and CI-safe.
+    model = models.resnet18(weights=None).eval()
+    input_tensor = torch.randn(1, 3, 32, 32)
 
     onnx_path = artifact_path.with_suffix(".onnx")
     torch.onnx.export(
@@ -74,7 +76,7 @@ def main() -> int:
 
     export_resnet18(artifact, input_path, expected_path)
     subprocess.run(
-        [str(executable), str(artifact), str(input_path), "1,3,224,224", str(actual_path)],
+        [str(executable), str(artifact), str(input_path), "1,3,32,32", str(actual_path)],
         check=True,
     )
 

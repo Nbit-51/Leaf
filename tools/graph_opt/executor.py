@@ -20,9 +20,12 @@ Extend as new op types are added to the passes under test.
 from __future__ import annotations
 
 import numpy as np
-from onnx import numpy_helper
+from onnx import TensorProto, numpy_helper
 
-from ir import Graph
+try:
+    from .ir import Graph
+except ImportError:
+    from ir import Graph
 
 
 def _conv2d(x, w, b, pads, strides, dilations):
@@ -77,6 +80,39 @@ def _relu(x):
     return np.maximum(x, 0)
 def _sigmoid(x):
     return 1 / (1 + np.exp(-x))
+
+
+def _gelu(x):
+    return 0.5 * x * (1.0 + np.tanh(np.sqrt(2.0 / np.pi) * (x + 0.044715 * x**3)))
+
+
+def _silu(x):
+    return x * _sigmoid(x)
+
+
+def _reshape_scales(scales: np.ndarray, axis: int, ndim: int) -> np.ndarray:
+    shape = [1] * ndim
+    shape[axis] = scales.size
+    return scales.reshape(shape)
+
+
+def _fake_quantize(value: np.ndarray, params: dict | None) -> np.ndarray:
+    if not params:
+        return value
+    scale = np.asarray(params["scale"], dtype=np.float32)
+    axis = params.get("axis")
+    if axis is not None and scale.ndim:
+        scale = _reshape_scales(scale, int(axis), value.ndim)
+    scale = np.maximum(scale, np.finfo(np.float32).tiny)
+    quantized = np.clip(np.rint(value / scale), -127, 127).astype(np.int8)
+    return quantized.astype(np.float32) * scale
+
+
+def _dequantize_weight(value: np.ndarray, params: dict | None) -> np.ndarray:
+    if not params:
+        return value
+    scales = np.asarray(params["scale"], dtype=np.float32)
+    return value.astype(np.float32) * _reshape_scales(scales, int(params["axis"]), value.ndim)
 
 def _maxpool2d(x, kernel_shape, pads, strides):
     """Direct MaxPool2D reference implementation.
@@ -139,7 +175,7 @@ def _gemm(a, b, c, alpha, beta, trans_a, trans_b):
     return out
 
 
-_ACTIVATIONS = {"Relu": _relu}
+_ACTIVATIONS = {"Relu": _relu, "Gelu": _gelu, "Silu": _silu}
 
 
 def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
@@ -153,6 +189,11 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
             x = tensors[node.inputs[0]]
             w = tensors[node.inputs[1]]
             b = tensors[node.inputs[2]] if len(node.inputs) > 2 else np.zeros(w.shape[0], dtype=w.dtype)
+
+            quantization = node.attributes.get("quantization")
+            if quantization:
+                x = _fake_quantize(x, quantization.get("input"))
+                w = _dequantize_weight(w, quantization.get("weight"))
 
             pads = list(node.attributes.get("pads", [0, 0, 0, 0]))
             strides = list(node.attributes.get("strides", [1, 1]))
@@ -179,6 +220,8 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
             tensors[node.outputs[0]] = _relu(tensors[node.inputs[0]])
         elif node.op_type == "Sigmoid":
             tensors[node.outputs[0]] = _sigmoid(tensors[node.inputs[0]])
+        elif node.op_type in ("Gelu", "Silu"):
+            tensors[node.outputs[0]] = _ACTIVATIONS[node.op_type](tensors[node.inputs[0]])
         elif node.op_type == "Add":
             a = tensors[node.inputs[0]]
             b = tensors[node.inputs[1]]
@@ -203,22 +246,43 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
         elif node.op_type == "Gemm":
             a = tensors[node.inputs[0]]
             b = tensors[node.inputs[1]]
+            quantization = node.attributes.get("quantization")
+            if quantization:
+                a = _fake_quantize(a, quantization.get("input"))
+                b = _dequantize_weight(b, quantization.get("weight"))
             c = tensors[node.inputs[2]] if len(node.inputs) > 2 else None
             alpha = float(node.attributes.get("alpha", 1.0))
             beta = float(node.attributes.get("beta", 1.0))
             trans_a = bool(node.attributes.get("transA", 0))
             trans_b = bool(node.attributes.get("transB", 0))
-            tensors[node.outputs[0]] = _gemm(a, b, c, alpha, beta, trans_a, trans_b)
+            output = _gemm(a, b, c, alpha, beta, trans_a, trans_b)
+            activation = node.attributes.get("activation")
+            tensors[node.outputs[0]] = _ACTIVATIONS[activation](output) if activation else output
+
+        elif node.op_type == "MatMul":
+            a = tensors[node.inputs[0]]
+            b = tensors[node.inputs[1]]
+            quantization = node.attributes.get("quantization")
+            if quantization:
+                a = _fake_quantize(a, quantization.get("input"))
+                b = _dequantize_weight(b, quantization.get("weight"))
+            tensors[node.outputs[0]] = np.matmul(a, b)
 
         elif node.op_type == "Constant":
             value = node.attributes.get("value")
-            tensors[node.outputs[0]] = numpy_helper.to_array(value)
+            tensors[node.outputs[0]] = (
+                numpy_helper.to_array(value)
+                if hasattr(value, "data_type")
+                else np.asarray(value)
+            )
 
         elif node.op_type == "Cast":
-            # Leaf's runtime is fp32 throughout -- exporter Cast round-trips
-            # are treated as identity (matches fusion.py's RMSNorm docstring
-            # rationale for absorbing these Casts rather than preserving them).
-            tensors[node.outputs[0]] = tensors[node.inputs[0]].astype(np.float32)
+            dtype = {
+                TensorProto.FLOAT: np.float32, TensorProto.DOUBLE: np.float64,
+                TensorProto.INT64: np.int64, TensorProto.INT32: np.int32,
+                TensorProto.INT8: np.int8,
+            }[int(node.attributes.get("to", TensorProto.FLOAT))]
+            tensors[node.outputs[0]] = tensors[node.inputs[0]].astype(dtype)
 
         elif node.op_type == "Pow":
             base = tensors[node.inputs[0]]
@@ -244,6 +308,62 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
             a = tensors[node.inputs[0]]
             b = tensors[node.inputs[1]]
             tensors[node.outputs[0]] = a * b
+
+        elif node.op_type == "Sub":
+            tensors[node.outputs[0]] = tensors[node.inputs[0]] - tensors[node.inputs[1]]
+
+        elif node.op_type == "Identity":
+            tensors[node.outputs[0]] = tensors[node.inputs[0]]
+
+        elif node.op_type == "Reshape":
+            shape = tuple(int(value) for value in tensors[node.inputs[1]].reshape(-1))
+            tensors[node.outputs[0]] = np.reshape(tensors[node.inputs[0]], shape)
+
+        elif node.op_type == "Transpose":
+            tensors[node.outputs[0]] = np.transpose(
+                tensors[node.inputs[0]], axes=node.attributes.get("perm")
+            )
+
+        elif node.op_type == "Concat":
+            tensors[node.outputs[0]] = np.concatenate(
+                [tensors[name] for name in node.inputs], axis=int(node.attributes.get("axis", 0))
+            )
+
+        elif node.op_type in ("Squeeze", "Unsqueeze"):
+            axes = node.attributes.get("axes")
+            if axes is None and len(node.inputs) > 1:
+                axes = tensors[node.inputs[1]].reshape(-1).tolist()
+            value = tensors[node.inputs[0]]
+            if node.op_type == "Squeeze":
+                tensors[node.outputs[0]] = np.squeeze(value, axis=None if axes is None else tuple(axes))
+            else:
+                for axis in sorted(int(item) for item in axes):
+                    value = np.expand_dims(value, axis)
+                tensors[node.outputs[0]] = value
+
+        elif node.op_type == "Gather":
+            tensors[node.outputs[0]] = np.take(
+                tensors[node.inputs[0]], tensors[node.inputs[1]],
+                axis=int(node.attributes.get("axis", 0)),
+            )
+
+        elif node.op_type == "Shape":
+            shape = tensors[node.inputs[0]].shape
+            start = int(node.attributes.get("start", 0))
+            end = int(node.attributes.get("end", len(shape)))
+            tensors[node.outputs[0]] = np.asarray(shape[start:end], dtype=np.int64)
+
+        elif node.op_type == "LayerNormalization":
+            value = tensors[node.inputs[0]]
+            axis = int(node.attributes.get("axis", -1)) % value.ndim
+            epsilon = float(node.attributes.get("epsilon", 1e-5))
+            axes = tuple(range(axis, value.ndim))
+            mean = value.mean(axis=axes, keepdims=True)
+            result = (value - mean) / np.sqrt(value.var(axis=axes, keepdims=True) + epsilon)
+            result *= tensors[node.inputs[1]]
+            if len(node.inputs) > 2:
+                result += tensors[node.inputs[2]]
+            tensors[node.outputs[0]] = result
 
         elif node.op_type == "RMSNorm":
             x = tensors[node.inputs[0]]

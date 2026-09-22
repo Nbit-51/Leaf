@@ -1,5 +1,5 @@
 """
-End-to-end numerical verification: real pretrained ResNet-18 through
+End-to-end numerical verification: a real ResNet-18 architecture through
 Leaf's IR + reference executor, checked against PyTorch's own forward
 pass on the same input.
 
@@ -9,9 +9,8 @@ proves the executed graph produces the same numbers PyTorch does, across
 every op ResNet-18 needs: Conv, Relu, Add (residual connections),
 MaxPool, GlobalAveragePool, Flatten, Gemm (final FC head).
 
-Downloads pretrained weights on first run (~45MB, cached after) and
-requires torchvision -- skipped automatically if unavailable so the
-core unit test suite doesn't require it.
+Uses deterministic randomly initialized weights so the test is offline and
+CI-safe. It requires torchvision and is skipped automatically if unavailable.
 """
 
 import sys
@@ -33,10 +32,13 @@ torchvision = pytest.importorskip("torchvision")
 def resnet18_onnx_path(tmp_path_factory):
     import torchvision.models as models
 
-    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    torch.manual_seed(123)
+    model = models.resnet18(weights=None)
     model.eval()
 
-    dummy_input = torch.randn(1, 3, 224, 224)
+    # A CIFAR-sized input preserves the complete ResNet operator graph while
+    # keeping the deliberately simple NumPy convolution oracle fast enough for CI.
+    dummy_input = torch.randn(1, 3, 32, 32)
     onnx_path = tmp_path_factory.mktemp("onnx") / "resnet18.onnx"
 
     torch.onnx.export(

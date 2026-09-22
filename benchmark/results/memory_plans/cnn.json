@@ -1,0 +1,18 @@
+{
+  "format": "leaf-memory-plan-v1",
+  "graph_fingerprint": "042706746ae5aca9",
+  "alignment": 64,
+  "arena_size": 8192,
+  "naive_size": 8192,
+  "bytes_saved": 0,
+  "allocations": [
+    {
+      "tensor": "y",
+      "offset": 0,
+      "size": 8192,
+      "first_node": 0,
+      "last_node": 1
+    }
+  ],
+  "unplanned_tensors": []
+}

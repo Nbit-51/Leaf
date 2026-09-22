@@ -40,3 +40,23 @@ add_subdirectory(tests)
 
 target_sources(leaf_core PRIVATE kernels/im2col.cpp kernels/gemm.cpp kernels/conv2d.cpp)
 target_include_directories(leaf_core PUBLIC kernels)
+
+# Quantized/fused kernel development library. Kept separate from leaf_core
+# until the binary format carries INT8 tensors and calibration parameters.
+add_library(leaf_optimized_kernels STATIC
+  src/kernels/gemm.cpp
+  src/kernels/conv.cpp
+)
+target_include_directories(leaf_optimized_kernels PUBLIC include)
+if(MSVC)
+  target_compile_options(leaf_optimized_kernels PRIVATE /O2 /arch:AVX2)
+else()
+  target_compile_options(leaf_optimized_kernels PRIVATE -O3 -mavx2 -mfma)
+endif()
+
+add_executable(leaf_native_tests ../tests/native/test_kernels.cpp)
+target_link_libraries(leaf_native_tests PRIVATE leaf_optimized_kernels)
+add_test(NAME leaf_native_tests COMMAND leaf_native_tests)
+
+add_executable(leaf_kernel_bench ../benchmark/native_benchmark.cpp)
+target_link_libraries(leaf_kernel_bench PRIVATE leaf_optimized_kernels)

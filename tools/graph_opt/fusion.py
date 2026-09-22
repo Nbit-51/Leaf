@@ -85,7 +85,10 @@ import numpy as np
 import onnx
 from onnx import numpy_helper
 
-from ir import Graph, Node
+try:
+    from .ir import Graph, Node
+except ImportError:
+    from ir import Graph, Node
 
 
 # ---------------------------------------------------------------------------
@@ -113,6 +116,7 @@ def _shallow_copy_graph_shell(graph: Graph) -> Graph:
     new_graph.outputs = list(graph.outputs)
     new_graph.value_info = dict(graph.value_info)
     new_graph.initializers = dict(graph.initializers)
+    new_graph.metadata = dict(graph.metadata)
     return new_graph
 
 
@@ -898,4 +902,14 @@ def run_fusion_passes(graph: Graph) -> Graph:
     g = fuse_repeat_kv(g)
     g = fuse_attention(g)
     g = fuse_swiglu_mlp(g)
+    used_initializers = {name for node in g.nodes for name in node.inputs}
+    used_initializers.update(name for name in g.outputs if name in g.initializers)
+    g.initializers = {
+        name: value for name, value in g.initializers.items()
+        if name in used_initializers
+    }
+    g.metadata.setdefault("passes", {})["fusion"] = {
+        "nodes_before": len(graph.nodes),
+        "nodes_after": len(g.nodes),
+    }
     return g

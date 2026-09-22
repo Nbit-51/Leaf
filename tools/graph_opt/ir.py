@@ -21,6 +21,8 @@ Design notes:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from copy import deepcopy
+from os import PathLike
 from typing import Optional
 
 import numpy as np
@@ -73,18 +75,27 @@ class Graph:
         self.outputs: list[str] = []
         self.initializers: dict[str, np.ndarray] = {}
         self.value_info: dict[str, TensorInfo] = {}
+        self.metadata: dict = {}
 
     # -- construction ------------------------------------------------------
 
     @classmethod
     def from_onnx(cls, path_or_model) -> "Graph":
         """Load a Graph from an .onnx file path or an already-loaded ModelProto."""
-        if isinstance(path_or_model, (str, bytes)):
+        if isinstance(path_or_model, (str, bytes, PathLike)):
             model = onnx.load(path_or_model)
         else:
             model = path_or_model
 
         onnx.checker.check_model(model)
+        # Exporters frequently omit intermediate value_info. Shape inference
+        # makes memory planning useful without a model-specific shape pass.
+        try:
+            model = onnx.shape_inference.infer_shapes(model)
+        except Exception:
+            # Shape inference is an aid, not a load requirement. Custom-domain
+            # operators are valid Leaf inputs even when ONNX cannot infer them.
+            pass
         graph_proto = model.graph
 
         g = cls()
@@ -112,7 +123,14 @@ class Graph:
                     dims.append(d.dim_value if d.dim_value > 0 else None)
                 shape = tuple(dims)
             if vi.type.tensor_type.elem_type:
-                dtype = onnx.TensorProto.DataType.Name(vi.type.tensor_type.elem_type).lower()
+                try:
+                    dtype = np.dtype(
+                        onnx.helper.tensor_dtype_to_np_dtype(vi.type.tensor_type.elem_type)
+                    ).name
+                except (TypeError, ValueError):
+                    dtype = onnx.TensorProto.DataType.Name(
+                        vi.type.tensor_type.elem_type
+                    ).lower()
             g.value_info[vi.name] = TensorInfo(name=vi.name, shape=shape, dtype=dtype)
 
         # Nodes, in the order ONNX stored them.
@@ -128,6 +146,46 @@ class Graph:
             g.nodes.append(node)
 
         return g
+
+    def clone(self) -> "Graph":
+        """Return an independent graph suitable for destructive rewrites."""
+        cloned = Graph()
+        cloned.nodes = deepcopy(self.nodes)
+        cloned.inputs = list(self.inputs)
+        cloned.outputs = list(self.outputs)
+        cloned.initializers = {
+            name: np.array(value, copy=True) for name, value in self.initializers.items()
+        }
+        cloned.value_info = deepcopy(self.value_info)
+        cloned.metadata = deepcopy(self.metadata)
+        return cloned
+
+    def consumers(self) -> dict[str, list[Node]]:
+        result: dict[str, list[Node]] = {}
+        for node in self.nodes:
+            for tensor in node.inputs:
+                result.setdefault(tensor, []).append(node)
+        return result
+
+    def producers(self) -> dict[str, Node]:
+        return {tensor: node for node in self.nodes for tensor in node.outputs}
+
+    def validate(self) -> None:
+        """Validate invariants relied on by graph-rewrite passes."""
+        node_names: set[str] = set()
+        tensor_names: set[str] = set(self.inputs) | set(self.initializers)
+        for node in self.nodes:
+            if node.name in node_names:
+                raise ValueError(f"duplicate node name: {node.name!r}")
+            node_names.add(node.name)
+            for output in node.outputs:
+                if output in tensor_names:
+                    raise ValueError(f"tensor has multiple producers: {output!r}")
+                tensor_names.add(output)
+        missing = [name for name in self.outputs if name not in tensor_names]
+        if missing:
+            raise ValueError(f"graph outputs have no producer: {missing}")
+        self.topological_order()
 
     # -- traversal -----------------------------------------------------
 
