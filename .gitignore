@@ -7,3 +7,4 @@ qwen_onnx/
 *.onnx
 *.safetensors
 work/
+benchmark/data/

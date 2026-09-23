@@ -1,0 +1,27 @@
+{
+  "benchmark": "qwen2.5-0.5b-pytorch-cpu-kv-cache",
+  "measured_at_utc": "2026-09-23T01:10:07.596780+00:00",
+  "environment": {
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "torch": "2.13.0+cu130",
+    "transformers": "4.57.6"
+  },
+  "model": "Qwen/Qwen2.5-0.5B",
+  "model_commit": "060db6499f32faf8b98477b0a26969ef7d8b9987",
+  "precision": "float32",
+  "threads": 1,
+  "sequence_length": 64,
+  "warmup_runs": 1,
+  "measured_runs": 5,
+  "model_parameter_bytes": 1976131072,
+  "load_seconds": 2.8064568990000005,
+  "rss_before_load_bytes": 683470848,
+  "rss_after_load_bytes": 2686046208,
+  "uncached_full_context_decode_p50_ms": 763.8265220000022,
+  "cached_single_token_decode_p50_ms": 91.86180600000071,
+  "kv_cache_speedup": 8.314952157591984,
+  "cached_vs_uncached_max_abs_logit_error": 1.6689300537109375e-05,
+  "cached_vs_uncached_argmax_match": true,
+  "scope": "PyTorch CPU baseline; Leaf full-transformer execution is not implemented yet."
+}

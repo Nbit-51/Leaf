@@ -38,6 +38,9 @@ if ($LASTEXITCODE -ne 0) { throw "buffer-pool test build failed" }
 & $Compiler "-std=c++17" "-O3" "-DNDEBUG" "-mavx2" "-mfma" @runtimeIncludes @runtimeSources `
     (Join-Path $root "engine/src/main_infer.cpp") "-o" (Join-Path $output "leaf_infer.exe")
 if ($LASTEXITCODE -ne 0) { throw "FP32 inference runtime build failed" }
+& $Compiler "-std=c++17" "-O3" "-DNDEBUG" "-mavx2" "-mfma" @runtimeIncludes @runtimeSources `
+    (Join-Path $root "engine/src/main_bench.cpp") "-o" (Join-Path $output "leaf_graph_bench.exe")
+if ($LASTEXITCODE -ne 0) { throw "FP32 graph benchmark build failed" }
 
 & $Compiler "-std=c++17" "-O3" "-DNDEBUG" "-mavx2" "-mfma" `
     (Join-Path $root "engine/kernels/gemm.cpp") (Join-Path $root "engine/tests/test_gemm.cpp") `
