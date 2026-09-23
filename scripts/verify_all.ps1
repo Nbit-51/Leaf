@@ -23,6 +23,9 @@ try {
 
     python tools/verify_cpp_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe")
     if ($LASTEXITCODE -ne 0) { throw "C++ runtime parity check failed" }
+
+    python tools/verify_quantized_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe")
+    if ($LASTEXITCODE -ne 0) { throw "C++ INT8 graph parity check failed" }
 } finally {
     Pop-Location
 }

@@ -9,6 +9,8 @@ machine match. The large source datasets and model weights remain local.
 | `native_latest.json` | Scalar Leaf versus AVX2 Leaf FP32/INT8 GEMM and Conv kernel speed gate |
 | `latest.json` | Deterministic synthetic CNN/FFN calibration, PyTorch parity, Python reference timings, and memory plans |
 | `cifar10_cpu.json` | Real CIFAR-10 images on the small optimizer CNN graph; PyTorch versus NumPy FP32/INT8 simulation |
+| `cifar10_native_int8.json` | Same real-image subset with native FP32 and native INT8 graph parity and latency |
+| `native_int8_graph.json` | Synthetic native INT8 graph parity, FP32 comparison, latency, and peak process RSS |
 | `cifar10_resnet18_cpp.json` | First 20 real CIFAR-10 test images, full seeded FP32 ResNet-18, PyTorch versus C++ |
 | `cifar10_resnet18_cpp_repeat.json` | Independent repeat of the same full-model comparison |
 | `qwen25_cached_cpu.json` | Offline cached Qwen2.5-0.5B PyTorch CPU decode, full-context recomputation versus populated KV cache |
@@ -21,4 +23,5 @@ reference for KV-cache behavior; Leaf does not yet execute the full model.
 
 The README contains reproduction commands and a table of the important
 numbers. Run those commands again on the deployment CPU before drawing
-machine-independent performance conclusions.
+machine-independent performance conclusions. INT8 graph support is opt-in;
+the current whole-graph measurements do not show a latency benefit.

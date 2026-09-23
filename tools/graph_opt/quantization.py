@@ -61,8 +61,11 @@ def quantize_int8_per_channel(
     """Quantize Conv/Gemm constant weights and annotate activation scales."""
     result = graph.clone()
     quantized_nodes: list[str] = []
-    quantized_weights: dict[tuple[str, int], tuple[np.ndarray, np.ndarray]] = {}
-    for node in result.nodes:
+    candidates: dict[int, tuple[str, int]] = {}
+    consumers: dict[str, list[int]] = {}
+    for index, node in enumerate(result.nodes):
+        for name in node.inputs:
+            consumers.setdefault(name, []).append(index)
         if node.op_type not in ("Conv", "Gemm", "MatMul") or len(node.inputs) < 2:
             continue
         weight_name = node.inputs[1]
@@ -74,19 +77,42 @@ def quantize_int8_per_channel(
         weight_axis = 0 if node.op_type == "Conv" else (
             0 if int(node.attributes.get("transB", 0)) else 1
         )
+        candidates[index] = (weight_name, weight_axis)
+
+    quantized_weights: dict[tuple[str, int], tuple[str, np.ndarray]] = {}
+    for index, node in enumerate(result.nodes):
+        if index not in candidates:
+            continue
+        weight_name, weight_axis = candidates[index]
         key = (weight_name, weight_axis)
-        if key in quantized_weights:
-            quantized, scales = quantized_weights[key]
-        else:
-            quantized, scales = _per_channel_quantize(result.initializers[weight_name], weight_axis)
-            quantized_weights[key] = (quantized, scales)
-        result.initializers[weight_name] = quantized
+        if key not in quantized_weights:
+            quantized, scales = _per_channel_quantize(graph.initializers[weight_name], weight_axis)
+            exclusively_quantized = all(candidates.get(consumer) == key
+                                        for consumer in consumers[weight_name])
+            if exclusively_quantized and weight_name not in result.outputs:
+                destination = weight_name
+            else:
+                destination = f"{weight_name}__leaf_int8_axis{weight_axis}"
+                suffix = 1
+                while destination in result.initializers:
+                    destination = f"{weight_name}__leaf_int8_axis{weight_axis}_{suffix}"
+                    suffix += 1
+            result.initializers[destination] = quantized
+            quantized_weights[key] = (destination, scales)
+        destination, scales = quantized_weights[key]
+        node.inputs[1] = destination
         node.attributes["quantization"] = {
             "scheme": "symmetric_int8",
             "input": {"scale": activation_range.scale, "zero_point": 0},
             "weight": {"scale": scales, "zero_point": 0, "axis": weight_axis},
         }
         quantized_nodes.append(node.name)
+
+    referenced = set(result.outputs)
+    referenced.update(name for node in result.nodes for name in node.inputs)
+    for name in tuple(result.initializers):
+        if name not in referenced:
+            del result.initializers[name]
 
     result.metadata.setdefault("passes", {})["int8_quantization"] = {
         "scheme": "per_tensor_activations_per_output_channel_weights",

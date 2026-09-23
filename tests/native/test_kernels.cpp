@@ -36,24 +36,26 @@ void test_f32() {
 }
 
 void test_i8() {
-  constexpr std::size_t m = 4, k = 31, n = 35;
-  std::mt19937 generator(7);
-  std::uniform_int_distribution<int> distribution(-127, 127);
-  std::vector<std::int8_t> a(m * k), b(k * n);
-  std::vector<float> bias(n), scales(n), expected(m * n), actual(m * n);
-  for (auto& value : a) value = static_cast<std::int8_t>(distribution(generator));
-  for (auto& value : b) value = static_cast<std::int8_t>(distribution(generator));
-  for (std::size_t index = 0; index < n; ++index) {
-    bias[index] = static_cast<float>(index) * 0.01F;
-    scales[index] = 0.002F + static_cast<float>(index) * 0.00001F;
-  }
-  leaf::kernels::gemm_i8_reference(a.data(), b.data(), bias.data(), 0.003F, scales.data(),
-                                   expected.data(), m, k, n, leaf::kernels::Activation::Relu);
-  leaf::kernels::gemm_i8_per_channel(a.data(), b.data(), bias.data(), 0.003F, scales.data(),
-                                     actual.data(), m, k, n, leaf::kernels::Activation::Relu);
-  for (std::size_t index = 0; index < actual.size(); ++index) {
-    require(std::abs(actual[index] - expected[index]) < 1e-5F,
-            "optimized INT8 GEMM disagrees with reference");
+  constexpr std::size_t m = 4, k = 31;
+  for (const std::size_t n : {8U, 23U, 35U, 40U}) {
+    std::mt19937 generator(7);
+    std::uniform_int_distribution<int> distribution(-127, 127);
+    std::vector<std::int8_t> a(m * k), b(k * n);
+    std::vector<float> bias(n), scales(n), expected(m * n), actual(m * n);
+    for (auto& value : a) value = static_cast<std::int8_t>(distribution(generator));
+    for (auto& value : b) value = static_cast<std::int8_t>(distribution(generator));
+    for (std::size_t index = 0; index < n; ++index) {
+      bias[index] = static_cast<float>(index) * 0.01F;
+      scales[index] = 0.002F + static_cast<float>(index) * 0.00001F;
+    }
+    leaf::kernels::gemm_i8_reference(a.data(), b.data(), bias.data(), 0.003F, scales.data(),
+                                     expected.data(), m, k, n, leaf::kernels::Activation::Relu);
+    leaf::kernels::gemm_i8_per_channel(a.data(), b.data(), bias.data(), 0.003F, scales.data(),
+                                       actual.data(), m, k, n, leaf::kernels::Activation::Relu);
+    for (std::size_t index = 0; index < actual.size(); ++index) {
+      require(std::abs(actual[index] - expected[index]) < 1e-5F,
+              "optimized INT8 GEMM disagrees with reference");
+    }
   }
 }
 

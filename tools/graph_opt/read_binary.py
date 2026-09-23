@@ -20,6 +20,7 @@ import struct
 import numpy as np
 
 MAGIC = b"LEAF"
+_DTYPES = {0: np.float32, 1: np.int8}
 
 
 def _read_string(data: bytes, offset: int) -> tuple[str, int]:
@@ -54,6 +55,8 @@ def read_graph(path: str) -> dict:
 
     (version, node_count, initializer_count) = struct.unpack_from("<III", data, offset)
     offset += 12
+    if version not in (1, 2):
+        raise ValueError(f"unsupported .leaf version: {version}")
 
     graph_inputs, offset = _read_string_array(data, offset)
     graph_outputs, offset = _read_string_array(data, offset)
@@ -65,6 +68,22 @@ def read_graph(path: str) -> dict:
         outputs, offset = _read_string_array(data, offset)
         attrs_json, offset = _read_string(data, offset)
         attributes = json.loads(attrs_json)
+        if version >= 2:
+            (quantized,) = struct.unpack_from("<B", data, offset)
+            offset += 1
+            if quantized not in (0, 1):
+                raise ValueError(f"invalid quantization flag: {quantized}")
+            if quantized:
+                input_scale, axis, scale_count = struct.unpack_from("<fBI", data, offset)
+                offset += 9
+                scales = np.frombuffer(data, dtype="<f4", count=scale_count,
+                                       offset=offset).copy()
+                offset += 4 * scale_count
+                attributes["quantization"] = {
+                    "scheme": "symmetric_int8",
+                    "input": {"scale": float(input_scale), "zero_point": 0},
+                    "weight": {"scale": scales, "zero_point": 0, "axis": int(axis)},
+                }
         nodes.append({
             "op_type": op_type,
             "inputs": inputs,
@@ -91,12 +110,20 @@ def read_graph(path: str) -> dict:
             "byte_length": byte_length,
         })
 
-    data_block_start = offset
+    data_block_start = (offset + 31) // 32 * 32 if version >= 2 else offset
     initializers = {}
     for meta in init_meta:
         start = data_block_start + meta["byte_offset"]
         end = start + meta["byte_length"]
-        arr = np.frombuffer(data[start:end], dtype=np.float32).reshape(meta["shape"])
+        if end > len(data):
+            raise ValueError(f"truncated initializer: {meta['name']}")
+        if meta["dtype_tag"] not in _DTYPES:
+            raise ValueError(f"unsupported initializer dtype tag: {meta['dtype_tag']}")
+        if version == 1 and meta["dtype_tag"] != 0:
+            raise ValueError("version 1 only supports float32 initializers")
+        arr = np.frombuffer(data[start:end], dtype=_DTYPES[meta["dtype_tag"]]).reshape(
+            meta["shape"]
+        )
         initializers[meta["name"]] = arr
 
     return {

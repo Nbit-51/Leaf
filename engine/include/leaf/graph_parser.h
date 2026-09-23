@@ -16,12 +16,16 @@ struct Node {
     std::vector<std::string> inputs;
     std::vector<std::string> outputs;
     std::string attributes_json;  // parsed lazily by whichever kernel needs it
+    bool quantized = false;
+    float input_scale = 1.0f;
+    uint8_t weight_axis = 0;
+    std::vector<float> weight_scales;
 };
 
 struct InitializerMeta {
     std::string name;
     std::vector<uint32_t> shape;
-    uint8_t dtype_tag;   // 0 = float32 (only supported type for now)
+    uint8_t dtype_tag;   // 0 = float32, 1 = signed int8
     uint64_t byte_offset;
     uint64_t byte_length;
 };
@@ -37,6 +41,7 @@ public:
     // the (still-owned) data block. No copy -- the Graph must outlive
     // any pointer obtained this way.
     const float* initializer_data(const std::string& name) const;
+    const int8_t* initializer_i8_data(const std::string& name) const;
     const InitializerMeta& initializer_meta(const std::string& name) const;
     bool has_initializer(const std::string& name) const;
 

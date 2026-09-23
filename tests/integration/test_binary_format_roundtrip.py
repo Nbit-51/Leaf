@@ -15,7 +15,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "graph_opt"))
 
-from ir import Graph
+from ir import Graph, Node
 from export_binary import export_graph
 from read_binary import read_graph
 
@@ -66,3 +66,34 @@ def test_binary_format_roundtrips_losslessly(resnet18_leaf_path):
         assert orig_array.shape == read_array.shape
         diff = np.max(np.abs(orig_array.astype(np.float32) - read_array))
         assert diff == 0.0, f"initializer '{name}' not bit-exact (max diff: {diff})"
+
+
+def test_int8_weights_and_scales_roundtrip(tmp_path):
+    graph = Graph()
+    graph.inputs = ["x"]
+    graph.outputs = ["y"]
+    graph.initializers = {
+        "weight": np.array([[1, -2], [3, 4], [-5, 6]], dtype=np.int8),
+        "bias": np.array([0.25, -0.5], dtype=np.float32),
+    }
+    graph.nodes = [Node(
+        "dense", "Gemm", ["x", "weight", "bias"], ["y"],
+        {"alpha": 1.0, "quantization": {
+            "scheme": "symmetric_int8",
+            "input": {"scale": 0.03125, "zero_point": 0},
+            "weight": {"scale": np.array([0.125, 0.25], dtype=np.float32),
+                       "zero_point": 0, "axis": 1},
+        }},
+    )]
+    path = tmp_path / "quantized.leaf"
+    export_graph(graph, str(path))
+    loaded = read_graph(str(path))
+
+    assert loaded["version"] == 2
+    np.testing.assert_array_equal(loaded["initializers"]["weight"], graph.initializers["weight"])
+    assert loaded["initializers"]["weight"].dtype == np.int8
+    np.testing.assert_array_equal(loaded["initializers"]["bias"], graph.initializers["bias"])
+    quant = loaded["nodes"][0]["attributes"]["quantization"]
+    assert quant["input"]["scale"] == 0.03125
+    assert quant["weight"]["axis"] == 1
+    np.testing.assert_array_equal(quant["weight"]["scale"], [0.125, 0.25])

@@ -11,7 +11,10 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import platform
+import re
 import statistics
+import subprocess
+import tempfile
 import time
 
 import numpy as np
@@ -23,6 +26,10 @@ from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 from benchmark.workloads import cnn_workload
 from tools.graph_opt.executor import run_graph
 from tools.graph_opt.pipeline import optimize_graph
+from tools.graph_opt.constant_folding import fold_constants
+from tools.graph_opt.fusion import run_fusion_passes
+from tools.graph_opt.transformer import run_transformer_rewrites
+from tools.graph_opt.export_binary import export_graph
 
 
 def _latency_ms(function, samples, repeats: int) -> float:
@@ -48,9 +55,14 @@ def main() -> int:
     parser.add_argument("--evaluation-samples", type=int, default=100)
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--leaf-infer", type=Path, help="optional native inference executable")
+    parser.add_argument("--leaf-bench", type=Path, help="optional native graph benchmark executable")
+    parser.add_argument("--native-evaluation-samples", type=int, default=20)
     parser.add_argument("--output", type=Path,
                         default=Path("benchmark/results/cifar10_cpu.json"))
     args = parser.parse_args()
+    if bool(args.leaf_infer) != bool(args.leaf_bench):
+        parser.error("--leaf-infer and --leaf-bench must be provided together")
     if min(args.calibration_samples, args.evaluation_samples, args.repeats, args.threads) < 1:
         parser.error("sample counts, repeats, and threads must all be positive")
     torch.set_num_threads(args.threads)
@@ -126,6 +138,42 @@ def main() -> int:
         },
         "scope": "Real dataset; untrained optimizer micrograph, so accuracy is intentionally not reported.",
     }
+    if args.leaf_infer:
+        native_samples = evaluation[:args.native_evaluation_samples]
+        if not native_samples:
+            parser.error("--native-evaluation-samples must be positive")
+        fp32_graph = run_transformer_rewrites(run_fusion_passes(fold_constants(graph)))
+        native_result = {"samples": len(native_samples), "warmup": 5, "runs": 10}
+        with tempfile.TemporaryDirectory(prefix="leaf_cifar_native_") as directory_name:
+            directory = Path(directory_name)
+            input_path = directory / "input.bin"
+            output_path = directory / "output.bin"
+            for label, candidate in (("fp32", fp32_graph), ("int8", optimized.graph)):
+                artifact = directory / f"{label}.leaf"
+                export_graph(candidate, str(artifact))
+                latencies = []
+                max_error = 0.0
+                for sample in native_samples:
+                    value = sample["x"]
+                    value.tofile(input_path)
+                    command = [str(args.leaf_infer.resolve()), str(artifact), str(input_path),
+                               "1,3,16,16", str(output_path)]
+                    subprocess.run(command, check=True, capture_output=True, text=True)
+                    actual = np.fromfile(output_path, dtype=np.float32).reshape(1, 8, 16, 16)
+                    max_error = max(max_error, float(np.max(np.abs(actual - pytorch_call(sample)))))
+                    output = subprocess.run(
+                        [str(args.leaf_bench.resolve()), str(artifact), str(input_path),
+                         "1,3,16,16", "5", "10"],
+                        check=True, capture_output=True, text=True).stdout
+                    match = re.search(r"p50=([0-9.]+)", output)
+                    if match is None:
+                        raise RuntimeError("native benchmark did not report p50 latency")
+                    latencies.append(float(match.group(1)))
+                native_result[label] = {
+                    "median_per_image_p50_ms": statistics.median(latencies),
+                    "max_abs_vs_pytorch": max_error,
+                }
+        result["native_graph"] = native_result
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(result, indent=2))

@@ -3,9 +3,12 @@
 #include "conv2d.h"
 #include "gemm.h"
 #include "im2col.h"
+#include "leaf/kernels/conv.h"
+#include "leaf/kernels/gemm.h"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -188,6 +191,124 @@ TensorView tensor_for(const Graph& graph,
     throw std::runtime_error("leaf::Executor: tensor not found: " + name);
 }
 
+std::vector<int8_t> quantize_input(const float* values, size_t count, float scale) {
+    require(std::isfinite(scale) && scale > 0.0f, "invalid activation scale");
+    std::vector<int8_t> result(count);
+    for (size_t index = 0; index < count; ++index) {
+        require(std::isfinite(values[index]), "INT8 input contains a non-finite value");
+        const float scaled = values[index] / scale;
+        const float clamped = std::max(-127.0f, std::min(127.0f, scaled));
+        result[index] = static_cast<int8_t>(std::nearbyint(clamped));
+    }
+    return result;
+}
+
+float apply_activation(float value, const std::string& name) {
+    if (name.empty()) return value;
+    if (name == "Relu") return std::max(value, 0.0f);
+    if (name == "Silu") return value / (1.0f + std::exp(-value));
+    if (name == "Gelu") {
+        constexpr float root_two_over_pi = 0.7978845608028654f;
+        return 0.5f * value * (1.0f +
+            std::tanh(root_two_over_pi * (value + 0.044715f * value * value * value)));
+    }
+    throw std::runtime_error("leaf::Executor: unsupported fused activation: " + name);
+}
+
+void require_channel_scales(const Node& node, size_t channels, uint8_t axis) {
+    require(node.quantized, "missing INT8 node parameters");
+    require(node.weight_axis == axis && node.weight_scales.size() == channels,
+            "INT8 weight scales do not match output channels");
+}
+
+Tensor execute_quant_conv(const Graph& graph, const Node& node, const TensorView& input,
+                          const std::unordered_map<std::string, Tensor>& intermediates,
+                          const std::unordered_map<std::string, TensorView>& graph_inputs) {
+    require(input.shape.size() == 4 && input.shape[0] == 1,
+            "INT8 Conv requires one NCHW image");
+    const std::string& weight_name = node.inputs.at(1);
+    const InitializerMeta& meta = graph.initializer_meta(weight_name);
+    require(meta.dtype_tag == 1 && meta.shape.size() == 4,
+            "INT8 Conv weight must be an OIHW initializer");
+    const size_t out_c = meta.shape[0], in_c = meta.shape[1];
+    const size_t kh = meta.shape[2], kw = meta.shape[3];
+    require(in_c == input.shape[1], "INT8 Conv input-channel mismatch");
+    require_channel_scales(node, out_c, 0);
+    const std::vector<size_t> pads = integer_list_attribute(node, "pads", {0, 0, 0, 0});
+    const std::vector<size_t> strides = integer_list_attribute(node, "strides", {1, 1});
+    const std::vector<size_t> dilations = integer_list_attribute(node, "dilations", {1, 1});
+    const std::vector<size_t> groups = integer_list_attribute(node, "group", {1});
+    require(pads.size() == 4 && strides.size() == 2 && dilations.size() == 2 &&
+            groups.size() == 1 && groups[0] == 1, "unsupported INT8 Conv attributes");
+    size_t out_h = 0, out_w = 0;
+    conv2d_output_shape(input.shape[2], input.shape[3], kh, kw,
+                        pads[0], pads[1], pads[2], pads[3], strides[0], strides[1],
+                        dilations[0], dilations[1], out_h, out_w);
+    const float* bias = nullptr;
+    if (node.inputs.size() >= 3 && !node.inputs[2].empty()) {
+        const TensorView bias_tensor = tensor_for(graph, intermediates, graph_inputs, node.inputs[2]);
+        require(bias_tensor.shape == std::vector<size_t>{out_c},
+                "INT8 Conv bias shape must be [out_channels]");
+        bias = bias_tensor.data;
+    }
+
+    Tensor output{{1, out_c, out_h, out_w}, acquire_buffer(out_c * out_h * out_w)};
+    const std::vector<int8_t> qinput = quantize_input(input.data, element_count(input.shape),
+                                                      node.input_scale);
+    const int8_t* weight = graph.initializer_i8_data(weight_name);
+    const std::string activation = string_attribute(node, "activation");
+    require(activation.empty() || activation == "Relu", "unsupported INT8 Conv activation");
+    const kernels::Activation fused = activation == "Relu"
+        ? kernels::Activation::Relu : kernels::Activation::None;
+    const size_t patch = in_c * kh * kw;
+    const bool fast_layout = pads[0] == pads[2] && pads[1] == pads[3] &&
+                             dilations[0] == 1 && dilations[1] == 1 &&
+                             patch <= static_cast<size_t>(INT32_MAX / (127 * 127));
+    if (fast_layout) {
+        const kernels::Conv2DShape shape{1, in_c, input.shape[2], input.shape[3],
+                                         out_c, kh, kw, pads[0], pads[1],
+                                         strides[0], strides[1]};
+        std::vector<int8_t> packed(patch * out_c);
+        std::vector<int8_t> workspace(out_h * out_w * patch);
+        std::vector<float> gemm_output(out_h * out_w * out_c);
+        kernels::pack_conv_weights_i8(weight, packed.data(), shape);
+        kernels::conv2d_i8_im2col(qinput.data(), packed.data(), bias, node.input_scale,
+                                  node.weight_scales.data(), output.values.data(),
+                                  workspace.data(), gemm_output.data(), shape, fused);
+    } else {
+        // General padding/dilation path. Accumulate in int64 to avoid overflow
+        // for unusually wide kernels that exceed the int32 fast-path limit.
+        for (size_t oc = 0; oc < out_c; ++oc) {
+            for (size_t y = 0; y < out_h; ++y) {
+                for (size_t x = 0; x < out_w; ++x) {
+                    int64_t sum = 0;
+                    for (size_t ic = 0; ic < in_c; ++ic) {
+                        for (size_t ky = 0; ky < kh; ++ky) {
+                            for (size_t kx = 0; kx < kw; ++kx) {
+                                const int64_t iy = static_cast<int64_t>(y * strides[0] + ky * dilations[0]) -
+                                                   static_cast<int64_t>(pads[0]);
+                                const int64_t ix = static_cast<int64_t>(x * strides[1] + kx * dilations[1]) -
+                                                   static_cast<int64_t>(pads[1]);
+                                if (iy < 0 || ix < 0 || iy >= static_cast<int64_t>(input.shape[2]) ||
+                                    ix >= static_cast<int64_t>(input.shape[3])) continue;
+                                const size_t input_index = (ic * input.shape[2] + static_cast<size_t>(iy)) *
+                                                           input.shape[3] + static_cast<size_t>(ix);
+                                const size_t weight_index = ((oc * in_c + ic) * kh + ky) * kw + kx;
+                                sum += static_cast<int32_t>(qinput[input_index]) *
+                                       static_cast<int32_t>(weight[weight_index]);
+                            }
+                        }
+                    }
+                    float value = static_cast<float>(sum) * node.input_scale * node.weight_scales[oc];
+                    if (bias != nullptr) value += bias[oc];
+                    output.values[(oc * out_h + y) * out_w + x] = apply_activation(value, activation);
+                }
+            }
+        }
+    }
+    return output;
+}
+
 Tensor execute_conv(const Graph& graph, const Node& node, const TensorView& input,
                     const std::unordered_map<std::string, Tensor>& intermediates,
                     const std::unordered_map<std::string, TensorView>& graph_inputs) {
@@ -318,13 +439,14 @@ Tensor execute_flatten(const Node& node, const TensorView& input) {
 Tensor execute_gemm(const Graph& graph, const Node& node, const TensorView& a,
                     const std::unordered_map<std::string, Tensor>& intermediates,
                     const std::unordered_map<std::string, TensorView>& graph_inputs) {
-    require(a.shape.size() == 2, "Gemm A must be rank 2");
+    require(a.shape.size() >= 2, "Gemm A must have rank at least 2");
     const TensorView b = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
     require(b.shape.size() == 2, "Gemm B must be rank 2");
     const bool trans_a = integer_list_attribute(node, "transA", {0}).at(0) != 0;
     const bool trans_b = integer_list_attribute(node, "transB", {0}).at(0) != 0;
-    const size_t m = trans_a ? a.shape[1] : a.shape[0];
-    const size_t k = trans_a ? a.shape[0] : a.shape[1];
+    require(!trans_a || a.shape.size() == 2, "batched Gemm transA is unsupported");
+    const size_t k = trans_a ? a.shape[0] : a.shape.back();
+    const size_t m = trans_a ? a.shape[1] : element_count(a.shape) / k;
     const size_t n = trans_b ? b.shape[0] : b.shape[1];
     const size_t b_k = trans_b ? b.shape[1] : b.shape[0];
     require(k == b_k, "Gemm K dimensions do not match");
@@ -334,7 +456,7 @@ Tensor execute_gemm(const Graph& graph, const Node& node, const TensorView& a,
         for (size_t column = 0; column < k; ++column) {
             a_matrix[row * k + column] = trans_a
                 ? a.data[column * a.shape[1] + row]
-                : a.data[row * a.shape[1] + column];
+                : a.data[row * k + column];
         }
     }
     std::vector<float> b_matrix(k * n);
@@ -348,7 +470,10 @@ Tensor execute_gemm(const Graph& graph, const Node& node, const TensorView& a,
 
     std::vector<float> out_buffer = acquire_buffer(m * n);
     std::fill(out_buffer.begin(), out_buffer.end(), 0.0f);
-    Tensor output{{m, n}, std::move(out_buffer)};
+    std::vector<size_t> output_shape = a.shape;
+    if (trans_a) output_shape = {m, n};
+    else output_shape.back() = n;
+    Tensor output{output_shape, std::move(out_buffer)};
     if (node.inputs.size() >= 3 && !node.inputs[2].empty()) {
         const TensorView c = tensor_for(graph, intermediates, graph_inputs, node.inputs[2]);
         if (element_count(c.shape) == 1) {
@@ -364,6 +489,115 @@ Tensor execute_gemm(const Graph& graph, const Node& node, const TensorView& a,
     }
     gemm_f32(a_matrix.data(), b_matrix.data(), output.values.data(), m, k, n,
              float_attribute(node, "alpha", 1.0f), float_attribute(node, "beta", 1.0f));
+    return output;
+}
+
+Tensor execute_quant_linear(const Graph& graph, const Node& node, const TensorView& a,
+                            const std::unordered_map<std::string, Tensor>& intermediates,
+                            const std::unordered_map<std::string, TensorView>& graph_inputs) {
+    const bool gemm = node.op_type == "Gemm";
+    require(a.shape.size() >= 2,
+            "INT8 linear input must be a matrix or batched matrix");
+    const std::string& weight_name = node.inputs.at(1);
+    const InitializerMeta& meta = graph.initializer_meta(weight_name);
+    require(meta.dtype_tag == 1 && meta.shape.size() == 2,
+            "INT8 linear weight must be a rank-2 initializer");
+    const bool trans_a = gemm && integer_list_attribute(node, "transA", {0}).at(0) != 0;
+    const bool trans_b = gemm && integer_list_attribute(node, "transB", {0}).at(0) != 0;
+    require(!trans_a || a.shape.size() == 2, "batched INT8 Gemm transA is unsupported");
+    const size_t m = trans_a ? a.shape[1] : element_count(a.shape) / a.shape.back();
+    const size_t k = trans_a ? a.shape[0] : a.shape.back();
+    const size_t n = trans_b ? meta.shape[0] : meta.shape[1];
+    const size_t weight_k = trans_b ? meta.shape[1] : meta.shape[0];
+    require(k == weight_k, "INT8 linear K dimensions do not match");
+    require_channel_scales(node, n, trans_b ? 0 : 1);
+
+    std::vector<int8_t> qa;
+    if (trans_a) {
+        std::vector<float> transposed(m * k);
+        for (size_t row = 0; row < m; ++row) {
+            for (size_t col = 0; col < k; ++col) {
+                transposed[row * k + col] = a.data[col * m + row];
+            }
+        }
+        qa = quantize_input(transposed.data(), transposed.size(), node.input_scale);
+    } else {
+        qa = quantize_input(a.data, m * k, node.input_scale);
+    }
+    const int8_t* weight = graph.initializer_i8_data(weight_name);
+    std::vector<int8_t> transposed_weight;
+    if (trans_b) {
+        transposed_weight.resize(k * n);
+        for (size_t row = 0; row < k; ++row) {
+            for (size_t col = 0; col < n; ++col) {
+                transposed_weight[row * n + col] = weight[col * k + row];
+            }
+        }
+        weight = transposed_weight.data();
+    }
+
+    std::vector<size_t> output_shape = a.shape;
+    if (trans_a) output_shape = {m, n};
+    else output_shape.back() = n;
+    Tensor output{output_shape, acquire_buffer(m * n)};
+    if (k <= static_cast<size_t>(INT32_MAX / (127 * 127))) {
+        kernels::gemm_i8_per_channel(qa.data(), weight, nullptr, node.input_scale,
+                                     node.weight_scales.data(), output.values.data(),
+                                     m, k, n, kernels::Activation::None);
+    } else {
+        for (size_t row = 0; row < m; ++row) {
+            for (size_t col = 0; col < n; ++col) {
+                int64_t sum = 0;
+                for (size_t inner = 0; inner < k; ++inner) {
+                    sum += static_cast<int32_t>(qa[row * k + inner]) *
+                           static_cast<int32_t>(weight[inner * n + col]);
+                }
+                output.values[row * n + col] = static_cast<float>(sum) *
+                    node.input_scale * node.weight_scales[col];
+            }
+        }
+    }
+
+    const float alpha = gemm ? float_attribute(node, "alpha", 1.0f) : 1.0f;
+    const float beta = gemm ? float_attribute(node, "beta", 1.0f) : 0.0f;
+    const float* c = nullptr;
+    std::vector<size_t> c_shape;
+    if (gemm && node.inputs.size() >= 3 && !node.inputs[2].empty()) {
+        const TensorView bias = tensor_for(graph, intermediates, graph_inputs, node.inputs[2]);
+        c = bias.data;
+        c_shape = bias.shape;
+        require(element_count(c_shape) == 1 ||
+                (c_shape.size() == 1 && c_shape[0] == n) ||
+                c_shape == output_shape, "unsupported INT8 Gemm C broadcast shape");
+    }
+    const std::string activation = string_attribute(node, "activation");
+    for (size_t row = 0; row < m; ++row) {
+        for (size_t col = 0; col < n; ++col) {
+            float value = alpha * output.values[row * n + col];
+            if (c != nullptr) {
+                const size_t bias_index = element_count(c_shape) == 1 ? 0 :
+                    c_shape.size() == 1 ? col : row * n + col;
+                value += beta * c[bias_index];
+            }
+            output.values[row * n + col] = apply_activation(value, activation);
+        }
+    }
+    return output;
+}
+
+Tensor execute_matmul(const Graph& graph, const Node& node, const TensorView& a,
+                      const std::unordered_map<std::string, Tensor>& intermediates,
+                      const std::unordered_map<std::string, TensorView>& graph_inputs) {
+    require(a.shape.size() >= 2, "MatMul input must have rank at least 2");
+    const TensorView b = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
+    require(b.shape.size() == 2 && a.shape.back() == b.shape[0],
+            "MatMul weight shape mismatch");
+    const size_t k = a.shape.back(), n = b.shape[1];
+    const size_t m = element_count(a.shape) / k;
+    std::vector<size_t> shape = a.shape;
+    shape.back() = n;
+    Tensor output{shape, acquire_buffer(m * n)};
+    kernels::gemm_f32_optimized(a.data, b.data, nullptr, output.values.data(), m, k, n);
     return output;
 }
 
@@ -393,7 +627,9 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
         const TensorView first_input = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(0));
         Tensor output;
         if (node.op_type == "Conv") {
-            output = execute_conv(graph, node, first_input, intermediates, graph_inputs);
+            output = node.quantized
+                ? execute_quant_conv(graph, node, first_input, intermediates, graph_inputs)
+                : execute_conv(graph, node, first_input, intermediates, graph_inputs);
         } else if (node.op_type == "Relu") {
             std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
             std::copy(first_input.data, first_input.data + buffer.size(), buffer.begin());
@@ -420,7 +656,13 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
         } else if (node.op_type == "Flatten") {
             output = execute_flatten(node, first_input);
         } else if (node.op_type == "Gemm") {
-            output = execute_gemm(graph, node, first_input, intermediates, graph_inputs);
+            output = node.quantized
+                ? execute_quant_linear(graph, node, first_input, intermediates, graph_inputs)
+                : execute_gemm(graph, node, first_input, intermediates, graph_inputs);
+        } else if (node.op_type == "MatMul") {
+            output = node.quantized
+                ? execute_quant_linear(graph, node, first_input, intermediates, graph_inputs)
+                : execute_matmul(graph, node, first_input, intermediates, graph_inputs);
         } else if (node.op_type == "BatchNormalization") {
             require(first_input.shape.size() == 4 && first_input.shape[0] == 1,
                     "BatchNormalization requires one NCHW image");

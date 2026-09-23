@@ -8,11 +8,13 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# -O3 + AVX2 for release builds. -mavx2 -mfma enables the intrinsics the
-# kernels will use later; -march=native is deliberately avoided so builds
-# stay portable across machines that support AVX2 but not whatever the
-# build machine specifically has.
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mavx2 -mfma -DNDEBUG")
+option(LEAF_ENABLE_AVX2 "Build AVX2/FMA accelerated kernels" ON)
+if(NOT MSVC)
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+  if(LEAF_ENABLE_AVX2)
+    string(APPEND CMAKE_CXX_FLAGS_RELEASE " -mavx2 -mfma")
+  endif()
+endif()
 
 add_library(leaf_core
   src/graph_parser.cpp
@@ -34,6 +36,9 @@ add_executable(leaf_bench
   src/main_bench.cpp
 )
 target_link_libraries(leaf_bench PRIVATE leaf_core)
+if(WIN32)
+  target_link_libraries(leaf_bench PRIVATE psapi)
+endif()
 
 enable_testing()
 add_subdirectory(tests)
@@ -41,16 +46,16 @@ add_subdirectory(tests)
 target_sources(leaf_core PRIVATE kernels/im2col.cpp kernels/gemm.cpp kernels/conv2d.cpp)
 target_include_directories(leaf_core PUBLIC kernels)
 
-# Quantized/fused kernel development library. Kept separate from leaf_core
-# until the binary format carries INT8 tensors and calibration parameters.
+# Quantized/fused kernels used by the v2 graph executor.
 add_library(leaf_optimized_kernels STATIC
   src/kernels/gemm.cpp
   src/kernels/conv.cpp
 )
 target_include_directories(leaf_optimized_kernels PUBLIC include)
-if(MSVC)
+target_link_libraries(leaf_core PRIVATE leaf_optimized_kernels)
+if(MSVC AND LEAF_ENABLE_AVX2)
   target_compile_options(leaf_optimized_kernels PRIVATE /O2 /arch:AVX2)
-else()
+elseif(NOT MSVC AND LEAF_ENABLE_AVX2)
   target_compile_options(leaf_optimized_kernels PRIVATE -O3 -mavx2 -mfma)
 endif()
 

@@ -1,7 +1,9 @@
 #include "gemm.h"
 
-#include <immintrin.h>
 #include <cstring>
+#if defined(__AVX2__) && defined(__FMA__)
+#include <immintrin.h>
+#endif
 
 namespace leaf {
 
@@ -26,7 +28,9 @@ void gemm_f32(
         }
     }
 
+#if defined(__AVX2__) && defined(__FMA__)
     const __m256 alpha_vec = _mm256_set1_ps(alpha);
+#endif
 
     size_t i = 0;
     for (; i + 4 <= M; i += 4) {
@@ -40,6 +44,7 @@ void gemm_f32(
         float* c3 = C + (i + 3) * N;
 
         size_t j = 0;
+#if defined(__AVX2__) && defined(__FMA__)
         for (; j + 8 <= N; j += 8) {
             __m256 acc0 = _mm256_setzero_ps();
             __m256 acc1 = _mm256_setzero_ps();
@@ -57,6 +62,7 @@ void gemm_f32(
             _mm256_storeu_ps(c2 + j, _mm256_add_ps(_mm256_loadu_ps(c2 + j), _mm256_mul_ps(acc2, alpha_vec)));
             _mm256_storeu_ps(c3 + j, _mm256_add_ps(_mm256_loadu_ps(c3 + j), _mm256_mul_ps(acc3, alpha_vec)));
         }
+#endif
         for (; j < N; ++j) {
             float acc0 = 0.0f;
             float acc1 = 0.0f;
@@ -81,6 +87,7 @@ void gemm_f32(
         const float* a_row = A + i * K;
         float* c_row = C + i * N;
         size_t j = 0;
+#if defined(__AVX2__) && defined(__FMA__)
         for (; j + 8 <= N; j += 8) {
             __m256 acc = _mm256_setzero_ps();
             for (size_t k = 0; k < K; ++k) {
@@ -90,6 +97,7 @@ void gemm_f32(
             _mm256_storeu_ps(c_row + j, _mm256_add_ps(_mm256_loadu_ps(c_row + j),
                                                        _mm256_mul_ps(acc, alpha_vec)));
         }
+#endif
         for (; j < N; ++j) {
             float acc = 0.0f;
             for (size_t k = 0; k < K; ++k) {

@@ -129,6 +129,26 @@ void gemm_i8_per_channel(const std::int8_t* a, const std::int8_t* b,
         output[row * n + column + lane] = activate(value, activation);
       }
     }
+    for (; column + 8 <= n; column += 8) {
+      __m256i sum = _mm256_setzero_si256();
+      for (std::size_t inner = 0; inner < k; ++inner) {
+        const __m128i packed = _mm_loadl_epi64(
+            reinterpret_cast<const __m128i*>(b + inner * n + column));
+        const __m128i weights16 = _mm_cvtepi8_epi16(packed);
+        const __m128i activation16 = _mm_set1_epi16(
+            static_cast<std::int16_t>(a[row * k + inner]));
+        const __m128i products16 = _mm_mullo_epi16(weights16, activation16);
+        sum = _mm256_add_epi32(sum, _mm256_cvtepi16_epi32(products16));
+      }
+      alignas(32) std::int32_t accumulators[8];
+      _mm256_store_si256(reinterpret_cast<__m256i*>(accumulators), sum);
+      for (std::size_t lane = 0; lane < 8; ++lane) {
+        float value = static_cast<float>(accumulators[lane]) * input_scale *
+                      weight_scales[column + lane];
+        if (bias != nullptr) value += bias[column + lane];
+        output[row * n + column + lane] = activate(value, activation);
+      }
+    }
 #endif
     for (; column < n; ++column) {
       std::int32_t accumulator = 0;

@@ -6,30 +6,30 @@ graph in a small C++ runtime. The development machine may use Python, PyTorch,
 ONNX, and calibration data; the intended deployment machine only needs the
 exported model and native runtime.
 
-The project is actively developed. The end-to-end native path currently runs
-FP32 ResNet-18. INT8 calibration, per-output-channel weight conversion, and
-AVX2 INT8 kernels exist, but the binary format and C++ graph executor do not
-yet connect those pieces into quantized whole-model inference. Transformer
-graph pattern rewrites exist; full Qwen execution in Leaf is still pending.
+The project is actively developed. Its native path runs FP32 CNN graphs and
+selected calibrated INT8 CNN/linear graphs. ResNet-18, CIFAR-10, and
+Qwen2.5-0.5B are validation workloads, not model-specific design targets.
+Full decoder-only Transformer execution is still pending.
 
 ## 1. Why build Leaf?
 
-Large inference frameworks add installation size and Python overhead to small
-CPU deployments. A GPU is also unavailable on the intended target. Leaf's
-goal is to turn a trained network into a compact, predictable CPU artifact
+Large inference frameworks can add installation size and Python overhead to
+CPU deployments. Leaf's goal is to turn a trained network into a compact,
+predictable CPU artifact
 while measuring every change against its numerical reference and prior
 latency. It is an inference project, not a training framework.
 
 The concrete targets are:
 
-1. Import CNN and decoder-only Transformer graphs through a shared IR.
+1. Import supported ONNX graphs through a shared IR and expand operator
+   coverage across model families.
 2. Remove constant work, fuse operators, and reuse activation memory.
-3. Reduce CNN weight and activation cost with calibrated INT8; evaluate
-   weight-only quantization for language models after FP32 correctness.
-4. Move hot inference loops into C++ with AVX2 kernels, keeping Python on the
-   export and verification machine.
-5. Run the final artifact on a CPU-only machine with a roughly 6 GB storage
-   budget, then measure latency, memory, and model quality there.
+3. Reduce weight and activation cost with calibrated INT8; evaluate
+   weight-only formats after FP32 correctness and model-quality gates.
+4. Move hot inference loops into C++, with a portable scalar build and
+   architecture-specific acceleration where available.
+5. Reproduce artifacts across representative CPU machines and measure latency,
+   memory, and model quality without assuming a particular model or capacity.
 
 The speed rule is evidence driven: a new implementation must preserve outputs
 within a stated tolerance and beat its previous Leaf baseline under the same
@@ -46,14 +46,21 @@ PyTorch is an external comparison, not a substitute for this regression gate.
 | Transformer rewrites | Graph passes implemented | MatMul+bias and Gemm+activation; Qwen-pattern RMSNorm, RoPE table, RepeatKV, Attention, SwiGLU MLP |
 | INT8 calibration and conversion | Implemented in Python | Per-tensor activation scales, per-output-channel Conv/Gemm/MatMul weight scales; NumPy execution simulates quantized values |
 | Memory planning | JSON export implemented | 64-byte-aligned liveness plan; C++ still uses its runtime buffer pool rather than the exported offsets |
-| `.leaf` artifact and native executor | FP32 path implemented | C++ ResNet operator subset; binary exporter does not yet serialize INT8 weights/scales |
-| Native kernels | FP32 and INT8 kernels implemented | FP32 graph dispatch works; INT8 graph dispatch is pending |
+| `.leaf` artifact and native executor | FP32 and selected INT8 paths implemented | Version 2 stores aligned typed weights and per-channel scales; native Conv/Gemm/MatMul INT8 dispatch is opt-in |
+| Native kernels | FP32 and INT8 kernels implemented | Scalar build is available; AVX2/FMA build is optional and faster on the measured host |
 | Full-model Qwen in Leaf | Pending | Qwen benchmark below provides a PyTorch CPU reference |
 | Structured pruning and trained-model quality gates | Pending | No CIFAR accuracy or Qwen perplexity claim yet |
 
 The Qwen-pattern fusion passes identify and rewrite graph motifs, but their
 custom nodes do not yet have a complete native execution path. Pattern
 recognition alone is not a claim of Qwen inference speedup.
+
+General-purpose describes the architecture and intended direction, not a
+claim that every ONNX model runs today. The native executor currently accepts
+one graph input and output, and Conv is limited to one NCHW image with one
+group. Unsupported operators and layouts fail explicitly. Operator coverage,
+dynamic shapes, batching, and CPU-specific dispatch are expanded against
+independent model tests rather than hard-coded for the named benchmarks.
 
 ## 3. Architecture and artifact boundary
 
@@ -66,27 +73,27 @@ flowchart LR
       CF --> FU[CNN and Transformer rewrites]
       FU --> FP[FP32 .leaf artifact]
       FU --> CAL[Representative data calibration]
-      CAL --> Q[INT8 graph and error simulation]
+      CAL --> Q[INT8 .leaf artifact and error simulation]
       FU --> MP[Liveness memory plan JSON]
       PT -. numerical reference .-> CHECK[Parity and quality checks]
       Q --> CHECK
       FP --> CHECK
     end
-    subgraph Target[CPU-only target]
+    subgraph Target[CPU deployment]
       FP --> EX[C++ graph executor]
+      Q --> EX
       EX --> POOL[Reusable activation buffers]
-      EX --> AVX[AVX2 FP32 kernels]
-      AVX --> OUT[Prediction]
+      EX --> KERNEL[Portable or AVX2 FP32/INT8 kernels]
+      KERNEL --> OUT[Prediction]
     end
-    Q -. format and dispatch pending .-> EX
     MP -. arena integration pending .-> EX
 ```
 
-There are two representations today. The versioned `.leaf` binary carries
-FP32 graph nodes and weights for the native executor. The versioned
+There are two representations today. Version 2 `.leaf` carries FP32/INT8
+initializers and calibrated scales for the native executor. The versioned
 `leaf-memory-plan-v1` JSON carries planned activation offsets for inspection
-and future runtime integration. They are not yet one combined optimized
-quantized artifact.
+and future runtime integration. They are not yet one artifact with a directly
+applied arena plan.
 
 ## 4. Optimization pipeline, step by step
 
@@ -97,9 +104,9 @@ flowchart LR
     C --> D[Graph rewrites]
     D --> E[Calibrate INT8]
     E --> F[Plan memory]
-    D --> G[FP32 binary export]
+    D --> G[FP32 or INT8 binary export]
     G --> H[C++ whole-model execution]
-    E -. native dispatch pending .-> H
+    E --> H
     F -. planned arena pending .-> H
     H --> I[PyTorch parity and latency gate]
 ```
@@ -136,7 +143,10 @@ Representative input samples collect min/max activation ranges. Leaf uses
 symmetric INT8 with one scale per activation tensor and one scale per output
 channel for Conv/Gemm/MatMul weights. The NumPy reference executor then
 simulates quantize/dequantize at those nodes and compares the output with
-PyTorch. This is an error check; current `.leaf` binary export is FP32 only.
+PyTorch. Version 2 `.leaf` stores INT8 initializer bytes and scales directly;
+the native executor quantizes activations and dispatches Conv/Gemm/MatMul.
+When a weight is shared by consumers that need different channel axes or by
+an FP32 consumer, export retains separate correctly typed copies.
 The real CIFAR subset below uses 32 images for calibration and 100 different
 images for evaluation.
 
@@ -151,14 +161,14 @@ applying the exported offsets directly is the next integration step.
 
 ### Step 6: Export and execute in C++
 
-The FP32 exporter writes a versioned `.leaf` file with nodes, attributes, and
-aligned weights. `leaf_infer` loads it and executes the supported ResNet path:
+The exporter writes a versioned `.leaf` file with nodes, attributes, and
+32-byte-aligned typed weights. `leaf_infer` loads it and executes the supported CNN path:
 Conv, BatchNorm, ReLU, Add, MaxPool, GlobalAveragePool, Flatten, Gemm, and
 Identity. `leaf_graph_bench` measures repeated full-graph inference. Native
 scalar kernels are correctness baselines; AVX2/FMA GEMM, im2col Conv, packed
 Conv weights, fused ReLU, and signed INT8 GEMM/Conv kernels are benchmarked
-separately. The native INT8 kernels do not yet receive whole-model quantized
-graphs.
+separately. Native INT8 graph execution is available for supported ops, but
+remains opt-in because the measured small whole graphs below are slower.
 
 ### Step 7: Keep or reject a speed change
 
@@ -181,15 +191,25 @@ python -m pip install -r requirements-dev.txt
 That command runs Python tests, builds and runs native correctness tests,
 enforces the native kernel speed gate, writes the deterministic PyTorch/NumPy
 baseline JSON, and verifies the FP32 C++ ResNet output against PyTorch. The
-latest run passed all 22 Python tests and the native/C++ checks. The
-native build script uses GCC with `-O3 -mavx2 -mfma`; the current build
-therefore requires an AVX2-capable x86 CPU. CMake is an alternative:
+latest run passed all 25 Python tests and the native/C++ checks. The default
+native build uses GCC with `-O3 -mavx2 -mfma` on compatible x86 CPUs. A
+portable scalar build is available with:
+
+```powershell
+./scripts/build_native.ps1 -Portable -BuildDirectory build/portable
+./build/portable/leaf_native_tests.exe
+```
+
+The portable build passed the native kernel and INT8 graph parity checks.
+CMake is an alternative:
 
 ```powershell
 cmake -S . -B build/cmake -DCMAKE_BUILD_TYPE=Release
 cmake --build build/cmake --config Release
 ctest --test-dir build/cmake -C Release --output-on-failure
 ```
+
+For a portable CMake build, configure with `-DLEAF_ENABLE_AVX2=OFF`.
 
 The CMake route was also configured, built, and tested on Linux; all five
 CTest targets passed.
@@ -203,6 +223,7 @@ python -m pytest -q
 ./build/leaf_kernel_bench.exe --enforce-speedup --output benchmark/results/native_latest.json
 python -m benchmark.run_baselines
 python tools/verify_cpp_runtime.py --leaf-infer ./build/leaf_infer.exe
+python tools/verify_quantized_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe
 ```
 
 The Python/NumPy executor is a numerical oracle. Its latency appears in the
@@ -233,6 +254,7 @@ the actual benchmarks run offline:
 python -m benchmarks.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1
 ./scripts/build_native.ps1
 python -m benchmarks.bench_cifar10_resnet18 --samples 20 --warmup 5 --runs 10 --threads 1
+python -m benchmarks.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1 --leaf-infer build/leaf_infer.exe --leaf-bench build/leaf_graph_bench.exe --native-evaluation-samples 20 --output benchmark/results/cifar10_native_int8.json
 ```
 
 The small CNN graph is an untrained 3→8 Conv/BatchNorm/ReLU optimizer test at
@@ -308,11 +330,51 @@ following median per-image latency:
 | Leaf NumPy FP32 reference | 1.504 ms |
 | Leaf NumPy INT8 simulation | 1.469 ms |
 
-These Python reference timings expose interpreter overhead. Native INT8
-whole-graph execution is not available, so they do not measure INT8 deployment
-speed. The complete record is [`cifar10_cpu.json`](benchmark/results/cifar10_cpu.json).
+These Python reference timings expose interpreter overhead; they are not native
+INT8 deployment speed. The complete record is
+[`cifar10_cpu.json`](benchmark/results/cifar10_cpu.json).
 
-### 8.3 Qwen cached weights, PyTorch CPU baseline
+### 8.3 Real CIFAR-10, native INT8 versus native FP32
+
+Using the same 32 calibration images and a disjoint 100-image evaluation
+subset, the optional native harness measured the first 20 evaluation images.
+Each graph was warmed five times and timed ten times per image, then the
+median of per-image p50 latencies was reported:
+
+| Runtime | Median per-image p50 | Maximum absolute output difference vs PyTorch FP32 |
+|---|---:|---:|
+| Leaf C++ FP32 | 0.014 ms | 4.77e-7 |
+| Leaf C++ INT8 | 0.062 ms | 0.02277 |
+
+This is an untrained optimizer micrograph, not a classification accuracy
+result. Native INT8 is currently slower, so FP32 remains the preferred
+latency path. The complete environment and methodology are recorded in
+[`cifar10_native_int8.json`](benchmark/results/cifar10_native_int8.json).
+
+### 8.4 Native INT8 graph integration check
+
+On this development host, version 2 artifacts matched the quantized Python
+reference within `4.77e-7` for the synthetic CNN and `1.72e-7` for the fused
+transformer FFN. Relative RMSE against PyTorch FP32 was `1.000%` and `1.076%`.
+With ten warmups and 50 timed runs, native p50 latency was:
+
+| Workload | Leaf FP32 | Leaf INT8 | Decision |
+|---|---:|---:|---|
+| CNN, 1×3×16×16 | 0.014 ms | 0.062 ms | Keep FP32 as latency default |
+| FFN, 1×8×16 | 0.004 ms | 0.011 ms | Keep FP32 as latency default |
+
+An 8-output-channel AVX2 INT8 lane improved the synthetic CNN from an
+earlier `0.081 ms` p50 to `0.062 ms`; a direct scalar convolution candidate
+was measured and rejected at `0.116 ms`. These tiny graphs remain sensitive
+to activation quantization, packing, and workspace allocation overhead.
+They establish functional INT8 integration,
+not a speedup or trained-model quality result. Reproduce with
+`tools/verify_quantized_runtime.py`; larger shapes need a separate
+same-session whole-model gate before promotion. The record includes peak
+process RSS for each native run:
+[`native_int8_graph.json`](benchmark/results/native_int8_graph.json).
+
+### 8.5 Qwen cached weights, PyTorch CPU baseline
 
 One warmup and five measured runs on the cached Qwen2.5-0.5B revision produced:
 
@@ -327,22 +389,22 @@ parameters occupied 1,976,131,072 FP32 bytes; process RSS after loading was
 2,686,046,208 bytes. Prefix prefill is deliberately excluded from the cached
 single-token timing. See [`qwen25_cached_cpu.json`](benchmark/results/qwen25_cached_cpu.json).
 
-### 8.4 Native kernel speed gate
+### 8.6 Native kernel speed gate
 
 The latest GCC `-O3 -mavx2 -mfma` run compared each optimized kernel against
 Leaf's scalar implementation, after warmup. The GEMM shape was 64×384×384.
 
 | Kernel | Scalar Leaf baseline | Optimized Leaf | Speedup |
 |---|---:|---:|---:|
-| FP32 GEMM | 6.686 ms | 0.820 ms AVX2 | 8.151× |
-| INT8 GEMM | 4.274 ms | 1.128 ms AVX2 | 3.788× |
-| FP32 Conv, 16→32, 3×3 | 3.185 ms direct | 0.400 ms im2col+AVX2 | 7.960× |
+| FP32 GEMM | 6.512 ms | 0.823 ms AVX2 | 7.914× |
+| INT8 GEMM | 4.246 ms | 1.123 ms AVX2 | 3.783× |
+| FP32 Conv, 16→32, 3×3 | 3.200 ms direct | 0.406 ms im2col+AVX2 | 7.889× |
 
 These are kernel measurements, not full-model speedups. The command uses
 `--enforce-speedup` so a slower optimized path fails. Raw values are in
 [`native_latest.json`](benchmark/results/native_latest.json).
 
-### 8.5 Prior full ResNet runtime measurements
+### 8.7 Prior full ResNet runtime measurements
 
 The 224×224, single-image FP32 ResNet-18 measurements show the effect of
 temporary-buffer reuse. Their input shape and WSL2 environment differ from
@@ -360,7 +422,7 @@ run. Final-logit parity versus PyTorch remained `3.93e-6`. The data and
 measurement notes are in [`wsl_dev_machine.csv`](benchmark/results/wsl_dev_machine.csv)
 and [`docs/decisions.md`](docs/decisions.md).
 
-### 8.6 Deterministic synthetic checks
+### 8.8 Deterministic synthetic checks
 
 The offline CI workloads cover a small CNN and transformer FFN with fixed
 synthetic data. They prove pipeline behavior when real datasets or model
@@ -369,8 +431,8 @@ Qwen generation.
 
 | Workload | FP32 max error | INT8 simulated max error | PyTorch CPU | NumPy FP32 | NumPy INT8 simulation |
 |---|---:|---:|---:|---:|---:|
-| CNN | 5.96e-7 | 0.02034 | 0.0451 ms | 0.6391 ms | 0.6597 ms |
-| Transformer FFN | 2.71e-7 | 0.09518 | 0.0158 ms | 0.0218 ms | 0.0355 ms |
+| CNN | 5.96e-7 | 0.02034 | 0.0446 ms | 0.6168 ms | 0.6394 ms |
+| Transformer FFN | 2.71e-7 | 0.09518 | 0.0154 ms | 0.0215 ms | 0.0329 ms |
 
 The detailed timings and memory plans are in
 [`latest.json`](benchmark/results/latest.json). The transformer row is a small
@@ -403,8 +465,11 @@ Two values may share an offset only when their live intervals do not overlap.
 The current C++ executor instead has a grow-only, thread-local scratch buffer
 for im2col and a best-fit pool of retired activation vectors. It reuses memory
 without loading this JSON. Connecting verified plan offsets to a single arena
-is an open implementation task, with peak RSS and latency measured before and
-after that change.
+is an open implementation task. `leaf_graph_bench` now reports peak process
+RSS, supplying a baseline for the required before/after arena test; the
+synthetic FP32/INT8 process values are saved in
+[`native_int8_graph.json`](benchmark/results/native_int8_graph.json). No RSS
+improvement from an applied plan is claimed yet.
 
 ## 10. Repository map
 
@@ -442,12 +507,13 @@ the reference points for the next C++ optimization.
 - [x] Add AVX2 FP32/INT8 kernel tests and a no-slowdown native speed gate.
 - [x] Measure real CIFAR images against PyTorch and Leaf C++ FP32.
 - [x] Measure locally cached Qwen2.5-0.5B PyTorch CPU decode with and without KV cache.
-- [ ] Store INT8 tensors and scales in `.leaf`, then dispatch quantized whole graphs in C++.
+- [x] Store INT8 tensors and scales in `.leaf`, then dispatch supported quantized graphs in C++.
+- [x] Provide a portable scalar build alongside the AVX2/FMA build.
 - [ ] Apply the exported memory plan directly in the C++ executor and measure peak RSS.
 - [ ] Add native transformer norm, attention, KV-cache, and FFN execution; run full Qwen parity and latency.
 - [ ] Add trained CIFAR-10 accuracy and Qwen perplexity/next-token quality gates.
 - [ ] Evaluate structured pruning and weight-only INT8/INT4 only after those quality gates exist.
 - [ ] Profile packing, tiling, threading, and cache behavior; accept only measured whole-model improvements.
-- [ ] Reproduce the final artifact and benchmarks on the CPU-only, roughly 6 GB target machine.
+- [ ] Reproduce representative final artifacts and benchmarks on additional CPU machines.
 
 Training, GPU deployment, and unstructured sparsity are outside Leaf's scope.

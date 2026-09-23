@@ -1,0 +1,54 @@
+{
+  "benchmark": "cifar10-leaf-optimizer-micrograph",
+  "measured_at_utc": "2026-09-23T09:52:55.137108+00:00",
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.2",
+    "torch": "2.12.0+cpu",
+    "numpy": "2.4.6"
+  },
+  "dataset": "CIFAR-10 test split",
+  "dataset_source": "benchmark\\data\\cifar10-test-subset.npz",
+  "calibration_samples": 32,
+  "evaluation_samples": 100,
+  "threads": 1,
+  "input_shape": [
+    1,
+    3,
+    16,
+    16
+  ],
+  "label_histogram": {
+    "0": 9,
+    "1": 9,
+    "2": 11,
+    "3": 13,
+    "4": 9,
+    "5": 6,
+    "6": 13,
+    "7": 10,
+    "8": 13,
+    "9": 7
+  },
+  "leaf_fp32_vs_pytorch_max_abs": 4.76837158203125e-07,
+  "leaf_int8_vs_pytorch_max_abs": 0.026672422885894775,
+  "latency_ms_per_sample": {
+    "pytorch_cpu": 0.106007,
+    "leaf_numpy_reference_fp32": 1.556413,
+    "leaf_numpy_quantized_simulation": 1.6347319999999999
+  },
+  "scope": "Real dataset; untrained optimizer micrograph, so accuracy is intentionally not reported.",
+  "native_graph": {
+    "samples": 20,
+    "warmup": 5,
+    "runs": 10,
+    "fp32": {
+      "median_per_image_p50_ms": 0.014,
+      "max_abs_vs_pytorch": 4.76837158203125e-07
+    },
+    "int8": {
+      "median_per_image_p50_ms": 0.062,
+      "max_abs_vs_pytorch": 0.022767841815948486
+    }
+  }
+}

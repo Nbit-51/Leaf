@@ -10,6 +10,12 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#if defined(_WIN32)
+#include <windows.h>
+#include <psapi.h>
+#elif defined(__linux__)
+#include <sys/resource.h>
+#endif
 
 namespace {
 
@@ -61,6 +67,21 @@ double percentile(const std::vector<double>& sorted_values, double fraction) {
     return sorted_values[index];
 }
 
+size_t peak_rss_bytes() {
+#if defined(_WIN32)
+    PROCESS_MEMORY_COUNTERS counters{};
+    if (GetProcessMemoryInfo(GetCurrentProcess(), &counters, sizeof(counters))) {
+        return static_cast<size_t>(counters.PeakWorkingSetSize);
+    }
+#elif defined(__linux__)
+    rusage usage{};
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        return static_cast<size_t>(usage.ru_maxrss) * 1024;
+    }
+#endif
+    return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -98,7 +119,7 @@ int main(int argc, char** argv) {
         std::sort(timings_ms.begin(), timings_ms.end());
         const double checksum = std::accumulate(output.values.begin(), output.values.end(), 0.0);
         std::cout << std::fixed << std::setprecision(3);
-        std::cout << "Leaf FP32 inference benchmark\n"
+        std::cout << "Leaf graph inference benchmark\n"
                   << "  warmup runs: " << warmup << "\n"
                   << "  measured runs: " << runs << "\n"
                   << "  latency ms: min=" << timings_ms.front()
@@ -106,6 +127,7 @@ int main(int argc, char** argv) {
                   << ", p95=" << percentile(timings_ms, 0.95)
                   << ", mean=" << mean << "\n"
                   << "  throughput: " << (1000.0 / mean) << " inferences/s\n"
+                  << "  peak process RSS bytes: " << peak_rss_bytes() << "\n"
                   << "  output checksum: " << checksum << "\n";
         return 0;
     } catch (const std::exception& error) {

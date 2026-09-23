@@ -1,0 +1,44 @@
+{
+  "benchmark": "leaf-native-int8-graph-integration",
+  "measured_at_utc": "2026-09-23T09:52:40.316973+00:00",
+  "host": "Windows-11-10.0.26200-SP0",
+  "warmup": 10,
+  "runs": 50,
+  "results": {
+    "cnn": {
+      "shape": [
+        1,
+        3,
+        16,
+        16
+      ],
+      "native_reference_max_abs": 4.76837158203125e-07,
+      "pytorch_relative_rmse": 0.01000027172267437,
+      "fp32": {
+        "p50_ms": 0.014,
+        "peak_process_rss_bytes": 4857856
+      },
+      "int8": {
+        "p50_ms": 0.062,
+        "peak_process_rss_bytes": 4816896
+      }
+    },
+    "transformer_ffn": {
+      "shape": [
+        1,
+        8,
+        16
+      ],
+      "native_reference_max_abs": 1.7164344257025732e-07,
+      "pytorch_relative_rmse": 0.010757002979516983,
+      "fp32": {
+        "p50_ms": 0.003,
+        "peak_process_rss_bytes": 4800512
+      },
+      "int8": {
+        "p50_ms": 0.011,
+        "peak_process_rss_bytes": 4825088
+      }
+    }
+  }
+}
