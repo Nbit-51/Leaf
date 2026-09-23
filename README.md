@@ -48,7 +48,7 @@ PyTorch is an external comparison, not a substitute for this regression gate.
 | Memory planning | JSON export implemented | 64-byte-aligned liveness plan; C++ still uses its runtime buffer pool rather than the exported offsets |
 | `.leaf` artifact and native executor | FP32 path implemented | C++ ResNet operator subset; binary exporter does not yet serialize INT8 weights/scales |
 | Native kernels | FP32 and INT8 kernels implemented | FP32 graph dispatch works; INT8 graph dispatch is pending |
-| Full-model Qwen in Leaf | Pending | Qwen benchmark below is a PyTorch CPU baseline; Hydra numbers are historical reference data |
+| Full-model Qwen in Leaf | Pending | Qwen benchmark below provides a PyTorch CPU reference |
 | Structured pruning and trained-model quality gates | Pending | No CIFAR accuracy or Qwen perplexity claim yet |
 
 The Qwen-pattern fusion passes identify and rewrite graph motifs, but their
@@ -191,8 +191,8 @@ cmake --build build/cmake --config Release
 ctest --test-dir build/cmake -C Release --output-on-failure
 ```
 
-The CMake route was also configured, built, and tested in WSL; all five CTest
-targets passed.
+The CMake route was also configured, built, and tested on Linux; all five
+CTest targets passed.
 
 Individual checks can be run with:
 
@@ -242,40 +242,39 @@ on real images; neither supplies a trained CIFAR classifier, so classification
 accuracy is not reported. A trained model and separate held-out accuracy gate
 are still needed before making an accuracy claim.
 
-## 7. Qwen2.5-0.5B cached-weight benchmark setup
+## 7. Qwen2.5-0.5B reference benchmark
 
-The model weights are already cached in the older `Ubuntu` WSL distro under
-`/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B`. The measured
-snapshot revision is `060db6499f32faf8b98477b0a26969ef7d8b9987`.
-The benchmark loads this snapshot offline in FP32 on one CPU thread. It uses
-the same fixed 64-token input for two next-token computations:
+The benchmark loads locally cached Qwen2.5-0.5B weights without network
+access. The measured snapshot revision is
+`060db6499f32faf8b98477b0a26969ef7d8b9987`. It runs in FP32 on one
+CPU thread and uses the same fixed 64-token input for two next-token
+computations:
 
 1. Recompute all 64 tokens without a KV cache.
 2. Prefill the first 63 tokens outside timing and decode the last token with
    the populated KV cache.
 
-It checks maximum logit difference and next-token argmax agreement. On the
-current WSL installation, run:
+It checks maximum logit difference and next-token argmax agreement. Run the
+following from the repository root in an environment containing the cached
+model:
 
 ```bash
-cd /mnt/c/Users/navaneeth/leaf
-HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 /root/projects/leaf/venv/bin/python -m benchmarks.bench_qwen25_cached --threads 1 --sequence-length 64 --warmup 1 --runs 5
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m benchmarks.bench_qwen25_cached --model Qwen/Qwen2.5-0.5B --threads 1 --sequence-length 64 --warmup 1 --runs 5
 ```
 
-On another machine, use `python -m benchmarks.bench_qwen25_cached --model
-<local-snapshot-or-cached-id>` after caching the complete weights. The command
-does not download a model implicitly. This is a PyTorch KV-cache baseline for
-future Leaf Transformer execution, not a Leaf full-model result. The historical
-Hydra GPU comparison below is a different project and hardware path.
+`--model` also accepts a complete local snapshot directory. The benchmark
+does not download weights implicitly. Its output is a PyTorch KV-cache
+reference for future Leaf Transformer execution, not a Leaf full-model
+measurement.
 
 ## 8. Measured results and what each number means
 
 All results below are development-machine observations, not target-machine
 promises. Windows runs used an Intel Core i7-14700HX, Windows 11, one CPU
 thread, PyTorch 2.12.0+cpu, and GCC 15.2.0 for native code. The Qwen run used
-the same host through WSL2 Ubuntu, Python 3.12.3, Transformers 4.57.6, and a
-CPU tensor despite the CUDA-capable PyTorch package. Source JSON/CSV files
-are under [`benchmark/results`](benchmark/results/README.md).
+WSL2 on the same host, Python 3.12.3, Transformers 4.57.6, and CPU execution.
+Source JSON/CSV files are under
+[`benchmark/results`](benchmark/results/README.md).
 
 ### 8.1 Real CIFAR-10, full ResNet-18, C++ versus PyTorch
 
@@ -328,21 +327,7 @@ parameters occupied 1,976,131,072 FP32 bytes; process RSS after loading was
 2,686,046,208 bytes. Prefix prefill is deliberately excluded from the cached
 single-token timing. See [`qwen25_cached_cpu.json`](benchmark/results/qwen25_cached_cpu.json).
 
-### 8.4 Historical Hydra Qwen GPU reference
-
-The separate local [Hydra Engine project](https://github.com/Nbit-51/Hydra_Engine)
-recorded Qwen2.5-0.5B decode on an RTX 4050 Laptop GPU under WSL2: eager
-Hugging Face PyTorch at `39.86 tokens/s`, and Hydra's native LibTorch path at
-`58.3 tokens/s` (`1.46×`). The source is its local `HANDOVER.md` dated
-2026-08-05 and its README. Those figures use GPU FP16 autoregressive decode;
-they must not be compared numerically with Leaf's CPU FP32 latency above.
-Hydra's fix also documented why cache length matters: attending over the
-entire allocated 32,768-position cache caused unnecessary work, while slicing
-to the used cache length improved its decode from 14.8 to 48.7 tokens/s;
-removing a per-token GPU synchronization then reached 58.3 tokens/s. Leaf's
-future attention kernel should measure actual cache length for the same reason.
-
-### 8.5 Native kernel speed gate
+### 8.4 Native kernel speed gate
 
 The latest GCC `-O3 -mavx2 -mfma` run compared each optimized kernel against
 Leaf's scalar implementation, after warmup. The GEMM shape was 64×384×384.
@@ -357,16 +342,17 @@ These are kernel measurements, not full-model speedups. The command uses
 `--enforce-speedup` so a slower optimized path fails. Raw values are in
 [`native_latest.json`](benchmark/results/native_latest.json).
 
-### 8.6 Earlier full ResNet runtime stages in WSL
+### 8.5 Prior full ResNet runtime measurements
 
-The older 224×224, single-image FP32 ResNet-18 runs show the cost of temporary
-allocation. Their shape and WSL environment differ from the CIFAR 32×32 run.
+The 224×224, single-image FP32 ResNet-18 measurements show the effect of
+temporary-buffer reuse. Their input shape and WSL2 environment differ from
+the CIFAR 32×32 comparison.
 
 | Stage | Mean latency | Throughput | Context |
 |---|---:|---:|---|
 | AVX2 4×8 GEMM | 140.904 ms | 7.097 images/s | One warmup, ten runs |
 | Reuse im2col scratch buffer | 106.812 ms | 9.362 images/s | Three warmups, twenty runs; 24.2% below prior stage |
-| Executor buffer pool | 126.314 ms | 7.917 images/s | Later, noisier session |
+| Executor buffer pool | 126.314 ms | 7.917 images/s | Separate measurement session |
 
 The last row should be compared with its *same-session* unpatched measurement,
 `129.620 → 126.314 ms` (2.55% reduction), not with the earlier 106.812 ms
@@ -374,7 +360,7 @@ run. Final-logit parity versus PyTorch remained `3.93e-6`. The data and
 measurement notes are in [`wsl_dev_machine.csv`](benchmark/results/wsl_dev_machine.csv)
 and [`docs/decisions.md`](docs/decisions.md).
 
-### 8.7 Deterministic synthetic checks
+### 8.6 Deterministic synthetic checks
 
 The offline CI workloads cover a small CNN and transformer FFN with fixed
 synthetic data. They prove pipeline behavior when real datasets or model
@@ -427,7 +413,7 @@ Leaf/
 ├── tools/graph_opt/       ONNX IR, folding, fusion, calibration, planner, exporter
 ├── engine/                C++ graph parser, executor, FP32 and INT8 kernels
 ├── benchmark/             Synthetic workloads, baseline harness, native gate
-│   └── results/           Committed per-run JSON and historical WSL CSV
+│   └── results/           Committed per-run JSON and prior runtime measurements
 ├── benchmarks/            Real CIFAR and cached Qwen reproduction scripts
 ├── tests/                 Graph, quantization, integration, and native tests
 ├── scripts/               Native build and complete verification command

@@ -17,9 +17,7 @@ machine match. The large source datasets and model weights remain local.
 
 `cifar10_resnet18_cpp*.json` uses untrained model weights and measures parity
 and latency, not classifier accuracy. `qwen25_cached_cpu.json` is a PyTorch
-baseline, not full-model Leaf Transformer execution. The historical Hydra GPU
-Qwen result is documented in the top-level README with its separate source
-and is not a Leaf CPU result.
+reference for KV-cache behavior; Leaf does not yet execute the full model.
 
 The README contains reproduction commands and a table of the important
 numbers. Run those commands again on the deployment CPU before drawing
