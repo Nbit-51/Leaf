@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -10,10 +11,14 @@ namespace leaf::runtime {
 class Arena {
  public:
   explicit Arena(std::size_t bytes, std::size_t alignment = 64)
-      : storage_(bytes + alignment), size_(bytes), alignment_(alignment) {
+      : size_(bytes), alignment_(alignment) {
     if (alignment == 0 || (alignment & (alignment - 1)) != 0) {
       throw std::invalid_argument("arena alignment must be a power of two");
     }
+    if (bytes > std::numeric_limits<std::size_t>::max() - alignment) {
+      throw std::length_error("arena size overflows allocation");
+    }
+    storage_.resize(bytes + alignment);
     const auto raw = reinterpret_cast<std::uintptr_t>(storage_.data());
     const auto aligned = (raw + alignment - 1) & ~(alignment - 1);
     base_ = reinterpret_cast<std::byte*>(aligned);

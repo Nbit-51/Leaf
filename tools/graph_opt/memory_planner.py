@@ -9,7 +9,10 @@ from pathlib import Path
 
 import numpy as np
 
-from .ir import Graph
+try:
+    from .ir import Graph
+except ImportError:
+    from ir import Graph
 
 
 _DTYPE_ALIASES = {"float": "float32", "double": "float64"}

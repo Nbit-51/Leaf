@@ -35,7 +35,8 @@ def verify_case(name: str, graph, torch_reference, shape: tuple[int, ...],
     rng = np.random.default_rng(seed)
     calibration = [{"x": rng.normal(0, 1, shape).astype(np.float32)} for _ in range(8)]
     sample = calibration[0]["x"]
-    optimized = optimize_graph(graph, calibration).graph
+    optimization = optimize_graph(graph, calibration)
+    optimized = optimization.graph
     artifact = directory / f"{name}.leaf"
     input_path = directory / f"{name}.input.bin"
     output_path = directory / f"{name}.output.bin"
@@ -53,6 +54,18 @@ def verify_case(name: str, graph, torch_reference, shape: tuple[int, ...],
 
     expected = run_graph(optimized, {"x": sample})["y"]
     actual = np.fromfile(output_path, dtype=np.float32).reshape(expected.shape)
+    planned_artifact = directory / f"{name}.planned.leaf"
+    planned_output_path = directory / f"{name}.planned.output.bin"
+    export_graph(optimized, str(planned_artifact), memory_plan=optimization.memory_plan)
+    planned_process = subprocess.run(
+        [str(executable), str(planned_artifact), str(input_path),
+         ",".join(map(str, shape)), str(planned_output_path)],
+        capture_output=True, text=True)
+    if planned_process.returncode:
+        raise RuntimeError(f"{name} planned INT8 inference failed: {planned_process.stderr.strip()}")
+    planned_actual = np.fromfile(planned_output_path, dtype=np.float32).reshape(expected.shape)
+    if not np.array_equal(planned_actual, actual):
+        raise AssertionError(f"{name} planned and unplanned INT8 outputs differ")
     absolute_error = float(np.max(np.abs(actual - expected)))
     if not np.allclose(actual, expected, rtol=2e-3, atol=2e-3):
         raise AssertionError(f"{name} native INT8/reference mismatch: max abs {absolute_error:.6g}")

@@ -5,12 +5,14 @@
 #include "im2col.h"
 #include "leaf/kernels/conv.h"
 #include "leaf/kernels/gemm.h"
+#include "leaf/runtime/arena.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -171,13 +173,36 @@ void release_buffer(std::vector<float>&& buffer) {
     g_buffer_pool.push_back(std::move(buffer));
 }
 
+struct OutputAllocator {
+    const Graph& graph;
+    runtime::Arena* arena;
+    const std::string& name;
+
+    Tensor make(std::vector<size_t> shape) const {
+        Tensor result;
+        result.shape = std::move(shape);
+        const size_t count = element_count(result.shape);
+        const MemoryAllocation* allocation = graph.allocation_for(name);
+        if (allocation != nullptr) {
+            require(arena != nullptr && count <= allocation->size / sizeof(float),
+                    "memory-plan allocation is smaller than runtime tensor: " + name);
+            result.arena_data = static_cast<float*>(arena->at(
+                static_cast<size_t>(allocation->offset),
+                count * sizeof(float)));
+        } else {
+            result.values = acquire_buffer(count);
+        }
+        return result;
+    }
+};
+
 TensorView tensor_for(const Graph& graph,
                       const std::unordered_map<std::string, Tensor>& intermediates,
                       const std::unordered_map<std::string, TensorView>& graph_inputs,
                       const std::string& name) {
     const auto intermediate = intermediates.find(name);
     if (intermediate != intermediates.end()) {
-        return {intermediate->second.values.data(), intermediate->second.shape};
+        return {intermediate->second.data(), intermediate->second.shape};
     }
     const auto input = graph_inputs.find(name);
     if (input != graph_inputs.end()) {
@@ -223,7 +248,8 @@ void require_channel_scales(const Node& node, size_t channels, uint8_t axis) {
 
 Tensor execute_quant_conv(const Graph& graph, const Node& node, const TensorView& input,
                           const std::unordered_map<std::string, Tensor>& intermediates,
-                          const std::unordered_map<std::string, TensorView>& graph_inputs) {
+                          const std::unordered_map<std::string, TensorView>& graph_inputs,
+                          const OutputAllocator& allocator) {
     require(input.shape.size() == 4 && input.shape[0] == 1,
             "INT8 Conv requires one NCHW image");
     const std::string& weight_name = node.inputs.at(1);
@@ -252,7 +278,7 @@ Tensor execute_quant_conv(const Graph& graph, const Node& node, const TensorView
         bias = bias_tensor.data;
     }
 
-    Tensor output{{1, out_c, out_h, out_w}, acquire_buffer(out_c * out_h * out_w)};
+    Tensor output = allocator.make({1, out_c, out_h, out_w});
     const std::vector<int8_t> qinput = quantize_input(input.data, element_count(input.shape),
                                                       node.input_scale);
     const int8_t* weight = graph.initializer_i8_data(weight_name);
@@ -273,7 +299,7 @@ Tensor execute_quant_conv(const Graph& graph, const Node& node, const TensorView
         std::vector<float> gemm_output(out_h * out_w * out_c);
         kernels::pack_conv_weights_i8(weight, packed.data(), shape);
         kernels::conv2d_i8_im2col(qinput.data(), packed.data(), bias, node.input_scale,
-                                  node.weight_scales.data(), output.values.data(),
+                                  node.weight_scales.data(), output.data(),
                                   workspace.data(), gemm_output.data(), shape, fused);
     } else {
         // General padding/dilation path. Accumulate in int64 to avoid overflow
@@ -301,7 +327,7 @@ Tensor execute_quant_conv(const Graph& graph, const Node& node, const TensorView
                     }
                     float value = static_cast<float>(sum) * node.input_scale * node.weight_scales[oc];
                     if (bias != nullptr) value += bias[oc];
-                    output.values[(oc * out_h + y) * out_w + x] = apply_activation(value, activation);
+                    output.data()[(oc * out_h + y) * out_w + x] = apply_activation(value, activation);
                 }
             }
         }
@@ -311,7 +337,8 @@ Tensor execute_quant_conv(const Graph& graph, const Node& node, const TensorView
 
 Tensor execute_conv(const Graph& graph, const Node& node, const TensorView& input,
                     const std::unordered_map<std::string, Tensor>& intermediates,
-                    const std::unordered_map<std::string, TensorView>& graph_inputs) {
+                    const std::unordered_map<std::string, TensorView>& graph_inputs,
+                    const OutputAllocator& allocator) {
     require(input.shape.size() == 4 && input.shape[0] == 1,
             "Conv currently supports one NCHW image at a time");
     const TensorView weights = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
@@ -339,17 +366,16 @@ Tensor execute_conv(const Graph& graph, const Node& node, const TensorView& inpu
     conv2d_output_shape(input.shape[2], input.shape[3], weights.shape[2], weights.shape[3],
                         pads[0], pads[1], pads[2], pads[3], strides[0], strides[1],
                         dilations[0], dilations[1], out_h, out_w);
-    Tensor output{{1, weights.shape[0], out_h, out_w},
-                  acquire_buffer(weights.shape[0] * out_h * out_w)};
+    Tensor output = allocator.make({1, weights.shape[0], out_h, out_w});
     conv2d(input.data, input.shape[1], input.shape[2], input.shape[3],
            weights.data, weights.shape[0], weights.shape[2], weights.shape[3], bias,
            pads[0], pads[1], pads[2], pads[3], strides[0], strides[1],
-           dilations[0], dilations[1], output.values.data());
+           dilations[0], dilations[1], output.data());
 
     const std::string activation = string_attribute(node, "activation");
     if (activation == "Relu") {
-        for (float& value : output.values) {
-            value = std::max(value, 0.0f);
+        for (size_t i = 0; i < output.element_count(); ++i) {
+            output.data()[i] = std::max(output.data()[i], 0.0f);
         }
     } else {
         require(activation.empty(), "unsupported fused Conv activation: " + activation);
@@ -357,7 +383,8 @@ Tensor execute_conv(const Graph& graph, const Node& node, const TensorView& inpu
     return output;
 }
 
-Tensor execute_maxpool(const Node& node, const TensorView& input) {
+Tensor execute_maxpool(const Node& node, const TensorView& input,
+                       const OutputAllocator& allocator) {
     require(input.shape.size() == 4 && input.shape[0] == 1,
             "MaxPool currently supports one NCHW image at a time");
     const std::vector<size_t> kernel = integer_list_attribute(node, "kernel_shape", {});
@@ -375,8 +402,7 @@ Tensor execute_maxpool(const Node& node, const TensorView& input) {
     conv2d_output_shape(input.shape[2], input.shape[3], kernel[0], kernel[1],
                         pads[0], pads[1], pads[2], pads[3], strides[0], strides[1],
                         1, 1, out_h, out_w);
-    Tensor output{{1, input.shape[1], out_h, out_w},
-                  acquire_buffer(input.shape[1] * out_h * out_w)};
+    Tensor output = allocator.make({1, input.shape[1], out_h, out_w});
     for (size_t channel = 0; channel < input.shape[1]; ++channel) {
         for (size_t oh = 0; oh < out_h; ++oh) {
             for (size_t ow = 0; ow < out_w; ++ow) {
@@ -394,30 +420,32 @@ Tensor execute_maxpool(const Node& node, const TensorView& input) {
                         }
                     }
                 }
-                output.values[(channel * out_h + oh) * out_w + ow] = maximum;
+                output.data()[(channel * out_h + oh) * out_w + ow] = maximum;
             }
         }
     }
     return output;
 }
 
-Tensor execute_global_average_pool(const TensorView& input) {
+Tensor execute_global_average_pool(const TensorView& input,
+                                   const OutputAllocator& allocator) {
     require(input.shape.size() == 4 && input.shape[0] == 1,
             "GlobalAveragePool currently supports one NCHW image at a time");
     const size_t spatial = input.shape[2] * input.shape[3];
-    Tensor output{{1, input.shape[1], 1, 1}, acquire_buffer(input.shape[1])};
+    Tensor output = allocator.make({1, input.shape[1], 1, 1});
     for (size_t channel = 0; channel < input.shape[1]; ++channel) {
         float sum = 0.0f;
         const float* channel_data = input.data + channel * spatial;
         for (size_t index = 0; index < spatial; ++index) {
             sum += channel_data[index];
         }
-        output.values[channel] = sum / static_cast<float>(spatial);
+        output.data()[channel] = sum / static_cast<float>(spatial);
     }
     return output;
 }
 
-Tensor execute_flatten(const Node& node, const TensorView& input) {
+Tensor execute_flatten(const Node& node, const TensorView& input,
+                       const OutputAllocator& allocator) {
     const std::vector<size_t> axis_attribute = integer_list_attribute(node, "axis", {1});
     require(axis_attribute.size() == 1, "invalid Flatten axis");
     const size_t rank = input.shape.size();
@@ -431,14 +459,15 @@ Tensor execute_flatten(const Node& node, const TensorView& input) {
     for (size_t i = axis; i < rank; ++i) {
         inner *= input.shape[i];
     }
-    std::vector<float> buffer = acquire_buffer(element_count(input.shape));
-    std::copy(input.data, input.data + buffer.size(), buffer.begin());
-    return {{outer, inner}, std::move(buffer)};
+    Tensor output = allocator.make({outer, inner});
+    std::copy(input.data, input.data + output.element_count(), output.data());
+    return output;
 }
 
 Tensor execute_gemm(const Graph& graph, const Node& node, const TensorView& a,
                     const std::unordered_map<std::string, Tensor>& intermediates,
-                    const std::unordered_map<std::string, TensorView>& graph_inputs) {
+                    const std::unordered_map<std::string, TensorView>& graph_inputs,
+                    const OutputAllocator& allocator) {
     require(a.shape.size() >= 2, "Gemm A must have rank at least 2");
     const TensorView b = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
     require(b.shape.size() == 2, "Gemm B must be rank 2");
@@ -468,33 +497,33 @@ Tensor execute_gemm(const Graph& graph, const Node& node, const TensorView& a,
         }
     }
 
-    std::vector<float> out_buffer = acquire_buffer(m * n);
-    std::fill(out_buffer.begin(), out_buffer.end(), 0.0f);
     std::vector<size_t> output_shape = a.shape;
     if (trans_a) output_shape = {m, n};
     else output_shape.back() = n;
-    Tensor output{output_shape, std::move(out_buffer)};
+    Tensor output = allocator.make(output_shape);
+    std::fill_n(output.data(), m * n, 0.0f);
     if (node.inputs.size() >= 3 && !node.inputs[2].empty()) {
         const TensorView c = tensor_for(graph, intermediates, graph_inputs, node.inputs[2]);
         if (element_count(c.shape) == 1) {
-            std::fill(output.values.begin(), output.values.end(), c.data[0]);
+            std::fill_n(output.data(), m * n, c.data[0]);
         } else if (c.shape.size() == 1 && c.shape[0] == n) {
             for (size_t row = 0; row < m; ++row) {
-                std::copy(c.data, c.data + n, output.values.begin() + row * n);
+                std::copy(c.data, c.data + n, output.data() + row * n);
             }
         } else {
             require(c.shape == output.shape, "unsupported Gemm C broadcast shape");
-            std::copy(c.data, c.data + output.values.size(), output.values.begin());
+            std::copy(c.data, c.data + m * n, output.data());
         }
     }
-    gemm_f32(a_matrix.data(), b_matrix.data(), output.values.data(), m, k, n,
+    gemm_f32(a_matrix.data(), b_matrix.data(), output.data(), m, k, n,
              float_attribute(node, "alpha", 1.0f), float_attribute(node, "beta", 1.0f));
     return output;
 }
 
 Tensor execute_quant_linear(const Graph& graph, const Node& node, const TensorView& a,
                             const std::unordered_map<std::string, Tensor>& intermediates,
-                            const std::unordered_map<std::string, TensorView>& graph_inputs) {
+                            const std::unordered_map<std::string, TensorView>& graph_inputs,
+                            const OutputAllocator& allocator) {
     const bool gemm = node.op_type == "Gemm";
     require(a.shape.size() >= 2,
             "INT8 linear input must be a matrix or batched matrix");
@@ -539,10 +568,10 @@ Tensor execute_quant_linear(const Graph& graph, const Node& node, const TensorVi
     std::vector<size_t> output_shape = a.shape;
     if (trans_a) output_shape = {m, n};
     else output_shape.back() = n;
-    Tensor output{output_shape, acquire_buffer(m * n)};
+    Tensor output = allocator.make(output_shape);
     if (k <= static_cast<size_t>(INT32_MAX / (127 * 127))) {
         kernels::gemm_i8_per_channel(qa.data(), weight, nullptr, node.input_scale,
-                                     node.weight_scales.data(), output.values.data(),
+                                     node.weight_scales.data(), output.data(),
                                      m, k, n, kernels::Activation::None);
     } else {
         for (size_t row = 0; row < m; ++row) {
@@ -552,7 +581,7 @@ Tensor execute_quant_linear(const Graph& graph, const Node& node, const TensorVi
                     sum += static_cast<int32_t>(qa[row * k + inner]) *
                            static_cast<int32_t>(weight[inner * n + col]);
                 }
-                output.values[row * n + col] = static_cast<float>(sum) *
+                output.data()[row * n + col] = static_cast<float>(sum) *
                     node.input_scale * node.weight_scales[col];
             }
         }
@@ -573,13 +602,13 @@ Tensor execute_quant_linear(const Graph& graph, const Node& node, const TensorVi
     const std::string activation = string_attribute(node, "activation");
     for (size_t row = 0; row < m; ++row) {
         for (size_t col = 0; col < n; ++col) {
-            float value = alpha * output.values[row * n + col];
+            float value = alpha * output.data()[row * n + col];
             if (c != nullptr) {
                 const size_t bias_index = element_count(c_shape) == 1 ? 0 :
                     c_shape.size() == 1 ? col : row * n + col;
                 value += beta * c[bias_index];
             }
-            output.values[row * n + col] = apply_activation(value, activation);
+            output.data()[row * n + col] = apply_activation(value, activation);
         }
     }
     return output;
@@ -587,7 +616,8 @@ Tensor execute_quant_linear(const Graph& graph, const Node& node, const TensorVi
 
 Tensor execute_matmul(const Graph& graph, const Node& node, const TensorView& a,
                       const std::unordered_map<std::string, Tensor>& intermediates,
-                      const std::unordered_map<std::string, TensorView>& graph_inputs) {
+                      const std::unordered_map<std::string, TensorView>& graph_inputs,
+                      const OutputAllocator& allocator) {
     require(a.shape.size() >= 2, "MatMul input must have rank at least 2");
     const TensorView b = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
     require(b.shape.size() == 2 && a.shape.back() == b.shape[0],
@@ -596,8 +626,8 @@ Tensor execute_matmul(const Graph& graph, const Node& node, const TensorView& a,
     const size_t m = element_count(a.shape) / k;
     std::vector<size_t> shape = a.shape;
     shape.back() = n;
-    Tensor output{shape, acquire_buffer(m * n)};
-    kernels::gemm_f32_optimized(a.data, b.data, nullptr, output.values.data(), m, k, n);
+    Tensor output = allocator.make(shape);
+    kernels::gemm_f32_optimized(a.data, b.data, nullptr, output.data(), m, k, n);
     return output;
 }
 
@@ -609,7 +639,20 @@ size_t Tensor::element_count() const {
 
 Tensor Executor::run(const Graph& graph, const Tensor& input) const {
     require(graph.inputs().size() == 1, "only single-input models are supported");
-    require(input.element_count() == input.values.size(), "input data does not match its shape");
+    require(input.arena_data == nullptr && input.element_count() == input.values.size(),
+            "input data does not match its shape");
+    runtime::Arena* arena = nullptr;
+    if (const MemoryPlan* plan = graph.memory_plan()) {
+        static thread_local std::unique_ptr<runtime::Arena> cached_arena;
+        static thread_local size_t cached_alignment = 0;
+        if (cached_arena == nullptr || cached_arena->size() < plan->arena_size ||
+            cached_alignment != plan->alignment) {
+            cached_arena = std::make_unique<runtime::Arena>(
+                static_cast<size_t>(plan->arena_size), plan->alignment);
+            cached_alignment = plan->alignment;
+        }
+        arena = cached_arena.get();
+    }
     std::unordered_map<std::string, TensorView> graph_inputs;
     graph_inputs.emplace(graph.inputs()[0], TensorView{input.values.data(), input.shape});
 
@@ -624,45 +667,43 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
 
     for (const Node& node : graph.nodes()) {
         require(node.outputs.size() == 1, node.op_type + " must have one output");
+        const OutputAllocator allocator{graph, arena, node.outputs[0]};
         const TensorView first_input = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(0));
         Tensor output;
         if (node.op_type == "Conv") {
             output = node.quantized
-                ? execute_quant_conv(graph, node, first_input, intermediates, graph_inputs)
-                : execute_conv(graph, node, first_input, intermediates, graph_inputs);
+                ? execute_quant_conv(graph, node, first_input, intermediates, graph_inputs, allocator)
+                : execute_conv(graph, node, first_input, intermediates, graph_inputs, allocator);
         } else if (node.op_type == "Relu") {
-            std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
-            std::copy(first_input.data, first_input.data + buffer.size(), buffer.begin());
-            for (float& value : buffer) {
-                value = std::max(value, 0.0f);
+            output = allocator.make(first_input.shape);
+            std::copy(first_input.data, first_input.data + output.element_count(), output.data());
+            for (size_t i = 0; i < output.element_count(); ++i) {
+                output.data()[i] = std::max(output.data()[i], 0.0f);
             }
-            output = {first_input.shape, std::move(buffer)};
         } else if (node.op_type == "Identity") {
-            std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
-            std::copy(first_input.data, first_input.data + buffer.size(), buffer.begin());
-            output = {first_input.shape, std::move(buffer)};
+            output = allocator.make(first_input.shape);
+            std::copy(first_input.data, first_input.data + output.element_count(), output.data());
         } else if (node.op_type == "Add") {
             const TensorView second_input = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
             require(first_input.shape == second_input.shape, "Add requires equal input shapes");
-            std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
-            for (size_t i = 0; i < buffer.size(); ++i) {
-                buffer[i] = first_input.data[i] + second_input.data[i];
+            output = allocator.make(first_input.shape);
+            for (size_t i = 0; i < output.element_count(); ++i) {
+                output.data()[i] = first_input.data[i] + second_input.data[i];
             }
-            output = {first_input.shape, std::move(buffer)};
         } else if (node.op_type == "MaxPool") {
-            output = execute_maxpool(node, first_input);
+            output = execute_maxpool(node, first_input, allocator);
         } else if (node.op_type == "GlobalAveragePool") {
-            output = execute_global_average_pool(first_input);
+            output = execute_global_average_pool(first_input, allocator);
         } else if (node.op_type == "Flatten") {
-            output = execute_flatten(node, first_input);
+            output = execute_flatten(node, first_input, allocator);
         } else if (node.op_type == "Gemm") {
             output = node.quantized
-                ? execute_quant_linear(graph, node, first_input, intermediates, graph_inputs)
-                : execute_gemm(graph, node, first_input, intermediates, graph_inputs);
+                ? execute_quant_linear(graph, node, first_input, intermediates, graph_inputs, allocator)
+                : execute_gemm(graph, node, first_input, intermediates, graph_inputs, allocator);
         } else if (node.op_type == "MatMul") {
             output = node.quantized
-                ? execute_quant_linear(graph, node, first_input, intermediates, graph_inputs)
-                : execute_matmul(graph, node, first_input, intermediates, graph_inputs);
+                ? execute_quant_linear(graph, node, first_input, intermediates, graph_inputs, allocator)
+                : execute_matmul(graph, node, first_input, intermediates, graph_inputs, allocator);
         } else if (node.op_type == "BatchNormalization") {
             require(first_input.shape.size() == 4 && first_input.shape[0] == 1,
                     "BatchNormalization requires one NCHW image");
@@ -674,18 +715,17 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
             require(scale.shape == std::vector<size_t>{channels} && bias.shape == scale.shape &&
                     mean.shape == scale.shape && variance.shape == scale.shape,
                     "BatchNormalization parameter shape mismatch");
-            std::vector<float> buffer = acquire_buffer(element_count(first_input.shape));
-            std::copy(first_input.data, first_input.data + buffer.size(), buffer.begin());
+            output = allocator.make(first_input.shape);
+            std::copy(first_input.data, first_input.data + output.element_count(), output.data());
             const size_t spatial = first_input.shape[2] * first_input.shape[3];
             const float epsilon = float_attribute(node, "epsilon", 1e-5f);
             for (size_t channel = 0; channel < channels; ++channel) {
                 const float factor = scale.data[channel] / std::sqrt(variance.data[channel] + epsilon);
                 for (size_t i = 0; i < spatial; ++i) {
-                    float& value = buffer[channel * spatial + i];
+                    float& value = output.data()[channel * spatial + i];
                     value = factor * (value - mean.data[channel]) + bias.data[channel];
                 }
             }
-            output = {first_input.shape, std::move(buffer)};
         } else {
             throw std::runtime_error("leaf::Executor: unsupported operation: " + node.op_type);
         }
@@ -697,7 +737,9 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
                 graph_outputs.find(name) == graph_outputs.end()) {
                 auto retiring = intermediates.find(name);
                 if (retiring != intermediates.end()) {
-                    release_buffer(std::move(retiring->second.values));
+                    if (retiring->second.arena_data == nullptr) {
+                        release_buffer(std::move(retiring->second.values));
+                    }
                     intermediates.erase(retiring);
                 }
             }

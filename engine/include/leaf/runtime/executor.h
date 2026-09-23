@@ -12,8 +12,11 @@ namespace leaf {
 struct Tensor {
     std::vector<size_t> shape;
     std::vector<float> values;
+    float* arena_data = nullptr;
 
     size_t element_count() const;
+    float* data() { return arena_data != nullptr ? arena_data : values.data(); }
+    const float* data() const { return arena_data != nullptr ? arena_data : values.data(); }
 };
 
 // Executes the FP32 subset emitted by Leaf's current ResNet export path.

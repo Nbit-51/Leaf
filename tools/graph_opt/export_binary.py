@@ -12,7 +12,7 @@ Format (little-endian throughout):
 
   Header:
     4s   magic       b"LEAF"
-    I    version     2 (reader also accepts legacy version 1)
+    I    version     2, or 3 when an embedded memory plan is present
     I    node_count
     I    initializer_count
     <graph input names, length-prefixed>
@@ -38,6 +38,19 @@ Format (little-endian throughout):
     Q           byte_offset (into data block)
     Q           byte_length
 
+  Optional memory plan (version 3 only, after initializer table):
+    I           alignment
+    Q           arena_size
+    <graph_fingerprint, length-prefixed string>
+    I           allocation_count
+    for each allocation:
+      <tensor_name, length-prefixed string>
+      Q         offset
+      Q         size
+      I         first_node
+      I         last_node
+    <unplanned_tensor_names, length-prefixed string array>
+
   Data block:
     raw typed bytes for every initializer, in the initializer-table order.
     The data block and each initializer start at a 32-byte boundary.
@@ -52,6 +65,11 @@ import json
 import struct
 
 import numpy as np
+
+try:
+    from .memory_planner import MemoryPlan, plan_memory
+except ImportError:
+    from memory_planner import MemoryPlan, plan_memory
 
 try:
     from .ir import Graph
@@ -103,7 +121,8 @@ def _json_compatible(value):
     raise TypeError(f"cannot encode attribute of type {type(value).__name__}")
 
 
-def export_graph(graph: Graph, output_path: str) -> None:
+def export_graph(graph: Graph, output_path: str,
+                 memory_plan: MemoryPlan | None = None) -> None:
     """Serialize `graph` to Leaf's binary format at `output_path`.
 
     Assumes `graph` is already fused/optimized and will be executed in
@@ -114,7 +133,8 @@ def export_graph(graph: Graph, output_path: str) -> None:
     """
     header = bytearray()
     header += MAGIC
-    header += struct.pack("<I", VERSION)
+    version = 3 if memory_plan is not None else VERSION
+    header += struct.pack("<I", version)
     header += struct.pack("<I", len(graph.nodes))
     header += struct.pack("<I", len(graph.initializers))
     _write_string_array(header, graph.inputs)
@@ -175,19 +195,37 @@ def export_graph(graph: Graph, output_path: str) -> None:
         init_table += struct.pack("<Q", offset)
         init_table += struct.pack("<Q", len(payload))
 
+    plan_table = bytearray()
+    if memory_plan is not None:
+        if any(a is not b for a, b in zip(graph.nodes, graph.topological_order())):
+            raise ValueError("memory plan requires nodes in topological export order")
+        if memory_plan.graph_fingerprint != plan_memory(graph).graph_fingerprint:
+            raise ValueError("memory plan does not match graph topology")
+        if memory_plan.alignment <= 0 or memory_plan.alignment & (memory_plan.alignment - 1):
+            raise ValueError("invalid memory-plan alignment")
+        plan_table += struct.pack("<IQ", memory_plan.alignment, memory_plan.arena_size)
+        _write_string(plan_table, memory_plan.graph_fingerprint)
+        plan_table += struct.pack("<I", len(memory_plan.allocations))
+        for allocation in memory_plan.allocations:
+            _write_string(plan_table, allocation.tensor)
+            plan_table += struct.pack("<QQII", allocation.offset, allocation.size,
+                                      allocation.first_node, allocation.last_node)
+        _write_string_array(plan_table, memory_plan.unplanned_tensors)
+
     data_block = bytearray()
     for (_, _, _, payload), offset in zip(init_items, offsets):
         if len(data_block) < offset:
             data_block += b"\x00" * (offset - len(data_block))
         data_block += payload
 
-    table_size = len(header) + len(node_table) + len(init_table)
+    table_size = len(header) + len(node_table) + len(init_table) + len(plan_table)
     table_padding = _pad_to_alignment(table_size) - table_size
 
     with open(output_path, "wb") as f:
         f.write(header)
         f.write(node_table)
         f.write(init_table)
+        f.write(plan_table)
         f.write(b"\x00" * table_padding)
         f.write(data_block)
 

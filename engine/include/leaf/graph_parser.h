@@ -30,6 +30,22 @@ struct InitializerMeta {
     uint64_t byte_length;
 };
 
+struct MemoryAllocation {
+    std::string tensor;
+    uint64_t offset = 0;
+    uint64_t size = 0;
+    uint32_t first_node = 0;
+    uint32_t last_node = 0;
+};
+
+struct MemoryPlan {
+    uint32_t alignment = 0;
+    uint64_t arena_size = 0;
+    std::string graph_fingerprint;
+    std::vector<MemoryAllocation> allocations;
+    std::vector<std::string> unplanned_tensors;
+};
+
 class Graph {
 public:
     // Loads and fully parses a .leaf file. Throws std::runtime_error on
@@ -50,6 +66,8 @@ public:
     const std::vector<std::string>& outputs() const { return outputs_; }
     const std::vector<Node>& nodes() const { return nodes_; }
     size_t initializer_count() const { return init_meta_.size(); }
+    const MemoryPlan* memory_plan() const { return has_memory_plan_ ? &memory_plan_ : nullptr; }
+    const MemoryAllocation* allocation_for(const std::string& name) const;
 
 private:
     uint32_t version_ = 0;
@@ -65,6 +83,9 @@ private:
     // instead of reading the whole file into memory.
     std::vector<uint8_t> file_data_;
     size_t data_block_start_ = 0;
+    bool has_memory_plan_ = false;
+    MemoryPlan memory_plan_;
+    std::unordered_map<std::string, size_t> allocation_index_;
 };
 
 }  // namespace leaf

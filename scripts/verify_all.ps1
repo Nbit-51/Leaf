@@ -26,6 +26,10 @@ try {
 
     python tools/verify_quantized_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe")
     if ($LASTEXITCODE -ne 0) { throw "C++ INT8 graph parity check failed" }
+
+    python tools/verify_memory_plan_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe") `
+        --leaf-bench (Join-Path $root "build/leaf_graph_bench.exe")
+    if ($LASTEXITCODE -ne 0) { throw "C++ memory-plan runtime check failed" }
 } finally {
     Pop-Location
 }

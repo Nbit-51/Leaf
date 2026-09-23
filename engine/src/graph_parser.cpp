@@ -4,7 +4,9 @@
 #include <cstring>
 #include <fstream>
 #include <limits>
+#include <map>
 #include <stdexcept>
+#include <unordered_set>
 
 namespace leaf {
 namespace {
@@ -114,7 +116,7 @@ Graph Graph::load(const std::string& path) {
     }
     reader.offset = 4;
     graph.version_ = reader.u32();
-    if (graph.version_ != 1 && graph.version_ != 2) {
+    if (graph.version_ != 1 && graph.version_ != 2 && graph.version_ != 3) {
         throw std::runtime_error("leaf::Graph::load: unsupported format version " +
                                  std::to_string(graph.version_));
     }
@@ -199,6 +201,84 @@ Graph Graph::load(const std::string& path) {
         graph.init_meta_.push_back(std::move(meta));
     }
 
+    if (graph.version_ >= 3) {
+        graph.has_memory_plan_ = true;
+        MemoryPlan& plan = graph.memory_plan_;
+        plan.alignment = reader.u32();
+        plan.arena_size = reader.u64();
+        plan.graph_fingerprint = reader.string();
+        if (plan.alignment < alignof(float) ||
+            (plan.alignment & (plan.alignment - 1)) != 0 ||
+            plan.arena_size > std::numeric_limits<size_t>::max()) {
+            throw std::runtime_error("leaf::Graph::load: invalid memory-plan arena");
+        }
+        const uint32_t allocation_count = reader.u32();
+        if (allocation_count > (graph.file_data_.size() - reader.offset) / 28) {
+            throw std::runtime_error("leaf::Graph::load: invalid memory-plan count");
+        }
+        plan.allocations.reserve(allocation_count);
+        for (uint32_t i = 0; i < allocation_count; ++i) {
+            MemoryAllocation allocation;
+            allocation.tensor = reader.string();
+            allocation.offset = reader.u64();
+            allocation.size = reader.u64();
+            allocation.first_node = reader.u32();
+            allocation.last_node = reader.u32();
+            if (allocation.offset % plan.alignment != 0 ||
+                allocation.size % plan.alignment != 0 ||
+                allocation.offset > plan.arena_size ||
+                allocation.size > plan.arena_size - allocation.offset ||
+                allocation.first_node >= graph.nodes_.size() ||
+                allocation.last_node < allocation.first_node ||
+                allocation.last_node > graph.nodes_.size() ||
+                graph.nodes_[allocation.first_node].outputs.size() != 1 ||
+                graph.nodes_[allocation.first_node].outputs[0] != allocation.tensor) {
+                throw std::runtime_error("leaf::Graph::load: invalid memory-plan allocation");
+            }
+            if (!graph.allocation_index_.emplace(allocation.tensor,
+                                                 plan.allocations.size()).second) {
+                throw std::runtime_error("leaf::Graph::load: duplicate memory-plan tensor");
+            }
+            plan.allocations.push_back(std::move(allocation));
+        }
+        plan.unplanned_tensors = reader.strings();
+        std::unordered_set<std::string> unplanned(
+            plan.unplanned_tensors.begin(), plan.unplanned_tensors.end());
+        for (const Node& node : graph.nodes_) {
+            for (const std::string& name : node.outputs) {
+                if (graph.allocation_index_.find(name) == graph.allocation_index_.end() &&
+                    unplanned.find(name) == unplanned.end()) {
+                    throw std::runtime_error("leaf::Graph::load: memory plan omits tensor: " + name);
+                }
+            }
+        }
+        std::vector<std::vector<size_t>> starts(graph.nodes_.size() + 2);
+        std::vector<std::vector<size_t>> ends(graph.nodes_.size() + 2);
+        for (size_t index = 0; index < plan.allocations.size(); ++index) {
+            const MemoryAllocation& allocation = plan.allocations[index];
+            starts[allocation.first_node].push_back(index);
+            ends[allocation.last_node + 1].push_back(index);
+        }
+        std::map<uint64_t, size_t> active;
+        for (size_t node_index = 0; node_index <= graph.nodes_.size(); ++node_index) {
+            for (const size_t index : ends[node_index]) {
+                active.erase(plan.allocations[index].offset);
+            }
+            for (const size_t index : starts[node_index]) {
+                const MemoryAllocation& allocation = plan.allocations[index];
+                const auto next = active.lower_bound(allocation.offset);
+                if ((next != active.end() &&
+                     allocation.offset + allocation.size > next->first) ||
+                    (next != active.begin() &&
+                     std::prev(next)->first + plan.allocations[std::prev(next)->second].size >
+                         allocation.offset)) {
+                    throw std::runtime_error("leaf::Graph::load: overlapping live arena allocations");
+                }
+                active.emplace(allocation.offset, index);
+            }
+        }
+    }
+
     graph.data_block_start_ = graph.version_ >= 2 ? aligned_32(reader.offset) : reader.offset;
     if (graph.data_block_start_ > graph.file_data_.size()) {
         throw std::runtime_error("leaf::Graph::load: truncated data block");
@@ -223,6 +303,12 @@ const InitializerMeta& Graph::initializer_meta(const std::string& name) const {
 
 bool Graph::has_initializer(const std::string& name) const {
     return init_index_.find(name) != init_index_.end();
+}
+
+const MemoryAllocation* Graph::allocation_for(const std::string& name) const {
+    const auto found = allocation_index_.find(name);
+    return found == allocation_index_.end() ? nullptr :
+        &memory_plan_.allocations[found->second];
 }
 
 const float* Graph::initializer_data(const std::string& name) const {

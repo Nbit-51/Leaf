@@ -55,7 +55,7 @@ def read_graph(path: str) -> dict:
 
     (version, node_count, initializer_count) = struct.unpack_from("<III", data, offset)
     offset += 12
-    if version not in (1, 2):
+    if version not in (1, 2, 3):
         raise ValueError(f"unsupported .leaf version: {version}")
 
     graph_inputs, offset = _read_string_array(data, offset)
@@ -110,6 +110,27 @@ def read_graph(path: str) -> dict:
             "byte_length": byte_length,
         })
 
+    memory_plan = None
+    if version >= 3:
+        alignment, arena_size = struct.unpack_from("<IQ", data, offset)
+        offset += 12
+        fingerprint, offset = _read_string(data, offset)
+        (allocation_count,) = struct.unpack_from("<I", data, offset)
+        offset += 4
+        allocations = []
+        for _ in range(allocation_count):
+            tensor, offset = _read_string(data, offset)
+            allocation_offset, size, first_node, last_node = struct.unpack_from(
+                "<QQII", data, offset)
+            offset += 24
+            allocations.append({"tensor": tensor, "offset": allocation_offset,
+                                "size": size, "first_node": first_node,
+                                "last_node": last_node})
+        unplanned, offset = _read_string_array(data, offset)
+        memory_plan = {"alignment": alignment, "arena_size": arena_size,
+                       "graph_fingerprint": fingerprint,
+                       "allocations": allocations, "unplanned_tensors": unplanned}
+
     data_block_start = (offset + 31) // 32 * 32 if version >= 2 else offset
     initializers = {}
     for meta in init_meta:
@@ -132,6 +153,7 @@ def read_graph(path: str) -> dict:
         "outputs": graph_outputs,
         "nodes": nodes,
         "initializers": initializers,
+        "memory_plan": memory_plan,
     }
 
 

@@ -8,7 +8,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-option(LEAF_ENABLE_AVX2 "Build AVX2/FMA accelerated kernels" ON)
+option(LEAF_ENABLE_AVX2 "Build AVX2/FMA accelerated kernels" OFF)
 if(NOT MSVC)
   set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
   if(LEAF_ENABLE_AVX2)

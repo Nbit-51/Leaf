@@ -11,6 +11,7 @@ machine match. The large source datasets and model weights remain local.
 | `cifar10_cpu.json` | Real CIFAR-10 images on the small optimizer CNN graph; PyTorch versus NumPy FP32/INT8 simulation |
 | `cifar10_native_int8.json` | Same real-image subset with native FP32 and native INT8 graph parity and latency |
 | `native_int8_graph.json` | Synthetic native INT8 graph parity, FP32 comparison, latency, and peak process RSS |
+| `memory_plan_native.json` | Embedded version 3 arena versus version 2 buffer-pool ResNet parity, latency, and peak process RSS |
 | `cifar10_resnet18_cpp.json` | First 20 real CIFAR-10 test images, full seeded FP32 ResNet-18, PyTorch versus C++ |
 | `cifar10_resnet18_cpp_repeat.json` | Independent repeat of the same full-model comparison |
 | `qwen25_cached_cpu.json` | Offline cached Qwen2.5-0.5B PyTorch CPU decode, full-context recomputation versus populated KV cache |

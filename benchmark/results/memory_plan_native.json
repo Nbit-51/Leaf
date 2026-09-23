@@ -1,0 +1,52 @@
+{
+  "benchmark": "leaf-memory-plan-resnet18",
+  "measured_at_utc": "2026-09-23T10:18:26.994064+00:00",
+  "host": "Windows-11-10.0.26200-SP0",
+  "model": "seeded ResNet-18, input 1x3x32x32",
+  "warmup": 5,
+  "runs": 20,
+  "plan": {
+    "alignment": 64,
+    "arena_size": 146432,
+    "naive_size": 492480,
+    "allocations": 65,
+    "unplanned_tensors": []
+  },
+  "measurements": {
+    "buffer_pool": {
+      "max_abs_vs_pytorch": 8.642673492431641e-07,
+      "p50_ms": 9.5445,
+      "p50_samples_ms": [
+        10.167,
+        9.498,
+        9.591,
+        9.422
+      ],
+      "peak_process_rss_bytes": 53958656.0,
+      "peak_rss_samples_bytes": [
+        53956608,
+        53960704,
+        53960704,
+        53952512
+      ]
+    },
+    "arena_plan": {
+      "max_abs_vs_pytorch": 8.642673492431641e-07,
+      "p50_ms": 9.478,
+      "p50_samples_ms": [
+        9.354,
+        9.402,
+        9.554,
+        9.611
+      ],
+      "peak_process_rss_bytes": 53917696.0,
+      "peak_rss_samples_bytes": [
+        53886976,
+        53919744,
+        53915648,
+        53923840
+      ]
+    }
+  },
+  "arena_no_slowdown_with_2_percent_tolerance": true
+}

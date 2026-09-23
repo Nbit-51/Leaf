@@ -15,9 +15,10 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools" / "graph_opt"))
 
-from ir import Graph, Node
+from ir import Graph, Node, TensorInfo
 from export_binary import export_graph
 from read_binary import read_graph
+from memory_planner import plan_memory
 
 torchvision = pytest.importorskip("torchvision")
 
@@ -97,3 +98,24 @@ def test_int8_weights_and_scales_roundtrip(tmp_path):
     assert quant["input"]["scale"] == 0.03125
     assert quant["weight"]["axis"] == 1
     np.testing.assert_array_equal(quant["weight"]["scale"], [0.125, 0.25])
+
+
+def test_embedded_memory_plan_roundtrip(tmp_path):
+    graph = Graph()
+    graph.inputs, graph.outputs = ["x"], ["y"]
+    graph.nodes = [
+        Node("copy", "Identity", ["x"], ["a"]),
+        Node("relu", "Relu", ["a"], ["y"]),
+    ]
+    graph.value_info = {
+        name: TensorInfo(name, (1, 2), "float32") for name in ("x", "a", "y")
+    }
+    plan = plan_memory(graph)
+    path = tmp_path / "planned.leaf"
+    export_graph(graph, str(path), memory_plan=plan)
+    loaded = read_graph(str(path))
+    assert loaded["version"] == 3
+    assert loaded["memory_plan"]["alignment"] == plan.alignment
+    assert loaded["memory_plan"]["arena_size"] == plan.arena_size
+    assert loaded["memory_plan"]["graph_fingerprint"] == plan.graph_fingerprint
+    assert loaded["memory_plan"]["allocations"] == [vars(item) for item in plan.allocations]
