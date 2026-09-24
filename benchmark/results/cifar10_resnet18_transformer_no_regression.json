@@ -1,0 +1,25 @@
+{
+  "benchmark": "cifar10-resnet18-native-no-regression",
+  "measured_at_utc": "2026-09-24T01:01:30Z",
+  "host": "Windows-11-10.0.26200-SP0",
+  "baseline_commit": "eb6236d",
+  "candidate": "working tree with native Transformer operators",
+  "workload": "seeded untrained ResNet-18, first 20 CIFAR-10 test images, FP32, 1x3x32x32, one CPU thread",
+  "warmup_runs_per_image": 5,
+  "timed_runs_per_image": 10,
+  "process_order": ["baseline", "candidate", "candidate", "baseline"],
+  "runs": [
+    {"runtime": "baseline", "leaf_cpp_p50_ms": 10.117,
+     "pytorch_cpu_p50_ms": 9.723675, "max_abs_logit_error": 4.6193599700927734e-7},
+    {"runtime": "candidate", "leaf_cpp_p50_ms": 10.009,
+     "pytorch_cpu_p50_ms": 9.792075, "max_abs_logit_error": 4.6193599700927734e-7},
+    {"runtime": "candidate", "leaf_cpp_p50_ms": 9.624,
+     "pytorch_cpu_p50_ms": 9.61545, "max_abs_logit_error": 4.6193599700927734e-7},
+    {"runtime": "baseline", "leaf_cpp_p50_ms": 10.1365,
+     "pytorch_cpu_p50_ms": 10.07885, "max_abs_logit_error": 4.6193599700927734e-7}
+  ],
+  "median_baseline_leaf_cpp_p50_ms": 10.12675,
+  "median_candidate_leaf_cpp_p50_ms": 9.8165,
+  "candidate_over_baseline_latency_ratio": 0.9693633199200138,
+  "interpretation": "No CNN regression observed in this session. Host variation prevents attributing the difference to the Transformer additions."
+}

@@ -50,6 +50,7 @@ target_include_directories(leaf_core PUBLIC kernels)
 add_library(leaf_optimized_kernels STATIC
   src/kernels/gemm.cpp
   src/kernels/conv.cpp
+  src/kernels/transformer.cpp
 )
 target_include_directories(leaf_optimized_kernels PUBLIC include)
 target_link_libraries(leaf_core PRIVATE leaf_optimized_kernels)

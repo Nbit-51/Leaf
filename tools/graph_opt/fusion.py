@@ -734,7 +734,8 @@ def _try_match_attention(softmax_node: Node, producer, consumers):
         op_type="Attention",
         inputs=[q_name, k_name, v_name, where_node.inputs[0]],
         outputs=[transpose_out.outputs[0]],
-        attributes={"scale": q_scale},
+        attributes={"scale": q_scale,
+                    "mask_nonzero_is_valid": int(not np.isneginf(np.asarray(const_a).reshape(-1)[0]))},
     )
     return fused, skip
 

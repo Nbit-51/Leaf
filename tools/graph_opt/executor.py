@@ -373,6 +373,37 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
             normed = x.astype(np.float32) / np.sqrt(variance + eps)
             tensors[node.outputs[0]] = (weight * normed).astype(np.float32)
 
+        elif node.op_type == "SwiGLU_MLP":
+            x = tensors[node.inputs[0]]
+            gate_weight = tensors[node.inputs[1]]
+            up_weight = tensors[node.inputs[2]]
+            down_weight = tensors[node.inputs[3]]
+            residual = tensors[node.inputs[4]]
+            gate = np.matmul(x, gate_weight)
+            up = np.matmul(x, up_weight)
+            tensors[node.outputs[0]] = (
+                np.matmul(_silu(gate) * up, down_weight) + residual
+            ).astype(np.float32)
+
+        elif node.op_type == "Attention":
+            query = tensors[node.inputs[0]]
+            key = tensors[node.inputs[1]]
+            value = tensors[node.inputs[2]]
+            mask = tensors[node.inputs[3]].astype(bool)
+            if not bool(node.attributes.get("mask_nonzero_is_valid", 1)):
+                mask = ~mask
+            scale = float(node.attributes.get("scale", 1.0))
+            scores = np.matmul(query, np.swapaxes(key, -1, -2)) * (scale * scale)
+            scores = np.where(mask, scores, -np.inf)
+            maximum = np.max(scores, axis=-1, keepdims=True)
+            safe_maximum = np.where(np.isfinite(maximum), maximum, 0.0)
+            probabilities = np.exp(scores - safe_maximum)
+            probabilities /= np.where(np.sum(probabilities, axis=-1, keepdims=True) > 0,
+                                      np.sum(probabilities, axis=-1, keepdims=True), 1.0)
+            tensors[node.outputs[0]] = np.transpose(
+                np.matmul(probabilities, value), (0, 2, 1, 3)
+            ).astype(np.float32)
+
         else:
             raise NotImplementedError(f"reference executor: unsupported op '{node.op_type}'")
 

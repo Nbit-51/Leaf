@@ -1,0 +1,40 @@
+{
+  "benchmark": "leaf-native-swiglu-ffn",
+  "measured_at_utc": "2026-09-24T00:44:39.401745+00:00",
+  "host": "Windows-11-10.0.26200-SP0",
+  "shape": [
+    1,
+    16,
+    128
+  ],
+  "intermediate_width": 256,
+  "warmup": 10,
+  "runs": 100,
+  "pytorch_cpu_p50_ms": 0.0514,
+  "measurements": {
+    "unfused_v2": {
+      "max_abs_vs_pytorch": 2.384185791015625e-07,
+      "p50_ms": 0.451,
+      "p50_samples_ms": [
+        0.449,
+        0.453
+      ]
+    },
+    "fused_v2": {
+      "max_abs_vs_pytorch": 1.1920928955078125e-07,
+      "p50_ms": 0.4085,
+      "p50_samples_ms": [
+        0.409,
+        0.408
+      ]
+    },
+    "fused_v3": {
+      "max_abs_vs_pytorch": 1.1920928955078125e-07,
+      "p50_ms": 0.382,
+      "p50_samples_ms": [
+        0.382
+      ]
+    }
+  },
+  "fusion_no_slowdown_with_2_percent_tolerance": true
+}

@@ -13,7 +13,8 @@ $common = @(
     "-std=c++17", "-O3", "-DNDEBUG",
     "-I", (Join-Path $root "engine/include"),
     (Join-Path $root "engine/src/kernels/gemm.cpp"),
-    (Join-Path $root "engine/src/kernels/conv.cpp")
+    (Join-Path $root "engine/src/kernels/conv.cpp"),
+    (Join-Path $root "engine/src/kernels/transformer.cpp")
 )
 & $Compiler @architectureFlags @common (Join-Path $root "tests/native/test_kernels.cpp") "-o" (Join-Path $output "leaf_native_tests.exe")
 if ($LASTEXITCODE -ne 0) { throw "native test build failed" }
@@ -29,6 +30,7 @@ $runtimeSources = @(
     (Join-Path $root "engine/src/executor.cpp"),
     (Join-Path $root "engine/src/kernels/gemm.cpp"),
     (Join-Path $root "engine/src/kernels/conv.cpp"),
+    (Join-Path $root "engine/src/kernels/transformer.cpp"),
     (Join-Path $root "engine/kernels/im2col.cpp"),
     (Join-Path $root "engine/kernels/gemm.cpp"),
     (Join-Path $root "engine/kernels/conv2d.cpp")

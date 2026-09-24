@@ -1,5 +1,6 @@
 #include "leaf/kernels/gemm.h"
 #include "leaf/kernels/conv.h"
+#include "leaf/kernels/transformer.h"
 #include "leaf/runtime/arena.h"
 
 #include <algorithm>
@@ -127,6 +128,73 @@ void test_int8_convolution() {
   }
 }
 
+void test_rmsnorm() {
+  for (const std::size_t hidden : {15U, 32U, 896U}) {
+    constexpr std::size_t rows = 7;
+    std::mt19937 generator(static_cast<unsigned>(hidden));
+    std::uniform_real_distribution<float> distribution(-2.0f, 2.0f);
+    std::vector<float> input(rows * hidden), weight(hidden), expected(rows * hidden),
+        actual(rows * hidden);
+    for (float& value : input) value = distribution(generator);
+    for (float& value : weight) value = distribution(generator);
+    leaf::kernels::rmsnorm_f32_reference(input.data(), weight.data(), expected.data(),
+                                         rows, hidden, 1e-6f);
+    leaf::kernels::rmsnorm_f32(input.data(), weight.data(), actual.data(),
+                               rows, hidden, 1e-6f);
+    for (std::size_t index = 0; index < actual.size(); ++index) {
+      require(std::abs(actual[index] - expected[index]) < 2e-5f,
+              "RMSNorm kernel disagrees with scalar reference");
+    }
+  }
+}
+
+void test_attention() {
+  constexpr std::size_t batch = 2, heads = 3, queries = 4, keys = 5, dim = 15;
+  const std::size_t mask_shape[4] = {1, 1, queries, keys};
+  std::mt19937 generator(112);
+  std::uniform_real_distribution<float> distribution(-0.5f, 0.5f);
+  std::vector<float> query(batch * heads * queries * dim);
+  std::vector<float> key(batch * heads * keys * dim), value(key.size());
+  std::vector<float> mask(queries * keys, 1.0f);
+  std::vector<float> expected(query.size()), actual(query.size());
+  for (float& item : query) item = distribution(generator);
+  for (float& item : key) item = distribution(generator);
+  for (float& item : value) item = distribution(generator);
+  for (std::size_t q = 0; q < queries; ++q) {
+    for (std::size_t k = q + 1; k < keys; ++k) mask[q * keys + k] = 0.0f;
+  }
+  leaf::kernels::attention_f32_reference(query.data(), key.data(), value.data(),
+                                         mask.data(), expected.data(), batch, heads,
+                                         queries, keys, dim, mask_shape, 0.5f);
+  leaf::kernels::attention_f32(query.data(), key.data(), value.data(), mask.data(),
+                               actual.data(), batch, heads, queries, keys, dim,
+                               mask_shape, 0.5f);
+  for (std::size_t index = 0; index < actual.size(); ++index) {
+    require(std::abs(actual[index] - expected[index]) < 1e-5f,
+            "Attention kernel disagrees with scalar reference");
+  }
+  for (float& item : mask) item = 1.0f - item;
+  leaf::kernels::attention_f32(query.data(), key.data(), value.data(), mask.data(),
+                               actual.data(), batch, heads, queries, keys, dim,
+                               mask_shape, 0.5f, false);
+  for (std::size_t index = 0; index < actual.size(); ++index) {
+    require(std::abs(actual[index] - expected[index]) < 1e-5f,
+            "Attention inverted mask disagrees with scalar reference");
+  }
+  std::fill(mask.begin(), mask.begin() + keys, 1.0f);
+  leaf::kernels::attention_f32(query.data(), key.data(), value.data(), mask.data(),
+                               actual.data(), batch, heads, queries, keys, dim,
+                               mask_shape, 0.5f, false);
+  for (std::size_t b = 0; b < batch; ++b) {
+    for (std::size_t h = 0; h < heads; ++h) {
+      for (std::size_t d = 0; d < dim; ++d) {
+        require(actual[(b * queries * heads + h) * dim + d] == 0.0f,
+                "fully masked attention row must return zero");
+      }
+    }
+  }
+}
+
 }  // namespace
 
 int main() {
@@ -135,6 +203,8 @@ int main() {
     test_i8();
     test_convolution();
     test_int8_convolution();
+    test_rmsnorm();
+    test_attention();
     test_arena();
     std::cout << "native kernel tests passed (AVX2="
               << (leaf::kernels::compiled_with_avx2() ? "yes" : "no") << ")\n";

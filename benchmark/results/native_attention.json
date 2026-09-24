@@ -1,0 +1,68 @@
+{
+  "benchmark": "leaf-native-attention",
+  "measured_at_utc": "2026-09-24T00:53:40.740671+00:00",
+  "host": "Windows-11-10.0.26200-SP0",
+  "warmup": 10,
+  "runs": 100,
+  "cases": {
+    "prefill": {
+      "query_shape": [
+        1,
+        8,
+        32,
+        64
+      ],
+      "key_shape": [
+        1,
+        8,
+        32,
+        64
+      ],
+      "pytorch_cpu_p50_ms": 0.11915,
+      "measurements": {
+        "v2": {
+          "max_abs_vs_pytorch": 5.960464477539063e-08,
+          "p50_ms": 0.466
+        },
+        "v3": {
+          "max_abs_vs_pytorch": 5.960464477539063e-08,
+          "p50_ms": 0.433
+        },
+        "portable_v2": {
+          "max_abs_vs_pytorch": 7.450580596923828e-08,
+          "p50_ms": 0.552
+        }
+      }
+    },
+    "decode": {
+      "query_shape": [
+        1,
+        8,
+        1,
+        64
+      ],
+      "key_shape": [
+        1,
+        8,
+        64,
+        64
+      ],
+      "pytorch_cpu_p50_ms": 0.0477,
+      "measurements": {
+        "v2": {
+          "max_abs_vs_pytorch": 3.725290298461914e-08,
+          "p50_ms": 0.046
+        },
+        "v3": {
+          "max_abs_vs_pytorch": 3.725290298461914e-08,
+          "p50_ms": 0.044
+        },
+        "portable_v2": {
+          "max_abs_vs_pytorch": 4.470348358154297e-08,
+          "p50_ms": 0.054
+        }
+      }
+    }
+  },
+  "avx2_no_slowdown_with_2_percent_tolerance": true
+}

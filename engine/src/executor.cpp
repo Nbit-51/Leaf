@@ -5,6 +5,7 @@
 #include "im2col.h"
 #include "leaf/kernels/conv.h"
 #include "leaf/kernels/gemm.h"
+#include "leaf/kernels/transformer.h"
 #include "leaf/runtime/arena.h"
 
 #include <algorithm>
@@ -631,6 +632,48 @@ Tensor execute_matmul(const Graph& graph, const Node& node, const TensorView& a,
     return output;
 }
 
+Tensor execute_swiglu_mlp(const Graph& graph, const Node& node, const TensorView& input,
+                          const std::unordered_map<std::string, Tensor>& intermediates,
+                          const std::unordered_map<std::string, TensorView>& graph_inputs,
+                          const OutputAllocator& allocator) {
+    require(node.inputs.size() == 5 && input.shape.size() >= 2,
+            "SwiGLU_MLP expects input, three weights, and residual");
+    const TensorView gate_weight = tensor_for(graph, intermediates, graph_inputs, node.inputs[1]);
+    const TensorView up_weight = tensor_for(graph, intermediates, graph_inputs, node.inputs[2]);
+    const TensorView down_weight = tensor_for(graph, intermediates, graph_inputs, node.inputs[3]);
+    const TensorView residual = tensor_for(graph, intermediates, graph_inputs, node.inputs[4]);
+    const size_t hidden = input.shape.back();
+    require(gate_weight.shape.size() == 2 && gate_weight.shape[0] == hidden &&
+            up_weight.shape == gate_weight.shape && down_weight.shape.size() == 2 &&
+            down_weight.shape[0] == gate_weight.shape[1],
+            "SwiGLU_MLP weight dimensions do not match");
+    const size_t rows = element_count(input.shape) / hidden;
+    const size_t intermediate = gate_weight.shape[1];
+    const size_t output_hidden = down_weight.shape[1];
+    std::vector<size_t> output_shape = input.shape;
+    output_shape.back() = output_hidden;
+    require(residual.shape == output_shape, "SwiGLU_MLP residual shape does not match output");
+    std::vector<float> gate = acquire_buffer(rows * intermediate);
+    std::vector<float> up = acquire_buffer(rows * intermediate);
+    kernels::gemm_f32_optimized(input.data, gate_weight.data, nullptr, gate.data(),
+                                 rows, hidden, intermediate);
+    kernels::gemm_f32_optimized(input.data, up_weight.data, nullptr, up.data(),
+                                 rows, hidden, intermediate);
+    for (size_t index = 0; index < gate.size(); ++index) {
+        const float value = gate[index];
+        gate[index] = value / (1.0f + std::exp(-value)) * up[index];
+    }
+    Tensor output = allocator.make(output_shape);
+    kernels::gemm_f32_optimized(gate.data(), down_weight.data, nullptr, output.data(),
+                                 rows, intermediate, output_hidden);
+    for (size_t index = 0; index < output.element_count(); ++index) {
+        output.data()[index] += residual.data[index];
+    }
+    release_buffer(std::move(gate));
+    release_buffer(std::move(up));
+    return output;
+}
+
 }  // namespace
 
 size_t Tensor::element_count() const {
@@ -690,6 +733,18 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
             for (size_t i = 0; i < output.element_count(); ++i) {
                 output.data()[i] = first_input.data[i] + second_input.data[i];
             }
+        } else if (node.op_type == "Mul") {
+            const TensorView second_input = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
+            require(first_input.shape == second_input.shape, "Mul requires equal input shapes");
+            output = allocator.make(first_input.shape);
+            for (size_t i = 0; i < output.element_count(); ++i) {
+                output.data()[i] = first_input.data[i] * second_input.data[i];
+            }
+        } else if (node.op_type == "Sigmoid") {
+            output = allocator.make(first_input.shape);
+            for (size_t i = 0; i < output.element_count(); ++i) {
+                output.data()[i] = 1.0f / (1.0f + std::exp(-first_input.data[i]));
+            }
         } else if (node.op_type == "MaxPool") {
             output = execute_maxpool(node, first_input, allocator);
         } else if (node.op_type == "GlobalAveragePool") {
@@ -704,6 +759,48 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
             output = node.quantized
                 ? execute_quant_linear(graph, node, first_input, intermediates, graph_inputs, allocator)
                 : execute_matmul(graph, node, first_input, intermediates, graph_inputs, allocator);
+        } else if (node.op_type == "RMSNorm") {
+            require(!first_input.shape.empty(), "RMSNorm input rank must be positive");
+            const size_t hidden = first_input.shape.back();
+            const TensorView weight = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(1));
+            require(weight.shape == std::vector<size_t>{hidden},
+                    "RMSNorm weight must match the final input dimension");
+            const float epsilon = float_attribute(node, "eps", 1e-6f);
+            require(std::isfinite(epsilon) && epsilon > 0.0f,
+                    "RMSNorm epsilon must be positive and finite");
+            output = allocator.make(first_input.shape);
+            kernels::rmsnorm_f32(first_input.data, weight.data, output.data(),
+                                  element_count(first_input.shape) / hidden, hidden, epsilon);
+        } else if (node.op_type == "Attention") {
+            require(node.inputs.size() == 4 && first_input.shape.size() == 4,
+                    "Attention expects 4D query and four inputs");
+            const TensorView key = tensor_for(graph, intermediates, graph_inputs, node.inputs[1]);
+            const TensorView value = tensor_for(graph, intermediates, graph_inputs, node.inputs[2]);
+            const TensorView mask = tensor_for(graph, intermediates, graph_inputs, node.inputs[3]);
+            const size_t batch = first_input.shape[0], heads = first_input.shape[1];
+            const size_t query_tokens = first_input.shape[2], head_dim = first_input.shape[3];
+            require(key.shape.size() == 4 && value.shape == key.shape &&
+                    key.shape[0] == batch && key.shape[1] == heads &&
+                    key.shape[3] == head_dim && mask.shape.size() == 4,
+                    "Attention Q/K/V shapes do not match");
+            const size_t key_tokens = key.shape[2];
+            const size_t target_shape[4] = {batch, heads, query_tokens, key_tokens};
+            for (size_t axis = 0; axis < 4; ++axis) {
+                require(mask.shape[axis] == 1 || mask.shape[axis] == target_shape[axis],
+                        "Attention mask is not broadcastable");
+            }
+            const float scale = float_attribute(node, "scale", 1.0f);
+            require(std::isfinite(scale) && scale > 0.0f,
+                    "Attention scale must be positive and finite");
+            const bool mask_nonzero_is_valid =
+                float_attribute(node, "mask_nonzero_is_valid", 1.0f) != 0.0f;
+            output = allocator.make({batch, query_tokens, heads, head_dim});
+            kernels::attention_f32(first_input.data, key.data, value.data, mask.data,
+                                    output.data(), batch, heads, query_tokens, key_tokens,
+                                    head_dim, mask.shape.data(), scale, mask_nonzero_is_valid);
+        } else if (node.op_type == "SwiGLU_MLP") {
+            output = execute_swiglu_mlp(graph, node, first_input, intermediates,
+                                        graph_inputs, allocator);
         } else if (node.op_type == "BatchNormalization") {
             require(first_input.shape.size() == 4 && first_input.shape[0] == 1,
                     "BatchNormalization requires one NCHW image");

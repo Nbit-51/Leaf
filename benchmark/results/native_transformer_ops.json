@@ -1,0 +1,28 @@
+{
+  "benchmark": "leaf-native-rmsnorm",
+  "measured_at_utc": "2026-09-24T00:53:30.251024+00:00",
+  "host": "Windows-11-10.0.26200-SP0",
+  "shape": [
+    1,
+    64,
+    896
+  ],
+  "warmup": 10,
+  "runs": 100,
+  "pytorch_cpu_p50_ms": 0.048,
+  "measurements": {
+    "avx2_v2": {
+      "max_abs_vs_pytorch": 7.152557373046875e-07,
+      "p50_ms": 0.103
+    },
+    "avx2_v3": {
+      "max_abs_vs_pytorch": 7.152557373046875e-07,
+      "p50_ms": 0.091
+    },
+    "portable_v2": {
+      "max_abs_vs_pytorch": 2.1457672119140625e-06,
+      "p50_ms": 0.138
+    }
+  },
+  "avx2_no_slowdown_with_2_percent_tolerance": true
+}

@@ -30,6 +30,18 @@ try {
     python tools/verify_memory_plan_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe") `
         --leaf-bench (Join-Path $root "build/leaf_graph_bench.exe")
     if ($LASTEXITCODE -ne 0) { throw "C++ memory-plan runtime check failed" }
+
+    python tools/verify_transformer_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe") `
+        --leaf-bench (Join-Path $root "build/leaf_graph_bench.exe")
+    if ($LASTEXITCODE -ne 0) { throw "C++ RMSNorm parity check failed" }
+
+    python tools/verify_swiglu_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe") `
+        --leaf-bench (Join-Path $root "build/leaf_graph_bench.exe") --enforce-no-slowdown
+    if ($LASTEXITCODE -ne 0) { throw "C++ SwiGLU parity or speed gate failed" }
+
+    python tools/verify_attention_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe") `
+        --leaf-bench (Join-Path $root "build/leaf_graph_bench.exe")
+    if ($LASTEXITCODE -ne 0) { throw "C++ attention parity check failed" }
 } finally {
     Pop-Location
 }
