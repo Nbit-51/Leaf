@@ -1,5 +1,6 @@
 #include "leaf/graph_parser.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -231,8 +232,9 @@ Graph Graph::load(const std::string& path) {
                 allocation.first_node >= graph.nodes_.size() ||
                 allocation.last_node < allocation.first_node ||
                 allocation.last_node > graph.nodes_.size() ||
-                graph.nodes_[allocation.first_node].outputs.size() != 1 ||
-                graph.nodes_[allocation.first_node].outputs[0] != allocation.tensor) {
+                std::find(graph.nodes_[allocation.first_node].outputs.begin(),
+                          graph.nodes_[allocation.first_node].outputs.end(),
+                          allocation.tensor) == graph.nodes_[allocation.first_node].outputs.end()) {
                 throw std::runtime_error("leaf::Graph::load: invalid memory-plan allocation");
             }
             if (!graph.allocation_index_.emplace(allocation.tensor,

@@ -1,4 +1,4 @@
-"""Offline Qwen2.5-0.5B CPU baseline with and without the KV cache.
+"""Offline causal-decoder CPU baseline with and without the KV cache.
 
 The benchmark never downloads implicitly. Point ``--model`` at a complete
 local snapshot, or populate the Hugging Face cache first. This is a PyTorch
@@ -55,6 +55,8 @@ def main() -> int:
     parser.add_argument("--runs", type=int, default=5)
     parser.add_argument("--output", type=Path,
                         default=Path("benchmark/results/qwen25_cached_cpu.json"))
+    parser.add_argument("--benchmark-name", default="qwen2.5-0.5b-pytorch-cpu-kv-cache",
+                        help="result label when benchmarking another local decoder")
     args = parser.parse_args()
     if args.sequence_length < 2 or args.runs < 1 or args.threads < 1:
         parser.error("sequence length must be >=2; runs and threads must be positive")
@@ -69,7 +71,7 @@ def main() -> int:
         ).eval()
     except OSError as error:
         raise SystemExit(
-            "Qwen snapshot is incomplete. This benchmark is offline-only; cache the model "
+            "Model snapshot is incomplete. This benchmark is offline-only; cache the model "
             "weights first or pass --model with a complete local snapshot.\n"
             f"Original error: {error}"
         ) from error
@@ -122,11 +124,11 @@ def main() -> int:
     uncached_ms = _median_ms(uncached_times)
     cached_ms = _median_ms(cached_times)
     result = {
-        "benchmark": "qwen2.5-0.5b-pytorch-cpu-kv-cache",
+        "benchmark": args.benchmark_name,
         "measured_at_utc": datetime.now(timezone.utc).isoformat(),
         "environment": {"platform": platform.platform(), "python": platform.python_version(),
                         "torch": torch.__version__, "transformers": transformers.__version__},
-        "model": args.model,
+        "model": Path(args.model).name if Path(args.model).exists() else args.model,
         "model_commit": getattr(model.config, "_commit_hash", None),
         "precision": "float32",
         "threads": args.threads,

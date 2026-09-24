@@ -3,13 +3,13 @@
   "compile_flags": "-O3 -mavx2 -mfma",
   "avx2": true,
   "shape": [64, 384, 384],
-  "f32_reference_ms": 6.716,
-  "f32_optimized_ms": 0.824,
-  "f32_speedup": 8.153,
-  "int8_reference_ms": 4.251,
-  "int8_optimized_ms": 1.125,
-  "int8_speedup": 3.780,
-  "conv_reference_ms": 3.281,
-  "conv_im2col_ms": 0.398,
-  "conv_speedup": 8.251
+  "f32_reference_ms": 6.837,
+  "f32_optimized_ms": 0.851,
+  "f32_speedup": 8.038,
+  "int8_reference_ms": 4.386,
+  "int8_optimized_ms": 1.129,
+  "int8_speedup": 3.884,
+  "conv_reference_ms": 3.272,
+  "conv_im2col_ms": 0.535,
+  "conv_speedup": 6.110
 }

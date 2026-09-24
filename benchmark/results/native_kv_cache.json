@@ -1,0 +1,25 @@
+{
+  "benchmark": "leaf-native-dynamic-kv-cache",
+  "measured_at_utc": "2026-09-24T01:58:20.048761+00:00",
+  "host": "Windows-11-10.0.26200-SP0",
+  "prefix_tokens": 63,
+  "decode_tokens": 1,
+  "query_heads": 14,
+  "kv_heads": 2,
+  "head_dim": 64,
+  "timed_runs": 50,
+  "cases": {
+    "v2": {
+      "prefill_max_abs_vs_pytorch": 7.450580596923828e-08,
+      "decode_max_abs_vs_pytorch": 6.705522537231445e-08,
+      "prefill_p50_ms": 2.97555,
+      "decode_p50_ms": 0.0921
+    },
+    "v3": {
+      "prefill_max_abs_vs_pytorch": 7.450580596923828e-08,
+      "decode_max_abs_vs_pytorch": 6.705522537231445e-08,
+      "prefill_p50_ms": 2.97755,
+      "decode_p50_ms": 0.0914
+    }
+  }
+}

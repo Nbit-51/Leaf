@@ -51,6 +51,7 @@ add_library(leaf_optimized_kernels STATIC
   src/kernels/gemm.cpp
   src/kernels/conv.cpp
   src/kernels/transformer.cpp
+  src/kv_cache.cpp
 )
 target_include_directories(leaf_optimized_kernels PUBLIC include)
 target_link_libraries(leaf_core PRIVATE leaf_optimized_kernels)
@@ -66,3 +67,6 @@ add_test(NAME leaf_native_tests COMMAND leaf_native_tests)
 
 add_executable(leaf_kernel_bench ../benchmark/native_benchmark.cpp)
 target_link_libraries(leaf_kernel_bench PRIVATE leaf_optimized_kernels)
+
+add_executable(leaf_kv_session ../tests/native/test_kv_session.cpp)
+target_link_libraries(leaf_kv_session PRIVATE leaf_core)

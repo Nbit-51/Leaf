@@ -680,10 +680,10 @@ size_t Tensor::element_count() const {
     return leaf::element_count(shape);
 }
 
-Tensor Executor::run(const Graph& graph, const Tensor& input) const {
-    require(graph.inputs().size() == 1, "only single-input models are supported");
-    require(input.arena_data == nullptr && input.element_count() == input.values.size(),
-            "input data does not match its shape");
+std::unordered_map<std::string, Tensor> execute_graph(
+        const Graph& graph,
+        const std::unordered_map<std::string, TensorView>& graph_inputs,
+        std::unordered_map<std::string, runtime::KVCache>* caches) {
     runtime::Arena* arena = nullptr;
     if (const MemoryPlan* plan = graph.memory_plan()) {
         static thread_local std::unique_ptr<runtime::Arena> cached_arena;
@@ -696,9 +696,6 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
         }
         arena = cached_arena.get();
     }
-    std::unordered_map<std::string, TensorView> graph_inputs;
-    graph_inputs.emplace(graph.inputs()[0], TensorView{input.values.data(), input.shape});
-
     std::unordered_map<std::string, size_t> remaining_uses;
     for (const Node& node : graph.nodes()) {
         for (const std::string& name : node.inputs) {
@@ -709,10 +706,13 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
     std::unordered_map<std::string, Tensor> intermediates;
 
     for (const Node& node : graph.nodes()) {
-        require(node.outputs.size() == 1, node.op_type + " must have one output");
+        const bool rope_table = node.op_type == "RoPE_Table";
+        require(node.outputs.size() == (rope_table ? 2U : 1U),
+                node.op_type + " has an unsupported output count");
         const OutputAllocator allocator{graph, arena, node.outputs[0]};
         const TensorView first_input = tensor_for(graph, intermediates, graph_inputs, node.inputs.at(0));
         Tensor output;
+        Tensor secondary_output;
         if (node.op_type == "Conv") {
             output = node.quantized
                 ? execute_quant_conv(graph, node, first_input, intermediates, graph_inputs, allocator)
@@ -771,6 +771,40 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
             output = allocator.make(first_input.shape);
             kernels::rmsnorm_f32(first_input.data, weight.data, output.data(),
                                   element_count(first_input.shape) / hidden, hidden, epsilon);
+        } else if (rope_table) {
+            require(node.inputs.size() == 2 && first_input.shape.size() == 3 &&
+                    first_input.shape[2] == 1,
+                    "RoPE_Table expects frequencies [batch, half_dim, 1]");
+            const TensorView positions = tensor_for(graph, intermediates, graph_inputs,
+                                                    node.inputs[1]);
+            require(positions.shape.size() == 3 && positions.shape[0] == first_input.shape[0] &&
+                    positions.shape[1] == 1,
+                    "RoPE_Table expects positions [batch, 1, tokens]");
+            const float cosine_scale = float_attribute(node, "cos_scale", 1.0f);
+            const float sine_scale = float_attribute(node, "sin_scale", 1.0f);
+            require(std::isfinite(cosine_scale) && std::isfinite(sine_scale),
+                    "RoPE_Table scales must be finite");
+            const size_t batch = first_input.shape[0];
+            const size_t half_dim = first_input.shape[1];
+            const size_t tokens = positions.shape[2];
+            const std::vector<size_t> table_shape{batch, tokens, half_dim * 2};
+            output = allocator.make(table_shape);
+            secondary_output = OutputAllocator{graph, arena, node.outputs[1]}.make(table_shape);
+            kernels::rope_table_f32(first_input.data, positions.data, output.data(),
+                                     secondary_output.data(), batch, half_dim, tokens,
+                                     cosine_scale, sine_scale);
+        } else if (node.op_type == "RepeatKV") {
+            require(first_input.shape.size() == 4, "RepeatKV input must have rank 4");
+            const std::vector<size_t> repetition = integer_list_attribute(node, "n_rep", {});
+            require(repetition.size() == 1 && repetition[0] > 0 &&
+                    first_input.shape[1] <= std::numeric_limits<size_t>::max() / repetition[0],
+                    "RepeatKV requires a positive non-overflowing n_rep attribute");
+            std::vector<size_t> shape = first_input.shape;
+            shape[1] *= repetition[0];
+            output = allocator.make(shape);
+            kernels::repeat_kv_f32(first_input.data, output.data(), first_input.shape[0],
+                                    first_input.shape[1], first_input.shape[2],
+                                    first_input.shape[3], repetition[0]);
         } else if (node.op_type == "Attention") {
             require(node.inputs.size() == 4 && first_input.shape.size() == 4,
                     "Attention expects 4D query and four inputs");
@@ -779,25 +813,48 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
             const TensorView mask = tensor_for(graph, intermediates, graph_inputs, node.inputs[3]);
             const size_t batch = first_input.shape[0], heads = first_input.shape[1];
             const size_t query_tokens = first_input.shape[2], head_dim = first_input.shape[3];
+            const std::string cache_id = string_attribute(node, "cache_id");
             require(key.shape.size() == 4 && value.shape == key.shape &&
-                    key.shape[0] == batch && key.shape[1] == heads &&
+                    batch > 0 && heads > 0 && query_tokens > 0 && head_dim > 0 &&
+                    key.shape[0] == batch && key.shape[1] > 0 && key.shape[2] > 0 &&
+                    (cache_id.empty() ? key.shape[1] == heads :
+                                        heads % key.shape[1] == 0) &&
                     key.shape[3] == head_dim && mask.shape.size() == 4,
                     "Attention Q/K/V shapes do not match");
-            const size_t key_tokens = key.shape[2];
-            const size_t target_shape[4] = {batch, heads, query_tokens, key_tokens};
-            for (size_t axis = 0; axis < 4; ++axis) {
-                require(mask.shape[axis] == 1 || mask.shape[axis] == target_shape[axis],
-                        "Attention mask is not broadcastable");
-            }
             const float scale = float_attribute(node, "scale", 1.0f);
             require(std::isfinite(scale) && scale > 0.0f,
                     "Attention scale must be positive and finite");
             const bool mask_nonzero_is_valid =
                 float_attribute(node, "mask_nonzero_is_valid", 1.0f) != 0.0f;
             output = allocator.make({batch, query_tokens, heads, head_dim});
-            kernels::attention_f32(first_input.data, key.data, value.data, mask.data,
-                                    output.data(), batch, heads, query_tokens, key_tokens,
-                                    head_dim, mask.shape.data(), scale, mask_nonzero_is_valid);
+            if (cache_id.empty()) {
+                const size_t target_shape[4] = {batch, heads, query_tokens, key.shape[2]};
+                for (size_t axis = 0; axis < 4; ++axis) {
+                    require(mask.shape[axis] == 1 || mask.shape[axis] == target_shape[axis],
+                            "Attention mask is not broadcastable");
+                }
+                kernels::attention_f32(first_input.data, key.data, value.data, mask.data,
+                                        output.data(), batch, heads, query_tokens, key.shape[2],
+                                        head_dim, mask.shape.data(), scale, mask_nonzero_is_valid);
+            } else {
+                require(caches != nullptr, "cached Attention requires run_outputs_cached()");
+                auto found = caches->try_emplace(cache_id, batch, key.shape[1], head_dim).first;
+                runtime::KVCache& cache = found->second;
+                require(cache.batch() == batch && cache.kv_heads() == key.shape[1] &&
+                        cache.head_dim() == head_dim,
+                        "cached Attention dimensions changed within a session");
+                require(key.shape[2] <= std::numeric_limits<size_t>::max() - cache.length(),
+                        "cached Attention token count overflows");
+                const size_t target_shape[4] = {
+                    batch, heads, query_tokens, cache.length() + key.shape[2]};
+                for (size_t axis = 0; axis < 4; ++axis) {
+                    require(mask.shape[axis] == 1 || mask.shape[axis] == target_shape[axis],
+                            "cached Attention mask is not broadcastable");
+                }
+                cache.append(key.data, value.data, key.shape[2]);
+                cache.attend(first_input.data, mask.data, output.data(), heads,
+                             query_tokens, mask.shape.data(), scale, mask_nonzero_is_valid);
+            }
         } else if (node.op_type == "SwiGLU_MLP") {
             output = execute_swiglu_mlp(graph, node, first_input, intermediates,
                                         graph_inputs, allocator);
@@ -827,6 +884,9 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
             throw std::runtime_error("leaf::Executor: unsupported operation: " + node.op_type);
         }
         intermediates[node.outputs[0]] = std::move(output);
+        if (rope_table) {
+            intermediates[node.outputs[1]] = std::move(secondary_output);
+        }
 
         for (const std::string& name : node.inputs) {
             auto use = remaining_uses.find(name);
@@ -843,9 +903,55 @@ Tensor Executor::run(const Graph& graph, const Tensor& input) const {
         }
     }
 
-    require(graph.outputs().size() == 1, "only single-output models are supported");
-    const TensorView result = tensor_for(graph, intermediates, graph_inputs, graph.outputs()[0]);
-    return {result.shape, std::vector<float>(result.data, result.data + element_count(result.shape))};
+    std::unordered_map<std::string, Tensor> results;
+    for (const std::string& name : graph.outputs()) {
+        const TensorView result = tensor_for(graph, intermediates, graph_inputs, name);
+        results.emplace(name, Tensor{result.shape,
+            std::vector<float>(result.data, result.data + element_count(result.shape))});
+    }
+    return results;
+}
+
+Tensor Executor::run(const Graph& graph, const Tensor& input) const {
+    require(graph.inputs().size() == 1 && graph.outputs().size() == 1,
+            "run() requires one graph input and one output");
+    require(input.arena_data == nullptr && input.element_count() == input.values.size(),
+            "input data does not match its shape");
+    const std::unordered_map<std::string, TensorView> inputs{
+        {graph.inputs()[0], TensorView{input.values.data(), input.shape}}};
+    auto results = execute_graph(graph, inputs, nullptr);
+    return std::move(results.at(graph.outputs()[0]));
+}
+
+std::unordered_map<std::string, Tensor> Executor::run_outputs(
+        const Graph& graph, const std::unordered_map<std::string, Tensor>& inputs) const {
+    require(inputs.size() == graph.inputs().size(), "named input count does not match graph");
+    std::unordered_map<std::string, TensorView> views;
+    for (const std::string& name : graph.inputs()) {
+        const auto found = inputs.find(name);
+        require(found != inputs.end(), "missing named graph input: " + name);
+        const Tensor& input = found->second;
+        require(input.arena_data == nullptr && input.element_count() == input.values.size(),
+                "named input data does not match its shape: " + name);
+        views.emplace(name, TensorView{input.values.data(), input.shape});
+    }
+    return execute_graph(graph, views, nullptr);
+}
+
+std::unordered_map<std::string, Tensor> Executor::run_outputs_cached(
+        const Graph& graph, const std::unordered_map<std::string, Tensor>& inputs,
+        std::unordered_map<std::string, runtime::KVCache>& caches) const {
+    require(inputs.size() == graph.inputs().size(), "named input count does not match graph");
+    std::unordered_map<std::string, TensorView> views;
+    for (const std::string& name : graph.inputs()) {
+        const auto found = inputs.find(name);
+        require(found != inputs.end(), "missing named graph input: " + name);
+        const Tensor& input = found->second;
+        require(input.arena_data == nullptr && input.element_count() == input.values.size(),
+                "named input data does not match its shape: " + name);
+        views.emplace(name, TensorView{input.values.data(), input.shape});
+    }
+    return execute_graph(graph, views, &caches);
 }
 
 }  // namespace leaf

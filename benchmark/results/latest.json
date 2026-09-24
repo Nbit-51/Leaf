@@ -17,9 +17,9 @@
         "leaf_int8_vs_pytorch_max_abs": 0.020336493849754333
       },
       "latency_ms_per_sample": {
-        "pytorch_cpu": 0.04226666666666667,
-        "leaf_numpy_reference_fp32": 0.6813166666666667,
-        "leaf_numpy_quantized_simulation": 0.6629333333333333
+        "pytorch_cpu": 0.04,
+        "leaf_numpy_reference_fp32": 0.6765666666666666,
+        "leaf_numpy_quantized_simulation": 0.7625333333333333
       },
       "optimized_nodes": 1,
       "memory_plan": {
@@ -50,9 +50,9 @@
         "leaf_int8_vs_pytorch_max_abs": 0.0951790452932284
       },
       "latency_ms_per_sample": {
-        "pytorch_cpu": 0.015300000000000001,
-        "leaf_numpy_reference_fp32": 0.02161666666666667,
-        "leaf_numpy_quantized_simulation": 0.0337
+        "pytorch_cpu": 0.015466666666666665,
+        "leaf_numpy_reference_fp32": 0.022033333333333335,
+        "leaf_numpy_quantized_simulation": 0.034083333333333334
       },
       "optimized_nodes": 1,
       "memory_plan": {

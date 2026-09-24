@@ -53,9 +53,8 @@ being encoded here -- see docs/handover.md section 3.3 for the raw dumps.
    bookkeeping (computing the Expand/Reshape target shapes at graph-build
    time from runtime Shape() calls). Rather than hardcode that bookkeeping
    node-for-node, this pass verifies it consists *only* of ops from a
-   known-safe whitelist and folds it away; n_rep itself is not extracted
-   here since Leaf's C++ loader determines it from Q/KV head-count model
-   config at load time, not by parsing exporter shape arithmetic.
+   known-safe whitelist and folds it away. It records n_rep only when shape
+   metadata proves the repeat count; otherwise the pattern remains unfused.
 
 6. Attention (causal, scaled)
    Mul(Q,scale) . Mul(K^T,scale) -> MatMul -> Add(mask) -> Softmax
@@ -533,7 +532,7 @@ _REPEAT_KV_BOOKKEEPING_OPS = {
 }
 
 
-def _try_match_repeat_kv(unsqueeze_node: Node, producer, consumers):
+def _try_match_repeat_kv(graph: Graph, unsqueeze_node: Node, producer, consumers):
     if len(unsqueeze_node.inputs) < 2:
         return None
     axis = _constant_array(producer, unsqueeze_node.inputs[1])
@@ -552,6 +551,25 @@ def _try_match_repeat_kv(unsqueeze_node: Node, producer, consumers):
     if reshape_node is None or reshape_node.op_type != "Reshape" or len(reshape_node.inputs) < 2:
         return None
 
+    source_info = graph.value_info.get(unsqueeze_node.inputs[0])
+    result_info = graph.value_info.get(reshape_node.outputs[0])
+    expand_info = graph.value_info.get(expand_node.outputs[0])
+    source_shape = source_info.shape if source_info is not None else None
+    result_shape = result_info.shape if result_info is not None else None
+    expand_shape = expand_info.shape if expand_info is not None else None
+    repeats = None
+    if (source_shape is not None and result_shape is not None and
+            len(source_shape) == 4 and len(result_shape) == 4 and
+            isinstance(source_shape[1], int) and source_shape[1] > 0 and
+            isinstance(result_shape[1], int) and
+            result_shape[1] % source_shape[1] == 0):
+        repeats = result_shape[1] // source_shape[1]
+    elif (expand_shape is not None and len(expand_shape) == 5 and
+          isinstance(expand_shape[2], int)):
+        repeats = expand_shape[2]
+    if repeats is None or repeats < 1:
+        return None
+
     reshape_shape_visited: set[str] = set()
     if not _collect_backward(reshape_node.inputs[1], producer, _REPEAT_KV_BOOKKEEPING_OPS, reshape_shape_visited):
         return None
@@ -564,7 +582,7 @@ def _try_match_repeat_kv(unsqueeze_node: Node, producer, consumers):
         op_type="RepeatKV",
         inputs=[unsqueeze_node.inputs[0]],
         outputs=[reshape_node.outputs[0]],
-        attributes={},  # n_rep resolved from Q/KV head-count model config at C++ load time
+        attributes={"n_rep": repeats},
     )
     return fused, skip
 
@@ -580,7 +598,7 @@ def fuse_repeat_kv(graph: Graph) -> Graph:
         if node.name in skip_names:
             continue
         if node.op_type == "Unsqueeze":
-            match = _try_match_repeat_kv(node, producer, consumers)
+            match = _try_match_repeat_kv(graph, node, producer, consumers)
             if match is not None:
                 fused, skip = match
                 new_nodes.append(fused)

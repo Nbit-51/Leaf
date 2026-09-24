@@ -14,7 +14,8 @@ $common = @(
     "-I", (Join-Path $root "engine/include"),
     (Join-Path $root "engine/src/kernels/gemm.cpp"),
     (Join-Path $root "engine/src/kernels/conv.cpp"),
-    (Join-Path $root "engine/src/kernels/transformer.cpp")
+    (Join-Path $root "engine/src/kernels/transformer.cpp"),
+    (Join-Path $root "engine/src/kv_cache.cpp")
 )
 & $Compiler @architectureFlags @common (Join-Path $root "tests/native/test_kernels.cpp") "-o" (Join-Path $output "leaf_native_tests.exe")
 if ($LASTEXITCODE -ne 0) { throw "native test build failed" }
@@ -31,6 +32,7 @@ $runtimeSources = @(
     (Join-Path $root "engine/src/kernels/gemm.cpp"),
     (Join-Path $root "engine/src/kernels/conv.cpp"),
     (Join-Path $root "engine/src/kernels/transformer.cpp"),
+    (Join-Path $root "engine/src/kv_cache.cpp"),
     (Join-Path $root "engine/kernels/im2col.cpp"),
     (Join-Path $root "engine/kernels/gemm.cpp"),
     (Join-Path $root "engine/kernels/conv2d.cpp")
@@ -47,6 +49,9 @@ if ($LASTEXITCODE -ne 0) { throw "FP32 inference runtime build failed" }
 & $Compiler "-std=c++17" "-O3" "-DNDEBUG" @architectureFlags @runtimeIncludes @runtimeSources `
     (Join-Path $root "engine/src/main_bench.cpp") "-o" (Join-Path $output "leaf_graph_bench.exe") "-lpsapi"
 if ($LASTEXITCODE -ne 0) { throw "FP32 graph benchmark build failed" }
+& $Compiler "-std=c++17" "-O3" "-DNDEBUG" @architectureFlags @runtimeIncludes @runtimeSources `
+    (Join-Path $root "tests/native/test_kv_session.cpp") "-o" (Join-Path $output "leaf_kv_session.exe")
+if ($LASTEXITCODE -ne 0) { throw "cached attention session build failed" }
 
 & $Compiler "-std=c++17" "-O3" "-DNDEBUG" @architectureFlags `
     (Join-Path $root "engine/kernels/gemm.cpp") (Join-Path $root "engine/tests/test_gemm.cpp") `

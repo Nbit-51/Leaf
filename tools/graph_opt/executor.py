@@ -373,6 +373,29 @@ def run_graph(graph: Graph, inputs: dict[str, np.ndarray]) -> dict[str, np.ndarr
             normed = x.astype(np.float32) / np.sqrt(variance + eps)
             tensors[node.outputs[0]] = (weight * normed).astype(np.float32)
 
+        elif node.op_type == "RoPE_Table":
+            frequencies = tensors[node.inputs[0]]
+            positions = tensors[node.inputs[1]]
+            if (frequencies.ndim != 3 or positions.ndim != 3 or
+                    frequencies.shape[2] != 1 or positions.shape[1] != 1 or
+                    frequencies.shape[0] != positions.shape[0]):
+                raise ValueError("RoPE_Table expects [batch, half_dim, 1] and [batch, 1, tokens]")
+            angles = np.matmul(frequencies, positions).transpose(0, 2, 1)
+            duplicated = np.concatenate((angles, angles), axis=-1)
+            tensors[node.outputs[0]] = (
+                np.cos(duplicated) * float(node.attributes.get("cos_scale", 1.0))
+            ).astype(np.float32)
+            tensors[node.outputs[1]] = (
+                np.sin(duplicated) * float(node.attributes.get("sin_scale", 1.0))
+            ).astype(np.float32)
+
+        elif node.op_type == "RepeatKV":
+            repeats = int(node.attributes["n_rep"])
+            if repeats < 1 or tensors[node.inputs[0]].ndim != 4:
+                raise ValueError("RepeatKV requires a positive repeat count and rank-4 input")
+            tensors[node.outputs[0]] = np.repeat(tensors[node.inputs[0]], repeats,
+                                                  axis=1).astype(np.float32)
+
         elif node.op_type == "SwiGLU_MLP":
             x = tensors[node.inputs[0]]
             gate_weight = tensors[node.inputs[1]]

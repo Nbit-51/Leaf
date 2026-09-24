@@ -3,7 +3,7 @@ from onnx import numpy_helper
 import torch
 
 from tools.graph_opt.executor import run_graph
-from tools.graph_opt.fusion import fuse_attention
+from tools.graph_opt.fusion import fuse_attention, fuse_repeat_kv
 from tools.graph_opt.ir import Graph, Node, TensorInfo
 
 
@@ -65,3 +65,31 @@ def test_attention_fusion_preserves_where_mask_polarity():
         attention_nodes = [node for node in rewritten.nodes if node.op_type == "Attention"]
         assert len(attention_nodes) == 1
         assert attention_nodes[0].attributes["mask_nonzero_is_valid"] == int(inverted)
+
+
+def test_repeat_kv_fusion_requires_proven_repeat_count():
+    def constant(name, values):
+        return Node(name, "Constant", [], [name],
+                    {"value": numpy_helper.from_array(np.asarray(values, dtype=np.int64))})
+
+    graph = Graph()
+    graph.inputs, graph.outputs = ["kv"], ["repeated"]
+    graph.nodes = [
+        constant("axis", [2]),
+        constant("expanded_shape", [1, 2, 7, 4, 8]),
+        constant("output_shape", [1, 14, 4, 8]),
+        Node("unsqueeze", "Unsqueeze", ["kv", "axis"], ["unsqueezed"]),
+        Node("expand", "Expand", ["unsqueezed", "expanded_shape"], ["expanded"]),
+        Node("reshape", "Reshape", ["expanded", "output_shape"], ["repeated"]),
+    ]
+    graph.value_info = {
+        "kv": TensorInfo("kv", (1, 2, 4, 8), "float32"),
+        "expanded": TensorInfo("expanded", (1, 2, 7, 4, 8), "float32"),
+        "repeated": TensorInfo("repeated", (1, 14, 4, 8), "float32"),
+    }
+    rewritten = fuse_repeat_kv(graph)
+    fused = [node for node in rewritten.nodes if node.op_type == "RepeatKV"]
+    assert len(fused) == 1
+    assert fused[0].attributes["n_rep"] == 7
+    graph.value_info.clear()
+    assert not any(node.op_type == "RepeatKV" for node in fuse_repeat_kv(graph).nodes)

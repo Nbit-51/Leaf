@@ -44,7 +44,8 @@ PyTorch is an external comparison, not a substitute for this regression gate.
 | Constant folding | Implemented | Small constant-only subgraphs; 16 MiB materialization guard |
 | CNN fusion | Implemented | Conv+BatchNorm folding, then Conv+ReLU |
 | Transformer rewrites | Graph passes implemented | MatMul+bias and Gemm+activation; Qwen-pattern RMSNorm, RoPE table, RepeatKV, Attention, SwiGLU MLP |
-| Native Transformer operators | Partial FP32 execution | RMSNorm, mask-aware scaled Attention, and fused SwiGLU MLP; standalone parity/latency checks for prefill and decode shapes |
+| Native Transformer operators | Partial FP32 execution | RMSNorm, two-output RoPE tables, RepeatKV, mask-aware scaled Attention, and fused SwiGLU MLP |
+| Dynamic KV cache | Session API implemented | Caller-owned per-layer FP32 cache; append/reset, grouped-query decode without materializing repeated K/V, and named-input graph execution |
 | INT8 calibration and conversion | Implemented in Python | Per-tensor activation scales, per-output-channel Conv/Gemm/MatMul weight scales; NumPy execution simulates quantized values |
 | Memory planning | JSON and native arena implemented | Version 3 embeds 64-byte-aligned offsets; C++ executes directly in the arena; default v2 buffer-pool path remains available |
 | `.leaf` artifact and native executor | FP32 and selected INT8 paths implemented | Version 2 stores aligned typed weights and per-channel scales; version 3 also embeds an arena plan |
@@ -52,15 +53,17 @@ PyTorch is an external comparison, not a substitute for this regression gate.
 | Full-model Qwen in Leaf | Pending | Qwen benchmark below provides a PyTorch CPU reference |
 | Structured pruning and trained-model quality gates | Pending | No CIFAR accuracy or Qwen perplexity claim yet |
 
-Native execution now covers three fused Transformer operators, but the RoPE,
-RepeatKV, dynamic KV-cache, and surrounding decoder graph paths are still
-missing. Pattern recognition and standalone operator checks are not a claim
+The operator and cache paths above pass standalone and two-step decode tests.
+The complete decoder graph, large-model export, and end-to-end Leaf parity are
+not yet implemented. Pattern recognition and operator checks are not a claim
 of full Qwen inference or speedup.
 
 General-purpose describes the architecture and intended direction, not a
-claim that every ONNX model runs today. The native executor currently accepts
-one graph input and output, and Conv is limited to one NCHW image with one
-group. Unsupported operators and layouts fail explicitly. Operator coverage,
+claim that every ONNX model runs today. The native executor accepts named
+inputs and outputs through its C++ API and the inference CLI; the graph
+latency benchmark CLI still targets one input and output. Conv is limited to
+one NCHW image with one group.
+Unsupported operators and layouts fail explicitly. Operator coverage,
 dynamic shapes, batching, and CPU-specific dispatch are expanded against
 independent model tests rather than hard-coded for the named benchmarks.
 
@@ -88,7 +91,9 @@ flowchart TB
       direction LR
       FILE --> EXEC[C++ graph executor]
       EXEC --> BUFFER[Reusable buffers<br/>or planned arena]
+      EXEC --> CACHE[Optional per-session<br/>dynamic KV cache]
       BUFFER --> KERNEL[Portable scalar<br/>or AVX2 kernels]
+      CACHE --> KERNEL
       KERNEL --> OUTPUT[Inference output]
     end
     MODEL -. numerical reference .-> CHECK[Parity, latency,<br/>memory and quality gates]
@@ -152,6 +157,8 @@ optional GELU, SiLU, or ReLU epilogue fusion. Separate Qwen ONNX pattern
 passes recognize RMSNorm, RoPE table construction, grouped KV repetition,
 attention, and SwiGLU MLP. The Attention rewrite records whether a nonzero
 mask means valid or masked-out, preserving the source graph's mask polarity.
+RepeatKV fusion records a repeat count only when static head metadata proves
+it; otherwise it leaves the source graph intact.
 Each pass preserves graph order and checks
 consumer relationships so a shared intermediate is not removed incorrectly.
 
@@ -186,11 +193,17 @@ The exporter writes a versioned `.leaf` file with nodes, attributes, and
 32-byte-aligned typed weights. Pass `memory_plan=plan` to `export_graph` to
 embed the arena plan in version 3. `leaf_infer` loads either version and
 executes the supported operators: Conv, BatchNorm, ReLU, Add, MaxPool,
-GlobalAveragePool, Flatten, Gemm, MatMul, Identity, RMSNorm, Attention,
-SwiGLU MLP, Sigmoid, and elementwise Mul. Attention accepts FP32 Q/K/V with
+GlobalAveragePool, Flatten, Gemm, MatMul, Identity, RMSNorm, RoPE_Table,
+RepeatKV, Attention, SwiGLU MLP, Sigmoid, and elementwise Mul. Attention accepts FP32 Q/K/V with
 contiguous `[batch, heads, tokens, head_dim]` layout and a broadcastable
 four-dimensional mask; it produces `[batch, query_tokens, heads, head_dim]`.
-These standalone operator paths do not yet form a complete decoder.
+The native RoPE node produces both cosine and sine tensors. The named-input
+executor path supports multiple graph outputs, while `run_outputs_cached`
+accepts a caller-owned cache map. A cached Attention node is opt-in through
+its `cache_id` attribute; new K/V tokens are appended for each call, and
+grouped-query heads access the cache without materialized RepeatKV copies.
+The caller clears the map between sequences. These paths do not yet form a
+complete decoder.
 `leaf_graph_bench`
 measures repeated full-graph inference. Native
 scalar kernels are correctness baselines; AVX2/FMA GEMM, im2col Conv, packed
@@ -219,7 +232,7 @@ python -m pip install -r requirements-dev.txt
 That command runs Python tests, builds and runs native correctness tests,
 enforces the native kernel speed gate, writes the deterministic PyTorch/NumPy
 baseline JSON, and verifies the FP32 C++ ResNet output against PyTorch. The
-latest run passed all 28 Python tests and the native/C++ checks. The default
+latest run passed the Python and native/C++ checks. The default
 native build uses GCC with `-O3 -mavx2 -mfma` on compatible x86 CPUs. A
 portable scalar build is available with:
 
@@ -257,6 +270,8 @@ python tools/verify_memory_plan_runtime.py --leaf-infer ./build/leaf_infer.exe -
 python tools/verify_transformer_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe --portable-infer ./build/portable/leaf_infer.exe --portable-bench ./build/portable/leaf_graph_bench.exe --enforce-no-slowdown
 python tools/verify_swiglu_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe --enforce-no-slowdown
 python tools/verify_attention_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe --portable-infer ./build/portable/leaf_infer.exe --portable-bench ./build/portable/leaf_graph_bench.exe --enforce-no-slowdown
+python tools/verify_rope_repeatkv_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe
+python tools/verify_kv_cache_runtime.py --session-exe ./build/leaf_kv_session.exe
 ```
 
 The Python/NumPy executor is a numerical oracle. Its latency appears in the
@@ -321,6 +336,11 @@ HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m benchmarks.bench_qwen25_cached
 does not download weights implicitly. Its output is a PyTorch KV-cache
 reference for future Leaf Transformer execution, not a Leaf full-model
 measurement.
+
+For another locally available causal decoder, supply its complete snapshot
+with `--model`, a distinct `--benchmark-name`, and a separate `--output`.
+This was used for the TinyLlama fallback measurement below; its numbers are
+not interchangeable with Qwen's.
 
 ## 8. Measured results and what each number means
 
@@ -467,9 +487,9 @@ Leaf's scalar implementation, after warmup. The GEMM shape was 64×384×384.
 
 | Kernel | Scalar Leaf baseline | Optimized Leaf | Speedup |
 |---|---:|---:|---:|
-| FP32 GEMM | 6.716 ms | 0.824 ms AVX2 | 8.153× |
-| INT8 GEMM | 4.251 ms | 1.125 ms AVX2 | 3.780× |
-| FP32 Conv, 16→32, 3×3 | 3.281 ms direct | 0.398 ms im2col+AVX2 | 8.251× |
+| FP32 GEMM | 6.837 ms | 0.851 ms AVX2 | 8.038× |
+| INT8 GEMM | 4.386 ms | 1.129 ms AVX2 | 3.884× |
+| FP32 Conv, 16→32, 3×3 | 3.272 ms direct | 0.535 ms im2col+AVX2 | 6.110× |
 
 These are kernel measurements, not full-model speedups. The command uses
 `--enforce-speedup` so a slower optimized path fails. Raw values are in
@@ -502,8 +522,8 @@ Qwen generation.
 
 | Workload | FP32 max error | INT8 simulated max error | PyTorch CPU | NumPy FP32 | NumPy INT8 simulation |
 |---|---:|---:|---:|---:|---:|
-| CNN | 5.96e-7 | 0.02034 | 0.0423 ms | 0.6813 ms | 0.6629 ms |
-| Transformer FFN | 2.71e-7 | 0.09518 | 0.0153 ms | 0.0216 ms | 0.0337 ms |
+| CNN | 5.96e-7 | 0.02034 | 0.0400 ms | 0.6766 ms | 0.7625 ms |
+| Transformer FFN | 2.71e-7 | 0.09518 | 0.0155 ms | 0.0220 ms | 0.0341 ms |
 
 The detailed timings and memory plans are in
 [`latest.json`](benchmark/results/latest.json). The transformer row is a small
@@ -539,6 +559,75 @@ order-alternated version-2 Leaf comparison was 0.451 ms unfused versus
 PyTorch's p50 was 0.0514 ms on the same shape, so this is a Leaf-relative
 improvement, not a PyTorch win. The raw samples and methodology are in
 [`native_swiglu.json`](benchmark/results/native_swiglu.json).
+
+### 8.11 RoPE, RepeatKV, and stateful KV-cache checks
+
+The RoPE table uses `[1,32,1]` frequencies and `[1,1,64]` positions to
+produce separate `[1,64,64]` cosine and sine outputs. A named-input,
+two-output graph passed both version-2 and version-3 parity, including memory
+plan validation. RepeatKV expanded `[1,2,64,64]` to `[1,14,64,64]` with
+`n_rep=7` and matched PyTorch exactly.
+
+| Native standalone graph | Version 2 p50 | Version 3 p50 | Maximum absolute error vs PyTorch |
+|---|---:|---:|---:|
+| RoPE cosine | 0.128 ms | 0.101 ms | 5.96e-8 |
+| RoPE sine | 0.131 ms | 0.104 ms | 1.19e-7 |
+| RepeatKV | 0.017 ms | 0.013 ms | 0 |
+
+The caller-owned cache then appended a 63-token prefix and one decode token
+for 14 query heads, two KV heads, and a 64-wide head. Its grouped-query
+attention reads K/V directly from capacity-strided cache storage; no repeated
+K/V tensor is materialized. Across 50 timed session runs, native p50 latency
+was `2.9756 ms` prefill and `0.0921 ms` decode for version 2, versus
+`2.9776 ms` and `0.0914 ms` for version 3. Maximum output differences from
+PyTorch were `7.45e-8` and `6.71e-8` for prefill and decode. These are
+single-attention-node measurements, not full-model decode. Records:
+[`native_rope_repeatkv.json`](benchmark/results/native_rope_repeatkv.json) and
+[`native_kv_cache.json`](benchmark/results/native_kv_cache.json).
+The version-3 decode timing was not consistently faster in a repeat run, so
+version 2 remains the default rather than treating this small difference as
+an established speedup.
+
+An alternating same-session run of the full FP32 ResNet-18 on ten real
+CIFAR-10 images checked that these Transformer branches did not materially
+regress the existing CNN path. The previous commit measured `9.931` and
+`9.8385 ms` (median `9.8848 ms`); the updated build measured `10.117` and
+`9.864 ms` (median `9.9905 ms`). The updated-to-baseline ratio was `1.0107`,
+within the 2% no-slowdown gate. Maximum absolute error against PyTorch was
+`4.62e-7` in both builds. This is a no-regression result, not a speedup:
+[`cifar10_resnet18_kv_no_regression.json`](benchmark/results/cifar10_resnet18_kv_no_regression.json).
+
+### 8.12 Complete cached decoder baseline and Leaf coverage boundary
+
+The complete locally available TinyLlama-1.1B weights supplied an offline
+fallback when a complete Qwen snapshot could not be located for this run.
+On one Windows CPU thread, FP32 PyTorch measured `1,612.864 ms` for a
+64-token full-context forward and `169.301 ms` for the last token with a
+populated KV cache (`9.527×` faster). The two paths selected the same token;
+their maximum logit difference was `1.43e-5`. This is a full *PyTorch*
+model run, not a Leaf result. See
+[`tinyllama_cached_cpu.json`](benchmark/results/tinyllama_cached_cpu.json).
+
+Before attempting a multi-gigabyte Leaf export, a one-layer, reduced-width
+graph using the same decoder architecture was exported through the current
+PyTorch ONNX exporter and passed through Leaf's existing rewrites. Thirteen
+operator types remain unsupported in the native executor: `Concat`, `Expand`,
+`Gather`, `Neg`, `Pow`, `Reciprocal`, `ReduceMean`, `Reshape`, `Slice`,
+`Softmax`, `Sqrt`, `Transpose`, and `Unsqueeze`. This bounded probe did not
+load the full model's weights; it identifies a concrete graph-coverage
+blocker rather than implying a Leaf full-model run succeeded. Its operator
+counts are in
+[`tinyllama_leaf_coverage.json`](benchmark/results/tinyllama_leaf_coverage.json).
+An attempted `.leaf` export of that reduced graph stopped first at an
+unsupported `int64` initializer; native execution would additionally require
+the listed operators. The full trained model was therefore not falsely
+presented as a Leaf run.
+With any complete compatible local snapshot, reproduce the two stages using:
+
+```powershell
+python -m benchmarks.bench_qwen25_cached --model 'C:\path\to\snapshot' --benchmark-name local-decoder-pytorch-cpu-kv-cache --threads 1 --sequence-length 64 --warmup 1 --runs 3 --output benchmark/results/local_decoder_cached_cpu.json
+python -X utf8 tools/probe_decoder_coverage.py --config 'C:\path\to\snapshot' --output benchmark/results/local_decoder_leaf_coverage.json
+```
 
 ## 9. Memory-plan format and runtime reuse
 
@@ -611,7 +700,8 @@ the reference points for the next C++ optimization.
 - [x] Provide a portable scalar build alongside the AVX2/FMA build.
 - [x] Apply the exported memory plan directly in the C++ executor and measure peak RSS.
 - [x] Add native FP32 RMSNorm, mask-aware Attention, and fused SwiGLU FFN with standalone PyTorch parity and latency gates.
-- [ ] Add native RoPE, RepeatKV, dynamic KV-cache, and remaining decoder operators; then run full Qwen parity and latency.
+- [x] Add native RoPE, RepeatKV, named multi-output graph execution, and caller-owned dynamic GQA KV-cache with prefill/decode parity.
+- [ ] Add remaining decoder operators and large-model export, then run end-to-end Leaf parity and latency against a complete local causal decoder snapshot.
 - [ ] Add trained CIFAR-10 accuracy and Qwen perplexity/next-token quality gates.
 - [ ] Evaluate structured pruning and weight-only INT8/INT4 only after those quality gates exist.
 - [ ] Profile packing, tiling, threading, and cache behavior; accept only measured whole-model improvements.

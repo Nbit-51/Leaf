@@ -1,0 +1,27 @@
+{
+  "benchmark": "tinyllama-1.1b-pytorch-cpu-kv-cache",
+  "measured_at_utc": "2026-09-24T02:01:04.759613+00:00",
+  "environment": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.2",
+    "torch": "2.12.0+cpu",
+    "transformers": "5.14.1"
+  },
+  "model": "TinyLlama-1.1B-Chat-v1.0-git",
+  "model_commit": null,
+  "precision": "float32",
+  "threads": 1,
+  "sequence_length": 64,
+  "warmup_runs": 1,
+  "measured_runs": 3,
+  "model_parameter_bytes": 4400193536,
+  "load_seconds": 4.51472830000057,
+  "rss_before_load_bytes": 437891072,
+  "rss_after_load_bytes": 4866981888,
+  "uncached_full_context_decode_p50_ms": 1612.8637000001618,
+  "cached_single_token_decode_p50_ms": 169.30109999975684,
+  "kv_cache_speedup": 9.526599059323763,
+  "cached_vs_uncached_max_abs_logit_error": 1.430511474609375e-05,
+  "cached_vs_uncached_argmax_match": true,
+  "scope": "PyTorch CPU baseline; Leaf full-transformer execution is not implemented yet."
+}

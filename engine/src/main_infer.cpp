@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace {
@@ -59,25 +60,52 @@ void write_floats(const std::string& path, const std::vector<float>& values) {
 }  // namespace
 
 int main(int argc, char** argv) {
-    if (argc != 5) {
+    const bool single = argc == 5;
+    const bool named = argc >= 6 && (argc - 3) % 3 == 0;
+    if (!single && !named) {
         std::cerr << "Usage: " << argv[0]
-                  << " <model.leaf> <input.bin> <N,C,H,W> <output.bin>\n";
+                  << " <model.leaf> <input.bin> <shape> <output.bin>\n"
+                  << "   or: " << argv[0]
+                  << " <model.leaf> <output-prefix> <name> <shape> <input.bin> [more input triples]\n";
         return 1;
     }
     try {
-        leaf::Tensor input;
-        input.shape = parse_shape(argv[3]);
-        input.values = read_floats(argv[2], input.element_count());
-
         const leaf::Graph graph = leaf::Graph::load(argv[1]);
-        const leaf::Tensor output = leaf::Executor().run(graph, input);
-        write_floats(argv[4], output.values);
-
-        std::cout << "Output shape: [";
-        for (size_t i = 0; i < output.shape.size(); ++i) {
-            std::cout << output.shape[i] << (i + 1 == output.shape.size() ? "" : ", ");
+        if (single) {
+            leaf::Tensor input;
+            input.shape = parse_shape(argv[3]);
+            input.values = read_floats(argv[2], input.element_count());
+            const leaf::Tensor output = leaf::Executor().run(graph, input);
+            write_floats(argv[4], output.values);
+            std::cout << "Output shape: [";
+            for (size_t i = 0; i < output.shape.size(); ++i) {
+                std::cout << output.shape[i] << (i + 1 == output.shape.size() ? "" : ", ");
+            }
+            std::cout << "]\nWrote " << output.values.size() << " float32 values to " << argv[4] << "\n";
+        } else {
+            std::unordered_map<std::string, leaf::Tensor> inputs;
+            for (int index = 3; index < argc; index += 3) {
+                leaf::Tensor tensor;
+                tensor.shape = parse_shape(argv[index + 1]);
+                tensor.values = read_floats(argv[index + 2], tensor.element_count());
+                if (!inputs.emplace(argv[index], std::move(tensor)).second) {
+                    throw std::runtime_error("duplicate named input");
+                }
+            }
+            auto outputs = leaf::Executor().run_outputs(graph, inputs);
+            for (size_t index = 0; index < graph.outputs().size(); ++index) {
+                const std::string& name = graph.outputs()[index];
+                const leaf::Tensor& tensor = outputs.at(name);
+                const std::string path = std::string(argv[2]) + "." + std::to_string(index) + ".bin";
+                write_floats(path, tensor.values);
+                std::cout << name << "\t" << path << "\t";
+                for (size_t dimension = 0; dimension < tensor.shape.size(); ++dimension) {
+                    if (dimension != 0) std::cout << ',';
+                    std::cout << tensor.shape[dimension];
+                }
+                std::cout << '\n';
+            }
         }
-        std::cout << "]\nWrote " << output.values.size() << " float32 values to " << argv[4] << "\n";
         return 0;
     } catch (const std::exception& error) {
         std::cerr << "Error: " << error.what() << '\n';

@@ -1,5 +1,6 @@
 numpy>=2.0
 onnx>=1.16
+onnxscript>=0.7
 pytest>=8.0
 torch>=2.2
 torchvision>=0.17

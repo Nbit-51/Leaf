@@ -1,8 +1,11 @@
 #pragma once
 
 #include "leaf/graph_parser.h"
+#include "leaf/runtime/kv_cache.h"
 
 #include <cstddef>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace leaf {
@@ -24,10 +27,20 @@ struct Tensor {
 // this executor, and AVX2-capable C++ are all the target machine needs.
 class Executor {
 public:
-    // The current artifact format records graph-input names but not their
-    // shapes, so the caller supplies a single concrete input tensor.
-    // Models with multiple dynamic inputs are rejected explicitly.
+    // Convenience API for existing one-input/one-output artifacts.
     Tensor run(const Graph& graph, const Tensor& input) const;
+
+    // General graph boundary: named concrete inputs and owned output copies.
+    // Stateful decoding is handled by an explicit KVCache owned by the caller.
+    std::unordered_map<std::string, Tensor> run_outputs(
+        const Graph& graph, const std::unordered_map<std::string, Tensor>& inputs) const;
+
+    // Attention nodes with a nonempty cache_id append their K/V inputs to the
+    // caller-owned cache map. Reuse the map across decode calls; clear it at a
+    // sequence boundary. Ordinary run()/run_outputs() remain stateless.
+    std::unordered_map<std::string, Tensor> run_outputs_cached(
+        const Graph& graph, const std::unordered_map<std::string, Tensor>& inputs,
+        std::unordered_map<std::string, runtime::KVCache>& caches) const;
 };
 
 }  // namespace leaf

@@ -42,6 +42,13 @@ try {
     python tools/verify_attention_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe") `
         --leaf-bench (Join-Path $root "build/leaf_graph_bench.exe")
     if ($LASTEXITCODE -ne 0) { throw "C++ attention parity check failed" }
+
+    python tools/verify_rope_repeatkv_runtime.py --leaf-infer (Join-Path $root "build/leaf_infer.exe") `
+        --leaf-bench (Join-Path $root "build/leaf_graph_bench.exe")
+    if ($LASTEXITCODE -ne 0) { throw "C++ RoPE/RepeatKV parity check failed" }
+
+    python tools/verify_kv_cache_runtime.py --session-exe (Join-Path $root "build/leaf_kv_session.exe")
+    if ($LASTEXITCODE -ne 0) { throw "C++ dynamic KV-cache parity check failed" }
 } finally {
     Pop-Location
 }

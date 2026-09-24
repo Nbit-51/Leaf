@@ -1,0 +1,68 @@
+{
+  "benchmark": "leaf-native-rope-repeatkv",
+  "measured_at_utc": "2026-09-24T01:46:13.760542+00:00",
+  "host": "Windows-11-10.0.26200-SP0",
+  "warmup": 10,
+  "runs": 100,
+  "shapes": {
+    "rope_table": [
+      1,
+      64,
+      64
+    ],
+    "repeat_kv_input": [
+      1,
+      2,
+      64,
+      64
+    ],
+    "repeat_kv_output": [
+      1,
+      14,
+      64,
+      64
+    ]
+  },
+  "cases": {
+    "rope_cos": {
+      "v2": {
+        "max_abs_vs_pytorch": 5.960464477539063e-08,
+        "p50_ms": 0.128
+      },
+      "v3": {
+        "max_abs_vs_pytorch": 5.960464477539063e-08,
+        "p50_ms": 0.101
+      }
+    },
+    "rope_sin": {
+      "v2": {
+        "max_abs_vs_pytorch": 1.1920928955078125e-07,
+        "p50_ms": 0.131
+      },
+      "v3": {
+        "max_abs_vs_pytorch": 1.1920928955078125e-07,
+        "p50_ms": 0.104
+      }
+    },
+    "repeat_kv": {
+      "v2": {
+        "max_abs_vs_pytorch": 0.0,
+        "p50_ms": 0.017
+      },
+      "v3": {
+        "max_abs_vs_pytorch": 0.0,
+        "p50_ms": 0.013
+      }
+    },
+    "rope_named_two_outputs": {
+      "v2": {
+        "cos": 5.960464477539063e-08,
+        "sin": 1.1920928955078125e-07
+      },
+      "v3": {
+        "cos": 5.960464477539063e-08,
+        "sin": 1.1920928955078125e-07
+      }
+    }
+  }
+}

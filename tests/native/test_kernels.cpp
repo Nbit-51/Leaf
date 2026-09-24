@@ -2,6 +2,7 @@
 #include "leaf/kernels/conv.h"
 #include "leaf/kernels/transformer.h"
 #include "leaf/runtime/arena.h"
+#include "leaf/runtime/kv_cache.h"
 
 #include <algorithm>
 #include <cmath>
@@ -195,6 +196,116 @@ void test_attention() {
   }
 }
 
+void test_rope_table() {
+  constexpr std::size_t batch = 2, half_dim = 7, tokens = 5;
+  std::vector<float> frequency(batch * half_dim);
+  std::vector<float> position(batch * tokens);
+  std::vector<float> cosine(batch * tokens * half_dim * 2);
+  std::vector<float> sine(cosine.size());
+  for (std::size_t index = 0; index < frequency.size(); ++index) {
+    frequency[index] = static_cast<float>(index + 1) * 0.01f;
+  }
+  for (std::size_t index = 0; index < position.size(); ++index) {
+    position[index] = static_cast<float>(index);
+  }
+  leaf::kernels::rope_table_f32(frequency.data(), position.data(), cosine.data(), sine.data(),
+                                 batch, half_dim, tokens, 0.75f, 1.25f);
+  for (std::size_t b = 0; b < batch; ++b) {
+    for (std::size_t token = 0; token < tokens; ++token) {
+      for (std::size_t dimension = 0; dimension < half_dim; ++dimension) {
+        const float angle = frequency[b * half_dim + dimension] * position[b * tokens + token];
+        const std::size_t index = (b * tokens + token) * half_dim * 2 + dimension;
+        require(std::abs(cosine[index] - std::cos(angle) * 0.75f) < 1e-6f,
+                "RoPE cosine table mismatch");
+        require(std::abs(sine[index] - std::sin(angle) * 1.25f) < 1e-6f,
+                "RoPE sine table mismatch");
+        require(cosine[index] == cosine[index + half_dim] &&
+                sine[index] == sine[index + half_dim],
+                "RoPE table halves are not duplicated");
+      }
+    }
+  }
+}
+
+void test_repeat_kv() {
+  constexpr std::size_t batch = 2, heads = 3, tokens = 4, dim = 5, repeats = 7;
+  std::vector<float> input(batch * heads * tokens * dim);
+  std::vector<float> output(input.size() * repeats);
+  for (std::size_t index = 0; index < input.size(); ++index) {
+    input[index] = static_cast<float>(index);
+  }
+  leaf::kernels::repeat_kv_f32(input.data(), output.data(), batch, heads,
+                                tokens, dim, repeats);
+  for (std::size_t b = 0; b < batch; ++b) {
+    for (std::size_t h = 0; h < heads; ++h) {
+      for (std::size_t r = 0; r < repeats; ++r) {
+        for (std::size_t item = 0; item < tokens * dim; ++item) {
+          const std::size_t source = (b * heads + h) * tokens * dim + item;
+          const std::size_t target =
+              (b * heads * repeats + h * repeats + r) * tokens * dim + item;
+          require(output[target] == input[source], "RepeatKV head ordering mismatch");
+        }
+      }
+    }
+  }
+}
+
+void test_dynamic_kv_cache() {
+  constexpr std::size_t kv_heads = 2, query_heads = 14, dim = 16;
+  constexpr std::size_t prefix = 64, total = 65;
+  std::mt19937 generator(722);
+  std::uniform_real_distribution<float> distribution(-0.3f, 0.3f);
+  std::vector<float> prefix_keys(kv_heads * prefix * dim);
+  std::vector<float> prefix_values(prefix_keys.size());
+  std::vector<float> next_keys(kv_heads * dim), next_values(next_keys.size());
+  std::vector<float> query(query_heads * dim);
+  for (float& value : prefix_keys) value = distribution(generator);
+  for (float& value : prefix_values) value = distribution(generator);
+  for (float& value : next_keys) value = distribution(generator);
+  for (float& value : next_values) value = distribution(generator);
+  for (float& value : query) value = distribution(generator);
+
+  leaf::runtime::KVCache cache(1, kv_heads, dim);
+  cache.append(prefix_keys.data(), prefix_values.data(), prefix);
+  require(cache.length() == prefix && cache.capacity() >= prefix,
+          "KVCache prefix length/capacity mismatch");
+  cache.append(next_keys.data(), next_values.data(), 1);
+  require(cache.length() == total && cache.capacity() >= total,
+          "KVCache failed to grow at capacity boundary");
+
+  std::vector<float> dense_keys(kv_heads * total * dim), dense_values(dense_keys.size());
+  for (std::size_t head = 0; head < kv_heads; ++head) {
+    std::copy_n(prefix_keys.data() + head * prefix * dim, prefix * dim,
+                dense_keys.data() + head * total * dim);
+    std::copy_n(prefix_values.data() + head * prefix * dim, prefix * dim,
+                dense_values.data() + head * total * dim);
+    std::copy_n(next_keys.data() + head * dim, dim,
+                dense_keys.data() + (head * total + prefix) * dim);
+    std::copy_n(next_values.data() + head * dim, dim,
+                dense_values.data() + (head * total + prefix) * dim);
+  }
+  std::vector<float> repeated_keys(dense_keys.size() * (query_heads / kv_heads));
+  std::vector<float> repeated_values(repeated_keys.size());
+  leaf::kernels::repeat_kv_f32(dense_keys.data(), repeated_keys.data(), 1,
+                                kv_heads, total, dim, query_heads / kv_heads);
+  leaf::kernels::repeat_kv_f32(dense_values.data(), repeated_values.data(), 1,
+                                kv_heads, total, dim, query_heads / kv_heads);
+  const std::size_t mask_shape[4] = {1, 1, 1, 1};
+  const float mask = 1.0f;
+  std::vector<float> expected(query_heads * dim), actual(expected.size());
+  leaf::kernels::attention_f32_reference(query.data(), repeated_keys.data(),
+                                         repeated_values.data(), &mask, expected.data(),
+                                         1, query_heads, 1, total, dim, mask_shape, 0.5f);
+  cache.attend(query.data(), &mask, actual.data(), query_heads, 1, mask_shape, 0.5f);
+  for (std::size_t index = 0; index < actual.size(); ++index) {
+    require(std::abs(actual[index] - expected[index]) < 1e-5f,
+            "cached GQA attention disagrees with dense reference");
+  }
+  cache.reset();
+  require(cache.length() == 0 && cache.capacity() >= total,
+          "KVCache reset must clear state without discarding capacity");
+}
+
 }  // namespace
 
 int main() {
@@ -205,6 +316,9 @@ int main() {
     test_int8_convolution();
     test_rmsnorm();
     test_attention();
+    test_rope_table();
+    test_repeat_kv();
+    test_dynamic_kv_cache();
     test_arena();
     std::cout << "native kernel tests passed (AVX2="
               << (leaf::kernels::compiled_with_avx2() ? "yes" : "no") << ")\n";

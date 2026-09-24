@@ -1,0 +1,25 @@
+{
+  "benchmark": "cifar10-resnet18-kv-change-no-regression",
+  "baseline_commit": "d015af5",
+  "comparison": "two alternating same-session runs: baseline, current, current, baseline",
+  "dataset": "first 10 CIFAR-10 test images, 32x32",
+  "model": "full FP32 ResNet-18, seed 42, untrained",
+  "threads": 1,
+  "warmup_runs_per_image": 2,
+  "measured_runs_per_image": 7,
+  "leaf_cpp_fp32_p50_ms": {
+    "baseline_a": 9.931,
+    "current_a": 10.117,
+    "current_b": 9.864,
+    "baseline_b": 9.8385,
+    "baseline_run_median": 9.88475,
+    "current_run_median": 9.9905,
+    "current_over_baseline_ratio": 1.0106982978831027
+  },
+  "max_abs_error_vs_pytorch": 4.6193599700927734e-07,
+  "gate": {
+    "max_allowed_ratio": 1.02,
+    "passed": true
+  },
+  "interpretation": "Within a 2% same-session no-slowdown tolerance; no speedup claim. These unrelated ResNet graph paths check that new Transformer execution branches did not materially regress existing CNN inference."
+}
