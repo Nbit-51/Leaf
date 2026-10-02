@@ -6,5 +6,9 @@ build/
 qwen_onnx/
 *.onnx
 *.safetensors
+*.leaf
 work/
 benchmark/data/
+.leaf-cache/
+*.egg-info/
+dist/

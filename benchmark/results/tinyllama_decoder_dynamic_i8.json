@@ -1,0 +1,329 @@
+{
+  "benchmark": "trained-full-decoder-quality-and-latency",
+  "pytorch": {
+    "measured_at_utc": "2026-10-01T12:37:33.931007+00:00",
+    "model": "TinyLlama-1.1B-Chat-v1.0-git",
+    "model_config_sha256": "2add6e2d3f7cfc555e8cfee8dbaa12e9f9b057b2a4d70e9a999aeb32b8d02873",
+    "source_weight_sha256": {
+      "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933"
+    },
+    "dataset": "WikiText-2 raw test, contiguous blocks from first nonempty text",
+    "dataset_source": "https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e/wikitext-2-raw-v1",
+    "dataset_sha256": "5f1bea067869d04849c0f975a2b29c4ff47d867f484f5010ea5e861eab246d91",
+    "sequence_length": 128,
+    "blocks": 8,
+    "threads": 1,
+    "warmup": 1,
+    "runs": 5,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "logical_cpus": 28,
+    "physical_memory_bytes": 16869548032,
+    "torch": "2.12.0+cpu",
+    "load_seconds": 10.650941899999907,
+    "parameter_bytes": 4400193536,
+    "resident_bytes": 4448550912,
+    "generation_prompt": "Explain in one sentence why careful measurement matters when optimizing software.",
+    "generated_tokens": [
+      29907,
+      598,
+      1319,
+      20039,
+      13750,
+      746,
+      5994,
+      5281,
+      7047,
+      1363,
+      372,
+      6911,
+      304,
+      9801,
+      393,
+      278
+    ],
+    "generated_text": "Careful measurement matters when optimizing software because it helps to ensure that the",
+    "latency": {
+      "eager": {
+        "prefill_p50_ms": 4121.7242999996415,
+        "decode_p50_ms": 339.33280000019295,
+        "prefill_samples_ms": [
+          4047.2320999997464,
+          4088.5644999998476,
+          11114.15390000002,
+          4867.305500000384,
+          4121.7242999996415
+        ],
+        "decode_samples_ms": [
+          303.40750000004846,
+          332.9369999996743,
+          348.02350000018123,
+          431.8737999997211,
+          339.33280000019295
+        ]
+      },
+      "sdpa": {
+        "prefill_p50_ms": 4165.731600000072,
+        "decode_p50_ms": 387.51430000002074,
+        "prefill_samples_ms": [
+          4186.819200000173,
+          4307.298899999751,
+          4165.731600000072,
+          4155.553500000224,
+          4088.8020000002143
+        ],
+        "decode_samples_ms": [
+          388.0088999999316,
+          386.99399999995876,
+          457.3599000000286,
+          355.56720000022324,
+          387.51430000002074
+        ]
+      }
+    },
+    "quality_gate_thresholds": {
+      "32": {
+        "min_next_token_agreement": 0.999,
+        "max_perplexity_ratio": 1.001
+      },
+      "8": {
+        "min_next_token_agreement": 0.95,
+        "max_perplexity_ratio": 1.02
+      },
+      "4": {
+        "min_next_token_agreement": 0.9,
+        "max_perplexity_ratio": 1.05
+      }
+    }
+  },
+  "native_executable_sha256": "a04c8ceaea1d5c24736326e85c24fb4457a7bc4c3cf07ec2196f6ff25f31c788",
+  "native": {
+    "32": {
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 0.0002231597900390625,
+        "relative_logit_rmse": 1.080751985682582e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 13.69743217493049,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 0.9999998276908328
+      },
+      "quality_gate_passed": true,
+      "generation_exact_match": true,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        304,
+        9801,
+        393,
+        278
+      ],
+      "execution": {
+        "avx2": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4181360640,
+        "load_ms": 0.6495,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4153085952,
+        "load_ms": 0.4626,
+        "prefill_p50_ms": 4032.3182,
+        "decode_p50_ms": 263.0311,
+        "prefill_samples_ms": [
+          4184.7763,
+          4032.3182,
+          3643.9883,
+          3313.8337,
+          8426.2732
+        ],
+        "decode_samples_ms": [
+          262.0437,
+          263.0311,
+          232.9297,
+          422.1991,
+          646.2304
+        ],
+        "generated_tokens": []
+      },
+      "decode_speedup_vs_pytorch_sdpa": 1.4732641881512138,
+      "decode_speedup_vs_fastest_pytorch": 1.2900862293477575,
+      "prefill_speedup_vs_fastest_pytorch": 1.022172382129873,
+      "decode_speedup_vs_leaf_fp32": 1.0,
+      "prefill_speedup_vs_leaf_fp32": 1.0,
+      "eligible_for_automatic_selection": false
+    },
+    "8": {
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 14.841312408447266,
+        "relative_logit_rmse": 0.08566318452358246,
+        "next_token_agreement": 0.92578125,
+        "perplexity": 14.351387316532685,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 1.0477427199766307
+      },
+      "quality_gate_passed": false,
+      "generation_exact_match": false,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        338,
+        7618,
+        1455,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        304,
+        12439
+      ],
+      "execution": {
+        "avx2": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 1102176832,
+        "peak_rss_bytes": 1079656448,
+        "load_ms": 36.6555,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 1102176832,
+        "peak_rss_bytes": 1051799552,
+        "load_ms": 16.5593,
+        "prefill_p50_ms": 6173.5757,
+        "decode_p50_ms": 222.0356,
+        "prefill_samples_ms": [
+          5923.0498,
+          6173.5757,
+          6348.562,
+          5967.7684,
+          6415.2515
+        ],
+        "decode_samples_ms": [
+          212.147,
+          222.0356,
+          310.2302,
+          193.6459,
+          238.401
+        ],
+        "generated_tokens": []
+      },
+      "decode_speedup_vs_pytorch_sdpa": 1.7452800361744727,
+      "decode_speedup_vs_fastest_pytorch": 1.528281050427017,
+      "prefill_speedup_vs_fastest_pytorch": 0.6676397116179593,
+      "decode_speedup_vs_leaf_fp32": 1.1846348063103393,
+      "prefill_speedup_vs_leaf_fp32": 0.6531576505978537,
+      "eligible_for_automatic_selection": false
+    },
+    "4": {
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 14.441812515258789,
+        "relative_logit_rmse": 0.1781143993139267,
+        "next_token_agreement": 0.8212890625,
+        "perplexity": 16.08960433427529,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 1.1746436380489407
+      },
+      "quality_gate_passed": false,
+      "generation_exact_match": false,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        338,
+        7618,
+        1455,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        12439,
+        10161
+      ],
+      "execution": {
+        "avx2": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 619113024,
+        "peak_rss_bytes": 628981760,
+        "load_ms": 871.0471,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 619113024,
+        "peak_rss_bytes": 601460736,
+        "load_ms": 611.9255,
+        "prefill_p50_ms": 12251.6801,
+        "decode_p50_ms": 555.903,
+        "prefill_samples_ms": [
+          12324.3171,
+          12267.1631,
+          12251.6801,
+          12195.9104,
+          12148.3558
+        ],
+        "decode_samples_ms": [
+          539.0412,
+          572.6427,
+          555.903,
+          597.0235,
+          547.7306
+        ],
+        "generated_tokens": []
+      },
+      "decode_speedup_vs_pytorch_sdpa": 0.697089780051593,
+      "decode_speedup_vs_fastest_pytorch": 0.6104172850302894,
+      "prefill_speedup_vs_fastest_pytorch": 0.3364211492919768,
+      "decode_speedup_vs_leaf_fp32": 0.47316006569491437,
+      "prefill_speedup_vs_leaf_fp32": 0.3291236930027254,
+      "eligible_for_automatic_selection": false
+    }
+  },
+  "scope": "Complete trained model; held-out subset perplexity is not whole-corpus perplexity."
+}

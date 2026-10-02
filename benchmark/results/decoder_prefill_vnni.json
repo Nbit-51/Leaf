@@ -1,0 +1,71 @@
+{
+  "benchmark": "runtime-dispatched-avx-vnni-w8a8-prefill",
+  "measured_at_utc": "2026-10-01T14:43:28Z",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "cpu_affinity": [2],
+  "native_affinity_mask": 4,
+  "threads": 1,
+  "artifact": "decoder-8-smooth.leaf",
+  "artifact_bytes": 1103777152,
+  "prefill_tokens": 63,
+  "decode_tokens": 1,
+  "candidate": "AVX-VNNI 2-row by 4-token byte-packed integer prefill, cached signed weight sums and exact zero-point correction",
+  "fallback": "Existing AVX2 4-row by 2-token prefill or scalar path; one-token decode unchanged",
+  "runtime_guards": "Supported compiler, AVX2/FMA/AVX-VNNI CPU support, activation_bits=8, weight_bits=8, group<=65536, tokens>1, LEAF_DISABLE_VNNI unset/empty",
+  "final_executable_sha256": "890bba185eec56e08dd2aa04d74b4759a3121e5c78058b8527a3a6301b424032",
+  "final_decoder_source_sha256": "54d19dbe2909a5514464244567ac719b97a9d0d43b0c72beeb4d4862e04cba5f",
+  "validation": {
+    "complete_reduced_architecture_cases_passed": 8,
+    "trained_enabled_vs_disabled_request_tokens": 128,
+    "trained_enabled_vs_disabled_logits_bit_exact": true,
+    "max_abs_logit_difference": 0.0,
+    "enabled_metrics_vnni": true,
+    "disabled_metrics_vnni": false,
+    "full_held_out_quality": "Required separately with final executable before precision promotion"
+  },
+  "same_binary_avx2_vs_vnni_abba": {
+    "executable_sha256": "d3a3490dcf70e62b36effae77d84a9473576a909f84439959c52166a5bce9ea6",
+    "warmup_per_run": 1,
+    "measured_iterations_per_run": 3,
+    "runs": [
+      {"vnni": false, "load_ms": 51.2281, "prefill_p50_ms": 2411.8762, "decode_p50_ms": 104.3379, "prefill_samples_ms": [2411.8762, 2385.2311, 2445.9449], "decode_samples_ms": [106.4944, 101.769, 104.3379]},
+      {"vnni": true, "load_ms": 505.1926, "prefill_p50_ms": 1722.4784, "decode_p50_ms": 101.7685, "prefill_samples_ms": [1709.8622, 1722.4784, 1755.51], "decode_samples_ms": [101.1323, 101.7685, 107.2552]},
+      {"vnni": true, "load_ms": 577.2593, "prefill_p50_ms": 1709.8924, "decode_p50_ms": 104.3008, "prefill_samples_ms": [1697.6372, 1724.1386, 1709.8924], "decode_samples_ms": [103.449, 113.2168, 104.3008]},
+      {"vnni": false, "load_ms": 37.7104, "prefill_p50_ms": 2427.3781, "decode_p50_ms": 109.0742, "prefill_samples_ms": [2403.6735, 2427.3781, 2468.5379], "decode_samples_ms": [110.1856, 98.9121, 109.0742]}
+    ],
+    "avx2_prefill_p50_ms": 2419.62715,
+    "vnni_prefill_p50_ms": 1716.1854,
+    "prefill_latency_reduction": 0.2907232008865499,
+    "startup_note": "Weight-sum preprocessing adds measurable constructor time; warmed prefill numbers exclude load time."
+  },
+  "after_vnni_weight_sum_preparation": {
+    "executable_sha256": "0eb3e628a95fe5a9b715742b15c85168e725f3c0da2dac2ba70bdfcd3f75c397",
+    "warmup_per_run": 1,
+    "measured_iterations_per_run": 3,
+    "load_ms": 369.8573,
+    "prefill_p50_ms": 1445.6006,
+    "decode_p50_ms": 87.8957,
+    "prefill_samples_ms": [1468.7217, 1369.7618, 1445.6006],
+    "decode_samples_ms": [87.8957, 85.9083, 113.5704],
+    "trained_enabled_vs_disabled_logits_bit_exact": true
+  },
+  "rejected_vnni_4x3_trial": {
+    "baseline_2x4_executable_sha256": "0eb3e628a95fe5a9b715742b15c85168e725f3c0da2dac2ba70bdfcd3f75c397",
+    "candidate_4x3_executable_sha256": "3337b5558ef8d94e307a421f6082ee2c99a2a358151a012e1126a6880ef03e63",
+    "warmup_per_run": 3,
+    "measured_iterations_per_run": 7,
+    "trained_logits_bit_exact": true,
+    "all_reduced_architecture_cases_passed": true,
+    "assembly_note": "One accumulator spills to and from the stack in every 32-column inner iteration.",
+    "runs": [
+      {"tile": "2x4", "load_ms": 579.1842, "prefill_p50_ms": 1566.6694, "decode_p50_ms": 96.2231, "prefill_samples_ms": [1434.4495, 1723.4775, 1357.5666, 1312.2147, 1566.6694, 1626.0088, 1804.2466], "decode_samples_ms": [85.7223, 109.2595, 85.0769, 84.1361, 98.1062, 96.2231, 104.0157]},
+      {"tile": "4x3", "load_ms": 540.1488, "prefill_p50_ms": 1667.275, "decode_p50_ms": 98.5651, "prefill_samples_ms": [1710.2361, 1661.008, 1689.5868, 1667.275, 1698.7272, 1145.0867, 1335.4181], "decode_samples_ms": [98.5651, 98.7131, 101.9213, 95.3557, 118.2593, 77.5545, 84.4073]},
+      {"tile": "4x3", "load_ms": 406.6582, "prefill_p50_ms": 1540.1886, "decode_p50_ms": 102.4454, "prefill_samples_ms": [1449.2817, 1566.6701, 1540.1886, 1632.0603, 1483.4439, 1233.0449, 1572.0747], "decode_samples_ms": [99.3819, 107.5129, 105.928, 95.7638, 102.4454, 83.5336, 103.6096]},
+      {"tile": "2x4", "load_ms": 442.8458, "prefill_p50_ms": 3463.1984, "decode_p50_ms": 182.4293, "prefill_samples_ms": [1133.0209, 1053.354, 3463.1984, 3468.3959, 3464.2362, 3463.2696, 3462.3124], "decode_samples_ms": [83.1717, 181.7332, 189.8143, 184.3778, 182.4293, 184.5726, 181.0301]}
+    ],
+    "decision": "rejected",
+    "reason": "No clear repeatable improvement, register spill, and abrupt host timing change in final baseline. All raw samples preserved; final baseline is not filtered to claim a speedup."
+  },
+  "decision": "Retain 2x4 VNNI kernel; require fresh stable final-executable PyTorch/native speed and held-out quality gates before automatic precision promotion."
+}

@@ -1,357 +1,1023 @@
 # Leaf
 
-Leaf is a CPU inference engine and model optimizer. It takes an already trained
-model, imports an ONNX graph, removes redundant work, and runs the supported
-graph in a small C++ runtime. The development machine may use Python, PyTorch,
-ONNX, and calibration data; the intended deployment machine only needs the
-exported model and native runtime.
+Leaf is a CPU inference framework and measured model optimizer. Its purpose is
+to make already trained models practical on local devices through native
+execution, graph simplification, compact weight formats, and reusable memory.
+Models and datasets are validation workloads, not identities embedded in the
+execution engine.
 
-The project is actively developed. Its native path runs FP32 CNN graphs,
-selected calibrated INT8 CNN/linear graphs, and individual FP32 Transformer
-operators. ResNet-18, CIFAR-10, and
-Qwen2.5-0.5B are validation workloads, not model-specific design targets.
-Full decoder-only Transformer execution is still pending.
+Two preparation routes share that purpose:
 
-## 1. Why build Leaf?
+- ONNX graphs become validated Leaf IR, optimized graph artifacts, and native
+  CNN/linear/Transformer-operator execution.
+- Safetensors model snapshots become declarative decoder plans and
+  memory-mapped native autoregressive execution.
 
-Large inference frameworks can add installation size and Python overhead to
-CPU deployments. Leaf's goal is to turn a trained network into a compact,
-predictable CPU artifact while measuring every change against its numerical reference and prior
-latency. It is an inference project, not a training framework.
+Leaf now runs complete trained TinyLlama-1.1B and GPT-2 decoders, and a trained
+ResNet-20 across all 10,000 CIFAR-10 test images. This establishes more than a
+single-model prototype, but does **not** mean every LLM or architecture is
+supported today. Compatibility is determined by operator semantics and tensor
+layouts; unsupported features fail explicitly.
 
-The concrete targets are:
+The latest trained-model checks show a useful distinction: calibrated W8A8
+passes the measured TinyLlama quality and speed gates, while GPT-2 quantization
+and CIFAR INT8 do not qualify for automatic promotion. The
+[current results](#7-current-trained-model-and-dataset-results) include successes,
+failures, memory, and baseline comparisons. All previous benchmark tables remain
+in the [historical measurements](#9-historical-benchmarks-preserved).
 
-1. Import supported ONNX graphs through a shared IR and expand operator
-   coverage across model families.
-2. Remove constant work, fuse operators, and reuse activation memory.
-3. Reduce weight and activation cost with calibrated INT8; evaluate
-   weight-only formats after FP32 correctness and model-quality gates.
-4. Move hot inference loops into C++, with a portable scalar build and
-   architecture-specific acceleration where available.
-5. Reproduce artifacts across representative CPU machines and measure latency,
-   memory, and model quality without assuming a particular model or capacity.
+## Contents
 
-The speed rule is evidence driven: a new implementation must preserve outputs
-within a stated tolerance and beat its previous Leaf baseline under the same
-shape and machine conditions before it is called a performance improvement.
-PyTorch is an external comparison, not a substitute for this regression gate.
+1. [Purpose and performance rules](#1-purpose-and-performance-rules)
+2. [Install and run with one command](#2-install-and-run-with-one-command)
+3. [Coverage and explicit boundaries](#3-coverage-and-explicit-boundaries)
+4. [Architecture](#4-architecture)
+5. [Implementation pipeline, step by step](#5-implementation-pipeline-step-by-step)
+6. [Reproduce validation and benchmarks](#6-reproduce-validation-and-benchmarks)
+7. [Current trained-model and dataset results](#7-current-trained-model-and-dataset-results)
+8. [Package and portability checks](#8-package-and-portability-checks)
+9. [Historical benchmarks, preserved](#9-historical-benchmarks-preserved)
+10. [Artifact formats and trust boundary](#10-artifact-formats-and-trust-boundary)
+11. [Memory-plan format and runtime reuse](#11-memory-plan-format-and-runtime-reuse)
+12. [Repository map](#12-repository-map)
+13. [Implemented work and next goals](#13-implemented-work-and-next-goals)
 
-## 2. What runs today?
+## 1. Purpose and performance rules
 
-| Component | Current state | Boundary |
+Leaf is an inference project, not a training framework. The goal is a
+general-purpose local CPU framework: model import and preprocessing adapters
+describe the inputs; reusable native operators execute them; measurements decide
+which optimizations are worth keeping.
+
+The engineering goals are:
+
+1. Expand supported model architectures without model-name branches in the
+   native execution loop.
+2. Remove constant work, fuse compatible operators, and reuse activation
+   storage.
+3. Reduce weight bandwidth and memory with quantization only when trained-model
+   quality remains within a stated acceptance gate.
+4. Execute prefill, decode, attention, norms, and feed-forward computation in
+   C++, with scalar portability and optional CPU-specific acceleration.
+5. Offer a simple local command while keeping preparation and validation
+   reproducible.
+6. Qualify performance on additional CPUs, rather than assuming one host proves
+   portability or speed everywhere.
+
+A smaller artifact or faster kernel is not automatically a faster model.
+Candidate results must distinguish numerical correctness, task quality,
+steady-state latency, startup/first-token latency, and memory.
+
+For automatic decoder precision selection, a candidate must pass the quality
+gate, have stable repeated timings, decode faster than native FP32 and at least
+2% faster than the fastest measured PyTorch implementation, and avoid a prefill
+regression greater than 2% against either reference. The fastest PyTorch
+implementation is selected independently for each phase. These are local,
+tested-configuration gates—not a universal speed guarantee.
+
+## 2. Install and run with one command
+
+### 2.1 Install from this repository
+
+Python 3.10 or newer is required for the lightweight CLI. From a checkout:
+
+~~~powershell
+python -m pip install .
+leaf --help
+~~~
+
+Building from source requires a C++17 compiler. A platform wheel contains a
+native decoder binary, so an installed wheel does not require a compiler for
+generation. A source checkout can also build and cache the decoder on first
+use; an already built executable can be supplied through `LEAF_DECODER_BIN`.
+
+The generation dependencies are NumPy, the Rust-backed `tokenizers` package,
+Hugging Face Hub, and Jinja2. PyTorch and Transformers are used for preparation
+validation and reference measurements, not the native generation loop.
+Install the optional validation dependencies when optimizing:
+
+~~~powershell
+python -m pip install ".[validation]"
+~~~
+
+For all repository tests and CNN/ONNX benchmarks:
+
+~~~powershell
+python -m pip install -r requirements-dev.txt
+~~~
+
+### 2.2 Run a model
+
+A complete local snapshot needs `config.json`, safetensors weights, and
+`tokenizer.json`:
+
+~~~powershell
+leaf run C:\models\decoder --offline --prompt "Explain why careful measurement matters." --max-tokens 32
+~~~
+
+A supported Hugging Face model ID can be used directly:
+
+~~~powershell
+leaf run openai-community/gpt2 --prompt "Local inference is" --max-tokens 32
+~~~
+
+The first Hub run downloads the model and prepares a native artifact. Subsequent
+runs reuse the cache. `--offline` prohibits Hub downloads; the local snapshot
+or Hub cache must already contain the required files. Configuration support is
+checked before fetching large weight shards.
+
+Register a short name and reuse it:
+
+~~~powershell
+leaf alias local-decoder C:\models\decoder
+leaf run local-decoder --offline --prompt "Give a short explanation of CPU inference."
+~~~
+
+Chat templates are applied when supplied by the tokenizer configuration.
+Use `--raw` for an unformatted prompt. Generation is currently greedy; the C++
+process owns the autoregressive loop and KV cache, while the launcher encodes
+the prompt and renders streamed tokens.
+
+For recognized older SentencePiece-style JSON backends with `legacy=false`,
+the launcher applies a structure-based Metaspace migration to preserve prefix
+space behavior around special tokens. This does not branch on a model name or
+tokenizer class; unrelated and already modern backends are unchanged. Measured
+TinyLlama/GPT-2 preflights reproduced the saved 29-token/13-token reference
+prompts exactly. New tokenizer structures still require their own parity tests;
+this is not a promise of universal Hugging Face tokenizer compatibility.
+
+### 2.3 Validate before selecting quantization
+
+Use separate calibration and held-out text splits:
+
+~~~powershell
+leaf optimize C:\models\decoder --offline --dataset C:\datasets\test.jsonl --calibration-dataset C:\datasets\train.jsonl --text-column text --threads 1 --warmup 5 --runs 11
+leaf run C:\models\decoder --offline --prompt "Summarize the purpose of this project." --threads 1
+~~~
+
+`leaf optimize` measures FP32, weight-only INT8/INT4, and, with calibration data,
+channel-smoothed W8A8. Optional experiments are `--protected-int8`,
+`--grouped-int8`, and `--grouped-int8-smooth`. Protection keeps embeddings,
+learned positional embeddings where present, and the output head in source
+FP32; grouped INT8 uses 64-column groups. Grouped smoothing requires calibration.
+
+`--bits auto` is the generation default. It uses a lower-precision artifact
+only when a matching validation profile qualifies it. Missing, malformed,
+unstable, stale, or mismatched profiles fall back to FP32. Explicit
+`--bits 8` or `--bits 4` is an experimental user override, not evidence that the
+requested precision passes quality or speed gates.
+
+Profiles bind the artifact and native binary hashes, source/configuration and
+export request, measured platform/CPU signature, thread count, and optional CPU
+pin. CPU signatures are not unique hardware identities: do not copy a profile
+to another machine and treat it as validation there. Revalidate on that device.
+Nonempty experimental-kernel flags, or a persisted experimental native policy,
+cannot authorize automatic lower precision. A rebuilt binary also needs its
+own qualification; it does not inherit an older binary's speed profile.
+
+`--cpu` optionally pins to a logical CPU. Use the same pin for optimization and
+generation, or omit it in both. A pin from the published measurements is not a
+portable recommendation for other machines.
+
+### 2.4 Cache and platform controls
+
+| Control | Purpose |
+|---|---|
+| `LEAF_CACHE_DIR` | Change the model/artifact/native cache root; default `~/.cache/leaf` |
+| `LEAF_DECODER_BIN` | Use a supplied native executable instead of the bundled or cached build |
+| `CXX` | Select GCC or Clang for a source-checkout build |
+| `LEAF_DISABLE_VNNI` | A nonempty value disables VNNI; changed ISA policy invalidates automatic precision selection |
+| `LEAF_EXPERIMENTAL_FLOAT_TILES` / `LEAF_EXPERIMENTAL_FLOAT_GEMV` | Nonempty research-only opt-ins; both are off by default and disable automatic lower-precision selection |
+| `LEAF_DECODER_PROFILE` | Emit native phase diagnostics on stderr; profiling is excluded from acceptance timing runs |
+| `--metrics path.json` | Record artifact, native timings, memory, generated IDs, CLI first-token and end-to-end time |
+| `--plan path.json` | Supply a custom decoder plan with supported block semantics and tensor mappings |
+
+On Windows, use ASCII cache/artifact paths for the current native decoder,
+for example `$env:LEAF_CACHE_DIR = 'C:\leaf-cache'`. Its mapped-file path API
+does not yet support arbitrary Unicode paths. This is a known implementation
+limit, not a requirement of the framework's intended design.
+
+## 3. Coverage and explicit boundaries
+
+### 3.1 Model-independent native decoder
+
+The native decoder consumes dimensions, tensor descriptors, and block semantics,
+not a model identifier. Import adapters normalize different source layouts into
+`leaf-decoder-plan-v1`. A custom plan can map another snapshot to those same
+operators without adding a model-name branch.
+
+| Semantic component | Implemented options |
+|---|---|
+| Normalization | RMSNorm and affine LayerNorm; configurable epsilon |
+| Positions | Standard/partial RoPE, learned positional embeddings, or no positional transform |
+| Attention | Causal dense attention, multi-head or grouped-query heads, persistent per-layer FP32 KV cache |
+| Residual structure | Sequential or parallel attention/FFN residuals |
+| Feed-forward blocks | Gated or ordinary FFN; SiLU, GELU, GELU-new, or ReLU |
+| Weight layouts | Separate or fused QKV source tensors; declarative slice, reshape, and transpose transforms |
+| Weights | FP32, symmetric per-output-channel INT8, grouped INT4, optional mixed FP32 protection |
+| Execution | Native prefill, single-token decode, chunked cache evaluation, greedy generation, persistent worker threads |
+
+Built-in adapter boundaries are:
+
+| Adapter | Covered semantics | Important restriction |
 |---|---|---|
-| ONNX importer and graph IR | Implemented | Shape metadata, graph validation, producer/consumer maps |
-| Constant folding | Implemented | Small constant-only subgraphs; 16 MiB materialization guard |
-| CNN fusion | Implemented | Conv+BatchNorm folding, then Conv+ReLU |
-| Transformer rewrites | Graph passes implemented | MatMul+bias and Gemm+activation; Qwen-pattern RMSNorm, RoPE table, RepeatKV, Attention, SwiGLU MLP |
-| Native Transformer operators | Partial FP32 execution | RMSNorm, two-output RoPE tables, RepeatKV, mask-aware scaled Attention, and fused SwiGLU MLP |
-| Dynamic KV cache | Session API implemented | Caller-owned per-layer FP32 cache; append/reset, grouped-query decode without materializing repeated K/V, and named-input graph execution |
-| INT8 calibration and conversion | Implemented in Python | Per-tensor activation scales, per-output-channel Conv/Gemm/MatMul weight scales; NumPy execution simulates quantized values |
-| Memory planning | JSON and native arena implemented | Version 3 embeds 64-byte-aligned offsets; C++ executes directly in the arena; default v2 buffer-pool path remains available |
-| `.leaf` artifact and native executor | FP32 and selected INT8 paths implemented | Version 2 stores aligned typed weights and per-channel scales; version 3 also embeds an arena plan |
-| Native kernels | FP32 and INT8 kernels implemented | Scalar build is available; AVX2/FMA build is optional and faster on the measured host |
-| Full-model Qwen in Leaf | Pending | Qwen benchmark below provides a PyTorch CPU reference |
-| Structured pruning and trained-model quality gates | Pending | No CIFAR accuracy or Qwen perplexity claim yet |
+| Llama / Qwen2 | RMSNorm, standard RoPE, gated FFN, MHA/GQA | Scaled RoPE and Q/K normalization rejected |
+| Mistral | Compatible dense decoder blocks | Sliding-window configurations rejected |
+| GPT-2 | LayerNorm, learned positions, fused QKV/Conv1D layouts, GELU-new | Nonstandard attention scaling/upcast variants rejected |
+| GPT-NeoX | LayerNorm, partial RoPE, parallel or sequential residuals, fused per-head QKV | Unsupported positional/norm extensions require new operators |
+| OPT | Pre-norm LayerNorm, learned position offset, ordinary FFN | Post-norm or unequal embedding/hidden projection variants rejected |
+| Custom plan | Supported components above with explicit tensor mappings | A new mapping does not implement a missing operator |
 
-The operator and cache paths above pass standalone and two-step decode tests.
-The complete decoder graph, large-model export, and end-to-end Leaf parity are
-not yet implemented. Pattern recognition and operator checks are not a claim
-of full Qwen inference or speedup.
+Eight reduced-model cases across five architecture families test complete
+forward passes, scalar/vector execution, two-thread FP32 execution, chunked KV
+cache, generation, and precision candidates. The extra variants exercise an odd
+GPT-2 head width, bias-free/tied GPT-NeoX, and bias-free OPT. Their weights are
+random; trained model quality is checked separately.
 
-General-purpose describes the architecture and intended direction, not a
-claim that every ONNX model runs today. The native executor accepts named
-inputs and outputs through its C++ API and the inference CLI; the graph
-latency benchmark CLI still targets one input and output. Conv is limited to
-one NCHW image with one group.
-Unsupported operators and layouts fail explicitly. Operator coverage,
-dynamic shapes, batching, and CPU-specific dispatch are expanded against
-independent model tests rather than hard-coded for the named benchmarks.
+Encoder-decoder models, mixture-of-experts routing, sliding-window attention,
+scaled RoPE, Q/K normalization, arbitrary dynamic graph shapes, multiple EOS
+terminators, and general sampling policies are not implemented. Existing
+generation uses a single scalar EOS or no-stop sentinel. Source
+`generation_config.json` termination settings must match the supported plan;
+multiple, malformed, or mismatched EOS settings are rejected. Greedy generation
+and `--max-tokens` are explicit Leaf CLI policies, not implementation of every
+Hugging Face generation default. Unsupported semantics
+must be added and independently validated before claiming those models work.
 
-## 3. Architecture and artifact boundary
+### 3.2 ONNX graph execution
 
-```mermaid
-%%{init: {"themeVariables": {"fontSize": "20px"}, "flowchart": {"nodeSpacing": 65, "rankSpacing": 80}}}%%
-flowchart TB
-    subgraph BUILD[1. Offline model preparation]
-      direction LR
-      MODEL[Trained model] --> ONNX[ONNX export] --> IR[Validated Leaf IR]
-      IR --> OPT[Constant folding<br/>CNN and Transformer rewrites]
-      OPT --> CAL[Optional INT8 calibration]
-    end
-    subgraph ARTIFACT[2. Versioned, self-contained artifact]
-      direction LR
-      OPT --> FP[FP32 typed weights]
-      CAL --> INT8[INT8 weights<br/>per-channel scales]
-      FP --> FILE[.leaf v2 or v3]
-      INT8 --> FILE
-      PLAN[Optional liveness plan<br/>64-byte aligned] --> FILE
-      OPT --> PLAN
-    end
-    subgraph DEPLOY[3. CPU-only execution]
-      direction LR
-      FILE --> EXEC[C++ graph executor]
-      EXEC --> BUFFER[Reusable buffers<br/>or planned arena]
-      EXEC --> CACHE[Optional per-session<br/>dynamic KV cache]
-      BUFFER --> KERNEL[Portable scalar<br/>or AVX2 kernels]
-      CACHE --> KERNEL
-      KERNEL --> OUTPUT[Inference output]
-    end
-    MODEL -. numerical reference .-> CHECK[Parity, latency,<br/>memory and quality gates]
-    OUTPUT --> CHECK
-```
+| Component | Current state and boundary |
+|---|---|
+| Import and graph IR | Shapes, dtypes, named inputs/outputs, producer/consumer validation |
+| Constant folding | Supported constant-only arithmetic/shape subgraphs; 16 MiB materialization guard |
+| CNN rewrites | Conv+BatchNorm folding and single-consumer Conv+ReLU epilogue fusion |
+| Transformer rewrites | MatMul+bias, Gemm+activation, and recognized RMSNorm/RoPE/RepeatKV/Attention/SwiGLU motifs |
+| Native graph operators | Conv, BatchNorm, ReLU, Add, MaxPool, GlobalAveragePool, Flatten, Gemm, MatMul, Identity, RMSNorm, RoPE_Table, RepeatKV, Attention, SwiGLU MLP, Sigmoid, Mul |
+| Quantization | Symmetric activation INT8 and per-output-channel Conv/Gemm/MatMul weight scales |
+| Memory | v2 reusable buffers; optional v3 aligned liveness arena |
+| Session cache | Caller-owned per-layer FP32 K/V append/reset and direct GQA cache access |
+| CNN layout | Batch-one NCHW Conv with one group; broader batching/layouts remain future work |
 
-Version 2 `.leaf` carries FP32/INT8 initializers and calibrated scales.
-Version 3 additionally embeds the exported liveness plan and executes its
-offsets directly in an aligned C++ arena. The `leaf-memory-plan-v1` JSON
-remains available for inspection. Version 2 remains the default artifact
-until the planned path shows a repeatable whole-model advantage.
+Graph-pattern recognition is not the same as accepting every ONNX export.
+The complete decoder route avoids assuming that a particular exporter emits
+only the graph executor's current operator subset.
 
-## 4. Optimization pipeline, step by step
+### 3.3 Datasets are adapters, not hard-coded identities
 
-```mermaid
-%%{init: {"themeVariables": {"fontSize": "20px"}, "flowchart": {"nodeSpacing": 65, "rankSpacing": 85}}}%%
-flowchart TB
-    A[1 · Import ONNX and validate shapes/dependencies]
-    B[2 · Fold export-time constants]
-    C[3 · Rewrite CNN and Transformer motifs]
-    D{4 · Select precision}
-    E[FP32 tensors]
-    F[Representative-data INT8 calibration<br/>and per-channel weight conversion]
-    G[5 · Compute optional liveness plan]
-    H[6 · Export aligned .leaf v2/v3]
-    I[Run supported graph in C++<br/>portable scalar or AVX2]
-    J[7 · Check PyTorch parity, latency and RSS]
-    K{No numerical or speed regression?}
-    L[Keep measured improvement]
-    M[Revise or reject candidate]
-    A --> B --> C --> D
-    D --> E --> G
-    D --> F --> G
-    G --> H --> I --> J --> K
-    K -- yes --> L
-    K -- no --> M
-```
+Text quality validation accepts local TXT/Markdown, JSON arrays, JSONL/NDJSON,
+CSV, and Parquet, with a configurable text column. JSONL, CSV, and Parquet
+iterate records/batches; plain-text token prefix reading is bounded. JSON arrays
+are eager, so prefer JSONL for large corpora.
 
-### Step 1: Import and validate
+The native classification runner consumes prepared FP32 tensors, labels, and
+reference outputs independently of a dataset name. CIFAR-10 is one benchmark
+adapter providing the image decoding, normalization, and trained model.
 
-Export an eval-mode PyTorch model to ONNX, then load it with
-`Graph.from_onnx`. Leaf stores nodes, initializers, shapes, dtypes, inputs,
-outputs, and metadata. Validation checks missing values and cycles before a
-rewrite can alter the graph. The ResNet test uses a full 20-Conv, eight
-residual-Add, one-Gemm architecture at 32×32 for fast offline verification.
+This architecture permits additional datasets, but does not automatically
+supply preprocessing or task metrics for every dataset. New tasks need their
+own reproducible input adapter and appropriate held-out quality gate.
 
-### Step 2: Fold constants
+## 4. Architecture
 
-The optimizer evaluates constant-only arithmetic and shape subgraphs once at
-export time. It can fold `Constant`, `Identity`, arithmetic, `MatMul`, `Gemm`,
-`Reshape`, `Transpose`, `Concat`, `Squeeze`, `Unsqueeze`, `Gather`, `Shape`, and
-`Cast`. Outputs larger than 16 MiB remain as nodes, preventing accidental
-artifact inflation. Unused initializers are removed.
+![Leaf architecture: import adapters, separate artifact routes, and native execution](docs/architecture.svg)
 
-### Step 3: Rewrite the graph
+[Open the full-size architecture diagram](docs/architecture.svg).
 
-For CNNs, BatchNorm's fixed eval statistics become Conv weights and bias;
-then a single-consumer ReLU can become the Conv epilogue. For transformer
-feed-forward blocks, `MatMul + constant bias` becomes `Gemm`, followed by
-optional GELU, SiLU, or ReLU epilogue fusion. Separate Qwen ONNX pattern
-passes recognize RMSNorm, RoPE table construction, grouped KV repetition,
-attention, and SwiGLU MLP. The Attention rewrite records whether a nonzero
-mask means valid or masked-out, preserving the source graph's mask polarity.
-RepeatKV fusion records a repeat count only when static head metadata proves
-it; otherwise it leaves the source graph intact.
-Each pass preserves graph order and checks
-consumer relationships so a shared intermediate is not removed incorrectly.
+Offline preparation and deployed execution are separate. ONNX graph artifacts
+and decoder artifacts have different formats and runtimes; neither is silently
+treated as the other. The decoder uses runtime scalar/AVX2/FMA/optional VNNI
+dispatch. The graph executor is built portable by default or with explicitly
+enabled AVX2/FMA.
 
-### Step 4: Calibrate and simulate INT8
+A graph can run directly through the native API/executable without Python.
+The `leaf` generation command retains a lightweight Python/tokenizer launcher,
+but no PyTorch or Transformers model is needed in its inference loop.
 
-Representative input samples collect min/max activation ranges. Leaf uses
-symmetric INT8 with one scale per activation tensor and one scale per output
-channel for Conv/Gemm/MatMul weights. The NumPy reference executor then
-simulates quantize/dequantize at those nodes and compares the output with
-PyTorch. Version 2 `.leaf` stores INT8 initializer bytes and scales directly;
-the native executor quantizes activations and dispatches Conv/Gemm/MatMul.
-When a weight is shared by consumers that need different channel axes or by
-an FP32 consumer, export retains separate correctly typed copies.
-The real CIFAR subset below uses 32 images for calibration and 100 different
-images for evaluation.
+## 5. Implementation pipeline, step by step
 
-### Step 5: Plan memory
+![Leaf optimization loop: independent data, trained quality, stable full-workload speed, and iterative rejection](docs/optimization-loop.svg)
 
-`plan_memory` computes first and last uses of each statically shaped tensor.
-It assigns 64-byte-aligned offsets, reusing a block only after its prior
-tensor dies. Unknown shapes are listed explicitly as unplanned. A graph
-fingerprint lets an exported plan be checked against the graph it describes.
-When embedded in a version 3 artifact, C++ validates allocation bounds and
-overlapping live intervals, then writes planned outputs directly to the
-64-byte-aligned arena. Tensors without known static shapes still use the
-existing buffer pool. The default version 2 path continues to reuse retired
-buffers without an arena.
+[Open the full-size optimization-loop diagram](docs/optimization-loop.svg).
 
-### Step 6: Export and execute in C++
+### Step 1: Import explicit semantics
 
-The exporter writes a versioned `.leaf` file with nodes, attributes, and
-32-byte-aligned typed weights. Pass `memory_plan=plan` to `export_graph` to
-embed the arena plan in version 3. `leaf_infer` loads either version and
-executes the supported operators: Conv, BatchNorm, ReLU, Add, MaxPool,
-GlobalAveragePool, Flatten, Gemm, MatMul, Identity, RMSNorm, RoPE_Table,
-RepeatKV, Attention, SwiGLU MLP, Sigmoid, and elementwise Mul. Attention accepts FP32 Q/K/V with
-contiguous `[batch, heads, tokens, head_dim]` layout and a broadcastable
-four-dimensional mask; it produces `[batch, query_tokens, heads, head_dim]`.
-The native RoPE node produces both cosine and sine tensors. The named-input
-executor path supports multiple graph outputs, while `run_outputs_cached`
-accepts a caller-owned cache map. A cached Attention node is opt-in through
-its `cache_id` attribute; new K/V tokens are appended for each call, and
-grouped-query heads access the cache without materialized RepeatKV copies.
-The caller clears the map between sequences. These paths do not yet form a
-complete decoder.
-`leaf_graph_bench`
-measures repeated full-graph inference. Native
-scalar kernels are correctness baselines; AVX2/FMA GEMM, im2col Conv, packed
-Conv weights, fused ReLU, and signed INT8 GEMM/Conv kernels are benchmarked
-separately. Native INT8 graph execution is available for supported ops, but
-remains opt-in because the measured small whole graphs below are slower.
+For ONNX, `Graph.from_onnx` records nodes, initializers, shapes, types, inputs,
+outputs, and metadata. Validation rejects missing producers and cycles before
+rewrites modify a graph.
 
-### Step 7: Keep or reject a speed change
+For decoders, an import adapter constructs `leaf-decoder-plan-v1` with dimensions,
+norm/position/attention/residual/FFN choices and tensor mappings. GPT-style fused
+QKV and Conv1D weights are reshaped/transposed at preparation time. Tied
+embeddings/output weights can share payloads when their transforms and
+precision match.
 
-Run numerical parity first, then warmed latency tests on the same machine,
-shape, dtype, and thread count. A microkernel speedup is recorded as a
-microkernel result; it is not assumed to speed up the complete model. The
-project's native benchmark command fails if an optimized kernel loses to its
-scalar Leaf baseline.
+The motive is correctness across architectures: different layouts should not
+change attention geometry or numerical semantics. An unsupported feature is an
+error, not a configuration silently discarded.
 
-## 5. Reproduce the development checks
+### Step 2: Fold export-time constants
 
-From the repository root on Windows, install the development dependencies and
-run the complete currently automated gate:
+Constant-only arithmetic and shape work is evaluated once during ONNX
+preparation. Supported folding includes `Constant`, `Identity`, arithmetic,
+`MatMul`, `Gemm`, `Reshape`, `Transpose`, `Concat`, `Squeeze`, `Unsqueeze`,
+`Gather`, `Shape`, and `Cast`. Outputs over 16 MiB stay as nodes; unused
+initializers are removed.
 
-```powershell
+The motive is to remove repeated work without inflating the artifact. This
+folding pass belongs to the graph route; it is not a claim that all listed
+operators can execute dynamically in the native graph runtime.
+
+### Step 3: Fuse only proven graph relationships
+
+Fixed eval BatchNorm statistics become Conv weights and bias. A ReLU can join
+the Conv epilogue only when consumer relationships permit it. MatMul with
+constant bias becomes Gemm, followed by optional GELU/SiLU/ReLU epilogue fusion.
+
+Recognized Transformer graph motifs include RMSNorm, RoPE table construction,
+RepeatKV, mask-aware Attention, and SwiGLU. Attention preserves mask polarity;
+RepeatKV records its count only when static head metadata proves it. Shared
+intermediates are not removed without checking their consumers.
+
+The decoder plan describes equivalent block-level operations directly rather
+than depending on one model family's ONNX naming patterns.
+
+### Step 4: Establish FP32 whole-model correctness
+
+Export native FP32 first. Compare full outputs with PyTorch, not only a norm or
+linear operator. Decoder validation checks every held-out token's logits,
+chunked versus full-context cache execution, and greedy generation. CNN
+validation checks all classifier outputs and task predictions.
+
+Scalar execution is a numerical reference for accelerated native kernels.
+Reduced random models cover combinations of architecture semantics; trained
+weights and real datasets supply the quality gates.
+
+### Step 5: Prepare precision candidates using independent calibration
+
+For graph INT8, representative inputs collect symmetric activation ranges;
+Conv/Gemm/MatMul weights use per-output-channel scales. Export stores signed
+INT8 bytes and their scales, and native execution quantizes activations.
+
+For decoder candidates:
+
+- W8A32 uses per-output-channel INT8 weights with floating activations.
+- W4A32 packs signed INT4 weights in groups (default 64 columns) with floating
+  activations.
+- W8A8 dynamically quantizes linear inputs; independent channel calibration can
+  smooth difficult activation channels.
+- Protected INT8 leaves specified embeddings/output tensors in source FP32.
+- Grouped INT8 is an additional candidate, not an assumed improvement.
+
+For channel smoothing, preparation uses activation maxima `a_j` and weight
+column maxima `w_j` to choose `s_j = a_j^alpha / w_j^(1-alpha)` (default
+`alpha=0.5`, with finite/clipped safeguards). It stores scaled weights `W·s` and
+the input factor `1/s`, preserving the algebraic FP32 linear transformation
+before quantization. This follows the channel-rescaling principle of
+[SmoothQuant](https://github.com/mit-han-lab/smoothquant).
+
+The calibration artifact records source weight/configuration and dataset hashes.
+Evaluation uses a different split. Calibration is preparation work; the
+deployment decoder reads packed weights/scales without a resident PyTorch model.
+
+### Step 6: Export aligned artifacts and reuse memory
+
+Graph v2 stores typed FP32/INT8 payloads; optional graph v3 also embeds the
+`leaf-memory-plan-v1` liveness offsets. The planner reuses an allocation only
+after its previous tensor dies. C++ validates bounds and live-range overlap,
+then writes directly into the aligned arena. Unknown shapes remain explicit
+and use reusable fallback storage.
+
+Decoder `LEAFDC02` stores block semantics, immutable mapped weights, quantization
+scales, and optional input rescaling. Its session owns reusable workspaces and
+a per-layer growing FP32 KV cache within the configured context capacity.
+It does not apply the ONNX graph's v3 liveness plan.
+
+Exported-cache provenance seals source/configuration, the plan, precision
+policy, protected tensors, calibration, and the resulting artifact hash.
+Changing any of these requires preparing a new candidate; a timing-only phase
+cannot silently reuse an unsealed or mismatched export request.
+
+### Step 7: Execute prefill and decode natively
+
+The C++ decoder executes embeddings, positions, norms, projections, attention,
+residuals, FFN, output projection, and greedy token selection. GQA reads the
+session's KV storage directly without materializing repeated K/V tensors.
+
+Hot matrix paths include portable scalar, runtime-dispatched AVX2/FMA, and
+optional AVX-VNNI W8A8 prefill on supported compiler/CPU combinations. VNNI uses
+byte-packed unsigned activations, cached signed-weight sums, and zero-point
+correction. The tested AVX2 fallback remains available; single-token decode
+uses its existing kernel. Persistent workers avoid creating threads per op.
+
+Packing and weight-sum preprocessing add startup cost. Warmed prefill/decode
+tables exclude constructor/export/tokenization time, so CLI first-token and
+end-to-end observations are recorded separately.
+
+### Step 8: Gate quality and stable whole-model speed
+
+The decoder's fixed quality thresholds are:
+
+| Weight precision | Minimum scored next-token agreement | Maximum perplexity / PyTorch perplexity |
+|---|---:|---:|
+| FP32 | 99.9% | 1.001 |
+| INT8 | 95.0% | 1.020 |
+| INT4 | 90.0% | 1.050 |
+
+Agreement counts the same causal target positions used for perplexity; the
+last input position of each independent block is not scored. Passing subset
+perplexity is not a claim of whole-corpus quality. FP32 also requires logit
+allclose and exact reference greedy generation. Quantized generation agreement
+is reported separately and is not assumed from a passing aggregate quality gate.
+
+A timing phase requires at least five finite positive samples. Linear
+percentiles must satisfy `p90/p10 <= 1.25` in both phases for the candidate and
+native FP32, and for the fastest PyTorch reference in each relevant phase.
+Outliers are retained; unstable runs cannot enable automatic selection.
+
+Classification uses a separate task gate: trained accuracy may drop by at most
+0.5 percentage points, and FP32 outputs must pass the stated logit tolerance.
+Full-dataset timing stability compares independent whole-pass medians, rather
+than treating different images' intrinsic costs as timing noise.
+
+Only a candidate satisfying its quality, stability, and speed gates is
+promoted. A fast but inaccurate GPT-2 variant and a compact but slow CNN INT8
+artifact are useful findings, not successful optimizations.
+
+### Step 9: Iterate on bottlenecks
+
+Profile a complete workload, change one factor, check parity, and measure again.
+Preserve failed candidates and raw timings. Tiling, packing, cache behavior,
+threading, and precision protection are experiments until their whole-model
+evidence qualifies them. There is no final-report phase that ends development.
+
+The optional native profiler groups multi-token and single-token forwards and
+reports operation classes, calls, tokens, and aggregate milliseconds. It includes
+all forward calls, including warmups; nested phase totals are not independent
+additive end-to-end timers. Profiling adds measurement cost and is for diagnosis
+only. The native comparison harness clears profiling for its timed children.
+
+## 6. Reproduce validation and benchmarks
+
+### 6.1 Complete automated repository gate
+
+From the repository root on Windows:
+
+~~~powershell
 python -m pip install -r requirements-dev.txt
 ./scripts/verify_all.ps1
-```
+~~~
 
-That command runs Python tests, builds and runs native correctness tests,
-enforces the native kernel speed gate, writes the deterministic PyTorch/NumPy
-baseline JSON, and verifies the FP32 C++ ResNet output against PyTorch. The
-latest run passed the Python and native/C++ checks. The default
-native build uses GCC with `-O3 -mavx2 -mfma` on compatible x86 CPUs. A
-portable scalar build is available with:
+The last completed full Python suite passed **598 tests**, with no skips and
+four existing ONNX-export deprecation warnings. The complete native verification
+command also passed: native correctness, executor/buffer tests, scalar-versus-
+optimized kernel speed gates, synthetic PyTorch/NumPy checks, full FP32 ResNet
+parity, INT8 graph integration, memory planning, norms, attention, SwiGLU,
+RoPE/RepeatKV, KV-session tests, and reduced complete decoder architecture checks.
 
-```powershell
+This automated command does not download trained models or substitute its
+synthetic checks for trained quality/latency results.
+
+Portable graph build:
+
+~~~powershell
 ./scripts/build_native.ps1 -Portable -BuildDirectory build/portable
 ./build/portable/leaf_native_tests.exe
-```
+~~~
 
-The portable build passed the native kernel and INT8 graph parity checks.
-CMake is an alternative:
+Decoder build and architecture checks:
 
-```powershell
+~~~powershell
+./scripts/build_decoder.ps1
+python tools/verify_decoder_architectures.py --executable build/leaf_decoder.exe --output benchmark/results/decoder_architectures.json
+~~~
+
+CMake alternative:
+
+~~~powershell
 cmake -S . -B build/cmake -DCMAKE_BUILD_TYPE=Release
 cmake --build build/cmake --config Release
 ctest --test-dir build/cmake -C Release --output-on-failure
-```
+~~~
 
-CMake defaults to portable kernels; configure with
-`-DLEAF_ENABLE_AVX2=ON` only for compatible CPUs.
+CMake graph kernels default to portable. Enable `-DLEAF_ENABLE_AVX2=ON` only
+for compatible deployment CPUs. The decoder's optional target-specific kernels
+use runtime dispatch rather than a globally native-ISA build.
 
-The CMake route was also configured, built, and tested on Linux; all five
-CTest targets passed.
+### 6.2 Trained decoder quality and latency
 
-Individual checks can be run with:
+Use complete compatible snapshots. The following Windows example uses logical
+CPU 2 because that is the recorded host configuration; choose a valid logical
+CPU on your device, or omit the pin consistently.
 
-```powershell
-python -m pytest -q
-./scripts/build_native.ps1
-./build/leaf_native_tests.exe
-./build/leaf_kernel_bench.exe --enforce-speedup --output benchmark/results/native_latest.json
-python -m benchmark.run_baselines
-python tools/verify_cpp_runtime.py --leaf-infer ./build/leaf_infer.exe
-python tools/verify_quantized_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe
-python tools/verify_memory_plan_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe --enforce-no-slowdown
-python tools/verify_transformer_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe --portable-infer ./build/portable/leaf_infer.exe --portable-bench ./build/portable/leaf_graph_bench.exe --enforce-no-slowdown
-python tools/verify_swiglu_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe --enforce-no-slowdown
-python tools/verify_attention_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe --portable-infer ./build/portable/leaf_infer.exe --portable-bench ./build/portable/leaf_graph_bench.exe --enforce-no-slowdown
-python tools/verify_rope_repeatkv_runtime.py --leaf-infer ./build/leaf_infer.exe --leaf-bench ./build/leaf_graph_bench.exe
-python tools/verify_kv_cache_runtime.py --session-exe ./build/leaf_kv_session.exe
-```
+~~~powershell
+python -m tools.calibrate_decoder --model C:\models\decoder --dataset benchmark/data/wikitext2-train.parquet --output build/decoder/calibration.npz --threads 1
+python tools/validate_decoder.py --model C:\models\decoder --dataset benchmark/data/wikitext2-test.parquet --dataset-source https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e/wikitext-2-raw-v1 --workdir build/decoder --executable build/leaf_decoder.exe --calibration build/decoder/calibration.npz --threads 1 --cpu 2 --warmup 5 --runs 11 --output benchmark/results/trained_decoder.json
+~~~
 
-The Python/NumPy executor is a numerical oracle. Its latency appears in the
-results so Python overhead is visible, but it is not the deployment runtime.
+Use `--protected-int8 --grouped-int8 --grouped-int8-smooth` to reproduce the
+additional GPT-2 precision candidates. Supply `--plan` for a custom supported
+architecture plan and `--text-column` for another dataset schema.
 
-## 6. Real CIFAR-10 benchmark setup
+`--phase all` runs reference and native evaluation in separate processes, so a
+resident multi-gigabyte PyTorch model does not compete with mapped native
+weights. `--phase baseline` and `--phase native` allow explicit staging.
+`--phase latency` refreshes timing only after checking sealed baseline-quality
+caches, native artifact/executable identities, and export-request provenance.
+If those checks fail, run full validation rather than relabeling old quality.
 
-The test data is the University of Toronto CIFAR-10 test split served by its
-[Hugging Face dataset mirror](https://huggingface.co/datasets/uoft-cs/cifar10/tree/main/plain_text).
-The 23,940,850-byte Parquet file used for this run has SHA-256
-`841389e6f2d64f28bf17310e430aebac20ec3ba611a3c5e231dc93c645ce84de`.
-The first 132 original-order test images were prepared locally; the data files
-are Git-ignored. Images 0–31 calibrate the small CNN optimizer graph, and
-images 32–131 evaluate it. The full ResNet comparison uses the first 20
-images. Download and prepare once:
+The committed TinyLlama/GPT-2 records preserve their completed evaluation.
+They predate the later export-request sidecar hardening and are not silently
+rewritten to claim a new full validation. Fresh optimization creates the sealed
+provenance needed for future timing-only refreshes.
 
-```powershell
+Published text measurements use the first eight contiguous 128-token blocks
+from WikiText-2 test: 1,024 input tokens and 1,016 scored causal targets. Channel
+calibration uses four 128-token blocks (512 tokens) from the separate training
+split. This is a reproducible held-out subset, not full WikiText perplexity.
+
+### 6.3 Full trained CIFAR-10
+
+Use the published
+[trained ResNet-20 checkpoint](https://github.com/chenyaofo/pytorch-cifar-models)
+and original-order CIFAR-10 train/test splits. Large files remain Git-ignored.
+
+~~~powershell
 New-Item -ItemType Directory -Force benchmark/data | Out-Null
-Invoke-WebRequest -Uri 'https://huggingface.co/datasets/uoft-cs/cifar10/resolve/main/plain_text/test-00000-of-00001.parquet' -OutFile benchmark/data/cifar10-test.parquet
-python -m benchmarks.prepare_cifar10 --samples 132
-```
-
-The preparation command needs `pyarrow` and Pillow. Check the downloaded
-file's hash if reproducing the exact rows. With the generated NPZ present,
-the actual benchmarks run offline:
-
-```powershell
-python -m benchmarks.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1
+Invoke-WebRequest -Uri 'https://github.com/chenyaofo/pytorch-cifar-models/releases/download/resnet/cifar10_resnet20-4118986f.pt' -OutFile benchmark/data/cifar10_resnet20-4118986f.pt
+Invoke-WebRequest -Uri 'https://huggingface.co/datasets/uoft-cs/cifar10/resolve/0b27149/plain_text/test-00000-of-00001.parquet' -OutFile benchmark/data/cifar10-test.parquet
+Invoke-WebRequest -Uri 'https://huggingface.co/datasets/uoft-cs/cifar10/resolve/0b27149/plain_text/train-00000-of-00001.parquet' -OutFile benchmark/data/cifar10-train.parquet
 ./scripts/build_native.ps1
+python -m benchmarks.bench_cifar10_full --samples 10000 --cpu 2 --output benchmark/results/cifar10_full_trained.json
+~~~
+
+The benchmark verifies the checkpoint hash and uses the published CIFAR
+normalization (RGB means `[0.4914, 0.4822, 0.4465]`, standard deviations
+`[0.2023, 0.1994, 0.2010]`). It calibrates INT8 on the first 64 **training**
+images and evaluates all 10,000 test images. PyTorch runs before and after
+native passes. Native order is unfused FP32, fused FP32, planned FP32, INT8,
+then the reverse order, with 20 warmups per process.
+
+Important source hashes:
+
+| Asset | SHA-256 |
+|---|---|
+| CIFAR test Parquet | `841389e6f2d64f28bf17310e430aebac20ec3ba611a3c5e231dc93c645ce84de` |
+| CIFAR train Parquet | `8428b53a88a11ac374111006708df51469e315a22ac6d66470afd9c78d2ae883` |
+| Trained ResNet-20 checkpoint | `4118986f0df73003d572b0e397f0ac7b3f60af1f31aff3d2da164536e36f6ec8` |
+| WikiText-2 test Parquet | `5f1bea067869d04849c0f975a2b29c4ff47d867f484f5010ea5e861eab246d91` |
+| WikiText-2 train Parquet | `e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7` |
+
+Text dataset provenance:
+[WikiText-2 pinned revision](https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e/wikitext-2-raw-v1).
+Image dataset provenance:
+[CIFAR-10 pinned revision](https://huggingface.co/datasets/uoft-cs/cifar10/tree/0b27149/plain_text).
+
+### 6.4 Historical subset and cached-Qwen reproduction
+
+The earlier real-image optimizer tests use an untrained small CNN and seeded
+ResNet-18; they are still useful parity/latency regressions, not trained accuracy
+baselines:
+
+~~~powershell
+python -m benchmarks.prepare_cifar10 --samples 132
+python -m benchmarks.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1
 python -m benchmarks.bench_cifar10_resnet18 --samples 20 --warmup 5 --runs 10 --threads 1
 python -m benchmarks.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1 --leaf-infer build/leaf_infer.exe --leaf-bench build/leaf_graph_bench.exe --native-evaluation-samples 20 --output benchmark/results/cifar10_native_int8.json
-```
+~~~
 
-The small CNN graph is an untrained 3→8 Conv/BatchNorm/ReLU optimizer test at
-16×16. The full ResNet-18 has deterministic random weights and runs at the
-original 32×32 resolution. These runs establish numerical parity and latency
-on real images; neither supplies a trained CIFAR classifier, so classification
-accuracy is not reported. A trained model and separate held-out accuracy gate
-are still needed before making an accuracy claim.
+The original Qwen2.5-0.5B PyTorch-only cache reference remains reproducible from
+a complete local snapshot without implicit downloads:
 
-## 7. Qwen2.5-0.5B reference benchmark
-
-The benchmark loads locally cached Qwen2.5-0.5B weights without network
-access. The measured snapshot revision is
-`060db6499f32faf8b98477b0a26969ef7d8b9987`. It runs in FP32 on one
-CPU thread and uses the same fixed 64-token input for two next-token
-computations:
-
-1. Recompute all 64 tokens without a KV cache.
-2. Prefill the first 63 tokens outside timing and decode the last token with
-   the populated KV cache.
-
-It checks maximum logit difference and next-token argmax agreement. Run the
-following from the repository root in an environment containing the cached
-model:
-
-```bash
+~~~bash
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m benchmarks.bench_qwen25_cached --model Qwen/Qwen2.5-0.5B --threads 1 --sequence-length 64 --warmup 1 --runs 5
-```
+~~~
 
-`--model` also accepts a complete local snapshot directory. The benchmark
-does not download weights implicitly. Its output is a PyTorch KV-cache
-reference for future Leaf Transformer execution, not a Leaf full-model
-measurement.
+`--model` also accepts a full local snapshot directory. It compares a 64-token
+uncached forward with one last-token decode after untimed 63-token prefill.
+This Qwen record is not a trained full-Qwen Leaf run. A complete Qwen weight
+snapshot was unavailable for the newer native-decoder evaluation; the complete
+cached TinyLlama snapshot and a second trained GPT-2 architecture supplied those
+checks instead.
 
-For another locally available causal decoder, supply its complete snapshot
-with `--model`, a distinct `--benchmark-name`, and a separate `--output`.
-This was used for the TinyLlama fallback measurement below; its numbers are
-not interchangeable with Qwen's.
+### 6.5 Native experiment and cached full-command harnesses
 
-## 8. Measured results and what each number means
+Compare two binaries against unchanged trained artifacts and reference caches:
 
-All results below are development-machine observations, not target-machine
-promises. Windows runs used an Intel Core i7-14700HX, Windows 11, one CPU
-thread, PyTorch 2.12.0+cpu, and GCC 15.2.0 for native code. The Qwen run used
-WSL2 on the same host, Python 3.12.3, Transformers 4.57.6, and CPU execution.
-Source JSON/CSV files are under
-[`benchmark/results`](benchmark/results/README.md).
+~~~powershell
+python tools/benchmark_decoder_comparison.py --before C:\runtimes\validated_decoder.exe --after C:\runtimes\candidate_decoder.exe --workdir build/decoder --record benchmark/results/gpt2_full_decoder.json --keys 32 8-protected --warmup 3 --runs 7 --output benchmark/results/decoder_comparison.json
+~~~
 
-### 8.1 Real CIFAR-10, full ResNet-18, C++ versus PyTorch
+Use the model's matching reference record, artifact directory, and frozen
+baseline binary. The harness verifies hashes, rechecks the complete held-out
+quality/chunked cache/generation, and runs before–after–after–before serially.
+Within-pass p90/p10 and between-pass median ratios must stay within 1.25; both
+prefill and decode may regress by no more than 2%, and prefill must improve by
+at least 2% for native acceptance. This does not run fresh PyTorch timings or
+authorize automatic quantization. An optional `--cpu` changes the pin for both
+native stages without pretending old PyTorch timings used the new pin.
+
+`--windows-high-qos` is a separate Windows-only experiment applied and verified
+on both owned child processes. It is not a CLI default, process-priority change,
+or persistent system power-plan change. The API policy is described in
+[Microsoft's SetProcessInformation documentation](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setprocessinformation).
+It does not, by itself, prove why a particular CPU timing window drifted.
+
+Measure cached command startup, visible streaming, and total time separately:
+
+~~~powershell
+python tools/benchmark_cli.py --model C:\models\decoder --profile benchmark/results/tinyllama_full_decoder.json --artifacts-dir build/decoder --executable C:\runtimes\validated_decoder.exe --cases 32 auto --runs 5 --output benchmark/results/cli_runtime.json
+~~~
+
+This uses a complete local model, matching saved prompt IDs, an unchanged
+validation profile, and its exact native binary. It stages existing artifacts
+in a fresh cache without exporting/building/downloading, then starts a fresh
+Python/native process for every sample. `auto` must genuinely select a qualified
+candidate. Integrity preflight warms the OS file cache; this is not a cold-disk
+benchmark or an installed-wheel qualification. Experimental policy flags must
+be unset for the ordinary qualified comparison.
+
+For native diagnostics, set `LEAF_DECODER_PROFILE` only for a direct native run
+with prepared artifact/request/output paths, then unset it before timing:
+
+~~~powershell
+$env:LEAF_DECODER_PROFILE = '1'
+./build/leaf_decoder.exe C:\runs\decoder.leaf C:\runs\tokens.bin C:\runs\logits.bin C:\runs\metrics.json bench 1 3 1
+Remove-Item Env:LEAF_DECODER_PROFILE
+~~~
+
+The request contains little-endian uint32 sequence count, length, and token IDs.
+The native process emits phase JSON on stderr at shutdown. These profiling
+numbers include warmups and are not acceptance timings. The production CLI is
+not a phase-profile display tool.
+
+## 7. Current trained-model and dataset results
+
+Measurements below were completed on October 2, 2026. The decoder latency
+window used one CPU thread pinned to logical CPU 2, five warmups and eleven
+samples per phase. The host is an Intel Core i7-14700HX, Windows 11, with
+PyTorch 2.12.0+cpu and GCC 15.2.0 native builds. These are observations on that
+configuration, not promises for other devices.
+
+All latency tables report warmed native forward work. Model download/export,
+Python startup, tokenization, image decoding, and native constructor time are
+outside those latency intervals. Raw timing arrays and hashes remain in
+[the result records](benchmark/results/README.md).
+
+The trained precision tables in sections 7.1–7.3 retain the measured binaries,
+including decoder SHA-256
+`890bba185eec56e08dd2aa04d74b4759a3121e5c78058b8527a3a6301b424032`.
+Later research binaries and full-command observations are separate experiments;
+they do not replace or requalify those recorded baselines.
+
+### 7.1 Complete trained TinyLlama-1.1B decoder
+
+The complete 22-layer model uses RMSNorm, RoPE, GQA, and a gated FFN.
+Source weights/configuration hashes, independent calibration, every candidate,
+generation IDs, memory, and raw samples are in
+[tinyllama_full_decoder.json](benchmark/results/tinyllama_full_decoder.json).
+
+Quality on 1,016 held-out causal targets:
+
+| Candidate | Next-token agreement | Subset perplexity | Perplexity / reference | Quality gate | 16-token generation exact |
+|---|---:|---:|---:|---|---|
+| PyTorch FP32 reference | 100% | 13.6974 | 1.0000 | Reference | Reference |
+| Leaf FP32 | 100% | 13.6974 | 1.0000 | Pass | Yes |
+| W8A32 | 97.3425% | 13.7338 | 1.00266 | Pass | Yes |
+| W4A32 | 82.6772% | 15.5113 | 1.13242 | Fail | No |
+| Channel-smoothed W8A8 | 95.0787% | 13.8673 | 1.01240 | Pass | No |
+
+FP32 maximum absolute logit error is `2.2316e-4`, relative RMSE `1.0808e-6`,
+and its greedy generation matches PyTorch exactly. W8A8 passing the aggregate
+quality gate does **not** make its generated text token-identical.
+
+Warmed latency and artifact/memory cost:
+
+| Runtime | 63-token prefill p50 | Cached one-token decode p50 | Artifact bytes | Held-out native peak RSS |
+|---|---:|---:|---:|---:|
+| PyTorch eager FP32 | 1,873.2919 ms | 204.2617 ms | — | — |
+| PyTorch SDPA FP32 | 1,871.8874 ms | 210.7265 ms | — | — |
+| Leaf FP32 | 4,054.3532 ms | 263.2102 ms | 4,400,212,544 | 4,182,384,640 bytes |
+| Leaf W8A32 | 3,591.0361 ms | 103.2698 ms | 1,102,176,832 | 1,078,657,024 bytes |
+| Leaf W4A32 | 5,280.4338 ms | 206.6974 ms | 619,113,024 | 627,978,240 bytes |
+| Leaf smoothed W8A8 | 1,627.2248 ms | 97.3332 ms | 1,103,777,152 | 1,085,812,736 bytes |
+
+PyTorch parameter storage is 4,400,193,536 bytes; recorded resident memory after
+loading is 5,195,530,240 bytes. Native peak RSS above comes from held-out
+evaluation, not the timing process; resident mapped pages and process overhead
+mean artifact size and RSS are different quantities.
+
+On the frozen tested runtime, smoothed W8A8 passes the quality, stability, and
+automatic-selection gates. Against the fastest PyTorch phase baseline it is
+`1.1504×` faster for prefill and `2.0986×` faster for decode. Against native FP32
+it is `2.4916×` and `2.7042×` faster respectively. Ordinary W8A32 has faster decode
+but slower prefill than PyTorch, so it remains unpromoted; INT4 fails quality.
+
+W8A8's timed constructor reports `500.9569 ms` versus FP32's `0.6668 ms` in this
+window. These constructor observations exclude mapped-page costs subsequently
+paid by inference and are not cold-start distributions. Startup preprocessing
+must still be considered when choosing precision for short requests.
+
+### 7.2 Complete trained GPT-2 decoder
+
+GPT-2 supplies a different trained architecture: affine LayerNorm, learned
+positions, fused QKV/Conv1D source layouts, and an ordinary GELU-new FFN.
+The full record is
+[gpt2_full_decoder.json](benchmark/results/gpt2_full_decoder.json).
+
+All seven Leaf candidates were evaluated on the same 1,016 scored targets:
+
+| Candidate | Next-token agreement | Subset perplexity | Perplexity / reference | Quality gate | 16-token generation exact |
+|---|---:|---:|---:|---|---|
+| PyTorch FP32 reference | 100% | 62.5801 | 1.0000 | Reference | Reference |
+| Leaf FP32 | 100% | 62.5801 | 1.0000 | Pass | Yes |
+| W8A32 | 84.1535% | 61.9680 | 0.99022 | Fail | No |
+| W4A32 | 30.4134% | 1,874.1079 | 29.94734 | Fail | No |
+| Channel-smoothed W8A8 | 88.5827% | 63.0767 | 1.00794 | Fail | Yes |
+| Protected W8A32 | 96.8504% | 62.7824 | 1.00323 | Pass | Yes |
+| Grouped W8A8 | 47.7362% | 178.4719 | 2.85190 | Fail | No |
+| Grouped smoothed W8A8 | 92.8150% | 62.2619 | 0.99492 | Fail | Yes |
+
+A lower perplexity alone cannot override a failed next-token-agreement gate.
+One matching short generation also cannot establish held-out quality.
+
+| Runtime | 63-token prefill p50 | Cached one-token decode p50 | Artifact bytes | Automatic selection |
+|---|---:|---:|---:|---|
+| PyTorch eager FP32 | 219.9268 ms | 28.4353 ms | — | Reference |
+| PyTorch SDPA FP32 | 215.4603 ms | 29.5759 ms | — | Reference |
+| Leaf FP32 | 395.6224 ms | 31.0835 ms | 497,777,600 | FP32 fallback |
+| Leaf W8A32 | 377.0227 ms | 12.6908 ms | 125,359,168 | No: quality/prefill |
+| Leaf W4A32 | 491.8874 ms | 26.5319 ms | 70,432,896 | No: quality/prefill |
+| Leaf smoothed W8A8 | 167.7722 ms | 10.7552 ms | 164,499,648 | No: quality |
+| Leaf protected W8A32 | 379.3001 ms | 17.9639 ms | 243,305,408 | No: prefill |
+| Leaf grouped W8A8 | 349.4502 ms | 22.2686 ms | 132,592,128 | No: quality/prefill |
+| Leaf grouped smoothed W8A8 | 354.1289 ms | 22.6191 ms | 173,943,872 | No: quality/prefill |
+
+Protected W8A32 keeps `model.embed_tokens.weight`,
+`model.position_embeddings.weight`, and `lm_head.weight` in source FP32.
+It repairs the quality failure, but prefill remains slower than the fastest
+PyTorch reference. Consequently no GPT-2 quantized candidate is automatically
+selected. Native FP32 remains the conservative fallback; that fallback is not
+a claim that Leaf beats PyTorch.
+
+### 7.3 Trained ResNet-20, complete CIFAR-10 test split
+
+All 10,000 test images were evaluated in every complete pass. Calibration used
+64 separate training images. FP32 native outputs passed allclose with
+`atol=rtol=1e-3` for every image, with maximum absolute logit error
+`1.5259e-5`. The full 10,000-image accuracy baseline is now established:
+
+| Runtime | Correct / 10,000 | Accuracy | Prediction agreement with PyTorch | Maximum absolute logit error | Quality gate |
+|---|---:|---:|---:|---:|---|
+| PyTorch FP32 | 9,260 | 92.60% | Reference | Reference | Reference |
+| Leaf unfused FP32 | 9,260 | 92.60% | 100% | 1.5259e-5 | Pass |
+| Leaf fused FP32 | 9,260 | 92.60% | 100% | 1.5259e-5 | Pass |
+| Leaf planned FP32 | 9,260 | 92.60% | 100% | 1.5259e-5 | Pass |
+| Leaf calibrated INT8 | 9,218 | 92.18% | 98.05% | 3.81844 | Pass: 0.42 percentage-point drop |
+
+INT8 meets the 0.5-percentage-point accuracy gate, but is not FP32-logit
+equivalent: all images fail the strict FP32 allclose tolerance. Its task quality
+gate and FP32 parity criterion intentionally measure different things.
+
+Independent whole-pass p50 values:
+
+| Runtime | First pass p50 | Reverse/repeat pass p50 | Median of pass p50s | Promotion |
+|---|---:|---:|---:|---|
+| PyTorch FP32 | 2.4662 ms | 2.46865 ms | 2.467425 ms | Reference |
+| Leaf unfused FP32 | 7.8905 ms | 4.7493 ms | 6.3199 ms | Baseline unstable |
+| Leaf fused FP32 | 4.5636 ms | 4.6619 ms | 4.61275 ms | No |
+| Leaf planned FP32 | 4.7550 ms | 4.69395 ms | 4.724475 ms | No |
+| Leaf calibrated INT8 | 18.7393 ms | 18.7376 ms | 18.73845 ms | No |
+
+The unfused native baseline drifts by `1.6614×` between complete passes,
+exceeding the `1.25×` stability limit. Every candidate therefore remains
+unpromoted. The observed fused median is lower than the observed unfused median,
+but that is **not** an accepted speed improvement. All native paths also remain
+slower than this PyTorch baseline; INT8 is clearly unsuitable as the latency
+default in this run.
+
+The record preserves all 10,000 per-image timing samples for every native and
+PyTorch pass, rather than dropping the slow baseline:
+[cifar10_full_trained.json](benchmark/results/cifar10_full_trained.json).
+
+### 7.4 Iterative decoder optimization evidence and rejections
+
+The iteration records are retained, including attempts that failed quality or
+did not improve whole-model latency:
+
+| Recorded stage | Relevant prefill / decode p50 | Decision at that stage |
+|---|---:|---|
+| Initial TinyLlama FP32 | 9,351.9285 / 575.3178 ms | Correct, uncompetitive baseline |
+| Initial TinyLlama W8A32 | 14,348.5056 / 943.9697 ms | Quality pass, speed fail |
+| Unsmoothed TinyLlama W8A8 | 6,173.5757 / 222.0356 ms | Quality fail: perplexity ratio 1.04774 |
+| Revised TinyLlama W8A32 | 8,163.6836 / 229.2613 ms | Quality pass, prefill fail |
+| Smoothed W8A8 before prefill tiling | 6,357.1980 / 165.0016 ms | Quality pass, prefill fail |
+| AVX2 4-row/2-token prefill experiment | 2,961.0532 → 2,258.8294 ms prefill | Same-session 23.7% reduction; not independent trained promotion |
+| Same-binary AVX-VNNI comparison | 2,419.6272 → 1,716.1854 ms prefill | Same-session 29.1% reduction; startup cost recorded |
+| AVX2 2-row/4-token alternative | 2,449.3316/2,419.8717 vs 2,329.3248/2,424.1808 ms prefill | Rejected: small, inconsistent gain |
+| VNNI 4-row/3-token alternative | Raw samples retained; baseline jumped to 3,463.1984 ms | Rejected: register spill and unstable session |
+
+Stage timings are from distinct sessions/binaries and cannot be subtracted to
+claim a controlled end-to-end speedup. The trained quality/latency decisions in
+sections 7.1–7.3 are the authoritative current model comparisons.
+
+Records:
+[initial decoder](benchmark/results/tinyllama_decoder_initial.json),
+[dynamic INT8](benchmark/results/tinyllama_decoder_dynamic_i8.json),
+[weight-only](benchmark/results/tinyllama_decoder_weight_only.json),
+[pre-tiling smoothing](benchmark/results/tinyllama_decoder_smoothing_pre_tiling.json),
+[AVX2 tiling](benchmark/results/decoder_prefill_tiling.json),
+[rejected AVX2 tile](benchmark/results/decoder_prefill_tile2_rejected.json),
+[VNNI and rejected wider tile](benchmark/results/decoder_prefill_vnni.json).
+Earlier noisy windows remain in
+[tinyllama_decoder_unstable_latency.json](benchmark/results/tinyllama_decoder_unstable_latency.json)
+and
+[tinyllama_decoder_before_latency_refresh.json](benchmark/results/tinyllama_decoder_before_latency_refresh.json).
+
+Subsequent GPT-2 float-kernel experiments repeated full 1,016-target quality,
+chunked/full cache parity, and greedy generation for FP32 and protected INT8.
+Both policies passed quality in each experiment, but none qualified for a
+default speed change:
+
+| Experiment / policy | Prefill before → after p50 | Decode before → after p50 | Verdict |
+|---|---:|---:|---|
+| Specialized float tile / FP32 | 337.0607 → 274.6343 ms | 28.3863 → 34.9147 ms | Reject: unstable; 23.0% decode regression |
+| Specialized float tile / protected INT8 | 318.1136 → 255.8345 ms | 16.8456 → 18.3489 ms | Reject: unstable; 8.9% decode regression |
+| Float GEMV experiment / FP32 | 462.2968 → 305.7437 ms | 46.1929 → 31.0669 ms | Reject: unstable |
+| Float GEMV experiment / protected INT8 | 795.9624 → 280.7811 ms | 33.1543 → 21.9463 ms | Reject: unstable |
+| Windows HighQoS experiment / FP32 | 356.4927 → 264.9654 ms | 32.1770 → 31.2729 ms | Reject: unstable |
+| Windows HighQoS experiment / protected INT8 | 280.0556 → 270.3266 ms | 17.4765 → 19.4958 ms | Reject: unstable; 11.6% decode regression |
+| CPU 6 + verified HighQoS / FP32 | 319.8759 → 249.4212 ms | 31.4087 → 30.1930 ms | Reject: unstable |
+| CPU 6 + verified HighQoS / protected INT8 | 322.9353 → 251.5526 ms | 18.3674 → 17.2700 ms | Reject: unstable |
+
+Records: [float prefill ABBA](benchmark/results/gpt2_float_prefill_abba.json),
+[float GEMV ABBA](benchmark/results/gpt2_float_gemv_abba.json), and
+[HighQoS ABBA](benchmark/results/gpt2_float_high_qos_abba.json), plus
+[CPU 6 HighQoS ABBA](benchmark/results/gpt2_float_cpu6_abba.json).
+Every raw sample is retained, including slower baselines. Apparent fast subsets
+cannot override failed stability or decode gates. Historical PyTorch context in
+these native-only records is not a fresh PyTorch speed comparison.
+
+The unqualified float-tile/GEMV implementations remain **off by default**.
+Nonempty `LEAF_EXPERIMENTAL_FLOAT_TILES` or `LEAF_EXPERIMENTAL_FLOAT_GEMV` enables
+research only and disables automatic lower-precision selection. HighQoS was
+verified on both child processes without changing system policy; these results
+do not establish CPU throttling as the cause of the remaining variability.
+The CPU 6 comparison pins both new native stages to logical CPU 6 on the same
+host. Its frozen quality reference remains valid, but the historical PyTorch
+latency was measured on CPU 2 and is not reused as a performance gate. All
+quality checks pass in that experiment; both stability gates still fail.
+
+### 7.5 Latest automated kernel and synthetic checks
+
+These are correctness/microkernel checks, not trained full-model speed claims.
+The latest native GEMM shape is 64×384×384:
+
+| Kernel | Scalar baseline | Optimized native | Speedup |
+|---|---:|---:|---:|
+| FP32 GEMM | 6.754 ms | 0.837 ms | 8.068× |
+| INT8 GEMM | 4.283 ms | 1.134 ms | 3.778× |
+| FP32 Conv, 16→32, 3×3 | 3.174 ms | 0.409 ms | 7.767× |
+
+The gate passed, with raw values in
+[native_latest.json](benchmark/results/native_latest.json). The prior kernel
+table is preserved separately in section 9.7.
+
+| Synthetic workload | FP32 maximum error | INT8 simulated maximum error | PyTorch CPU | NumPy FP32 | NumPy INT8 simulation |
+|---|---:|---:|---:|---:|---:|
+| CNN | 5.96e-7 | 0.02034 | 0.0403 ms | 0.6259 ms | 0.6570 ms |
+| Transformer FFN | 2.71e-7 | 0.09518 | 0.0156 ms | 0.0222 ms | 0.0343 ms |
+
+The NumPy executor is an oracle, not deployment inference. See
+[latest.json](benchmark/results/latest.json) for the refreshed deterministic
+records and exact samples. Their previous numbers remain in section 9.9.
+
+## 8. Package and portability checks
+
+### 8.1 Installed lightweight package
+
+An actual installed Windows platform wheel was run in an isolated working
+directory without importing PyTorch/Transformers, with no compiler available
+on PATH.
+Both the first offline GPT-2 preparation and cached repeat generated the same
+16 reference tokens. The bundled static native runtime was used, and the second
+run reused the prepared artifact.
+
+A profile measured against a different native binary correctly fell back to
+FP32. Package preparation/inference did not load heavy model libraries.
+This is stronger than a mocked command test, but the two startup observations
+are not latency speed gates or cold-file-cache tests.
+
+The final installed-wheel observations are:
+
+| Stage | External first visible text | External complete command | CLI first-token timer | CLI complete execution | Native prefill | Native decode p50 |
+|---|---:|---:|---:|---:|---:|---:|
+| First offline preparation | 2,988.8143 ms | 3,619.4554 ms | 2,730.3798 ms | 3,378.7941 ms | 325.0853 ms | 37.4392 ms |
+| Cached repeat | 897.9553 ms | 1,562.5659 ms | 636.8798 ms | 1,350.0816 ms | 334.5409 ms | 39.0359 ms |
+
+These are one observation per stage, not medians across repeated commands.
+The final wheel identity, generated IDs, native constructor/RSS observations,
+and runtime policy are recorded in
+[package_runtime_final.json](benchmark/results/package_runtime_final.json).
+The earlier installed-wheel observations remain historical in
+[package_runtime.json](benchmark/results/package_runtime.json): external
+complete-command time was `2,979.4237 ms` for first preparation and
+`1,263.4925 ms` for the cached repeat; first-visible text was `2,432.4264 ms`
+and `765.0996 ms` respectively. Neither record
+turns warmed forward latency into a cold-start or accepted speed claim.
+The new wheel's runtime binary is different from the frozen trained-performance
+binary in section 7; passing installation/parity checks does not requalify its
+latency. Existing profiles measured against that older binary therefore select
+the FP32 fallback, not an automatically promoted quantized candidate.
+
+### 8.2 Same-host Windows/Linux checks and future hardware
+
+The native protocol passed 18 reduced-model/precision cases on Windows and
+Linux under WSL on the **same physical CPU**. Checks covered FP32/INT8/INT4,
+mixed FP32 protection, grouped/smoothed INT8, scalar/vector parity, chunked KV,
+generation, and VNNI-enabled versus disabled comparisons where applicable.
+
+[decoder_portability_final.json](benchmark/results/decoder_portability_final.json)
+records the final guarded default runtime's OS hashes and cross-OS comparisons;
+[decoder_architectures_final.json](benchmark/results/decoder_architectures_final.json)
+also passes eight complete reduced cases across five decoder families with both
+experimental float policies disabled.
+[decoder_architectures_experimental.json](benchmark/results/decoder_architectures_experimental.json)
+passes the same eight reduced cases with both research float flags enabled;
+this correctness check does not overturn their rejected speed experiments.
+The earlier
+[portability record](benchmark/results/decoder_portability.json) and
+[architecture record](benchmark/results/decoder_architectures.json) are retained.
+These are portable
+execution sanity checks, not trained Linux quality/latency results and not
+independent hardware qualification.
+
+A CI matrix is configured for Ubuntu, Windows, and macOS in
+[the portable validation workflow](.github/workflows/cpu-validation.yml).
+Its presence is not a claim that those hosted runs or additional hardware
+benchmarks have already passed. ARM-specific acceleration and broader CPU
+performance qualification remain development work.
+
+### 8.3 Cached full-command TinyLlama measurements
+
+Five fresh command processes per case compared explicit FP32 with genuinely
+eligible `auto` (smoothed W8A8), using the same frozen validated decoder binary
+and 16 generated tokens. Order alternated between cases. Exact saved prompt IDs
+and generated IDs for each selected native reference were verified; auto matches
+its quantized native reference, not the FP32/PyTorch token sequence.
+
+| Full-command observation | Explicit FP32 p50 | Auto W8A8 p50 | Stability |
+|---|---:|---:|---|
+| External first visible text | 6,246.1153 ms | 3,103.3198 ms | FP32 fails; auto passes |
+| External complete command | 11,040.3993 ms | 4,778.9251 ms | Both pass |
+| CLI first-token timer | 6,068.3774 ms | 2,924.3736 ms | FP32 fails; auto passes |
+| CLI complete execution timer | 10,838.0387 ms | 4,587.4923 ms | Both pass |
+| Native constructor | 0.6630 ms | 497.2055 ms | FP32 fails; auto passes |
+| Native prompt prefill | 5,805.5380 ms | 756.0863 ms | FP32 fails; auto passes |
+| Native per-run decode p50 | 276.8680 ms | 96.7737 ms | Both pass |
+
+Native rows summarize per-command metrics across the five commands. Prompt
+prefill uses the saved 29-token chat input, not the 63-token warmed-workload
+shape in section 7.1.
+
+The external complete-command median is `2.3102×` faster for auto in this
+cached, 16-token workload, with both total-time sample sets passing the existing
+spread check. The observed first-visible-text ratio is `2.0127×`, but its FP32
+reference is unstable, so no first-token speed qualification is claimed.
+These are not fresh PyTorch CLI comparisons or automatic precision qualification
+for another binary/device.
+
+External timers include interpreter startup; CLI timers begin later. Native
+constructor/prefill/decode do not include frontend integrity hashing,
+tokenization, IPC, and rendering. The remaining first-visible interval combines
+all of these and cannot be called isolated Python overhead. Hash-based preflight
+read source/artifact data; the OS file cache was not flushed. No model export,
+native build, or download occurred in the measured commands.
+
+[tinyllama_cli_runtime.json](benchmark/results/tinyllama_cli_runtime.json)
+preserves the frozen identities, prompt IDs, ten command observations, native
+timings, raw external samples, and stability verdicts. Installed-wheel startup
+checks remain the separate section 8.1 evidence.
+
+## 9. Historical benchmarks, preserved
+
+The following twelve prior benchmark subsections retain their measured numbers
+and methodology. They are historical observations—not results of the latest
+trained decoder/CIFAR window and not deployment-machine promises.
+
+Unless a subsection says otherwise, historical Windows runs used an Intel
+Core i7-14700HX, Windows 11, one CPU thread, PyTorch 2.12.0+cpu, and GCC 15.2.0.
+The Qwen record used Linux under WSL2 on the same host, Python 3.12.3 and
+Transformers 4.57.6. Exact source records are linked beside each table.
+
+The native-kernel and synthetic files overwritten by the current automated gate
+were snapshotted byte-for-byte under
+[history/pre-decoder](benchmark/results/history/pre-decoder).
+The other historical result files retain their original paths. The initial
+ONNX decoder-coverage probe below remains a valid record of that route's
+operator boundary at the time; the newer separate declarative decoder route
+now executes complete trained models.
+
+### 9.1 Real CIFAR-10, full ResNet-18, C++ versus PyTorch
 
 Each image had five warmups and ten measured executions per runtime. The table
 reports the median of 20 per-image medians. Both runtimes used the same FP32
@@ -382,7 +1048,7 @@ same-session no-regression observation, not evidence that Transformer additions
 accelerated ResNet. The measurements are preserved in
 [`cifar10_resnet18_transformer_no_regression.json`](benchmark/results/cifar10_resnet18_transformer_no_regression.json).
 
-### 8.2 Real CIFAR-10, calibration and optimizer micrograph
+### 9.2 Real CIFAR-10, calibration and optimizer micrograph
 
 With 32 calibration images and 100 distinct evaluation images, FP32 Leaf/NumPy
 versus PyTorch had maximum absolute output error `4.77e-7`; calibrated INT8
@@ -399,7 +1065,7 @@ These Python reference timings expose interpreter overhead; they are not native
 INT8 deployment speed. The complete record is
 [`cifar10_cpu.json`](benchmark/results/cifar10_cpu.json).
 
-### 8.3 Real CIFAR-10, native INT8 versus native FP32
+### 9.3 Real CIFAR-10, native INT8 versus native FP32
 
 Using the same 32 calibration images and a disjoint 100-image evaluation
 subset, the optional native harness measured the first 20 evaluation images.
@@ -412,11 +1078,11 @@ median of per-image p50 latencies was reported:
 | Leaf C++ INT8 | 0.062 ms | 0.02277 |
 
 This is an untrained optimizer micrograph, not a classification accuracy
-result. Native INT8 is currently slower, so FP32 remains the preferred
+result. Native INT8 was slower in this run, so FP32 remains the preferred
 latency path. The complete environment and methodology are recorded in
 [`cifar10_native_int8.json`](benchmark/results/cifar10_native_int8.json).
 
-### 8.4 Native INT8 graph integration check
+### 9.4 Native INT8 graph integration check
 
 On this development host, version 2 artifacts matched the quantized Python
 reference within `4.77e-7` for the synthetic CNN and `1.72e-7` for the fused
@@ -439,7 +1105,7 @@ same-session whole-model gate before promotion. The record includes peak
 process RSS for each native run:
 [`native_int8_graph.json`](benchmark/results/native_int8_graph.json).
 
-### 8.5 Embedded memory plan, native ResNet-18
+### 9.5 Embedded memory plan, native ResNet-18
 
 The version 3 artifact embeds 65 planned activation allocations for the same
 seeded FP32 ResNet-18 at 1×3×32×32. The 64-byte-aligned arena is 146,432
@@ -465,7 +1131,7 @@ overhead dominate peak RSS. Reproduce with
 `tools/verify_memory_plan_runtime.py`; the individual measurements are in
 [`memory_plan_native.json`](benchmark/results/memory_plan_native.json).
 
-### 8.6 Qwen cached weights, PyTorch CPU baseline
+### 9.6 Qwen cached weights, PyTorch CPU baseline
 
 One warmup and five measured runs on the cached Qwen2.5-0.5B revision produced:
 
@@ -480,9 +1146,9 @@ parameters occupied 1,976,131,072 FP32 bytes; process RSS after loading was
 2,686,046,208 bytes. Prefix prefill is deliberately excluded from the cached
 single-token timing. See [`qwen25_cached_cpu.json`](benchmark/results/qwen25_cached_cpu.json).
 
-### 8.7 Native kernel speed gate
+### 9.7 Native kernel speed gate
 
-The latest GCC `-O3 -mavx2 -mfma` run compared each optimized kernel against
+The historical GCC `-O3 -mavx2 -mfma` run compared each optimized kernel against
 Leaf's scalar implementation, after warmup. The GEMM shape was 64×384×384.
 
 | Kernel | Scalar Leaf baseline | Optimized Leaf | Speedup |
@@ -493,9 +1159,9 @@ Leaf's scalar implementation, after warmup. The GEMM shape was 64×384×384.
 
 These are kernel measurements, not full-model speedups. The command uses
 `--enforce-speedup` so a slower optimized path fails. Raw values are in
-[`native_latest.json`](benchmark/results/native_latest.json).
+[`native_latest.json`](benchmark/results/history/pre-decoder/native_latest.json).
 
-### 8.8 Prior full ResNet runtime measurements
+### 9.8 Prior full ResNet runtime measurements
 
 The 224×224, single-image FP32 ResNet-18 measurements show the effect of
 temporary-buffer reuse. Their input shape and WSL2 environment differ from
@@ -513,7 +1179,7 @@ run. Final-logit parity versus PyTorch remained `3.93e-6`. The data and
 measurement notes are in [`wsl_dev_machine.csv`](benchmark/results/wsl_dev_machine.csv)
 and [`docs/decisions.md`](docs/decisions.md).
 
-### 8.9 Deterministic synthetic checks
+### 9.9 Deterministic synthetic checks
 
 The offline CI workloads cover a small CNN and transformer FFN with fixed
 synthetic data. They prove pipeline behavior when real datasets or model
@@ -526,11 +1192,11 @@ Qwen generation.
 | Transformer FFN | 2.71e-7 | 0.09518 | 0.0155 ms | 0.0220 ms | 0.0341 ms |
 
 The detailed timings and memory plans are in
-[`latest.json`](benchmark/results/latest.json). The transformer row is a small
+[`latest.json`](benchmark/results/history/pre-decoder/latest.json). The transformer row is a small
 feed-forward graph, not full Qwen. These Python reference timings varied
 substantially with host load and are not native speed claims.
 
-### 8.10 Native Transformer operator milestones
+### 9.10 Native Transformer operator milestones
 
 These are standalone FP32 operator graphs using deterministic synthetic
 inputs, one CPU thread, ten warmups, and 100 timed iterations per native
@@ -560,7 +1226,7 @@ PyTorch's p50 was 0.0514 ms on the same shape, so this is a Leaf-relative
 improvement, not a PyTorch win. The raw samples and methodology are in
 [`native_swiglu.json`](benchmark/results/native_swiglu.json).
 
-### 8.11 RoPE, RepeatKV, and stateful KV-cache checks
+### 9.11 RoPE, RepeatKV, and stateful KV-cache checks
 
 The RoPE table uses `[1,32,1]` frequencies and `[1,1,64]` positions to
 produce separate `[1,64,64]` cosine and sine outputs. A named-input,
@@ -597,9 +1263,9 @@ within the 2% no-slowdown gate. Maximum absolute error against PyTorch was
 `4.62e-7` in both builds. This is a no-regression result, not a speedup:
 [`cifar10_resnet18_kv_no_regression.json`](benchmark/results/cifar10_resnet18_kv_no_regression.json).
 
-### 8.12 Complete cached decoder baseline and Leaf coverage boundary
+### 9.12 Complete cached decoder baseline and Leaf coverage boundary
 
-The complete locally available TinyLlama-1.1B weights supplied an offline
+At the initial decoder milestone, the complete locally available TinyLlama-1.1B weights supplied an offline
 fallback when a complete Qwen snapshot could not be located for this run.
 On one Windows CPU thread, FP32 PyTorch measured `1,612.864 ms` for a
 64-token full-context forward and `169.301 ms` for the last token with a
@@ -610,12 +1276,12 @@ model run, not a Leaf result. See
 
 Before attempting a multi-gigabyte Leaf export, a one-layer, reduced-width
 graph using the same decoder architecture was exported through the current
-PyTorch ONNX exporter and passed through Leaf's existing rewrites. Thirteen
+PyTorch ONNX exporter and passed through Leaf's then-existing ONNX rewrites. Thirteen
 operator types remain unsupported in the native executor: `Concat`, `Expand`,
 `Gather`, `Neg`, `Pow`, `Reciprocal`, `ReduceMean`, `Reshape`, `Slice`,
 `Softmax`, `Sqrt`, `Transpose`, and `Unsqueeze`. This bounded probe did not
 load the full model's weights; it identifies a concrete graph-coverage
-blocker rather than implying a Leaf full-model run succeeded. Its operator
+blocker rather than implying a Leaf full-model run had succeeded at that stage. Its operator
 counts are in
 [`tinyllama_leaf_coverage.json`](benchmark/results/tinyllama_leaf_coverage.json).
 An attempted `.leaf` export of that reduced graph stopped first at an
@@ -629,7 +1295,28 @@ python -m benchmarks.bench_qwen25_cached --model 'C:\path\to\snapshot' --benchma
 python -X utf8 tools/probe_decoder_coverage.py --config 'C:\path\to\snapshot' --output benchmark/results/local_decoder_leaf_coverage.json
 ```
 
-## 9. Memory-plan format and runtime reuse
+## 10. Artifact formats and trust boundary
+
+| Artifact | Contents | Execution consumer |
+|---|---|---|
+| `leaf-decoder-plan-v1` JSON | Dimensions, supported block semantics, canonical tensor mappings/transforms | Decoder preparation |
+| `LEAFDC02` decoder `.leaf`, version 2 | 64-byte-aligned mapped FP32/INT8/INT4 payloads, scales, optional input factors, decoder semantics | `leaf_decoder` |
+| Graph `.leaf` version 2 | Nodes/attributes, 32-byte-aligned typed FP32/INT8 weights and per-channel scales | `leaf_infer` / graph C++ API |
+| Graph `.leaf` version 3 | v2 graph data plus embedded 64-byte-aligned liveness arena plan | Graph executor planned path |
+| `leaf-memory-plan-v1` JSON | Fingerprint, offsets, live intervals, alignment, unplanned tensors | Inspection and graph v3 export |
+| Calibration/provenance sidecars | Model/data hashes, channel statistics, export request and artifact hash | Preparation, cache validity, quality/timing refresh |
+
+Decoder and graph `.leaf` formats are intentionally distinct. Graph v3 is not a
+decoder format, and `LEAFDC02` version 2 is not interchangeable with graph v2.
+
+Use trusted, locally exported artifacts. Export rejects non-finite source
+weights; native loaders check versions, dimensions, offsets, scales, and
+workspace bounds, but the decoder does not yet validate every FP32 payload
+value. Comprehensive adversarial/corrupted-artifact hardening remains pending.
+Do not treat native artifact loading as a sandbox for untrusted downloaded
+binaries or arbitrary artifact files.
+
+## 11. Memory-plan format and runtime reuse
 
 `optimize_graph(graph, calibration_samples, memory_plan_path=...)` exports
 `leaf-memory-plan-v1`. A plan records the graph fingerprint, 64-byte
@@ -660,51 +1347,97 @@ reused across inferences. Version 2 retains its grow-only im2col scratch
 buffer and best-fit pool of retired activation vectors. Both paths are measured
 with `leaf_graph_bench`, which reports latency and peak process RSS.
 
-## 10. Repository map
+## 12. Repository map
 
-```text
+~~~text
 Leaf/
-├── tools/graph_opt/       ONNX IR, folding, fusion, calibration, planner, exporter
-├── engine/                C++ graph parser, executor, FP32 and INT8 kernels
-├── benchmark/             Synthetic workloads, baseline harness, native gate
-│   └── results/           Committed per-run JSON and prior runtime measurements
-├── benchmarks/            Real CIFAR and cached Qwen reproduction scripts
-├── tests/                 Graph, quantization, integration, and native tests
-├── scripts/               Native build and complete verification command
-├── docs/decisions.md      Performance decisions and same-session comparisons
-└── README.md              Current architecture, methods, measurements, roadmap
-```
+├── leaf/                       Lightweight run/alias/optimize CLI, affinity/power guards
+├── tools/
+│   ├── decoder_plan.py         Architecture adapters and declarative semantic validation
+│   ├── export_decoder.py       Streaming safetensors → mapped precision candidates
+│   ├── calibrate_decoder.py    Independent input-channel calibration
+│   ├── validate_decoder.py     Trained parity, generation, quality, stable speed gates
+│   ├── benchmark_decoder_comparison.py  Frozen-artifact native ABBA experiments
+│   ├── benchmark_cli.py        Cached full-command startup/streaming measurements
+│   ├── decoder_validation.py   Native protocol and shared numerical/timing measurements
+│   ├── datasets.py             Text dataset format adapters and bounded token prefixes
+│   └── graph_opt/              ONNX IR, folding, fusion, calibration, planner, exporter
+├── engine/                     Native decoder/graph/session APIs and CPU kernels
+├── benchmark/                  Synthetic workloads, baseline harness, native gates
+│   └── results/                Current and preserved historical measurements
+├── benchmarks/                 Trained decoder reference, full CIFAR and subset harnesses
+├── tests/                      Python, graph, precision, CLI, package, and native checks
+├── scripts/                    Portable/native builds and full verification command
+├── .github/workflows/          Portable hosted-OS validation matrix
+├── docs/
+│   ├── architecture.svg        Large two-route execution diagram
+│   ├── optimization-loop.svg   Quality/stability/speed decision loop
+│   └── decisions.md            Earlier performance decisions and measurement context
+├── pyproject.toml              Installable CLI and optional validation dependencies
+└── README.md                   Purpose, methods, limits, results, iterative roadmap
+~~~
 
-`benchmark/data/`, exported ONNX files, generated `.leaf` artifacts, and model
-weights are intentionally Git-ignored. The repository keeps scripts and
-small result records so the large datasets and cached weights stay local.
+Model weights, source datasets, exported ONNX/`.leaf` artifacts, caches, build
+outputs, and wheels are Git-ignored. Small result records are committed for
+reproducibility. Benchmark implementations own dataset/model-specific
+preprocessing; the execution core does not.
 
-## 11. Development loop and remaining goals
+## 13. Implemented work and next goals
 
-The next work is iterative implementation, not a final-report phase. For each
-candidate: profile the full model, change one bottleneck, verify outputs,
-measure same-session latency and RSS, and keep the change only when the result
-supports it. The current CIFAR full-model benchmark and native speed gate are
-the reference points for the next C++ optimization.
+Development continues through measured implementation, testing, bottleneck
+analysis, and revision. The goal remains broad local CPU inference—not a
+framework tied to Qwen, Llama, CIFAR, one operating system, or a fixed RAM target.
 
-- [x] Load and validate ResNet-18 ONNX as Leaf IR.
-- [x] Export and run a self-contained FP32 `.leaf` ResNet artifact in C++.
-- [x] Match full ResNet outputs against PyTorch.
-- [x] Add constant folding and CNN/Transformer graph rewrites.
-- [x] Calibrate symmetric INT8 and convert Conv/Gemm/MatMul weights per output channel.
-- [x] Export a versioned, aligned liveness memory plan.
-- [x] Add AVX2 FP32/INT8 kernel tests and a no-slowdown native speed gate.
-- [x] Measure real CIFAR images against PyTorch and Leaf C++ FP32.
-- [x] Measure locally cached Qwen2.5-0.5B PyTorch CPU decode with and without KV cache.
-- [x] Store INT8 tensors and scales in `.leaf`, then dispatch supported quantized graphs in C++.
-- [x] Provide a portable scalar build alongside the AVX2/FMA build.
-- [x] Apply the exported memory plan directly in the C++ executor and measure peak RSS.
-- [x] Add native FP32 RMSNorm, mask-aware Attention, and fused SwiGLU FFN with standalone PyTorch parity and latency gates.
-- [x] Add native RoPE, RepeatKV, named multi-output graph execution, and caller-owned dynamic GQA KV-cache with prefill/decode parity.
-- [ ] Add remaining decoder operators and large-model export, then run end-to-end Leaf parity and latency against a complete local causal decoder snapshot.
-- [ ] Add trained CIFAR-10 accuracy and Qwen perplexity/next-token quality gates.
-- [ ] Evaluate structured pruning and weight-only INT8/INT4 only after those quality gates exist.
-- [ ] Profile packing, tiling, threading, and cache behavior; accept only measured whole-model improvements.
-- [ ] Reproduce representative final artifacts and benchmarks on additional CPU machines.
+Implementation checkpoint (2026-10-02): the Python suite, default and
+experimental reduced-model decoder checks, same-host Windows/Linux checks, and
+installed Windows wheel checks pass. The new float-kernel experiments remain
+disabled because stable whole-model speed qualification is incomplete. The
+next iteration starts with native dense-kernel profiling and fresh matched
+baselines; a successful correctness check does not close the performance work.
 
-Training, GPU deployment, and unstructured sparsity are outside Leaf's scope.
+Implemented and checked:
+
+- [x] Load/validate ONNX graphs and a full ResNet architecture through Leaf IR.
+- [x] Fold export-time constants and apply CNN/Transformer graph rewrites.
+- [x] Store typed INT8 tensors/scales and execute supported quantized whole graphs natively.
+- [x] Export a versioned aligned liveness plan and apply it in the graph C++ arena.
+- [x] Compare real CIFAR images with PyTorch and native FP32, retaining all prior measurements.
+- [x] Add native norms, attention, SwiGLU, RoPE, RepeatKV, and caller-owned GQA KV sessions.
+- [x] Add model-independent decoder block semantics and architecture import adapters.
+- [x] Export complete trained decoder weights and execute native prefill, decode, and generation.
+- [x] Check complete trained TinyLlama and GPT-2 FP32 parity, chunked cache, and generation.
+- [x] Establish independent text calibration and held-out agreement/perplexity quality gates.
+- [x] Implement/test weight-only INT8/INT4, dynamic W8A8, smoothing, grouped INT8, and FP32 protection.
+- [x] Measure full-model precision candidates, including failures; qualify smoothed W8A8 on the tested TinyLlama configuration.
+- [x] Add scalar fallback, optional AVX2/FMA/VNNI decoder dispatch, and native kernel regression tests.
+- [x] Profile/test prefill tiling and packing; reject inconsistent/spilling alternatives.
+- [x] Run all 10,000 trained CIFAR-10 test images, FP32 parity, INT8 accuracy, and baseline comparisons.
+- [x] Keep unstable and slower CIFAR candidates unpromoted; preserve every per-image timing.
+- [x] Provide `leaf run`, aliases, offline mode, reusable preparation, and validated precision selection.
+- [x] Verify an installed native wheel without heavy-library imports or an available compiler, including first preparation and cached generation.
+- [x] Add hashed export/cache provenance and fail-closed timing-only refresh checks.
+- [x] Preserve saved chat/raw prompt IDs through a narrow structural nonlegacy-tokenizer compatibility fix.
+- [x] Measure cached complete commands separately from warmed native forwards and installed-package startup.
+- [x] Add native phase diagnostics and full-quality ABBA experiments; keep unstable/slow float candidates off by default.
+- [x] Check reduced-model execution across Windows/Linux on the same host and configure portable CI.
+
+Next measured steps:
+
+- [ ] Improve native FP32/GPT-2 prefill and CNN whole-model latency without weakening quality gates.
+- [ ] Measure native GEMM/GEMV bottlenecks, per-core frequency behavior, and CNN packing before proposing another default kernel change.
+- [ ] Reduce measured startup/integrity/tokenizer costs safely; do not attribute the mixed frontend interval to Python alone.
+- [ ] Broaden quality evaluation beyond short text prefixes: larger corpora, more prompts, and task-specific metrics.
+- [ ] Run full trained Qwen and further independently trained architecture families when compatible weights are available.
+- [ ] Add scaled RoPE, sliding-window attention, Q/K normalization, and multiple-EOS/sampling policies with reference tests.
+- [ ] Extend plan/operators for encoder-decoder models, MoE routing, and additional model domains.
+- [ ] Expand graph layouts, dynamic shapes, batching, and dataset preprocessing adapters.
+- [ ] Harden native artifacts against malformed/non-finite payloads and support Windows Unicode artifact paths.
+- [ ] Evaluate structured pruning or additional low-bit strategies only behind established quality/speed gates.
+- [ ] Optimize threading/cache behavior and add acceleration for additional CPU architectures where measured useful.
+- [ ] Reproduce artifacts and trained-model benchmarks on independent CPU devices and operating systems.
+- [ ] Establish device-specific optimization profiles; do not infer unique machine identity from a CPU signature.
+- [ ] Expand the single-command model experience while preserving explicit compatibility checks and safe fallbacks.
+
+Training, GPU deployment, and unstructured sparsity are outside the present
+scope. General-purpose CPU execution is the direction; verified operator
+coverage and measured device-specific results define what can be claimed today.

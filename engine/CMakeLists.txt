@@ -70,3 +70,18 @@ target_link_libraries(leaf_kernel_bench PRIVATE leaf_optimized_kernels)
 
 add_executable(leaf_kv_session ../tests/native/test_kv_session.cpp)
 target_link_libraries(leaf_kv_session PRIVATE leaf_core)
+add_executable(leaf_dataset src/main_dataset.cpp)
+target_link_libraries(leaf_dataset PRIVATE leaf_core)
+
+# Portable executable with runtime-dispatched decoder vector kernels.
+find_package(Threads REQUIRED)
+add_executable(leaf_decoder src/decoder.cpp src/main_decoder.cpp
+  src/kv_cache.cpp src/kernels/transformer.cpp)
+target_include_directories(leaf_decoder PRIVATE include)
+target_link_libraries(leaf_decoder PRIVATE Threads::Threads)
+if(NOT MSVC AND LEAF_ENABLE_AVX2)
+  target_compile_options(leaf_decoder PRIVATE -mno-avx2 -mno-fma)
+endif()
+if(WIN32)
+  target_link_libraries(leaf_decoder PRIVATE psapi)
+endif()

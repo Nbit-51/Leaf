@@ -1,0 +1,1188 @@
+{
+  "benchmark": "native-decoder-portability-sanity",
+  "measured_at_utc": "2026-10-02T03:16:40.121555+00:00",
+  "physical_host_cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "machine": "AMD64",
+  "same_physical_host": true,
+  "scope": "Reduced random-weight models; no trained quality, latency or independent hardware claim.",
+  "backends": [
+    {
+      "name": "windows",
+      "executable_sha256": "890bba185eec56e08dd2aa04d74b4759a3121e5c78058b8527a3a6301b424032",
+      "operating_system": "Windows-11-10.0.26200-SP0"
+    },
+    {
+      "name": "linux-wsl",
+      "executable_sha256": "c24b1df61943812e62ed5f7e7544e62cb8f336122117bd854aed19446744f5d7",
+      "operating_system": "Linux 6.6.87.2-microsoft-standard-WSL2 x86_64 x86_64"
+    }
+  ],
+  "cases": [
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "32",
+      "int8_group_size": null,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 32,
+      "activation_bits": 32,
+      "artifact_sha256": "c650b30e9184e27b5c73cab9f731b851671d0352fcb40e53e8e2bef9f5cbd7cb",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 1.7881393432617188e-07,
+            "relative_logit_rmse": 2.416603024357755e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.56075768839438,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9999999995279181
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 1.7881393432617188e-07,
+            "relative_logit_rmse": 2.411158561699267e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.56075773434625,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9999999998772006
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "8",
+      "int8_group_size": 0,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact_sha256": "8e7c08955ec1c5e2c670e1e76fc819edc5e7b8a76542829746b4333ae7555c6f",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007803574204444885,
+            "relative_logit_rmse": 0.010825028643012047,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.53622368412863,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9998135153157165
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007803574204444885,
+            "relative_logit_rmse": 0.010825030505657196,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.53622364233925,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9998135149980732
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "8",
+      "int8_group_size": 0,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 8,
+      "artifact_sha256": "8e7c08955ec1c5e2c670e1e76fc819edc5e7b8a76542829746b4333ae7555c6f",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.00815186370164156,
+            "relative_logit_rmse": 0.01295897364616394,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.53412648926943,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9997975744311012
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": {
+            "passed": true,
+            "bit_exact": true,
+            "vnni_path_exercised": true,
+            "fallback_avx2": true,
+            "fallback_vnni": false,
+            "policy_scope": "Child process only; parent environment unchanged."
+          }
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.00815186370164156,
+            "relative_logit_rmse": 0.01295897364616394,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.53412648926943,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9997975744311012
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "4",
+      "int8_group_size": null,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 4,
+      "activation_bits": 32,
+      "artifact_sha256": "754ece3bf4dc68df016cbef53a4b475b3e9ab9b00b2616c6edb5ece4a2bbe605",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.10762426257133484,
+            "relative_logit_rmse": 0.18840645253658295,
+            "next_token_agreement": 0.625,
+            "perplexity": 132.23537347422177,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.005127788371357
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.10762426257133484,
+            "relative_logit_rmse": 0.18840645253658295,
+            "next_token_agreement": 0.625,
+            "perplexity": 132.23537341131936,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.0051277878932325
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "4",
+      "int8_group_size": null,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 4,
+      "activation_bits": 8,
+      "artifact_sha256": "754ece3bf4dc68df016cbef53a4b475b3e9ab9b00b2616c6edb5ece4a2bbe605",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.1076740026473999,
+            "relative_logit_rmse": 0.18874956667423248,
+            "next_token_agreement": 0.625,
+            "perplexity": 132.28394631022397,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.0054969929642212
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.1076740026473999,
+            "relative_logit_rmse": 0.18874956667423248,
+            "next_token_agreement": 0.625,
+            "perplexity": 132.28394631022397,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.0054969929642212
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "8-grouped32",
+      "int8_group_size": 32,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact_sha256": "4cd6629c73b635fb7420d8c628a45fb88f0a6dafcd319b9af17b0c8011acbe97",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.006126139312982559,
+            "relative_logit_rmse": 0.009557684883475304,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.6267699982899,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.00050176244738
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.006126139312982559,
+            "relative_logit_rmse": 0.009557684883475304,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.62676990578535,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.0005017617442482
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "8-grouped32",
+      "int8_group_size": 32,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 8,
+      "artifact_sha256": "4cd6629c73b635fb7420d8c628a45fb88f0a6dafcd319b9af17b0c8011acbe97",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.00916111096739769,
+            "relative_logit_rmse": 0.01253899373114109,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.65283511703973,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.0006998847385213
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": {
+            "passed": true,
+            "bit_exact": false,
+            "vnni_path_exercised": true,
+            "fallback_avx2": true,
+            "fallback_vnni": false,
+            "policy_scope": "Child process only; parent environment unchanged."
+          }
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.00916111096739769,
+            "relative_logit_rmse": 0.01253899373114109,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.65283511703973,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.0006998847385213
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "8-protected",
+      "int8_group_size": 0,
+      "keep_fp32_tensors": [
+        "lm_head.weight",
+        "model.embed_tokens.weight"
+      ],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact_sha256": "6b2cdf453762781e54843c135842eaecf5cd71d3a4ef64afa8977d312a4a0d2e",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.005163967609405518,
+            "relative_logit_rmse": 0.007319754920899868,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.5404424535218,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9998455823960928
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.005163967609405518,
+            "relative_logit_rmse": 0.007319753989577293,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.54044236831598,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9998455817484391
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "candidate": "8-grouped32-smooth",
+      "int8_group_size": 32,
+      "keep_fp32_tensors": [],
+      "smoothing": true,
+      "weight_bits": 8,
+      "activation_bits": 8,
+      "artifact_sha256": "da3ee0a03ed6b9b1bfb2fd18e386954173f73cb81ec34c0576598da0243f7bbf",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007824264466762543,
+            "relative_logit_rmse": 0.01345204096287489,
+            "next_token_agreement": 0.9791666666666666,
+            "perplexity": 131.5939551509209,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.0002523351262693
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": {
+            "passed": true,
+            "bit_exact": false,
+            "vnni_path_exercised": true,
+            "fallback_avx2": true,
+            "fallback_vnni": false,
+            "policy_scope": "Child process only; parent environment unchanged."
+          }
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007824264466762543,
+            "relative_logit_rmse": 0.01345204096287489,
+            "next_token_agreement": 0.9791666666666666,
+            "perplexity": 131.5939551509209,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.0002523351262693
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            85,
+            30,
+            36,
+            13
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "calibration": {
+        "format": "leaf-activation-calibration-v1",
+        "tokens": 50,
+        "dataset_sha256": "fdf6ab0271d63f7b9b07ab0563e8496705eb8818416f8792b8cbfa0d9135f216",
+        "model_config_sha256": "51e8dffdd0ede49cf12657b82055934b6436c643dc0570780b5d0ef4c64e4164",
+        "source_weight_sha256": {
+          "model.safetensors": "acf95a2d2e5ccd61ce45dd8f972fb1d5f1fe1ee0bbe0179e2dd5516b1e069bde"
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "32",
+      "int8_group_size": null,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 32,
+      "activation_bits": 32,
+      "artifact_sha256": "c26bcba67e501fd69f656bdcef1e7fee3331ab9eff5bc24f6d1d0b2a867b9336",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 2.980232238769531e-07,
+            "relative_logit_rmse": 2.875435143323557e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.13130709225686,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.0000000045428337
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 2.384185791015625e-07,
+            "relative_logit_rmse": 2.9510562171708443e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.13130651903214,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.000000000171454
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "8",
+      "int8_group_size": 0,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact_sha256": "4d2bd1b2c0b646d30d9bf062f9038141d4163f529cb1964c3140014c1ded7e73",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.006174027919769287,
+            "relative_logit_rmse": 0.010142046958208084,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.1742797711811,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.0003277117858433
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.006173998117446899,
+            "relative_logit_rmse": 0.010142041370272636,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.17427972544823,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.000327711437087
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "8",
+      "int8_group_size": 0,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 8,
+      "artifact_sha256": "4d2bd1b2c0b646d30d9bf062f9038141d4163f529cb1964c3140014c1ded7e73",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009368956089019775,
+            "relative_logit_rmse": 0.013541100546717644,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.15854483537575,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.000207718046547
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": {
+            "passed": true,
+            "bit_exact": true,
+            "vnni_path_exercised": true,
+            "fallback_avx2": true,
+            "fallback_vnni": false,
+            "policy_scope": "Child process only; parent environment unchanged."
+          }
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009368956089019775,
+            "relative_logit_rmse": 0.013541100546717644,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.15854490818907,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.0002077186018172
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "4",
+      "int8_group_size": null,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 4,
+      "activation_bits": 32,
+      "artifact_sha256": "7fb8a9c34e4b9c156552fae96a72cf437965755278591b6cd905baf456fc1102",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.12667202949523926,
+            "relative_logit_rmse": 0.1915808618068695,
+            "next_token_agreement": 0.9375,
+            "perplexity": 130.98119460595743,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 0.9988552551286014
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.12667202949523926,
+            "relative_logit_rmse": 0.1915808618068695,
+            "next_token_agreement": 0.9375,
+            "perplexity": 130.98119460785114,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 0.9988552551430427
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "4",
+      "int8_group_size": null,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 4,
+      "activation_bits": 8,
+      "artifact_sha256": "7fb8a9c34e4b9c156552fae96a72cf437965755278591b6cd905baf456fc1102",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.12881611287593842,
+            "relative_logit_rmse": 0.191443532705307,
+            "next_token_agreement": 0.9375,
+            "perplexity": 130.9622542715194,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 0.9987108171988344
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.12881611287593842,
+            "relative_logit_rmse": 0.1914435178041458,
+            "next_token_agreement": 0.9375,
+            "perplexity": 130.96225419900045,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 0.9987108166458089
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "8-grouped32",
+      "int8_group_size": 32,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact_sha256": "f9b593dcd60762c405753105c5596dbee146a11c44bf14f3ca204970d669718b",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.00645819678902626,
+            "relative_logit_rmse": 0.009430935606360435,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.14873083669065,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.0001328770421574
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.006458190269768238,
+            "relative_logit_rmse": 0.009430937469005585,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.14873089730887,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.0001328775044287
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "8-grouped32",
+      "int8_group_size": 32,
+      "keep_fp32_tensors": [],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 8,
+      "artifact_sha256": "f9b593dcd60762c405753105c5596dbee146a11c44bf14f3ca204970d669718b",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009273327887058258,
+            "relative_logit_rmse": 0.013369387947022915,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.10323659388595,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 0.9997859404942028
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": {
+            "passed": true,
+            "bit_exact": false,
+            "vnni_path_exercised": true,
+            "fallback_avx2": true,
+            "fallback_vnni": false,
+            "policy_scope": "Child process only; parent environment unchanged."
+          }
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009273327887058258,
+            "relative_logit_rmse": 0.013369387947022915,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.10323687144188,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 0.9997859426108288
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "8-protected",
+      "int8_group_size": 0,
+      "keep_fp32_tensors": [
+        "lm_head.weight",
+        "model.embed_tokens.weight",
+        "model.position_embeddings.weight"
+      ],
+      "smoothing": false,
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact_sha256": "df253c2d82d16bb2feeeb04fcd99f47b7bf2dfab35610ad19cdacd3781d43658",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.004399150609970093,
+            "relative_logit_rmse": 0.006748332642018795,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.14520221832922,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.0001059679961355
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.004399150609970093,
+            "relative_logit_rmse": 0.006748329848051071,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.14520325980345,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.0001059759383597
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": false,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "candidate": "8-grouped32-smooth",
+      "int8_group_size": 32,
+      "keep_fp32_tensors": [],
+      "smoothing": true,
+      "weight_bits": 8,
+      "activation_bits": 8,
+      "artifact_sha256": "1ebbfdd4d5404083b00281703f4e6a2d472acf07dc6fc9ffb660f9981fd908e1",
+      "backends": {
+        "windows": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009051546454429626,
+            "relative_logit_rmse": 0.013245443813502789,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.22348498004575,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.0007029479531575
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": {
+            "passed": true,
+            "bit_exact": false,
+            "vnni_path_exercised": true,
+            "fallback_avx2": true,
+            "fallback_vnni": false,
+            "policy_scope": "Child process only; parent environment unchanged."
+          }
+        },
+        "linux-wsl": {
+          "quality": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009051546454429626,
+            "relative_logit_rmse": 0.013245443813502789,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.2234850062612,
+            "pytorch_perplexity": 131.13130649654914,
+            "perplexity_ratio": 1.000702948153075
+          },
+          "chunked_cache_passed": true,
+          "scalar_vector_parity_passed": true,
+          "generated_tokens": [
+            80,
+            80,
+            80,
+            80
+          ],
+          "generation_matches_pytorch": true,
+          "avx2": true,
+          "vnni": true,
+          "vnni_disabled_comparison": null
+        }
+      },
+      "calibration": {
+        "format": "leaf-activation-calibration-v1",
+        "tokens": 50,
+        "dataset_sha256": "fdf6ab0271d63f7b9b07ab0563e8496705eb8818416f8792b8cbfa0d9135f216",
+        "model_config_sha256": "daf1abe9031586bbb5e5562b6c203925ba2d20952080c30e85b1ddb2ce16d9f0",
+        "source_weight_sha256": {
+          "model.safetensors": "341e91df4c0d27288b0425faec5de5b5d88268baaf549717af22100b7b4685e2"
+        }
+      },
+      "cross_os_checked": true,
+      "cross_os_passed": true
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,1505 @@
+{
+  "benchmark": "trained-decoder-native-experiment-abba",
+  "measured_at_utc": "2026-10-02T08:38:55.619290+00:00",
+  "before_executable_sha256": "890bba185eec56e08dd2aa04d74b4759a3121e5c78058b8527a3a6301b424032",
+  "after_executable_sha256": "c11fd6d5290a3d22b320133fb597346989416814c0f43132057d296fafdd6775",
+  "frozen_record_sha256": "b6a3f755ea891921d2f03bd8f5027fee06dcd39c61444da766b09da2228828e0",
+  "quality_cache_sha256": {
+    "reference.npy": "c9f5a7f75bb0c8023c94587c3f73e4ae43b273f29b3c7a90ffaabbaa3cfa8c19",
+    "tokens.json": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6"
+  },
+  "frozen_quality_measured_at_utc": "2026-10-02T03:04:42.862448+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "machine": "AMD64",
+  "threads": 1,
+  "pinned_cpu": 2,
+  "runs_per_pass": 11,
+  "warmup_per_pass": 5,
+  "profiling_enabled": false,
+  "isa_policy": {
+    "LEAF_DISABLE_VNNI": null
+  },
+  "stability_thresholds": {
+    "minimum_samples_per_pass": 5,
+    "maximum_p90_p10_ratio": 1.25,
+    "maximum_between_pass_median_ratio": 1.25
+  },
+  "frozen_pytorch_context": {
+    "measured_at_utc": "2026-10-02T03:02:34.539445+00:00",
+    "quality_measured_at_utc": "2026-10-02T03:02:26.535102+00:00",
+    "latency_measured_at_utc": "2026-10-02T03:02:34.539445+00:00",
+    "quality_cache_sha256": {
+      "reference.npy": "c9f5a7f75bb0c8023c94587c3f73e4ae43b273f29b3c7a90ffaabbaa3cfa8c19",
+      "tokens.json": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6"
+    },
+    "model": "gpt2",
+    "model_config_sha256": "0daed7749b4f02b8f76240d5444551d7b08712dab4d0adb8239c56ba823bb7b4",
+    "source_weight_sha256": {
+      "model.safetensors": "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707"
+    },
+    "dataset": "wikitext2-test.parquet, contiguous blocks from first nonempty text",
+    "dataset_source": "https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e/wikitext-2-raw-v1",
+    "dataset_sha256": "5f1bea067869d04849c0f975a2b29c4ff47d867f484f5010ea5e861eab246d91",
+    "text_column": "text",
+    "sequence_length": 128,
+    "blocks": 8,
+    "threads": 1,
+    "warmup": 5,
+    "runs": 11,
+    "pinned_cpu": 2,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "logical_cpus": 28,
+    "physical_memory_bytes": 16869548032,
+    "torch": "2.12.0+cpu",
+    "load_seconds": 1.4034543000002486,
+    "parameter_bytes": 497759232,
+    "resident_bytes": 1446764544,
+    "generation_prompt": "Explain in one sentence why careful measurement matters when optimizing software.",
+    "generated_tokens": [
+      198,
+      198,
+      464,
+      1708,
+      318,
+      257,
+      1351,
+      286,
+      262,
+      749,
+      2219,
+      10135,
+      326,
+      460,
+      307,
+      925
+    ],
+    "generated_text": "\n\nThe following is a list of the most common mistakes that can be made",
+    "latency": {
+      "eager": {
+        "prefill_p50_ms": 219.92679999993925,
+        "decode_p50_ms": 28.43529999972816,
+        "prefill_samples_ms": [
+          221.62680000019463,
+          217.14920000022175,
+          215.7084999998915,
+          227.85529999964638,
+          220.3746999998657,
+          219.92679999993925,
+          219.53389999998763,
+          243.12919999965743,
+          216.6599000001952,
+          220.49739999965823,
+          216.11669999992955
+        ],
+        "decode_samples_ms": [
+          28.43529999972816,
+          28.097500000058062,
+          27.18879999974888,
+          28.46259999978429,
+          27.61080000027505,
+          27.067299999998795,
+          29.220899999927497,
+          30.784200000198325,
+          28.585199999724864,
+          28.358600000046863,
+          28.75350000022081
+        ],
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 216.11669999992955,
+            "p90_ms": 227.85529999964638,
+            "p90_p10_ratio": 1.0543160246279935,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 27.18879999974888,
+            "p90_ms": 29.220899999927497,
+            "p90_p10_ratio": 1.0747403342625415,
+            "reason": "passed"
+          }
+        }
+      },
+      "sdpa": {
+        "prefill_p50_ms": 215.46029999990424,
+        "decode_p50_ms": 29.57590000005439,
+        "prefill_samples_ms": [
+          214.60769999976037,
+          214.57749999990483,
+          214.36670000002778,
+          212.6938000001246,
+          215.46029999990424,
+          213.93310000030397,
+          224.85480000023017,
+          224.35290000021268,
+          231.02949999974953,
+          221.6763000001265,
+          222.1027000000504
+        ],
+        "decode_samples_ms": [
+          29.57590000005439,
+          28.291499999795633,
+          27.98350000011851,
+          29.848499999843625,
+          30.492800000047282,
+          29.26149999984773,
+          31.345400000191148,
+          33.9217999999164,
+          28.78920000011931,
+          28.380200000356126,
+          31.882499999937863
+        ],
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 213.93310000030397,
+            "p90_ms": 224.85480000023017,
+            "p90_p10_ratio": 1.0510519410035692,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 28.291499999795633,
+            "p90_ms": 31.882499999937863,
+            "p90_p10_ratio": 1.1269285827958282,
+            "reason": "passed"
+          }
+        }
+      }
+    },
+    "quality_gate_thresholds": {
+      "32": {
+        "min_next_token_agreement": 0.999,
+        "max_perplexity_ratio": 1.001
+      },
+      "8": {
+        "min_next_token_agreement": 0.95,
+        "max_perplexity_ratio": 1.02
+      },
+      "4": {
+        "min_next_token_agreement": 0.9,
+        "max_perplexity_ratio": 1.05
+      }
+    }
+  },
+  "native": {
+    "32": {
+      "weight_bits": 32,
+      "activation_bits": 32,
+      "artifact": "decoder-32.leaf",
+      "artifact_sha256": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 0.0018310546875,
+        "relative_logit_rmse": 6.976704867156514e-07,
+        "next_token_agreement": 1.0,
+        "perplexity": 62.580101513320024,
+        "pytorch_perplexity": 62.58010265069033,
+        "perplexity_ratio": 0.9999999818253685
+      },
+      "trained_quality_gate_passed": true,
+      "quality_gate_passed": true,
+      "fp32_allclose": true,
+      "chunked": {
+        "sequence_index": 0,
+        "chunk_tokens": 16,
+        "quality": {
+          "evaluated_tokens": 127,
+          "max_abs_logit_error": 0.0003509521484375,
+          "relative_logit_rmse": 4.56528965742109e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 47.318575443810666,
+          "pytorch_perplexity": 47.31863899974026,
+          "perplexity_ratio": 0.9999986568521213
+        },
+        "quality_gate_passed": true,
+        "parity_vs_full": true,
+        "fp32_allclose_pytorch": true
+      },
+      "generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "generation_exact_match_pytorch": true,
+      "generation_exact_match_before": true,
+      "frozen_before_quality_gate_passed": true,
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 541880320,
+        "load_ms": 0.7219,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "quality_measured_at_utc": "2026-10-02T08:38:00.730710+00:00",
+      "timing": {
+        "order": [
+          "before",
+          "after",
+          "after",
+          "before"
+        ],
+        "passes": [
+          {
+            "index": 0,
+            "stage": "before",
+            "measured_at_utc": "2026-10-02T08:38:16.475540+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 497777600,
+              "peak_rss_bytes": 507170816,
+              "load_ms": 0.3421,
+              "prefill_p50_ms": 346.2041,
+              "decode_p50_ms": 28.276,
+              "prefill_samples_ms": [
+                398.4313,
+                344.3358,
+                346.2041,
+                369.247,
+                327.1386,
+                373.038,
+                322.1581,
+                326.4238,
+                384.8773,
+                320.7485,
+                352.8967
+              ],
+              "decode_samples_ms": [
+                27.729,
+                28.9526,
+                37.2813,
+                28.1282,
+                35.4087,
+                35.6423,
+                28.276,
+                28.0347,
+                27.3066,
+                26.3636,
+                38.1623
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 322.1581,
+                "p90_ms": 384.8773,
+                "p90_p10_ratio": 1.194684535325978,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 27.3066,
+                "p90_ms": 37.2813,
+                "p90_p10_ratio": 1.3652853156379776,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          },
+          {
+            "index": 1,
+            "stage": "after",
+            "measured_at_utc": "2026-10-02T08:38:21.554642+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 497777600,
+              "peak_rss_bytes": 507162624,
+              "load_ms": 0.3383,
+              "prefill_p50_ms": 274.717,
+              "decode_p50_ms": 33.5687,
+              "prefill_samples_ms": [
+                296.4102,
+                209.6765,
+                269.2142,
+                274.717,
+                261.8281,
+                270.8527,
+                309.7973,
+                282.7207,
+                321.0598,
+                288.9987,
+                267.0569
+              ],
+              "decode_samples_ms": [
+                33.0206,
+                29.7866,
+                33.5687,
+                35.1063,
+                31.4609,
+                40.1253,
+                59.7922,
+                34.9866,
+                33.4252,
+                33.3152,
+                34.8263
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 261.8281,
+                "p90_ms": 309.7973,
+                "p90_p10_ratio": 1.1832087541405985,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 31.4609,
+                "p90_ms": 40.1253,
+                "p90_p10_ratio": 1.2754021658630237,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          },
+          {
+            "index": 2,
+            "stage": "after",
+            "measured_at_utc": "2026-10-02T08:38:26.916339+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 497777600,
+              "peak_rss_bytes": 507162624,
+              "load_ms": 0.4307,
+              "prefill_p50_ms": 274.5515,
+              "decode_p50_ms": 35.8072,
+              "prefill_samples_ms": [
+                274.5102,
+                259.893,
+                274.5515,
+                271.0923,
+                257.8389,
+                301.4208,
+                280.4612,
+                268.1949,
+                321.9117,
+                279.0312,
+                306.4504
+              ],
+              "decode_samples_ms": [
+                37.8219,
+                39.3213,
+                34.8428,
+                35.5096,
+                35.8072,
+                33.9002,
+                36.5117,
+                30.5309,
+                40.4146,
+                35.9727,
+                33.2336
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 259.893,
+                "p90_ms": 306.4504,
+                "p90_p10_ratio": 1.1791406463429182,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 33.2336,
+                "p90_ms": 39.3213,
+                "p90_p10_ratio": 1.183179071782774,
+                "reason": "passed"
+              }
+            }
+          },
+          {
+            "index": 3,
+            "stage": "before",
+            "measured_at_utc": "2026-10-02T08:38:33.424844+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 497777600,
+              "peak_rss_bytes": 507170816,
+              "load_ms": 0.3907,
+              "prefill_p50_ms": 321.8842,
+              "decode_p50_ms": 28.4327,
+              "prefill_samples_ms": [
+                411.2543,
+                443.3575,
+                370.6712,
+                317.5185,
+                320.9943,
+                329.7855,
+                316.3528,
+                321.8842,
+                378.7001,
+                320.5316,
+                315.7084
+              ],
+              "decode_samples_ms": [
+                28.4327,
+                31.1913,
+                44.0787,
+                27.1615,
+                29.679,
+                26.4524,
+                26.4363,
+                39.5393,
+                28.3399,
+                27.1798,
+                28.7325
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": false,
+              "prefill": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 316.3528,
+                "p90_ms": 411.2543,
+                "p90_p10_ratio": 1.299986281139285,
+                "reason": "timing_spread_exceeds_threshold"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 26.4524,
+                "p90_ms": 39.5393,
+                "p90_p10_ratio": 1.4947339371852837,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          }
+        ],
+        "before": {
+          "prefill_samples_ms": [
+            398.4313,
+            344.3358,
+            346.2041,
+            369.247,
+            327.1386,
+            373.038,
+            322.1581,
+            326.4238,
+            384.8773,
+            320.7485,
+            352.8967,
+            411.2543,
+            443.3575,
+            370.6712,
+            317.5185,
+            320.9943,
+            329.7855,
+            316.3528,
+            321.8842,
+            378.7001,
+            320.5316,
+            315.7084
+          ],
+          "prefill_p50_ms": 337.06065,
+          "decode_samples_ms": [
+            27.729,
+            28.9526,
+            37.2813,
+            28.1282,
+            35.4087,
+            35.6423,
+            28.276,
+            28.0347,
+            27.3066,
+            26.3636,
+            38.1623,
+            28.4327,
+            31.1913,
+            44.0787,
+            27.1615,
+            29.679,
+            26.4524,
+            26.4363,
+            39.5393,
+            28.3399,
+            27.1798,
+            28.7325
+          ],
+          "decode_p50_ms": 28.3863,
+          "stability": {
+            "passed": false,
+            "prefill": {
+              "passed": true,
+              "sample_count": 22,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 317.81981,
+              "p90_ms": 397.07590000000005,
+              "p90_p10_ratio": 1.2493742916780424,
+              "reason": "passed"
+            },
+            "decode": {
+              "passed": false,
+              "sample_count": 22,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 26.523310000000002,
+              "p90_ms": 38.074200000000005,
+              "p90_p10_ratio": 1.43549956623061,
+              "reason": "timing_spread_exceeds_threshold"
+            }
+          },
+          "pass_stability": [
+            {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 322.1581,
+                "p90_ms": 384.8773,
+                "p90_p10_ratio": 1.194684535325978,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 27.3066,
+                "p90_ms": 37.2813,
+                "p90_p10_ratio": 1.3652853156379776,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            },
+            {
+              "passed": false,
+              "prefill": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 316.3528,
+                "p90_ms": 411.2543,
+                "p90_p10_ratio": 1.299986281139285,
+                "reason": "timing_spread_exceeds_threshold"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 26.4524,
+                "p90_ms": 39.5393,
+                "p90_p10_ratio": 1.4947339371852837,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          ],
+          "pass_medians_ms": {
+            "prefill": [
+              346.2041,
+              321.8842
+            ],
+            "decode": [
+              28.276,
+              28.4327
+            ]
+          },
+          "between_pass_stability": {
+            "prefill": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0755548113265576,
+              "maximum_ratio": 1.25
+            },
+            "decode": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.005541802235111,
+              "maximum_ratio": 1.25
+            }
+          },
+          "stability_passed": false
+        },
+        "after": {
+          "prefill_samples_ms": [
+            296.4102,
+            209.6765,
+            269.2142,
+            274.717,
+            261.8281,
+            270.8527,
+            309.7973,
+            282.7207,
+            321.0598,
+            288.9987,
+            267.0569,
+            274.5102,
+            259.893,
+            274.5515,
+            271.0923,
+            257.8389,
+            301.4208,
+            280.4612,
+            268.1949,
+            321.9117,
+            279.0312,
+            306.4504
+          ],
+          "prefill_p50_ms": 274.63424999999995,
+          "decode_samples_ms": [
+            33.0206,
+            29.7866,
+            33.5687,
+            35.1063,
+            31.4609,
+            40.1253,
+            59.7922,
+            34.9866,
+            33.4252,
+            33.3152,
+            34.8263,
+            37.8219,
+            39.3213,
+            34.8428,
+            35.5096,
+            35.8072,
+            33.9002,
+            36.5117,
+            30.5309,
+            40.4146,
+            35.9727,
+            33.2336
+          ],
+          "decode_p50_ms": 34.914699999999996,
+          "stability": {
+            "passed": false,
+            "prefill": {
+              "passed": true,
+              "sample_count": 22,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 260.08651,
+              "p90_ms": 309.46261000000004,
+              "p90_p10_ratio": 1.1898449096802448,
+              "reason": "passed"
+            },
+            "decode": {
+              "passed": false,
+              "sample_count": 22,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 31.61687,
+              "p90_ms": 40.044900000000005,
+              "p90_p10_ratio": 1.2665675001984702,
+              "reason": "timing_spread_exceeds_threshold"
+            }
+          },
+          "pass_stability": [
+            {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 261.8281,
+                "p90_ms": 309.7973,
+                "p90_p10_ratio": 1.1832087541405985,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 31.4609,
+                "p90_ms": 40.1253,
+                "p90_p10_ratio": 1.2754021658630237,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            },
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 259.893,
+                "p90_ms": 306.4504,
+                "p90_p10_ratio": 1.1791406463429182,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 33.2336,
+                "p90_ms": 39.3213,
+                "p90_p10_ratio": 1.183179071782774,
+                "reason": "passed"
+              }
+            }
+          ],
+          "pass_medians_ms": {
+            "prefill": [
+              274.717,
+              274.5515
+            ],
+            "decode": [
+              33.5687,
+              35.8072
+            ]
+          },
+          "between_pass_stability": {
+            "prefill": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0006028012959318,
+              "maximum_ratio": 1.25
+            },
+            "decode": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.06668414326441,
+              "maximum_ratio": 1.25
+            }
+          },
+          "stability_passed": false
+        }
+      },
+      "gate": {
+        "quality_passed": true,
+        "timing_stability_passed": false,
+        "prefill_ratio_after_before": 0.814791788955489,
+        "decode_ratio_after_before": 1.2299841825105773,
+        "no_slowdown_passed": false,
+        "prefill_improvement_passed": true,
+        "maximum_slowdown_ratio": 1.02,
+        "required_prefill_ratio": 0.98,
+        "accepted_native_experiment": false,
+        "automatic_selection_authorized": false,
+        "fresh_pytorch_comparison": false
+      }
+    },
+    "8-protected": {
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact": "decoder-8-protected.leaf",
+      "artifact_sha256": "dc459d1585478ac3d73c5a6be7529232b0ddc89df81d05bb5e15ce16b8e01904",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 35.86662292480469,
+        "relative_logit_rmse": 0.0156409852206707,
+        "next_token_agreement": 0.968503937007874,
+        "perplexity": 62.78241352092633,
+        "pytorch_perplexity": 62.58010265069033,
+        "perplexity_ratio": 1.003232830590983
+      },
+      "trained_quality_gate_passed": true,
+      "quality_gate_passed": true,
+      "fp32_allclose": null,
+      "chunked": {
+        "sequence_index": 0,
+        "chunk_tokens": 16,
+        "quality": {
+          "evaluated_tokens": 127,
+          "max_abs_logit_error": 9.395843505859375,
+          "relative_logit_rmse": 0.010863836854696274,
+          "next_token_agreement": 0.9448818897637795,
+          "perplexity": 47.283112163300004,
+          "pytorch_perplexity": 47.31863899974026,
+          "perplexity_ratio": 0.9992491999518319
+        },
+        "quality_gate_passed": false,
+        "parity_vs_full": true,
+        "fp32_allclose_pytorch": null
+      },
+      "generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "generation_exact_match_pytorch": true,
+      "generation_exact_match_before": true,
+      "frozen_before_quality_gate_passed": true,
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 243305408,
+        "peak_rss_bytes": 286179328,
+        "load_ms": 4.2322,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "quality_measured_at_utc": "2026-10-02T08:38:10.075293+00:00",
+      "timing": {
+        "order": [
+          "before",
+          "after",
+          "after",
+          "before"
+        ],
+        "passes": [
+          {
+            "index": 0,
+            "stage": "before",
+            "measured_at_utc": "2026-10-02T08:38:38.862870+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 243305408,
+              "peak_rss_bytes": 252702720,
+              "load_ms": 3.8933,
+              "prefill_p50_ms": 309.0563,
+              "decode_p50_ms": 16.577,
+              "prefill_samples_ms": [
+                308.3041,
+                301.2147,
+                318.6553,
+                317.5718,
+                379.579,
+                309.0563,
+                317.2249,
+                307.5266,
+                304.3886,
+                304.7079,
+                328.4658
+              ],
+              "decode_samples_ms": [
+                18.9286,
+                16.1149,
+                16.8488,
+                17.4876,
+                16.577,
+                16.8469,
+                15.7704,
+                17.9516,
+                16.3331,
+                16.0303,
+                16.2313
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 304.3886,
+                "p90_ms": 328.4658,
+                "p90_p10_ratio": 1.0791002028328263,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 16.0303,
+                "p90_ms": 17.9516,
+                "p90_p10_ratio": 1.1198542759648915,
+                "reason": "passed"
+              }
+            }
+          },
+          {
+            "index": 1,
+            "stage": "after",
+            "measured_at_utc": "2026-10-02T08:38:43.325364+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 243305408,
+              "peak_rss_bytes": 252694528,
+              "load_ms": 3.4448,
+              "prefill_p50_ms": 242.1298,
+              "decode_p50_ms": 18.0233,
+              "prefill_samples_ms": [
+                238.2706,
+                249.7574,
+                240.4814,
+                237.9268,
+                241.9865,
+                242.1298,
+                290.2671,
+                270.0781,
+                240.7631,
+                243.8877,
+                261.2427
+              ],
+              "decode_samples_ms": [
+                17.8678,
+                21.0676,
+                17.7382,
+                18.0776,
+                17.9938,
+                17.7877,
+                18.3962,
+                18.0233,
+                17.8809,
+                20.5437,
+                35.166
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 238.2706,
+                "p90_ms": 270.0781,
+                "p90_p10_ratio": 1.1334931796033585,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 17.7877,
+                "p90_ms": 21.0676,
+                "p90_p10_ratio": 1.1843914615155415,
+                "reason": "passed"
+              }
+            }
+          },
+          {
+            "index": 2,
+            "stage": "after",
+            "measured_at_utc": "2026-10-02T08:38:48.082878+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 243305408,
+              "peak_rss_bytes": 252682240,
+              "load_ms": 4.4107,
+              "prefill_p50_ms": 265.9421,
+              "decode_p50_ms": 19.0296,
+              "prefill_samples_ms": [
+                270.8631,
+                250.4263,
+                268.4356,
+                301.9424,
+                265.9421,
+                239.3456,
+                240.4794,
+                261.5101,
+                267.982,
+                262.062,
+                295.9365
+              ],
+              "decode_samples_ms": [
+                21.0982,
+                19.0296,
+                43.0981,
+                32.9858,
+                18.262,
+                17.8885,
+                18.3016,
+                17.7746,
+                18.8989,
+                28.7975,
+                21.2239
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 240.4794,
+                "p90_ms": 295.9365,
+                "p90_p10_ratio": 1.2306106053158816,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 17.8885,
+                "p90_ms": 32.9858,
+                "p90_p10_ratio": 1.8439667943091929,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          },
+          {
+            "index": 3,
+            "stage": "before",
+            "measured_at_utc": "2026-10-02T08:38:54.727576+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 243305408,
+              "peak_rss_bytes": 252698624,
+              "load_ms": 4.1412,
+              "prefill_p50_ms": 391.8742,
+              "decode_p50_ms": 18.4198,
+              "prefill_samples_ms": [
+                441.9192,
+                416.0847,
+                380.529,
+                391.8742,
+                417.2584,
+                416.0852,
+                314.7746,
+                315.0862,
+                422.0167,
+                335.7936,
+                307.8791
+              ],
+              "decode_samples_ms": [
+                18.465,
+                18.6725,
+                19.1001,
+                20.4408,
+                18.4198,
+                16.2371,
+                16.3359,
+                18.7806,
+                16.8442,
+                16.0496,
+                15.9659
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": false,
+              "prefill": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 314.7746,
+                "p90_ms": 422.0167,
+                "p90_p10_ratio": 1.340694897237579,
+                "reason": "timing_spread_exceeds_threshold"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 16.0496,
+                "p90_ms": 19.1001,
+                "p90_p10_ratio": 1.1900670421692752,
+                "reason": "passed"
+              }
+            }
+          }
+        ],
+        "before": {
+          "prefill_samples_ms": [
+            308.3041,
+            301.2147,
+            318.6553,
+            317.5718,
+            379.579,
+            309.0563,
+            317.2249,
+            307.5266,
+            304.3886,
+            304.7079,
+            328.4658,
+            441.9192,
+            416.0847,
+            380.529,
+            391.8742,
+            417.2584,
+            416.0852,
+            314.7746,
+            315.0862,
+            422.0167,
+            335.7936,
+            307.8791
+          ],
+          "prefill_p50_ms": 318.11355000000003,
+          "decode_samples_ms": [
+            18.9286,
+            16.1149,
+            16.8488,
+            17.4876,
+            16.577,
+            16.8469,
+            15.7704,
+            17.9516,
+            16.3331,
+            16.0303,
+            16.2313,
+            18.465,
+            18.6725,
+            19.1001,
+            20.4408,
+            18.4198,
+            16.2371,
+            16.3359,
+            18.7806,
+            16.8442,
+            16.0496,
+            15.9659
+          ],
+          "decode_p50_ms": 16.845550000000003,
+          "stability": {
+            "passed": false,
+            "prefill": {
+              "passed": false,
+              "sample_count": 22,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 304.98977,
+              "p90_ms": 417.14108,
+              "p90_p10_ratio": 1.3677215468571289,
+              "reason": "timing_spread_exceeds_threshold"
+            },
+            "decode": {
+              "passed": true,
+              "sample_count": 22,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 16.032230000000002,
+              "p90_ms": 18.9138,
+              "p90_p10_ratio": 1.1797360691556942,
+              "reason": "passed"
+            }
+          },
+          "pass_stability": [
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 304.3886,
+                "p90_ms": 328.4658,
+                "p90_p10_ratio": 1.0791002028328263,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 16.0303,
+                "p90_ms": 17.9516,
+                "p90_p10_ratio": 1.1198542759648915,
+                "reason": "passed"
+              }
+            },
+            {
+              "passed": false,
+              "prefill": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 314.7746,
+                "p90_ms": 422.0167,
+                "p90_p10_ratio": 1.340694897237579,
+                "reason": "timing_spread_exceeds_threshold"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 16.0496,
+                "p90_ms": 19.1001,
+                "p90_p10_ratio": 1.1900670421692752,
+                "reason": "passed"
+              }
+            }
+          ],
+          "pass_medians_ms": {
+            "prefill": [
+              309.0563,
+              391.8742
+            ],
+            "decode": [
+              16.577,
+              18.4198
+            ]
+          },
+          "between_pass_stability": {
+            "prefill": {
+              "passed": false,
+              "max_min_pass_median_ratio": 1.2679702694945871,
+              "maximum_ratio": 1.25
+            },
+            "decode": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.1111660734752968,
+              "maximum_ratio": 1.25
+            }
+          },
+          "stability_passed": false
+        },
+        "after": {
+          "prefill_samples_ms": [
+            238.2706,
+            249.7574,
+            240.4814,
+            237.9268,
+            241.9865,
+            242.1298,
+            290.2671,
+            270.0781,
+            240.7631,
+            243.8877,
+            261.2427,
+            270.8631,
+            250.4263,
+            268.4356,
+            301.9424,
+            265.9421,
+            239.3456,
+            240.4794,
+            261.5101,
+            267.982,
+            262.062,
+            295.9365
+          ],
+          "prefill_p50_ms": 255.8345,
+          "decode_samples_ms": [
+            17.8678,
+            21.0676,
+            17.7382,
+            18.0776,
+            17.9938,
+            17.7877,
+            18.3962,
+            18.0233,
+            17.8809,
+            20.5437,
+            35.166,
+            21.0982,
+            19.0296,
+            43.0981,
+            32.9858,
+            18.262,
+            17.8885,
+            18.3016,
+            17.7746,
+            18.8989,
+            28.7975,
+            21.2239
+          ],
+          "decode_p50_ms": 18.3489,
+          "stability": {
+            "passed": false,
+            "prefill": {
+              "passed": true,
+              "sample_count": 22,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 239.45898,
+              "p90_ms": 288.3267000000001,
+              "p90_p10_ratio": 1.2040755372799137,
+              "reason": "passed"
+            },
+            "decode": {
+              "passed": false,
+              "sample_count": 22,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 17.79571,
+              "p90_ms": 32.566970000000005,
+              "p90_p10_ratio": 1.8300461178564948,
+              "reason": "timing_spread_exceeds_threshold"
+            }
+          },
+          "pass_stability": [
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 238.2706,
+                "p90_ms": 270.0781,
+                "p90_p10_ratio": 1.1334931796033585,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 17.7877,
+                "p90_ms": 21.0676,
+                "p90_p10_ratio": 1.1843914615155415,
+                "reason": "passed"
+              }
+            },
+            {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 240.4794,
+                "p90_ms": 295.9365,
+                "p90_p10_ratio": 1.2306106053158816,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 11,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 17.8885,
+                "p90_ms": 32.9858,
+                "p90_p10_ratio": 1.8439667943091929,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          ],
+          "pass_medians_ms": {
+            "prefill": [
+              242.1298,
+              265.9421
+            ],
+            "decode": [
+              18.0233,
+              19.0296
+            ]
+          },
+          "between_pass_stability": {
+            "prefill": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0983451851031967,
+              "maximum_ratio": 1.25
+            },
+            "decode": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.055833282473243,
+              "maximum_ratio": 1.25
+            }
+          },
+          "stability_passed": false
+        }
+      },
+      "gate": {
+        "quality_passed": true,
+        "timing_stability_passed": false,
+        "prefill_ratio_after_before": 0.8042238376831164,
+        "decode_ratio_after_before": 1.0892431532363145,
+        "no_slowdown_passed": false,
+        "prefill_improvement_passed": true,
+        "maximum_slowdown_ratio": 1.02,
+        "required_prefill_ratio": 0.98,
+        "accepted_native_experiment": false,
+        "automatic_selection_authorized": false,
+        "fresh_pytorch_comparison": false
+      }
+    }
+  },
+  "automatic_selection_authorized": false,
+  "scope": "Complete trained decoder against frozen held-out subset logits. Serial same-machine native ABBA only; PyTorch timings are historical context, not a fresh promotion baseline. Timed forward excludes artifact preparation/process startup. Quantized greedy equality and individual chunk quality are diagnostic; full held-out quality and chunked-vs-full parity qualify all precisions. FP32 also requires exact generation and reference allclose."
+}

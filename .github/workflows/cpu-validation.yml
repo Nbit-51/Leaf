@@ -1,0 +1,45 @@
+name: Portable CPU validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  decoder:
+    name: Decoder on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-14]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install CPU PyTorch on Linux and Windows
+        if: runner.os != 'macOS'
+        run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Install PyTorch on macOS
+        if: runner.os == 'macOS'
+        run: python -m pip install torch
+      - name: Install validation dependencies
+        run: python -m pip install numpy transformers safetensors pytest psutil tokenizers jinja2 huggingface-hub pyarrow setuptools wheel
+      - name: Configure portable build
+        run: cmake -S engine -B build/ci -DCMAKE_BUILD_TYPE=Release -DLEAF_ENABLE_AVX2=OFF
+      - name: Build native decoder
+        run: cmake --build build/ci --config Release --target leaf_decoder
+      - name: Python decoder, CLI and dataset tests
+        run: python -m pytest tests/unit/test_decoder_plan.py tests/unit/test_generation_policy.py tests/unit/test_decoder_precision_policy.py tests/unit/test_decoder_export_provenance.py tests/unit/test_decoder_latency_phases.py tests/unit/test_decoder_comparison.py tests/unit/test_datasets.py tests/unit/test_cli.py tests/unit/test_tokenizer_parity.py tests/unit/test_decoder_quality.py tests/unit/test_affinity.py tests/unit/test_power.py tests/unit/test_packaging.py tests/unit/test_package_runtime.py tests/unit/test_benchmark_cli.py -q
+      - name: Full reduced-model architecture validation
+        shell: bash
+        run: |
+          runtime=build/ci/leaf_decoder
+          if [ "${{ runner.os }}" = "Windows" ]; then runtime=build/ci/Release/leaf_decoder.exe; fi
+          python tools/verify_decoder_architectures.py --executable "$runtime" --output benchmark/results/decoder-ci.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: decoder-validation-${{ matrix.os }}
+          path: benchmark/results/decoder-ci.json

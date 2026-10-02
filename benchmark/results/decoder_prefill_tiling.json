@@ -1,0 +1,86 @@
+{
+  "benchmark": "native-decoder-integer-prefill-tiling-abba",
+  "measured_at_utc": "2026-10-01T13:58:55Z",
+  "scope": "Same trained 1.1B decoder artifact and 64-token request; one CPU thread; warmup excluded. This is a kernel candidate check, not a new held-out model-quality evaluation.",
+  "artifact": "decoder-8-smooth.leaf",
+  "artifact_bytes": 1103777152,
+  "weight_bits": 8,
+  "activation_bits": 8,
+  "threads": 1,
+  "request_tokens": 64,
+  "prefill_tokens": 63,
+  "decode_tokens": 1,
+  "warmup_per_run": 1,
+  "measured_iterations_per_run": 3,
+  "runtime_avx2": true,
+  "candidate": "Four output rows by two input tokens; existing one-token decode kernel retained",
+  "original_executable_sha256": "360dac67813739dcdcd43c1f0609d623953a3ebae43868742b0768f448ee4804",
+  "candidate_executable_sha256": "65066a7a7032c2317b1b16edcbdc2538be04795ad04712b32f5ecc852be10806",
+  "candidate_decoder_source_sha256": "217cf28d26c9eda46057b237182d927a377216789dee442c45528d0ec7ab6cd2",
+  "validation": {
+    "trained_request_logits_bit_exact_to_original": true,
+    "max_abs_logit_difference": 0.0,
+    "complete_reduced_architecture_parity_passed": ["llama", "qwen2", "gpt2", "gpt_neox", "opt"],
+    "architecture_checks": ["FP32 versus PyTorch", "FP32 scalar and two-thread execution", "chunked KV-cache", "greedy generation", "INT8 and INT4 activation-INT8 scalar/vector parity", "smoothed INT8 scalar/vector parity"],
+    "cross_architecture_weights": "random; trained held-out quality is evaluated separately"
+  },
+  "abba_runs": [
+    {
+      "implementation": "original",
+      "prefill_p50_ms": 2947.3422,
+      "decode_p50_ms": 88.5941,
+      "prefill_samples_ms": [3016.6233, 2947.3422, 2857.2138],
+      "decode_samples_ms": [105.1488, 87.9053, 88.5941]
+    },
+    {
+      "implementation": "candidate",
+      "prefill_p50_ms": 2280.6571,
+      "decode_p50_ms": 107.6029,
+      "prefill_samples_ms": [2263.7946, 2281.5666, 2280.6571],
+      "decode_samples_ms": [109.7534, 107.6029, 98.343]
+    },
+    {
+      "implementation": "candidate",
+      "prefill_p50_ms": 2221.1317,
+      "decode_p50_ms": 93.6717,
+      "prefill_samples_ms": [2221.0436, 2221.1317, 2253.8642],
+      "decode_samples_ms": [108.7544, 91.1973, 93.6717]
+    },
+    {
+      "implementation": "original",
+      "prefill_p50_ms": 2974.7641,
+      "decode_p50_ms": 110.9377,
+      "prefill_samples_ms": [2897.6148, 2974.7641, 3074.1531],
+      "decode_samples_ms": [114.4139, 93.0303, 110.9377]
+    }
+  ],
+  "abba_aggregate": {
+    "original_prefill_p50_ms": 2961.05315,
+    "candidate_prefill_p50_ms": 2258.8294,
+    "prefill_latency_reduction": 0.23715337564947114,
+    "prefill_gate_passed": true,
+    "decode_note": "Decode kernel unchanged; short decode measurements remain noisy. No decode improvement versus the original quantized implementation is claimed."
+  },
+  "fresh_candidate_same_binary_precision_comparison": {
+    "fp32": {
+      "artifact_bytes": 4400212544,
+      "activation_bits": 32,
+      "prefill_p50_ms": 3927.3215,
+      "decode_p50_ms": 264.2189,
+      "prefill_samples_ms": [3919.7308, 3927.3215, 3956.6416],
+      "decode_samples_ms": [351.3204, 264.2189, 259.6893]
+    },
+    "smoothed_int8": {
+      "artifact_bytes": 1103777152,
+      "activation_bits": 8,
+      "prefill_p50_ms": 2271.9244,
+      "decode_p50_ms": 98.6275,
+      "prefill_samples_ms": [2260.4797, 2271.9244, 2277.4406],
+      "decode_samples_ms": [98.6275, 106.4466, 95.9941]
+    },
+    "prefill_latency_reduction_vs_fp32": 0.42150791576396285,
+    "decode_latency_reduction_vs_fp32": 0.6267204957707416,
+    "native_fp32_no_slowdown_gate_passed": true,
+    "pytorch_speed_gate": "Fresh independent PyTorch benchmark required before automatic precision promotion"
+  }
+}

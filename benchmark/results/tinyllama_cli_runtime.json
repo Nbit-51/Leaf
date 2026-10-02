@@ -1,0 +1,1195 @@
+{
+  "benchmark": "cached-source-cli-full-command-streaming",
+  "measured_at_utc": "2026-10-02T08:36:26.735225+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "model": "TinyLlama-1.1B-Chat-v1.0-git",
+  "threads": 1,
+  "pinned_cpu": 2,
+  "generation_prompt": "Explain in one sentence why careful measurement matters when optimizing software.",
+  "max_tokens": 16,
+  "raw_prompt": false,
+  "model_config_sha256": "2add6e2d3f7cfc555e8cfee8dbaa12e9f9b057b2a4d70e9a999aeb32b8d02873",
+  "source_weight_sha256": {
+    "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933"
+  },
+  "profile_sha256": "89a0890963dee227b97b030e09194b6b505bad8232257003c07964530a656c59",
+  "generation_reference_sha256": "537a2ed92d0dbe9b77ceb462e3ee09fe41d0bc29a7d638e7a1bc2cfdf4c327f5",
+  "native_executable_sha256": "890bba185eec56e08dd2aa04d74b4759a3121e5c78058b8527a3a6301b424032",
+  "staged_artifacts": {
+    "decoder-32.leaf": {
+      "method": "hardlink",
+      "bytes": 4400212544,
+      "sha256": "71b98b53ce204393478990887c7beab7074e34bffc76e5a00c4f9183631e060a"
+    },
+    "decoder-8-smooth.leaf": {
+      "method": "hardlink",
+      "bytes": 1103777152,
+      "sha256": "6a831e4a655f4fa00ccf82ad1bf317492aeaa76c85950a56ec464a7f3611ffc5"
+    }
+  },
+  "prompt_token_ids": [
+    529,
+    29989,
+    1792,
+    29989,
+    29958,
+    13,
+    9544,
+    7420,
+    297,
+    697,
+    10541,
+    2020,
+    16010,
+    20039,
+    13750,
+    746,
+    5994,
+    5281,
+    7047,
+    29889,
+    2,
+    13,
+    29966,
+    29989,
+    465,
+    22137,
+    29989,
+    29958,
+    13
+  ],
+  "generation_config_sha256": "b73d28f1e14666a269b037d60470d131315b8007fca9f99868f78d1fa343805d",
+  "source_sha256": {
+    "leaf/cli.py": "054984265e27cad8ac088fee39728921c1450203a4318c1293401099b40abf77",
+    "leaf/affinity.py": "0f8e549f2e2c2ad4905a1acbab151515e3b88228750fba2954da0fbc016f6b91",
+    "tools/decoder_plan.py": "764302cf8fe859a0b3b5404178970163b2a1e436c8ff1fffb20947b6cb022938",
+    "tools/validate_decoder.py": "c392587307b61a80a5e53a2d1e4f347edf35b44c5e0b7d9da6309c0b7c3fd9cf",
+    "tools/benchmark_cli.py": "30f4cfbd9e81176a568be5712153531aa6880149bee523fea32cc8762eac84c8"
+  },
+  "runtime_scope": "Source CLI with explicit frozen validated executable, not an installed-wheel speed qualification",
+  "cached_artifacts": true,
+  "artifact_export_performed": false,
+  "native_build_performed": false,
+  "operating_system_file_cache_flushed": false,
+  "identity_preflight_reads_weights_and_artifacts": true,
+  "retained_run_directory": "C:\\Users\\navaneeth\\leaf\\build\\cli-benchmark\\cached-56pwx5u1",
+  "case_selection": {
+    "32": {
+      "native_case": "32",
+      "weight_bits": 32,
+      "activation_bits": 32,
+      "artifact": "decoder-32.leaf",
+      "artifact_sha256": "71b98b53ce204393478990887c7beab7074e34bffc76e5a00c4f9183631e060a",
+      "expected_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        304,
+        9801,
+        393,
+        278
+      ]
+    },
+    "auto": {
+      "native_case": "8-smooth",
+      "weight_bits": 8,
+      "activation_bits": 8,
+      "artifact": "decoder-8-smooth.leaf",
+      "artifact_sha256": "6a831e4a655f4fa00ccf82ad1bf317492aeaa76c85950a56ec464a7f3611ffc5",
+      "expected_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6511,
+        363,
+        16232,
+        322,
+        18378
+      ]
+    }
+  },
+  "execution_order": [
+    {
+      "case": "32",
+      "repetition": 1
+    },
+    {
+      "case": "auto",
+      "repetition": 1
+    },
+    {
+      "case": "auto",
+      "repetition": 2
+    },
+    {
+      "case": "32",
+      "repetition": 2
+    },
+    {
+      "case": "32",
+      "repetition": 3
+    },
+    {
+      "case": "auto",
+      "repetition": 3
+    },
+    {
+      "case": "auto",
+      "repetition": 4
+    },
+    {
+      "case": "32",
+      "repetition": 4
+    },
+    {
+      "case": "32",
+      "repetition": 5
+    },
+    {
+      "case": "auto",
+      "repetition": 5
+    }
+  ],
+  "timing_scope": "External timers include Python startup and streaming. CLI TTFT excludes interpreter startup. Native load_ms includes constructor/packing, not CLI profile/artifact hashing. Native prefill/decode are prompt execution. The first-visible remainder combines startup, hashing, tokenizer, IPC, and rendering; it is not an isolated Python timer.",
+  "runs": {
+    "32": [
+      {
+        "external_wall_ms": 11530.461000002106,
+        "external_first_stdout_byte_ms": 6412.243099999614,
+        "external_first_visible_text_ms": 6412.243099999614,
+        "stdout": "Careful measurement matters when optimizing software because it helps to ensure that the\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": true,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 4400212544,
+          "peak_rss_bytes": 4148391936,
+          "load_ms": 0.6919,
+          "prefill_p50_ms": 5805.538,
+          "decode_p50_ms": 294.6605,
+          "prefill_samples_ms": [
+            5805.538
+          ],
+          "decode_samples_ms": [
+            330.2373,
+            350.0663,
+            294.6605,
+            290.2056,
+            270.9383,
+            271.066,
+            281.0878,
+            278.9403,
+            281.3632,
+            273.4783,
+            303.9458,
+            308.1067,
+            330.0239,
+            313.6869,
+            334.2141
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6911,
+            304,
+            9801,
+            393,
+            278
+          ],
+          "weight_bits": 32,
+          "time_to_first_token_ms": 6226.685000001453,
+          "end_to_end_ms": 11321.841299999505
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 606.0131999996147,
+        "repetition": 1,
+        "native_case": "32"
+      },
+      {
+        "external_wall_ms": 11381.819699996413,
+        "external_first_stdout_byte_ms": 6302.171899998939,
+        "external_first_visible_text_ms": 6302.171899998939,
+        "stdout": "Careful measurement matters when optimizing software because it helps to ensure that the\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": true,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 4400212544,
+          "peak_rss_bytes": 4149301248,
+          "load_ms": 5.9611,
+          "prefill_p50_ms": 5940.3683,
+          "decode_p50_ms": 281.1794,
+          "prefill_samples_ms": [
+            5940.3683
+          ],
+          "decode_samples_ms": [
+            564.6727,
+            281.3516,
+            282.3787,
+            271.3231,
+            264.0884,
+            296.4948,
+            280.7089,
+            282.5716,
+            269.9105,
+            265.4225,
+            277.3073,
+            289.8428,
+            289.5579,
+            279.9001,
+            281.1794
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6911,
+            304,
+            9801,
+            393,
+            278
+          ],
+          "weight_bits": 32,
+          "time_to_first_token_ms": 6134.650700001657,
+          "end_to_end_ms": 11190.17470000108
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 355.84249999893837,
+        "repetition": 2,
+        "native_case": "32"
+      },
+      {
+        "external_wall_ms": 9146.584099999018,
+        "external_first_stdout_byte_ms": 4290.466099999321,
+        "external_first_visible_text_ms": 4290.466099999321,
+        "stdout": "Careful measurement matters when optimizing software because it helps to ensure that the\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": true,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 4400212544,
+          "peak_rss_bytes": 4149301248,
+          "load_ms": 0.4418,
+          "prefill_p50_ms": 3961.0977,
+          "decode_p50_ms": 270.9695,
+          "prefill_samples_ms": [
+            3961.0977
+          ],
+          "decode_samples_ms": [
+            340.4547,
+            292.515,
+            281.0032,
+            300.312,
+            349.2446,
+            270.9695,
+            262.7337,
+            268.9742,
+            271.1099,
+            266.8623,
+            270.8286,
+            264.4316,
+            284.9806,
+            260.7127,
+            269.1364
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6911,
+            304,
+            9801,
+            393,
+            278
+          ],
+          "weight_bits": 32,
+          "time_to_first_token_ms": 4128.486800000246,
+          "end_to_end_ms": 8961.314300002414
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 328.92659999932175,
+        "repetition": 3,
+        "native_case": "32"
+      },
+      {
+        "external_wall_ms": 11040.39929999999,
+        "external_first_stdout_byte_ms": 6246.115299996745,
+        "external_first_visible_text_ms": 6246.115299996745,
+        "stdout": "Careful measurement matters when optimizing software because it helps to ensure that the\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": true,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 4400212544,
+          "peak_rss_bytes": 4148391936,
+          "load_ms": 0.663,
+          "prefill_p50_ms": 5915.7184,
+          "decode_p50_ms": 270.2346,
+          "prefill_samples_ms": [
+            5915.7184
+          ],
+          "decode_samples_ms": [
+            345.8163,
+            269.8848,
+            270.2346,
+            266.0396,
+            267.5792,
+            266.7907,
+            268.0441,
+            279.4511,
+            275.6443,
+            280.8353,
+            269.8134,
+            287.0788,
+            286.0092,
+            270.0021,
+            283.8121
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6911,
+            304,
+            9801,
+            393,
+            278
+          ],
+          "weight_bits": 32,
+          "time_to_first_token_ms": 6068.377399999008,
+          "end_to_end_ms": 10838.038699999743
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 329.733899996746,
+        "repetition": 4,
+        "native_case": "32"
+      },
+      {
+        "external_wall_ms": 9818.433500000538,
+        "external_first_stdout_byte_ms": 4415.454000001773,
+        "external_first_visible_text_ms": 4415.454000001773,
+        "stdout": "Careful measurement matters when optimizing software because it helps to ensure that the\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": true,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 4400212544,
+          "peak_rss_bytes": 4149301248,
+          "load_ms": 0.4493,
+          "prefill_p50_ms": 4069.583,
+          "decode_p50_ms": 276.868,
+          "prefill_samples_ms": [
+            4069.583
+          ],
+          "decode_samples_ms": [
+            366.8677,
+            256.437,
+            269.8269,
+            313.7101,
+            675.9158,
+            335.4223,
+            317.4122,
+            310.3574,
+            267.4911,
+            274.5849,
+            274.6568,
+            270.789,
+            266.0385,
+            276.868,
+            327.9044
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6911,
+            304,
+            9801,
+            393,
+            278
+          ],
+          "weight_bits": 32,
+          "time_to_first_token_ms": 4248.621700000513,
+          "end_to_end_ms": 9629.531899998256
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 345.42170000177293,
+        "repetition": 5,
+        "native_case": "32"
+      }
+    ],
+    "auto": [
+      {
+        "external_wall_ms": 4714.182800002163,
+        "external_first_stdout_byte_ms": 3079.559199999494,
+        "external_first_visible_text_ms": 3079.559199999494,
+        "stdout": "Careful measurement matters when optimizing software because it allows for accurate and precise\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": false,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": true,
+          "activation_bits": 8,
+          "threads": 1,
+          "artifact_bytes": 1103777152,
+          "peak_rss_bytes": 1052106752,
+          "load_ms": 473.736,
+          "prefill_p50_ms": 721.7618,
+          "decode_p50_ms": 96.7737,
+          "prefill_samples_ms": [
+            721.7618
+          ],
+          "decode_samples_ms": [
+            93.1388,
+            101.0446,
+            98.8157,
+            94.3228,
+            93.1681,
+            91.7004,
+            106.1278,
+            98.9798,
+            104.2,
+            93.2516,
+            103.8752,
+            97.7885,
+            92.9756,
+            94.94,
+            96.7737
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6511,
+            363,
+            16232,
+            322,
+            18378
+          ],
+          "weight_bits": 8,
+          "time_to_first_token_ms": 2914.480100000219,
+          "end_to_end_ms": 4519.838599997456
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 1884.0613999994941,
+        "repetition": 1,
+        "native_case": "8-smooth"
+      },
+      {
+        "external_wall_ms": 4923.15100000269,
+        "external_first_stdout_byte_ms": 3103.319800000463,
+        "external_first_visible_text_ms": 3103.319800000463,
+        "stdout": "Careful measurement matters when optimizing software because it allows for accurate and precise\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": false,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": true,
+          "activation_bits": 8,
+          "threads": 1,
+          "artifact_bytes": 1103777152,
+          "peak_rss_bytes": 1052106752,
+          "load_ms": 497.2055,
+          "prefill_p50_ms": 734.8074,
+          "decode_p50_ms": 98.0357,
+          "prefill_samples_ms": [
+            734.8074
+          ],
+          "decode_samples_ms": [
+            95.1268,
+            99.447,
+            95.615,
+            93.0853,
+            112.2729,
+            98.0357,
+            91.7701,
+            98.2846,
+            103.0605,
+            91.7181,
+            92.3225,
+            98.1889,
+            99.5555,
+            94.0198,
+            251.752
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6511,
+            363,
+            16232,
+            322,
+            18378
+          ],
+          "weight_bits": 8,
+          "time_to_first_token_ms": 2924.373599998944,
+          "end_to_end_ms": 4716.265700000804
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 1871.306900000463,
+        "repetition": 2,
+        "native_case": "8-smooth"
+      },
+      {
+        "external_wall_ms": 4778.925100003107,
+        "external_first_stdout_byte_ms": 3179.0560000008554,
+        "external_first_visible_text_ms": 3179.0560000008554,
+        "stdout": "Careful measurement matters when optimizing software because it allows for accurate and precise\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": false,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": true,
+          "activation_bits": 8,
+          "threads": 1,
+          "artifact_bytes": 1103777152,
+          "peak_rss_bytes": 1052106752,
+          "load_ms": 499.3577,
+          "prefill_p50_ms": 768.2802,
+          "decode_p50_ms": 92.553,
+          "prefill_samples_ms": [
+            768.2802
+          ],
+          "decode_samples_ms": [
+            101.253,
+            95.3024,
+            91.6299,
+            99.1041,
+            94.2298,
+            92.553,
+            91.6368,
+            97.5757,
+            91.0928,
+            90.7117,
+            92.184,
+            90.2849,
+            92.7227,
+            90.9992,
+            101.2368
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6511,
+            363,
+            16232,
+            322,
+            18378
+          ],
+          "weight_bits": 8,
+          "time_to_first_token_ms": 3020.440800002689,
+          "end_to_end_ms": 4587.492300001031
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 1911.4181000008552,
+        "repetition": 3,
+        "native_case": "8-smooth"
+      },
+      {
+        "external_wall_ms": 5212.433700002293,
+        "external_first_stdout_byte_ms": 3374.633999999787,
+        "external_first_visible_text_ms": 3374.633999999787,
+        "stdout": "Careful measurement matters when optimizing software because it allows for accurate and precise\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": false,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": true,
+          "activation_bits": 8,
+          "threads": 1,
+          "artifact_bytes": 1103777152,
+          "peak_rss_bytes": 1052110848,
+          "load_ms": 540.0267,
+          "prefill_p50_ms": 833.8852,
+          "decode_p50_ms": 100.2196,
+          "prefill_samples_ms": [
+            833.8852
+          ],
+          "decode_samples_ms": [
+            123.9846,
+            99.4157,
+            115.6996,
+            147.1051,
+            121.1304,
+            97.9998,
+            134.4484,
+            134.7303,
+            99.4473,
+            100.2196,
+            93.3838,
+            101.7272,
+            90.5677,
+            90.358,
+            98.0916
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6511,
+            363,
+            16232,
+            322,
+            18378
+          ],
+          "weight_bits": 8,
+          "time_to_first_token_ms": 3203.823399999237,
+          "end_to_end_ms": 5006.214000000909
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 2000.7220999997871,
+        "repetition": 4,
+        "native_case": "8-smooth"
+      },
+      {
+        "external_wall_ms": 4740.442400001484,
+        "external_first_stdout_byte_ms": 3053.419200001372,
+        "external_first_visible_text_ms": 3053.419200001372,
+        "stdout": "Careful measurement matters when optimizing software because it allows for accurate and precise\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "source_cli": true,
+          "heavy_model_libraries_loaded": []
+        },
+        "generated_tokens_match_selected_native": true,
+        "generated_tokens_match_pytorch": false,
+        "cli_metrics": {
+          "avx2": true,
+          "vnni": true,
+          "activation_bits": 8,
+          "threads": 1,
+          "artifact_bytes": 1103777152,
+          "peak_rss_bytes": 1052106752,
+          "load_ms": 470.879,
+          "prefill_p50_ms": 756.0863,
+          "decode_p50_ms": 96.6719,
+          "prefill_samples_ms": [
+            756.0863
+          ],
+          "decode_samples_ms": [
+            92.8106,
+            91.8898,
+            96.2302,
+            104.8205,
+            140.8688,
+            99.0946,
+            91.3245,
+            96.6719,
+            98.3868,
+            95.8983,
+            100.5493,
+            93.5022,
+            91.6871,
+            105.0661,
+            102.6854
+          ],
+          "generated_tokens": [
+            29907,
+            598,
+            1319,
+            20039,
+            13750,
+            746,
+            5994,
+            5281,
+            7047,
+            1363,
+            372,
+            6511,
+            363,
+            16232,
+            322,
+            18378
+          ],
+          "weight_bits": 8,
+          "time_to_first_token_ms": 2883.1858999983524,
+          "end_to_end_ms": 4538.07869999946
+        },
+        "frontend_and_startup_remainder_until_first_visible_ms": 1826.453900001372,
+        "repetition": 5,
+        "native_case": "8-smooth"
+      }
+    ]
+  },
+  "summary": {
+    "32": {
+      "external_wall_ms": {
+        "p50_ms": 11040.39929999999,
+        "samples_ms": [
+          11530.461000002106,
+          11381.819699996413,
+          9146.584099999018,
+          11040.39929999999,
+          9818.433500000538
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 9415.323859999626,
+          "p90_ms": 11471.004479999829,
+          "p90_p10_ratio": 1.2183335008510567,
+          "reason": "passed"
+        }
+      },
+      "external_first_stdout_byte_ms": {
+        "p50_ms": 6246.115299996745,
+        "samples_ms": [
+          6412.243099999614,
+          6302.171899998939,
+          4290.466099999321,
+          6246.115299996745,
+          4415.454000001773
+        ],
+        "stability": {
+          "passed": false,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 4340.461260000302,
+          "p90_ms": 6368.214619999344,
+          "p90_p10_ratio": 1.4671746246616428,
+          "reason": "timing_spread_exceeds_threshold"
+        }
+      },
+      "external_first_visible_text_ms": {
+        "p50_ms": 6246.115299996745,
+        "samples_ms": [
+          6412.243099999614,
+          6302.171899998939,
+          4290.466099999321,
+          6246.115299996745,
+          4415.454000001773
+        ],
+        "stability": {
+          "passed": false,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 4340.461260000302,
+          "p90_ms": 6368.214619999344,
+          "p90_p10_ratio": 1.4671746246616428,
+          "reason": "timing_spread_exceeds_threshold"
+        }
+      },
+      "load_ms": {
+        "p50_ms": 0.663,
+        "samples_ms": [
+          0.6919,
+          5.9611,
+          0.4418,
+          0.663,
+          0.4493
+        ],
+        "stability": {
+          "passed": false,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 0.44480000000000003,
+          "p90_ms": 3.8534200000000007,
+          "p90_p10_ratio": 8.66326438848921,
+          "reason": "timing_spread_exceeds_threshold"
+        }
+      },
+      "prefill_p50_ms": {
+        "p50_ms": 5805.538,
+        "samples_ms": [
+          5805.538,
+          5940.3683,
+          3961.0977,
+          5915.7184,
+          4069.583
+        ],
+        "stability": {
+          "passed": false,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 4004.4918199999997,
+          "p90_ms": 5930.50834,
+          "p90_p10_ratio": 1.480964029038771,
+          "reason": "timing_spread_exceeds_threshold"
+        }
+      },
+      "decode_p50_ms": {
+        "p50_ms": 276.868,
+        "samples_ms": [
+          294.6605,
+          281.1794,
+          270.9695,
+          270.2346,
+          276.868
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 270.52855999999997,
+          "p90_ms": 289.26806,
+          "p90_p10_ratio": 1.0692699506477246,
+          "reason": "passed"
+        }
+      },
+      "time_to_first_token_ms": {
+        "p50_ms": 6068.377399999008,
+        "samples_ms": [
+          6226.685000001453,
+          6134.650700001657,
+          4128.486800000246,
+          6068.377399999008,
+          4248.621700000513
+        ],
+        "stability": {
+          "passed": false,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 4176.540760000353,
+          "p90_ms": 6189.871280001535,
+          "p90_p10_ratio": 1.482056954713166,
+          "reason": "timing_spread_exceeds_threshold"
+        }
+      },
+      "end_to_end_ms": {
+        "p50_ms": 10838.038699999743,
+        "samples_ms": [
+          11321.841299999505,
+          11190.17470000108,
+          8961.314300002414,
+          10838.038699999743,
+          9629.531899998256
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 9228.60134000075,
+          "p90_ms": 11269.174660000135,
+          "p90_p10_ratio": 1.2211140393674453,
+          "reason": "passed"
+        }
+      }
+    },
+    "auto": {
+      "external_wall_ms": {
+        "p50_ms": 4778.925100003107,
+        "samples_ms": [
+          4714.182800002163,
+          4923.15100000269,
+          4778.925100003107,
+          5212.433700002293,
+          4740.442400001484
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 4724.686640001892,
+          "p90_ms": 5096.720620002452,
+          "p90_p10_ratio": 1.0787425724387112,
+          "reason": "passed"
+        }
+      },
+      "external_first_stdout_byte_ms": {
+        "p50_ms": 3103.319800000463,
+        "samples_ms": [
+          3079.559199999494,
+          3103.319800000463,
+          3179.0560000008554,
+          3374.633999999787,
+          3053.419200001372
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 3063.8752000006207,
+          "p90_ms": 3296.4028000002145,
+          "p90_p10_ratio": 1.0758933000924928,
+          "reason": "passed"
+        }
+      },
+      "external_first_visible_text_ms": {
+        "p50_ms": 3103.319800000463,
+        "samples_ms": [
+          3079.559199999494,
+          3103.319800000463,
+          3179.0560000008554,
+          3374.633999999787,
+          3053.419200001372
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 3063.8752000006207,
+          "p90_ms": 3296.4028000002145,
+          "p90_p10_ratio": 1.0758933000924928,
+          "reason": "passed"
+        }
+      },
+      "load_ms": {
+        "p50_ms": 497.2055,
+        "samples_ms": [
+          473.736,
+          497.2055,
+          499.3577,
+          540.0267,
+          470.879
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 472.0218,
+          "p90_ms": 523.7591,
+          "p90_p10_ratio": 1.1096078613318283,
+          "reason": "passed"
+        }
+      },
+      "prefill_p50_ms": {
+        "p50_ms": 756.0863,
+        "samples_ms": [
+          721.7618,
+          734.8074,
+          768.2802,
+          833.8852,
+          756.0863
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 726.98004,
+          "p90_ms": 807.6432000000001,
+          "p90_p10_ratio": 1.110956498888195,
+          "reason": "passed"
+        }
+      },
+      "decode_p50_ms": {
+        "p50_ms": 96.7737,
+        "samples_ms": [
+          96.7737,
+          98.0357,
+          92.553,
+          100.2196,
+          96.6719
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 94.20056,
+          "p90_ms": 99.34604,
+          "p90_p10_ratio": 1.054622605215935,
+          "reason": "passed"
+        }
+      },
+      "time_to_first_token_ms": {
+        "p50_ms": 2924.373599998944,
+        "samples_ms": [
+          2914.480100000219,
+          2924.373599998944,
+          3020.440800002689,
+          3203.823399999237,
+          2883.1858999983524
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 2895.703579999099,
+          "p90_ms": 3130.470360000618,
+          "p90_p10_ratio": 1.081074175417358,
+          "reason": "passed"
+        }
+      },
+      "end_to_end_ms": {
+        "p50_ms": 4587.492300001031,
+        "samples_ms": [
+          4519.838599997456,
+          4716.265700000804,
+          4587.492300001031,
+          5006.214000000909,
+          4538.07869999946
+        ],
+        "stability": {
+          "passed": true,
+          "sample_count": 5,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 4527.134639998258,
+          "p90_ms": 4890.234680000867,
+          "p90_p10_ratio": 1.0802052664381878,
+          "reason": "passed"
+        }
+      }
+    }
+  },
+  "passed": true,
+  "auto_vs_fp32": {
+    "external_first_visible_text_ms": {
+      "speedup": 2.0127204743758003,
+      "both_stable": false
+    },
+    "external_wall_ms": {
+      "speedup": 2.3102264774965424,
+      "both_stable": true
+    }
+  }
+}

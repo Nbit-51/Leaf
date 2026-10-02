@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1520" viewBox="0 0 1680 1520" role="img" aria-labelledby="optimization-title optimization-desc">
+  <title id="optimization-title">Leaf measured optimization loop</title>
+  <desc id="optimization-desc">Calibration and held-out evaluation use independent data splits. Offline candidates are compared against native FP32 and the best PyTorch baseline on the same full workload and hardware. Automatic promotion requires trained-model quality gates, stable repeated timings for candidates and references, and no prefill or decode slowdown. Noisy measurements cannot promote an optimization. A failed candidate stays unpromoted; profiling, a scoped change, export, and both gates repeat. Passing results apply only to the tested configuration.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 1 L 10 6 L 0 11 Z" fill="#52657b"/>
+    </marker>
+    <marker id="loop-arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 1 L 10 6 L 0 11 Z" fill="#84749e"/>
+    </marker>
+    <style>
+      text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #203248; }
+      .title { font-size: 42px; font-weight: 700; }
+      .subtitle { font-size: 24px; fill: #53657a; }
+      .heading { font-size: 28px; font-weight: 650; }
+      .body { font-size: 24px; }
+      .note { font-size: 22px; fill: #53657a; }
+      .tag { font-size: 22px; font-weight: 700; }
+      .source { fill: #f4f7fb; stroke: #aab9c9; stroke-width: 2; }
+      .prepare { fill: #eff5fb; stroke: #7995b5; stroke-width: 2; }
+      .evaluate { fill: #ffffff; stroke: #94a7be; stroke-width: 2; }
+      .gate { fill: #f4f2fa; stroke: #9b8dbb; stroke-width: 2; }
+      .accepted { fill: #f0f7f4; stroke: #79a58d; stroke-width: 2; }
+      .rejected { fill: #fcf5ed; stroke: #c6a181; stroke-width: 2; }
+      .flow { fill: none; stroke: #52657b; stroke-width: 3; marker-end: url(#arrow); }
+      .branch { fill: none; stroke: #52657b; stroke-width: 3; }
+      .loop { fill: none; stroke: #84749e; stroke-width: 3; marker-end: url(#loop-arrow); }
+      .divider { stroke: #c3d0db; stroke-width: 2; }
+    </style>
+  </defs>
+  <rect width="1680" height="1520" fill="#fafbfd"/>
+  <text x="72" y="68" class="title">Leaf measured optimization loop</text>
+  <text x="72" y="108" class="subtitle">Implement → verify → measure → profile → improve. Candidate precision is not a performance claim.</text>
+
+  <rect x="72" y="148" width="672" height="144" rx="16" class="source"/>
+  <text x="100" y="192" class="heading">Calibration split</text>
+  <text x="100" y="232" class="body">Representative inputs for quantization statistics</text>
+  <text x="100" y="270" class="note">No held-out evaluation examples used for calibration</text>
+  <rect x="936" y="148" width="672" height="144" rx="16" class="source"/>
+  <text x="964" y="192" class="heading">Held-out evaluation split</text>
+  <text x="964" y="232" class="body">Model-independent dataset and input adapters</text>
+  <text x="964" y="270" class="note">References and candidates receive identical inputs</text>
+  <path d="M 408 292 V 370" class="flow"/>
+  <path d="M 1272 292 V 370" class="flow"/>
+  <text x="802" y="211" class="tag" text-anchor="middle">INDEPENDENT</text>
+  <text x="802" y="243" class="tag" text-anchor="middle">DATA SPLITS</text>
+
+  <rect x="72" y="370" width="672" height="188" rx="16" class="prepare"/>
+  <text x="100" y="414" class="heading">Prepare candidates offline</text>
+  <text x="100" y="456" class="body">Rewrite, quantize and export candidate artifacts</text>
+  <text x="100" y="494" class="body">Calibration uses only the calibration split</text>
+  <text x="100" y="532" class="note">Native FP32 remains the safe default</text>
+  <rect x="936" y="370" width="672" height="188" rx="16" class="prepare"/>
+  <text x="964" y="414" class="heading">Reference baselines</text>
+  <text x="964" y="456" class="body">Best PyTorch configuration + native FP32</text>
+  <text x="964" y="494" class="body">Match shapes, cache mode, threads and hardware</text>
+  <text x="964" y="532" class="note">Measure the full workload, not only a proxy kernel</text>
+  <path d="M 408 558 V 626" class="flow"/>
+  <path d="M 1272 558 V 626" class="flow"/>
+
+  <rect x="72" y="626" width="1536" height="268" rx="16" class="evaluate"/>
+  <text x="100" y="670" class="heading">Full-workload evaluation on held-out inputs</text>
+  <line x1="840" y1="696" x2="840" y2="868" class="divider"/>
+  <text x="100" y="727" class="body" font-weight="650">Trained-model quality</text>
+  <text x="100" y="770" class="body">Next-token agreement and perplexity</text>
+  <text x="100" y="810" class="body">or dataset task accuracy and output parity</text>
+  <text x="100" y="850" class="note">Fixed acceptance thresholds; record failures too</text>
+  <text x="876" y="727" class="body" font-weight="650">Whole-workload latency</text>
+  <text x="876" y="770" class="body">Prefill and decode measured separately</text>
+  <text x="876" y="810" class="body">Warm-up + stable repeated timings + matched settings</text>
+  <text x="876" y="850" class="note">Check variability in candidates and both reference paths</text>
+  <path d="M 840 894 V 956" class="flow"/>
+
+  <rect x="360" y="956" width="960" height="150" rx="16" class="gate"/>
+  <text x="840" y="1000" class="heading" text-anchor="middle">Promotion gate: quality AND stable measured speed</text>
+  <text x="840" y="1040" class="body" text-anchor="middle">Quality thresholds pass; stable prefill and decode do not regress</text>
+  <text x="840" y="1080" class="note" text-anchor="middle">Reject noisy results; require a whole-model improvement over both references</text>
+  <path d="M 840 1106 V 1150 H 408" class="branch"/>
+  <path d="M 840 1150 H 1272" class="branch"/>
+  <path d="M 408 1150 V 1210" class="flow"/>
+  <path d="M 1272 1150 V 1210" class="flow"/>
+  <text x="435" y="1186" class="tag" fill="#3d7157">PASS BOTH GATES</text>
+  <text x="1299" y="1186" class="tag" fill="#8b4b20">FAIL EITHER GATE</text>
+
+  <rect x="72" y="1210" width="672" height="180" rx="16" class="accepted"/>
+  <text x="100" y="1254" class="heading">Promote for this tested configuration</text>
+  <text x="100" y="1296" class="body">Record artifact, runtime, inputs and CPU identity</text>
+  <text x="100" y="1334" class="body">Reuse validated precision; retain FP32 fallback</text>
+  <text x="100" y="1372" class="note">Other architectures or hardware require new validation</text>
+  <rect x="936" y="1210" width="672" height="180" rx="16" class="rejected"/>
+  <text x="964" y="1254" class="heading">Keep the candidate unpromoted</text>
+  <text x="964" y="1296" class="body">Profile bottlenecks and change one factor at a time</text>
+  <text x="964" y="1334" class="body">Re-export and repeat quality plus latency checks</text>
+  <text x="964" y="1372" class="note">No unvalidated automatic precision selection</text>
+  <path d="M 1272 1390 V 1430 H 32 V 464 H 72" class="loop"/>
+  <text x="840" y="1478" class="note" text-anchor="middle">Iterative development continues until a candidate passes both gates, or the verified FP32 path is retained.</text>
+</svg>

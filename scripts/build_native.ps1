@@ -52,6 +52,9 @@ if ($LASTEXITCODE -ne 0) { throw "FP32 graph benchmark build failed" }
 & $Compiler "-std=c++17" "-O3" "-DNDEBUG" @architectureFlags @runtimeIncludes @runtimeSources `
     (Join-Path $root "tests/native/test_kv_session.cpp") "-o" (Join-Path $output "leaf_kv_session.exe")
 if ($LASTEXITCODE -ne 0) { throw "cached attention session build failed" }
+& $Compiler "-std=c++17" "-O3" "-DNDEBUG" @architectureFlags @runtimeIncludes @runtimeSources `
+    (Join-Path $root "engine/src/main_dataset.cpp") "-o" (Join-Path $output "leaf_dataset.exe")
+if ($LASTEXITCODE -ne 0) { throw "dataset runner build failed" }
 
 & $Compiler "-std=c++17" "-O3" "-DNDEBUG" @architectureFlags `
     (Join-Path $root "engine/kernels/gemm.cpp") (Join-Path $root "engine/tests/test_gemm.cpp") `

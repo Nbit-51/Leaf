@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "leaf-cpu"
+version = "0.2.0"
+description = "Native CPU inference and measured model optimization"
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy>=2.0", "tokenizers>=0.20", "huggingface-hub>=0.26", "jinja2>=3.1"]
+
+[project.optional-dependencies]
+validation = ["torch>=2.2", "transformers>=4.56", "pyarrow>=20", "psutil>=5.9", "safetensors>=0.4"]
+dev = ["pytest>=8", "onnx>=1.16", "onnxscript>=0.7", "torchvision>=0.17"]
+
+[project.scripts]
+leaf = "leaf.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["leaf*", "tools*"]
+
+[tool.setuptools.data-files]
+"share/leaf/engine/src" = ["engine/src/decoder.cpp", "engine/src/main_decoder.cpp", "engine/src/kv_cache.cpp"]
+"share/leaf/engine/src/kernels" = ["engine/src/kernels/transformer.cpp"]
+"share/leaf/engine/include/leaf/runtime" = ["engine/include/leaf/runtime/decoder.h", "engine/include/leaf/runtime/kv_cache.h"]
+"share/leaf/engine/include/leaf/kernels" = ["engine/include/leaf/kernels/transformer.h"]

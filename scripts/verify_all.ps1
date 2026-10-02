@@ -1,9 +1,29 @@
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-Push-Location $root
+$wakeState = $null
+$locationPushed = $false
+if ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT) {
+    if (-not ("LeafBenchmarkPower" -as [type])) {
+        Add-Type -TypeDefinition @'
+using System.Runtime.InteropServices;
+public static class LeafBenchmarkPower {
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern uint SetThreadExecutionState(uint state);
+}
+'@
+    }
+    $wakeState = [LeafBenchmarkPower]::SetThreadExecutionState([uint32]2147483649)
+    if ($wakeState -eq 0) { throw "Could not prevent automatic sleep during verification" }
+}
 try {
+    Push-Location $root
+    $locationPushed = $true
     python -m pytest -q
     if ($LASTEXITCODE -ne 0) { throw "Python test suite failed" }
+
+    & (Join-Path $PSScriptRoot "build_decoder.ps1")
+    python tools/verify_decoder_architectures.py --output benchmark/results/decoder_architectures.json
+    if ($LASTEXITCODE -ne 0) { throw "full decoder architecture parity check failed" }
 
     & (Join-Path $PSScriptRoot "build_native.ps1")
     & (Join-Path $root "build/leaf_native_tests.exe")
@@ -50,5 +70,8 @@ try {
     python tools/verify_kv_cache_runtime.py --session-exe (Join-Path $root "build/leaf_kv_session.exe")
     if ($LASTEXITCODE -ne 0) { throw "C++ dynamic KV-cache parity check failed" }
 } finally {
-    Pop-Location
+    if ($locationPushed) { Pop-Location }
+    if ($null -ne $wakeState) {
+        [LeafBenchmarkPower]::SetThreadExecutionState($wakeState) | Out-Null
+    }
 }

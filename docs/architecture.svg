@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1510" viewBox="0 0 1680 1510" role="img" aria-labelledby="architecture-title architecture-desc">
+  <title id="architecture-title">Leaf execution architecture</title>
+  <desc id="architecture-desc">Local model weights and custom decoder plans enter an explicit import adapter boundary. ONNX graphs enter a separate graph intermediate representation. Unsupported semantics are rejected. Offline preparation produces versioned decoder or graph artifacts. The native C++ decoder selects scalar, AVX2, or optional VNNI kernels through runtime CPU capability dispatch; the graph executor uses a portable build or an explicitly enabled AVX2 build. Decoder sessions retain their own key-value caches; graph execution uses the exported memory plan where available.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 1 L 10 6 L 0 11 Z" fill="#52657b"/>
+    </marker>
+    <style>
+      text { font-family: Inter, "Segoe UI", Arial, sans-serif; fill: #203248; }
+      .title { font-size: 42px; font-weight: 700; }
+      .subtitle { font-size: 24px; fill: #53657a; }
+      .heading { font-size: 28px; font-weight: 650; }
+      .body { font-size: 24px; }
+      .note { font-size: 22px; fill: #53657a; }
+      .warning { font-size: 22px; fill: #8b4b20; }
+      .frame { fill: #ffffff; stroke: #aab9c9; stroke-width: 2; }
+      .source { fill: #f4f7fb; stroke: #aab9c9; stroke-width: 2; }
+      .import { fill: #eff5fb; stroke: #7995b5; stroke-width: 2; }
+      .artifact { fill: #f0f7f4; stroke: #79a58d; stroke-width: 2; }
+      .runtime { fill: #f4f2fa; stroke: #9b8dbb; stroke-width: 2; }
+      .flow { fill: none; stroke: #52657b; stroke-width: 3; marker-end: url(#arrow); }
+      .divider { stroke: #c3d0db; stroke-width: 2; }
+    </style>
+  </defs>
+  <rect width="1680" height="1510" fill="#fafbfd"/>
+  <text x="56" y="68" class="title">Leaf execution architecture</text>
+  <text x="56" y="108" class="subtitle">Model import is separate from the execution engine. Every artifact has explicit semantics.</text>
+
+  <!-- Sources remain distinct: a custom decoder plan describes the accompanying weights. -->
+  <rect x="56" y="148" width="480" height="136" rx="16" class="source"/>
+  <text x="84" y="191" class="heading">Model weights</text>
+  <text x="84" y="229" class="body">Local snapshot or Hub identifier</text>
+  <text x="84" y="261" class="note">Configuration + tensors + tokenizer</text>
+  <rect x="600" y="148" width="480" height="136" rx="16" class="source"/>
+  <text x="628" y="191" class="heading">Custom decoder plan</text>
+  <text x="628" y="229" class="body">Declarative execution semantics</text>
+  <text x="628" y="261" class="note">Tensor mapping and layout transforms</text>
+  <rect x="1144" y="148" width="480" height="136" rx="16" class="source"/>
+  <text x="1172" y="191" class="heading">ONNX model</text>
+  <text x="1172" y="229" class="body">Graph + initializers</text>
+  <text x="1172" y="261" class="note">Named inputs, operators and outputs</text>
+  <path d="M 296 284 V 352" class="flow"/>
+  <path d="M 840 284 V 352" class="flow"/>
+  <path d="M 1384 284 V 352" class="flow"/>
+
+  <!-- The engine consumes plans and graph IR, not model-name-specific execution branches. -->
+  <rect x="56" y="352" width="1024" height="210" rx="16" class="import"/>
+  <text x="84" y="397" class="heading">Architecture adapter boundary</text>
+  <text x="84" y="437" class="body">Tensor layouts → architecture-independent decoder plan</text>
+  <text x="84" y="475" class="body">Norms · positions · attention geometry · residuals · feed-forward blocks</text>
+  <text x="84" y="529" class="warning">Unsupported semantic features → explicit rejection with an actionable error</text>
+  <rect x="1144" y="352" width="480" height="210" rx="16" class="import"/>
+  <text x="1172" y="397" class="heading">Validated graph IR</text>
+  <text x="1172" y="437" class="body">Operator and shape validation</text>
+  <text x="1172" y="475" class="body">Constants and graph rewrites</text>
+  <text x="1172" y="529" class="warning">Unsupported operators → explicit error</text>
+  <path d="M 568 562 V 638" class="flow"/>
+  <path d="M 1384 562 V 638" class="flow"/>
+
+  <rect x="56" y="638" width="1568" height="210" rx="16" class="artifact"/>
+  <text x="84" y="680" class="heading">Offline artifact candidates</text>
+  <line x1="840" y1="705" x2="840" y2="824" class="divider"/>
+  <text x="84" y="726" class="body" font-weight="650">Mapped decoder · LEAFDC02</text>
+  <text x="84" y="766" class="body">Explicit plan + immutable packed weights + scales</text>
+  <text x="84" y="806" class="note">FP32 · per-channel INT8 · grouped INT4 candidates</text>
+  <text x="876" y="726" class="body" font-weight="650">Graph .leaf · version 2 / version 3</text>
+  <text x="876" y="766" class="body">Operators + tensor data + quantization scales</text>
+  <text x="876" y="806" class="note">FP32 / calibrated INT8 · aligned v3 liveness plan</text>
+  <path d="M 568 848 V 920" class="flow"/>
+  <path d="M 1384 848 V 920" class="flow"/>
+
+  <rect x="56" y="920" width="1568" height="176" rx="16" class="runtime"/>
+  <text x="84" y="965" class="heading">Native C++ execution</text>
+  <line x1="840" y1="986" x2="840" y2="1072" class="divider"/>
+  <text x="84" y="1018" class="body">Mapped decoder weights · per-session dynamic KV cache</text>
+  <text x="84" y="1058" class="note">Native prefill and decode · persistent workers</text>
+  <text x="876" y="1018" class="body">Graph executor · reusable activation arena</text>
+  <text x="876" y="1058" class="note">Exported memory plan applied where available</text>
+  <path d="M 568 1096 V 1154" class="flow"/>
+  <path d="M 1384 1096 V 1154" class="flow"/>
+
+  <rect x="56" y="1154" width="1568" height="132" rx="16" class="frame"/>
+  <text x="84" y="1198" class="heading">CPU execution paths</text>
+  <text x="84" y="1236" class="body">Decoder: scalar fallback · runtime AVX2 / FMA dispatch · optional VNNI</text>
+  <text x="84" y="1272" class="note">Graph: portable build or an explicitly enabled AVX2 / FMA build</text>
+  <path d="M 568 1286 V 1320" class="flow"/>
+  <path d="M 1384 1286 V 1320" class="flow"/>
+
+  <rect x="56" y="1320" width="1024" height="118" rx="16" class="source"/>
+  <text x="84" y="1364" class="heading">Decoder outputs</text>
+  <text x="84" y="1403" class="body">Autoregressive generation · token logits · session metrics</text>
+  <rect x="1144" y="1320" width="480" height="118" rx="16" class="source"/>
+  <text x="1172" y="1364" class="heading">Graph outputs</text>
+  <text x="1172" y="1403" class="body">Named result tensors + metrics</text>
+  <text x="56" y="1480" class="note">Supported operators and adapter semantics define coverage; a model identifier alone never establishes compatibility.</text>
+</svg>

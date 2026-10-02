@@ -1,0 +1,21 @@
+{
+  "benchmark": "integer-prefill-2x4-versus-4x2-abba",
+  "scope": "Trained 1.1B smoothed W8A8 decoder, identical 64-token request, one CPU thread pinned to logical core 2 (affinity mask 4)",
+  "artifact": "decoder-8-smooth.leaf",
+  "artifact_bytes": 1103777152,
+  "request_tokens": 64,
+  "prefill_tokens": 63,
+  "warmup_per_run": 1,
+  "measured_iterations_per_run": 3,
+  "baseline_4x2_executable_sha256": "65066a7a7032c2317b1b16edcbdc2538be04795ad04712b32f5ecc852be10806",
+  "candidate_2x4_executable_sha256": "ce0a940d89bde68376a938ebedfbd145413578c2b4a11bbcc9503acff4656335",
+  "validation": {"all_reduced_architecture_cases_passed": true, "trained_logits_bit_exact": true, "max_abs_logit_difference": 0.0},
+  "runs": [
+    {"tile": "4x2", "prefill_p50_ms": 2449.3316, "decode_p50_ms": 96.5663, "prefill_samples_ms": [2449.3536, 2449.3316, 2302.6317], "decode_samples_ms": [96.5663, 97.0403, 92.7361]},
+    {"tile": "2x4", "prefill_p50_ms": 2329.3248, "decode_p50_ms": 94.4939, "prefill_samples_ms": [2327.7674, 2396.94, 2329.3248], "decode_samples_ms": [100.9683, 94.4939, 90.8258]},
+    {"tile": "2x4", "prefill_p50_ms": 2424.1808, "decode_p50_ms": 97.3008, "prefill_samples_ms": [2405.05, 2424.1808, 2464.1901], "decode_samples_ms": [97.9051, 92.1621, 97.3008]},
+    {"tile": "4x2", "prefill_p50_ms": 2419.8717, "decode_p50_ms": 95.4966, "prefill_samples_ms": [2432.5616, 2398.39, 2419.8717], "decode_samples_ms": [95.4947, 95.4966, 96.7793]}
+  ],
+  "decision": "rejected",
+  "reason": "Small inconsistent timing difference; no reliable whole-model gain. Removed experimental 2x4 AVX2 implementation, preserving measured 4x2 fallback."
+}

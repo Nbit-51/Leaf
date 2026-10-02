@@ -1,0 +1,948 @@
+{
+  "benchmark": "trained-full-decoder-quality-and-latency",
+  "pytorch": {
+    "measured_at_utc": "2026-10-02T02:19:14.858301+00:00",
+    "model": "TinyLlama-1.1B-Chat-v1.0-git",
+    "model_config_sha256": "2add6e2d3f7cfc555e8cfee8dbaa12e9f9b057b2a4d70e9a999aeb32b8d02873",
+    "source_weight_sha256": {
+      "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933"
+    },
+    "dataset": "wikitext2-test.parquet, contiguous blocks from first nonempty text",
+    "dataset_source": "https://huggingface.co/datasets/Salesforce/wikitext/tree/b08601e/wikitext-2-raw-v1",
+    "dataset_sha256": "5f1bea067869d04849c0f975a2b29c4ff47d867f484f5010ea5e861eab246d91",
+    "text_column": "text",
+    "sequence_length": 128,
+    "blocks": 8,
+    "threads": 1,
+    "warmup": 3,
+    "runs": 7,
+    "pinned_cpu": 2,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "logical_cpus": 28,
+    "physical_memory_bytes": 16869548032,
+    "torch": "2.12.0+cpu",
+    "load_seconds": 5.448948400000063,
+    "parameter_bytes": 4400193536,
+    "resident_bytes": 5195530240,
+    "generation_prompt": "Explain in one sentence why careful measurement matters when optimizing software.",
+    "generated_tokens": [
+      29907,
+      598,
+      1319,
+      20039,
+      13750,
+      746,
+      5994,
+      5281,
+      7047,
+      1363,
+      372,
+      6911,
+      304,
+      9801,
+      393,
+      278
+    ],
+    "generated_text": "Careful measurement matters when optimizing software because it helps to ensure that the",
+    "latency": {
+      "eager": {
+        "prefill_p50_ms": 1928.4564000001865,
+        "decode_p50_ms": 218.94360000010238,
+        "prefill_samples_ms": [
+          1928.4564000001865,
+          1992.4232000000757,
+          1866.8970999999601,
+          2110.0647999999183,
+          1978.4010000000762,
+          1900.956400000041,
+          1902.28060000004
+        ],
+        "decode_samples_ms": [
+          221.09419999992497,
+          218.94360000010238,
+          233.72040000003835,
+          223.2249999999567,
+          211.70009999991635,
+          204.2089000001397,
+          206.41680000017004
+        ],
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 1887.3326800000086,
+            "p90_ms": 2039.4798400000127,
+            "p90_p10_ratio": 1.0806149131058354,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 205.5336400001579,
+            "p90_ms": 227.42315999998937,
+            "p90_p10_ratio": 1.1065009114800606,
+            "reason": "passed"
+          }
+        }
+      },
+      "sdpa": {
+        "prefill_p50_ms": 1901.1194000001979,
+        "decode_p50_ms": 206.60139999995408,
+        "prefill_samples_ms": [
+          1908.199599999989,
+          1836.37049999993,
+          1871.1814000000686,
+          1839.1601999999239,
+          2016.6027000000213,
+          2052.4421000000075,
+          1901.1194000001979
+        ],
+        "decode_samples_ms": [
+          327.8313999999227,
+          206.4768999998705,
+          206.60139999995408,
+          202.0454000000882,
+          201.27100000013343,
+          243.72410000000855,
+          220.48279999989973
+        ],
+        "stability": {
+          "passed": false,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 1838.0443199999263,
+            "p90_ms": 2030.9384600000158,
+            "p90_p10_ratio": 1.1049453149204242,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": false,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 201.7356400001063,
+            "p90_ms": 277.3670199999742,
+            "p90_p10_ratio": 1.3749034131987192,
+            "reason": "timing_spread_exceeds_threshold"
+          }
+        }
+      }
+    },
+    "quality_gate_thresholds": {
+      "32": {
+        "min_next_token_agreement": 0.999,
+        "max_perplexity_ratio": 1.001
+      },
+      "8": {
+        "min_next_token_agreement": 0.95,
+        "max_perplexity_ratio": 1.02
+      },
+      "4": {
+        "min_next_token_agreement": 0.9,
+        "max_perplexity_ratio": 1.05
+      }
+    }
+  },
+  "measured_at_utc": "2026-10-02T02:28:58.808835+00:00",
+  "native_executable_sha256": "890bba185eec56e08dd2aa04d74b4759a3121e5c78058b8527a3a6301b424032",
+  "latency_stability_gate": {
+    "minimum_samples": 5,
+    "max_p90_p10_ratio": 1.25
+  },
+  "native": {
+    "32": {
+      "weight_bits": 32,
+      "activation_bits": 32,
+      "artifact": "decoder-32.leaf",
+      "artifact_sha256": "71b98b53ce204393478990887c7beab7074e34bffc76e5a00c4f9183631e060a",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 0.0002231597900390625,
+        "relative_logit_rmse": 1.080751985682582e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 13.69743217493049,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 0.9999998276908328
+      },
+      "quality_gate_passed": true,
+      "generation_exact_match": true,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        304,
+        9801,
+        393,
+        278
+      ],
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4182384640,
+        "load_ms": 5.6463,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4152823808,
+        "load_ms": 0.4482,
+        "prefill_p50_ms": 3892.7408,
+        "decode_p50_ms": 264.587,
+        "prefill_samples_ms": [
+          3892.7408,
+          3847.3539,
+          3998.1348,
+          4091.9894,
+          3923.086,
+          3880.4254,
+          3838.8511
+        ],
+        "decode_samples_ms": [
+          276.3865,
+          279.0059,
+          284.4855,
+          263.5118,
+          261.1917,
+          264.587,
+          260.0085
+        ],
+        "generated_tokens": [],
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3843.95278,
+            "p90_ms": 4035.6766399999997,
+            "p90_p10_ratio": 1.0498767469250754,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 260.71842000000004,
+            "p90_ms": 281.19774,
+            "p90_p10_ratio": 1.0785495708358466,
+            "reason": "passed"
+          }
+        }
+      },
+      "latency_stability": {
+        "passed": false,
+        "minimum_samples": 5,
+        "max_p90_p10_ratio": 1.25,
+        "candidate": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3843.95278,
+            "p90_ms": 4035.6766399999997,
+            "p90_p10_ratio": 1.0498767469250754,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 260.71842000000004,
+            "p90_ms": 281.19774,
+            "p90_p10_ratio": 1.0785495708358466,
+            "reason": "passed"
+          }
+        },
+        "leaf_fp32": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3843.95278,
+            "p90_ms": 4035.6766399999997,
+            "p90_p10_ratio": 1.0498767469250754,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 260.71842000000004,
+            "p90_ms": 281.19774,
+            "p90_p10_ratio": 1.0785495708358466,
+            "reason": "passed"
+          }
+        },
+        "fastest_pytorch": {
+          "prefill": {
+            "passed": true,
+            "median_ms": 1901.1194000001979,
+            "implementations": {
+              "sdpa": {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 1838.0443199999263,
+                "p90_ms": 2030.9384600000158,
+                "p90_p10_ratio": 1.1049453149204242,
+                "reason": "passed"
+              }
+            }
+          },
+          "decode": {
+            "passed": false,
+            "median_ms": 206.60139999995408,
+            "implementations": {
+              "sdpa": {
+                "passed": false,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 201.7356400001063,
+                "p90_ms": 277.3670199999742,
+                "p90_p10_ratio": 1.3749034131987192,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          }
+        }
+      },
+      "decode_speedup_vs_pytorch_sdpa": 0.7808448638820278,
+      "decode_speedup_vs_fastest_pytorch": 0.7808448638820278,
+      "prefill_speedup_vs_fastest_pytorch": 0.48837554249699794,
+      "decode_speedup_vs_leaf_fp32": 1.0,
+      "prefill_speedup_vs_leaf_fp32": 1.0,
+      "eligible_for_automatic_selection": false
+    },
+    "8": {
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact": "decoder-8.leaf",
+      "artifact_sha256": "db17a2858d440cf2a8e6cd8296e1ba364ceb15b3d335c0fa7dc42ac0f8d5fca2",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 3.1148324012756348,
+        "relative_logit_rmse": 0.019631939008831978,
+        "next_token_agreement": 0.9734251968503937,
+        "perplexity": 13.733807081880363,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 1.0026554276761144
+      },
+      "quality_gate_passed": true,
+      "generation_exact_match": true,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        304,
+        9801,
+        393,
+        278
+      ],
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 1102176832,
+        "peak_rss_bytes": 1078657024,
+        "load_ms": 53.0626,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 1102176832,
+        "peak_rss_bytes": 1051119616,
+        "load_ms": 19.7091,
+        "prefill_p50_ms": 3685.5139,
+        "decode_p50_ms": 105.2726,
+        "prefill_samples_ms": [
+          3624.6366,
+          3603.0839,
+          3903.7237,
+          3742.4607,
+          3614.4567,
+          3685.5139,
+          3936.1857
+        ],
+        "decode_samples_ms": [
+          104.9128,
+          105.2726,
+          134.5035,
+          114.1004,
+          101.0958,
+          112.0865,
+          102.4089
+        ],
+        "generated_tokens": [],
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3609.90758,
+            "p90_ms": 3916.7085,
+            "p90_p10_ratio": 1.0849885802339572,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 101.88366,
+            "p90_ms": 122.26164,
+            "p90_p10_ratio": 1.2000122492654857,
+            "reason": "passed"
+          }
+        }
+      },
+      "latency_stability": {
+        "passed": false,
+        "minimum_samples": 5,
+        "max_p90_p10_ratio": 1.25,
+        "candidate": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3609.90758,
+            "p90_ms": 3916.7085,
+            "p90_p10_ratio": 1.0849885802339572,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 101.88366,
+            "p90_ms": 122.26164,
+            "p90_p10_ratio": 1.2000122492654857,
+            "reason": "passed"
+          }
+        },
+        "leaf_fp32": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3843.95278,
+            "p90_ms": 4035.6766399999997,
+            "p90_p10_ratio": 1.0498767469250754,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 260.71842000000004,
+            "p90_ms": 281.19774,
+            "p90_p10_ratio": 1.0785495708358466,
+            "reason": "passed"
+          }
+        },
+        "fastest_pytorch": {
+          "prefill": {
+            "passed": true,
+            "median_ms": 1901.1194000001979,
+            "implementations": {
+              "sdpa": {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 1838.0443199999263,
+                "p90_ms": 2030.9384600000158,
+                "p90_p10_ratio": 1.1049453149204242,
+                "reason": "passed"
+              }
+            }
+          },
+          "decode": {
+            "passed": false,
+            "median_ms": 206.60139999995408,
+            "implementations": {
+              "sdpa": {
+                "passed": false,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 201.7356400001063,
+                "p90_ms": 277.3670199999742,
+                "p90_p10_ratio": 1.3749034131987192,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          }
+        }
+      },
+      "decode_speedup_vs_pytorch_sdpa": 1.9625372604073053,
+      "decode_speedup_vs_fastest_pytorch": 1.9625372604073053,
+      "prefill_speedup_vs_fastest_pytorch": 0.5158356342110656,
+      "decode_speedup_vs_leaf_fp32": 2.5133510524105986,
+      "prefill_speedup_vs_leaf_fp32": 1.056227409697193,
+      "eligible_for_automatic_selection": false
+    },
+    "4": {
+      "weight_bits": 4,
+      "activation_bits": 32,
+      "artifact": "decoder-4.leaf",
+      "artifact_sha256": "5f034f9e240b0a846b2888f382b0489fcb213bd2d22da2580ab68e2997797535",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 12.85319995880127,
+        "relative_logit_rmse": 0.16423113644123077,
+        "next_token_agreement": 0.8267716535433071,
+        "perplexity": 15.511280180218556,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 1.132422289768447
+      },
+      "quality_gate_passed": false,
+      "generation_exact_match": false,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        338,
+        4100,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        12439,
+        10161,
+        363
+      ],
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 619113024,
+        "peak_rss_bytes": 627978240,
+        "load_ms": 905.9604,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 619113024,
+        "peak_rss_bytes": 600764416,
+        "load_ms": 790.0795,
+        "prefill_p50_ms": 5234.2979,
+        "decode_p50_ms": 206.6073,
+        "prefill_samples_ms": [
+          5198.1031,
+          5213.3134,
+          5234.2979,
+          5401.5602,
+          5171.5888,
+          5423.7654,
+          5275.0352
+        ],
+        "decode_samples_ms": [
+          204.8272,
+          203.5425,
+          206.6073,
+          209.2376,
+          209.8556,
+          210.1847,
+          205.4975
+        ],
+        "generated_tokens": [],
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 5187.497380000001,
+            "p90_ms": 5410.44228,
+            "p90_p10_ratio": 1.0429773518266334,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 204.31332,
+            "p90_ms": 209.98724,
+            "p90_p10_ratio": 1.0277706808347102,
+            "reason": "passed"
+          }
+        }
+      },
+      "latency_stability": {
+        "passed": false,
+        "minimum_samples": 5,
+        "max_p90_p10_ratio": 1.25,
+        "candidate": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 5187.497380000001,
+            "p90_ms": 5410.44228,
+            "p90_p10_ratio": 1.0429773518266334,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 204.31332,
+            "p90_ms": 209.98724,
+            "p90_p10_ratio": 1.0277706808347102,
+            "reason": "passed"
+          }
+        },
+        "leaf_fp32": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3843.95278,
+            "p90_ms": 4035.6766399999997,
+            "p90_p10_ratio": 1.0498767469250754,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 260.71842000000004,
+            "p90_ms": 281.19774,
+            "p90_p10_ratio": 1.0785495708358466,
+            "reason": "passed"
+          }
+        },
+        "fastest_pytorch": {
+          "prefill": {
+            "passed": true,
+            "median_ms": 1901.1194000001979,
+            "implementations": {
+              "sdpa": {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 1838.0443199999263,
+                "p90_ms": 2030.9384600000158,
+                "p90_p10_ratio": 1.1049453149204242,
+                "reason": "passed"
+              }
+            }
+          },
+          "decode": {
+            "passed": false,
+            "median_ms": 206.60139999995408,
+            "implementations": {
+              "sdpa": {
+                "passed": false,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 201.7356400001063,
+                "p90_ms": 277.3670199999742,
+                "p90_p10_ratio": 1.3749034131987192,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          }
+        }
+      },
+      "decode_speedup_vs_pytorch_sdpa": 0.9999714434095701,
+      "decode_speedup_vs_fastest_pytorch": 0.9999714434095701,
+      "prefill_speedup_vs_fastest_pytorch": 0.363204279985707,
+      "decode_speedup_vs_leaf_fp32": 1.280627548010162,
+      "prefill_speedup_vs_leaf_fp32": 0.7436987489764387,
+      "eligible_for_automatic_selection": false
+    },
+    "8-smooth": {
+      "weight_bits": 8,
+      "activation_bits": 8,
+      "artifact": "decoder-8-smooth.leaf",
+      "artifact_sha256": "6a831e4a655f4fa00ccf82ad1bf317492aeaa76c85950a56ec464a7f3611ffc5",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 10.342117309570312,
+        "relative_logit_rmse": 0.04785344749689102,
+        "next_token_agreement": 0.9507874015748031,
+        "perplexity": 13.867265275513816,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 1.012398726196084
+      },
+      "quality_gate_passed": true,
+      "generation_exact_match": false,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6511,
+        363,
+        16232,
+        322,
+        18378
+      ],
+      "execution": {
+        "avx2": true,
+        "vnni": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 1103777152,
+        "peak_rss_bytes": 1085812736,
+        "load_ms": 1034.1829,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "vnni": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 1103777152,
+        "peak_rss_bytes": 1056518144,
+        "load_ms": 466.4517,
+        "prefill_p50_ms": 1618.1741,
+        "decode_p50_ms": 96.3263,
+        "prefill_samples_ms": [
+          1626.3481,
+          1681.4135,
+          1618.1741,
+          1598.8168,
+          1598.5145,
+          1617.4775,
+          1708.7607
+        ],
+        "decode_samples_ms": [
+          98.404,
+          96.8752,
+          99.4607,
+          95.2373,
+          93.7726,
+          95.6904,
+          96.3263
+        ],
+        "generated_tokens": [],
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 1598.69588,
+            "p90_ms": 1692.35238,
+            "p90_p10_ratio": 1.0585830620893324,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 94.65142,
+            "p90_ms": 98.82668,
+            "p90_p10_ratio": 1.0441119636662608,
+            "reason": "passed"
+          }
+        }
+      },
+      "latency_stability": {
+        "passed": false,
+        "minimum_samples": 5,
+        "max_p90_p10_ratio": 1.25,
+        "candidate": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 1598.69588,
+            "p90_ms": 1692.35238,
+            "p90_p10_ratio": 1.0585830620893324,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 94.65142,
+            "p90_ms": 98.82668,
+            "p90_p10_ratio": 1.0441119636662608,
+            "reason": "passed"
+          }
+        },
+        "leaf_fp32": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3843.95278,
+            "p90_ms": 4035.6766399999997,
+            "p90_p10_ratio": 1.0498767469250754,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 7,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 260.71842000000004,
+            "p90_ms": 281.19774,
+            "p90_p10_ratio": 1.0785495708358466,
+            "reason": "passed"
+          }
+        },
+        "fastest_pytorch": {
+          "prefill": {
+            "passed": true,
+            "median_ms": 1901.1194000001979,
+            "implementations": {
+              "sdpa": {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 1838.0443199999263,
+                "p90_ms": 2030.9384600000158,
+                "p90_p10_ratio": 1.1049453149204242,
+                "reason": "passed"
+              }
+            }
+          },
+          "decode": {
+            "passed": false,
+            "median_ms": 206.60139999995408,
+            "implementations": {
+              "sdpa": {
+                "passed": false,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 201.7356400001063,
+                "p90_ms": 277.3670199999742,
+                "p90_p10_ratio": 1.3749034131987192,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            }
+          }
+        }
+      },
+      "decode_speedup_vs_pytorch_sdpa": 2.144807804306343,
+      "decode_speedup_vs_fastest_pytorch": 2.144807804306343,
+      "prefill_speedup_vs_fastest_pytorch": 1.1748546710766152,
+      "decode_speedup_vs_leaf_fp32": 2.746778398007605,
+      "prefill_speedup_vs_leaf_fp32": 2.4056378111601218,
+      "eligible_for_automatic_selection": false
+    }
+  },
+  "scope": "Complete trained model; held-out subset perplexity is not whole-corpus perplexity.",
+  "calibration": {
+    "format": "leaf-activation-calibration-v1",
+    "tokens": 512,
+    "dataset_sha256": "e83889baabc497075506f91975be5fac0d45c5290b6b20582c8cd1e853d0c9f7",
+    "dataset": "wikitext2-train.parquet",
+    "model_config_sha256": "2add6e2d3f7cfc555e8cfee8dbaa12e9f9b057b2a4d70e9a999aeb32b8d02873",
+    "source_weight_sha256": {
+      "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933"
+    },
+    "smoothing_alpha": 0.5
+  }
+}
