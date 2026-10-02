@@ -1,0 +1,36 @@
+{
+  "check": "hosted-portable-cpu-validation",
+  "source_commit": "ce5fe66512b6eae4e7d7abfb432f35fe97ccbca8",
+  "workflow": ".github/workflows/cpu-validation.yml",
+  "run_id": 36990441323,
+  "run_url": "https://github.com/Nbit-51/Leaf/actions/runs/36990441323",
+  "verification_source": "GitHub Actions jobs API",
+  "passed": true,
+  "python_version": "3.12",
+  "global_avx2_compiler_flags": false,
+  "reduced_architecture_cases_per_job": 8,
+  "trained_model_quality_checked": false,
+  "latency_qualified": false,
+  "accelerated_path_coverage_qualified": false,
+  "scope": "Hosted native builds, selected Python tests, and reduced random-weight decoder parity; not independent trained-model performance qualification.",
+  "jobs": [
+    {
+      "job_id": 110785135353,
+      "runner": "ubuntu-24.04",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job_id": 110785135689,
+      "runner": "windows-2022",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "job_id": 110785135617,
+      "runner": "macos-14",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}

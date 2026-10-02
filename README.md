@@ -953,8 +953,13 @@ independent hardware qualification.
 
 A CI matrix is configured for Ubuntu, Windows, and macOS in
 [the portable validation workflow](.github/workflows/cpu-validation.yml).
-Its presence is not a claim that those hosted runs or additional hardware
-benchmarks have already passed. ARM-specific acceleration and broader CPU
+The [hosted run for implementation commit `ce5fe66`](https://github.com/Nbit-51/Leaf/actions/runs/36990441323)
+passed on Ubuntu 24.04, Windows Server 2022, and macOS 14: native builds, the
+selected Python tests, and all eight reduced-model architecture cases passed.
+These portable builds disable global AVX2 compiler flags; they do not establish
+trained-model quality, accelerated-path coverage, or latency on those devices.
+The [hosted-check record](benchmark/results/hosted_cpu_validation.json) identifies
+the exact tested implementation. ARM-specific acceleration and broader CPU
 performance qualification remain development work.
 
 ### 8.3 Cached full-command TinyLlama measurements

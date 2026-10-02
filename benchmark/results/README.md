@@ -91,6 +91,7 @@ timed experiment children. Profiling is not a precision/performance qualificatio
 
 | File | What it records |
 |---|---|
+| [hosted_cpu_validation.json](hosted_cpu_validation.json) | Successful Ubuntu 24.04, Windows Server 2022, and macOS 14 hosted builds, selected Python tests, and eight reduced-model architecture cases for implementation commit `ce5fe66`; not trained-model or latency qualification |
 | [native_latest.json](native_latest.json) | Refreshed scalar versus optimized native FP32/INT8 GEMM and Conv speed gates |
 | [latest.json](latest.json) | Refreshed deterministic synthetic CNN/FFN parity, calibration, Python-oracle latency, and memory plans |
 | [memory_plans/](memory_plans/) | Refreshed deterministic workload liveness plans |
