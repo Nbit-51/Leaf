@@ -121,6 +121,9 @@ def select_configuration(directory: Path, runtime: Path, requested: str, threads
                 32 if activation_bits == "auto" else int(activation_bits), None)
     if requested != "auto":
         return fallback
+    if (not isinstance(threads, int) or isinstance(threads, bool) or not 1 <= threads <= 64 or
+            (cpu is not None and (not isinstance(cpu, int) or isinstance(cpu, bool) or cpu < 0))):
+        return fallback
     if any(os.environ.get(name) for name in
            ("LEAF_DISABLE_VNNI", "LEAF_EXPERIMENTAL_FLOAT_TILES", "LEAF_EXPERIMENTAL_FLOAT_GEMV")):
         return fallback  # a changed ISA policy invalidates measured speed claims
@@ -135,24 +138,73 @@ def select_configuration(directory: Path, runtime: Path, requested: str, threads
                 any(value is not False for value in policy.values())):
             return fallback
         reference = result.get("pytorch", {})
+        import math
+        from tools.validate_decoder import GATES, apply_speed_gates, digest, latency_workload_matches
+        if not (latency_workload_matches(result) and latency_workload_matches(reference)):
+            return fallback  # legacy full-prefix logits are not a matched generation baseline
         if reference.get("platform") != platform.platform() or reference.get("cpu") != platform.processor():
             return fallback
         if reference.get("pinned_cpu") != cpu:
             return fallback
+        reference_cpu = reference.get("pinned_cpu")
+        if (not isinstance(reference.get("threads"), int) or reference.get("threads") != threads or
+                isinstance(reference.get("threads"), bool) or
+                (reference_cpu is not None and (not isinstance(reference_cpu, int) or isinstance(reference_cpu, bool))) or
+                reference.get("quality_gate_thresholds") != GATES):
+            return fallback
         if result.get("native_executable_sha256") != hashlib.sha256(runtime.read_bytes()).hexdigest():
             return fallback
-        eligible = [(case["latency"]["decode_p50_ms"], key, case) for key, case in result.get("native", {}).items()
-                    if case.get("eligible_for_automatic_selection") is True and case.get("quality_gate_passed") is True and
-                    isinstance(case.get("latency_stability"), dict) and case["latency_stability"].get("passed") is True and
-                    case["latency"].get("threads") == threads and
+        native_cases = result.get("native")
+        baseline_latencies = reference.get("latency")
+        if (not isinstance(native_cases, dict) or not isinstance(native_cases.get("32"), dict) or
+                not isinstance(baseline_latencies, dict) or not baseline_latencies or
+                not all(latency_workload_matches(item) for item in baseline_latencies.values()) or
+                not latency_workload_matches(native_cases["32"].get("latency")) or
+                native_cases["32"]["latency"].get("threads") != threads or
+                isinstance(native_cases["32"]["latency"].get("threads"), bool) or
+                not isinstance(native_cases["32"]["latency"].get("threads"), int) or
+                native_cases["32"]["latency"].get("activation_bits") != 32):
+            return fallback
+
+        def quality_matches(case):
+            bits = case.get("weight_bits")
+            measured = case.get("quality")
+            if (not isinstance(bits, int) or isinstance(bits, bool) or bits not in (32, 8, 4) or
+                    not isinstance(measured, dict) or case.get("quality_gate_passed") is not True):
+                return False
+            agreement, perplexity = measured.get("next_token_agreement"), measured.get("perplexity_ratio")
+            if any(isinstance(value, bool) or not isinstance(value, (int, float)) or
+                   not math.isfinite(value) for value in (agreement, perplexity)):
+                return False
+            gate = GATES[str(bits)]
+            return (0 <= agreement <= 1 and agreement >= gate["min_next_token_agreement"] and
+                    0 < perplexity <= gate["max_perplexity_ratio"])
+
+        if not quality_matches(native_cases["32"]):
+            return fallback
+        # Retain conservative stored rejections, but never trust stored True
+        # decisions instead of checking current thresholds and raw samples.
+        originally_eligible = {key for key, case in native_cases.items() if isinstance(case, dict) and
+                               case.get("eligible_for_automatic_selection") is True and quality_matches(case) and
+                               isinstance(case.get("latency_stability"), dict) and
+                               case["latency_stability"].get("passed") is True}
+        checked_cases = {key: case for key, case in native_cases.items() if isinstance(case, dict)}
+        apply_speed_gates(checked_cases, reference)
+        eligible = [(case["latency"]["decode_p50_ms"], key, case) for key, case in checked_cases.items()
+                    if key in originally_eligible and case.get("eligible_for_automatic_selection") is True and
+                    latency_workload_matches(case.get("latency")) and
+                    isinstance(case["latency"].get("threads"), int) and
+                    not isinstance(case["latency"].get("threads"), bool) and
+                    case["latency"]["threads"] == threads and
                     (activation_bits == "auto" or case["latency"].get("activation_bits", 32) == int(activation_bits))]
-        from tools.validate_decoder import digest
-        import math
         for milliseconds, key, case in sorted(eligible):
             bits = case["weight_bits"] if "weight_bits" in case else int(key.split("-")[0])
             activations = case["latency"].get("activation_bits", 32)
             if (isinstance(milliseconds, bool) or not isinstance(milliseconds, (int, float)) or
-                    bits not in (8, 4) or activations not in (8, 32) or
+                    not isinstance(bits, int) or isinstance(bits, bool) or bits not in (8, 4) or
+                    not isinstance(activations, int) or isinstance(activations, bool) or activations not in (8, 32) or
+                    not isinstance(case.get("activation_bits"), int) or isinstance(case.get("activation_bits"), bool) or
+                    case["activation_bits"] != activations or
                     not math.isfinite(milliseconds) or milliseconds <= 0):
                 continue
             artifact = directory / case.get("artifact", f"decoder-{key}.leaf")
@@ -160,7 +212,7 @@ def select_configuration(directory: Path, runtime: Path, requested: str, threads
             if (artifact.resolve().parent == directory.resolve() and artifact.is_file() and
                     case.get("artifact_sha256") == digest(artifact)):
                 return bits, activations, artifact
-    except (OSError, ValueError, TypeError, KeyError, AttributeError):
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, OverflowError):
         pass  # malformed or stale profiles never enable lower precision
     return fallback
 

@@ -1,0 +1,796 @@
+{
+  "benchmark": "trained-full-decoder-quality-and-latency",
+  "pytorch": {
+    "measured_at_utc": "2026-10-02T14:38:29.167191+00:00",
+    "quality_measured_at_utc": "2026-10-02T14:38:17.791007+00:00",
+    "latency_measured_at_utc": "2026-10-02T14:38:29.167191+00:00",
+    "latency_workload": {
+      "format": "leaf-decoder-latency-workload-v1",
+      "batch_size": 1,
+      "prefill": "all_prefix_tokens",
+      "decode": "one_token_with_prefill_kv_cache",
+      "logits": "last_token_only",
+      "use_cache": true
+    },
+    "quality_cache_sha256": {
+      "reference.npy": "c9f5a7f75bb0c8023c94587c3f73e4ae43b273f29b3c7a90ffaabbaa3cfa8c19",
+      "tokens.json": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6"
+    },
+    "model": "gpt2",
+    "model_config_sha256": "0daed7749b4f02b8f76240d5444551d7b08712dab4d0adb8239c56ba823bb7b4",
+    "source_weight_sha256": {
+      "model.safetensors": "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707"
+    },
+    "dataset": "wikitext2-test.parquet, contiguous blocks from first nonempty text",
+    "dataset_source": "WikiText-2 held-out test split",
+    "dataset_sha256": "5f1bea067869d04849c0f975a2b29c4ff47d867f484f5010ea5e861eab246d91",
+    "text_column": "text",
+    "sequence_length": 128,
+    "blocks": 8,
+    "threads": 1,
+    "warmup": 10,
+    "runs": 21,
+    "pinned_cpu": 2,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "machine": "AMD64",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "logical_cpus": 28,
+    "physical_memory_bytes": 16869548032,
+    "torch": "2.12.0+cpu",
+    "load_seconds": 1.4058389000056195,
+    "parameter_bytes": 497759232,
+    "resident_bytes": 1464479744,
+    "generation_prompt": "Explain in one sentence why careful measurement matters when optimizing software.",
+    "generated_tokens": [
+      198,
+      198,
+      464,
+      1708,
+      318,
+      257,
+      1351,
+      286,
+      262,
+      749,
+      2219,
+      10135,
+      326,
+      460,
+      307,
+      925
+    ],
+    "generated_text": "\n\nThe following is a list of the most common mistakes that can be made",
+    "latency": {
+      "eager": {
+        "prefill_p50_ms": 153.93399999447865,
+        "decode_p50_ms": 28.67060000426136,
+        "prefill_samples_ms": [
+          153.31599999626633,
+          152.32670000114013,
+          162.24619999411516,
+          156.43730000010692,
+          156.57410000130767,
+          156.8279999992228,
+          153.93399999447865,
+          156.60279999428894,
+          154.56280000216793,
+          152.82940000179224,
+          154.12479999940842,
+          151.12309999676654,
+          151.0342999972636,
+          154.27030000137165,
+          157.2844000038458,
+          151.75209999870276,
+          150.00449999934062,
+          150.95770000334596,
+          152.825600001961,
+          153.3936999985599,
+          154.2254000014509
+        ],
+        "decode_samples_ms": [
+          27.958999999100342,
+          28.759500004525762,
+          30.063300000620075,
+          31.110800002352335,
+          27.37619999970775,
+          27.449300003354438,
+          28.701199997158255,
+          27.988299996650312,
+          28.514500001620036,
+          27.779099997133017,
+          28.420399998140056,
+          28.723299998091534,
+          30.51449999475153,
+          33.04260000004433,
+          29.163999999582302,
+          31.635700004699174,
+          31.4825999957975,
+          28.634600006625988,
+          28.453999999328516,
+          28.20320000319043,
+          28.67060000426136
+        ],
+        "latency_workload": {
+          "format": "leaf-decoder-latency-workload-v1",
+          "batch_size": 1,
+          "prefill": "all_prefix_tokens",
+          "decode": "one_token_with_prefill_kv_cache",
+          "logits": "last_token_only",
+          "use_cache": true
+        },
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 151.0342999972636,
+            "p90_ms": 156.8279999992228,
+            "p90_p10_ratio": 1.038360160586464,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 27.779099997133017,
+            "p90_ms": 31.4825999957975,
+            "p90_p10_ratio": 1.1333196539501535,
+            "reason": "passed"
+          }
+        }
+      },
+      "sdpa": {
+        "prefill_p50_ms": 152.38759999920148,
+        "decode_p50_ms": 28.790099997422658,
+        "prefill_samples_ms": [
+          172.6293000028818,
+          149.80320000177016,
+          152.4111999970046,
+          152.38759999920148,
+          150.53559999796562,
+          149.81770000304095,
+          149.67559999786317,
+          150.19890000257874,
+          154.81269999872893,
+          152.13970000331756,
+          150.85350000299513,
+          153.7268000029144,
+          151.33320000313688,
+          149.0685000026133,
+          151.14360000006855,
+          156.80759999668226,
+          153.47740000288468,
+          160.65119999984745,
+          158.68170000612736,
+          152.56950000184588,
+          155.42809999897145
+        ],
+        "decode_samples_ms": [
+          44.480999997176696,
+          27.443699997093063,
+          27.941699998336844,
+          29.69689999736147,
+          27.358400002412964,
+          27.36989999539219,
+          28.800699998100754,
+          27.406200002587866,
+          28.625300001294818,
+          27.830099999846425,
+          28.8423000019975,
+          28.897500000311993,
+          29.58819999912521,
+          28.355700000247452,
+          41.28840000339551,
+          29.20589999848744,
+          30.80980000231648,
+          32.62479999830248,
+          28.58099999866681,
+          28.790099997422658,
+          28.175699997518677
+        ],
+        "latency_workload": {
+          "format": "leaf-decoder-latency-workload-v1",
+          "batch_size": 1,
+          "prefill": "all_prefix_tokens",
+          "decode": "one_token_with_prefill_kv_cache",
+          "logits": "last_token_only",
+          "use_cache": true
+        },
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 149.80320000177016,
+            "p90_ms": 158.68170000612736,
+            "p90_p10_ratio": 1.0592677593285877,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 27.406200002587866,
+            "p90_ms": 32.62479999830248,
+            "p90_p10_ratio": 1.190416766834579,
+            "reason": "passed"
+          }
+        }
+      }
+    },
+    "quality_gate_thresholds": {
+      "32": {
+        "min_next_token_agreement": 0.999,
+        "max_perplexity_ratio": 1.001
+      },
+      "8": {
+        "min_next_token_agreement": 0.95,
+        "max_perplexity_ratio": 1.02
+      },
+      "4": {
+        "min_next_token_agreement": 0.9,
+        "max_perplexity_ratio": 1.05
+      }
+    }
+  },
+  "measured_at_utc": "2026-10-02T14:39:28.821675+00:00",
+  "quality_measured_at_utc": "2026-10-02T14:39:15.924890+00:00",
+  "latency_measured_at_utc": "2026-10-02T14:39:28.519376+00:00",
+  "native_executable_sha256": "e952aeafe3a76aed6f4d0a8fe80858a3424140874f65042f992341c18919fbf0",
+  "native_policy": {
+    "LEAF_DISABLE_VNNI": false,
+    "LEAF_EXPERIMENTAL_FLOAT_TILES": false,
+    "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+  },
+  "latency_workload": {
+    "format": "leaf-decoder-latency-workload-v1",
+    "batch_size": 1,
+    "prefill": "all_prefix_tokens",
+    "decode": "one_token_with_prefill_kv_cache",
+    "logits": "last_token_only",
+    "use_cache": true
+  },
+  "latency_stability_gate": {
+    "minimum_samples": 5,
+    "max_p90_p10_ratio": 1.25
+  },
+  "native": {
+    "32": {
+      "weight_bits": 32,
+      "activation_bits": 32,
+      "export_provenance": {
+        "format": "leaf-decoder-export-request-v1",
+        "model_config_sha256": "0daed7749b4f02b8f76240d5444551d7b08712dab4d0adb8239c56ba823bb7b4",
+        "source_weight_sha256": {
+          "model.safetensors": "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707"
+        },
+        "plan_sha256": "3cae467aac1065a23010779a9fc619aac9f97b0a8ac7a8028d6418f14dd5a026",
+        "weight_bits": 32,
+        "activation_bits": 32,
+        "keep_fp32_tensors": [],
+        "int8_group_size": null,
+        "int4_group_size": null,
+        "calibration_sha256": null,
+        "smoothing_alpha": null
+      },
+      "keep_fp32_tensors": [],
+      "int8_group_size": null,
+      "artifact": "decoder-32.leaf",
+      "artifact_sha256": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 0.0018310546875,
+        "relative_logit_rmse": 6.976704867156514e-07,
+        "next_token_agreement": 1.0,
+        "perplexity": 62.580101513320024,
+        "pytorch_perplexity": 62.58010265069033,
+        "perplexity_ratio": 0.9999999818253685
+      },
+      "quality_gate_passed": true,
+      "generation_exact_match": true,
+      "generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "quality_measured_at_utc": "2026-10-02T14:38:49.507783+00:00",
+      "latency_measured_at_utc": "2026-10-02T14:39:01.875254+00:00",
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 540651520,
+        "load_ms": 0.4384,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 507166720,
+        "load_ms": 0.5175,
+        "prefill_p50_ms": 350.5344,
+        "decode_p50_ms": 30.889,
+        "prefill_samples_ms": [
+          354.242,
+          349.3557,
+          349.2264,
+          346.6459,
+          357.8355,
+          347.9307,
+          351.04,
+          350.5344,
+          347.8822,
+          345.8659,
+          346.6198,
+          347.6985,
+          352.9182,
+          346.015,
+          353.3212,
+          357.2829,
+          360.4819,
+          369.4155,
+          354.3617,
+          346.1556,
+          359.0542
+        ],
+        "decode_samples_ms": [
+          29.9734,
+          30.2879,
+          30.6079,
+          30.3846,
+          37.3983,
+          34.4222,
+          32.1669,
+          30.3578,
+          30.3367,
+          30.556,
+          30.9521,
+          31.2825,
+          30.8355,
+          30.6852,
+          31.4545,
+          31.0879,
+          30.889,
+          30.9381,
+          34.4125,
+          34.4361,
+          30.4969
+        ],
+        "generated_tokens": [],
+        "warmup": 10,
+        "runs": 21,
+        "latency_workload": {
+          "format": "leaf-decoder-latency-workload-v1",
+          "batch_size": 1,
+          "prefill": "all_prefix_tokens",
+          "decode": "one_token_with_prefill_kv_cache",
+          "logits": "last_token_only",
+          "use_cache": true
+        },
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 346.1556,
+            "p90_ms": 359.0542,
+            "p90_p10_ratio": 1.0372624334258929,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 30.3367,
+            "p90_ms": 34.4222,
+            "p90_p10_ratio": 1.1346718660895878,
+            "reason": "passed"
+          }
+        }
+      },
+      "latency_stability": {
+        "passed": true,
+        "minimum_samples": 5,
+        "max_p90_p10_ratio": 1.25,
+        "candidate": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 346.1556,
+            "p90_ms": 359.0542,
+            "p90_p10_ratio": 1.0372624334258929,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 30.3367,
+            "p90_ms": 34.4222,
+            "p90_p10_ratio": 1.1346718660895878,
+            "reason": "passed"
+          }
+        },
+        "leaf_fp32": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 346.1556,
+            "p90_ms": 359.0542,
+            "p90_p10_ratio": 1.0372624334258929,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 30.3367,
+            "p90_ms": 34.4222,
+            "p90_p10_ratio": 1.1346718660895878,
+            "reason": "passed"
+          }
+        },
+        "fastest_pytorch": {
+          "prefill": {
+            "passed": true,
+            "median_ms": 152.38759999920148,
+            "implementations": {
+              "sdpa": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 149.80320000177016,
+                "p90_ms": 158.68170000612736,
+                "p90_p10_ratio": 1.0592677593285877,
+                "reason": "passed"
+              }
+            }
+          },
+          "decode": {
+            "passed": true,
+            "median_ms": 28.67060000426136,
+            "implementations": {
+              "eager": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 27.779099997133017,
+                "p90_ms": 31.4825999957975,
+                "p90_p10_ratio": 1.1333196539501535,
+                "reason": "passed"
+              }
+            }
+          }
+        }
+      },
+      "latency_workload_match": {
+        "passed": true,
+        "expected": {
+          "format": "leaf-decoder-latency-workload-v1",
+          "batch_size": 1,
+          "prefill": "all_prefix_tokens",
+          "decode": "one_token_with_prefill_kv_cache",
+          "logits": "last_token_only",
+          "use_cache": true
+        }
+      },
+      "decode_speedup_vs_pytorch_sdpa": 0.9320502443401424,
+      "decode_speedup_vs_fastest_pytorch": 0.9281815534417223,
+      "prefill_speedup_vs_fastest_pytorch": 0.4347293732061717,
+      "decode_speedup_vs_leaf_fp32": 1.0,
+      "prefill_speedup_vs_leaf_fp32": 1.0,
+      "eligible_for_automatic_selection": false
+    },
+    "8-protected": {
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "export_provenance": {
+        "format": "leaf-decoder-export-request-v1",
+        "model_config_sha256": "0daed7749b4f02b8f76240d5444551d7b08712dab4d0adb8239c56ba823bb7b4",
+        "source_weight_sha256": {
+          "model.safetensors": "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707"
+        },
+        "plan_sha256": "3cae467aac1065a23010779a9fc619aac9f97b0a8ac7a8028d6418f14dd5a026",
+        "weight_bits": 8,
+        "activation_bits": 32,
+        "keep_fp32_tensors": [
+          "lm_head.weight",
+          "model.embed_tokens.weight",
+          "model.position_embeddings.weight"
+        ],
+        "int8_group_size": 0,
+        "int4_group_size": null,
+        "calibration_sha256": null,
+        "smoothing_alpha": null
+      },
+      "keep_fp32_tensors": [
+        "lm_head.weight",
+        "model.embed_tokens.weight",
+        "model.position_embeddings.weight"
+      ],
+      "int8_group_size": 0,
+      "artifact": "decoder-8-protected.leaf",
+      "artifact_sha256": "dc459d1585478ac3d73c5a6be7529232b0ddc89df81d05bb5e15ce16b8e01904",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 35.86662292480469,
+        "relative_logit_rmse": 0.0156409852206707,
+        "next_token_agreement": 0.968503937007874,
+        "perplexity": 62.78241352092633,
+        "pytorch_perplexity": 62.58010265069033,
+        "perplexity_ratio": 1.003232830590983
+      },
+      "quality_gate_passed": true,
+      "generation_exact_match": true,
+      "generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "quality_measured_at_utc": "2026-10-02T14:39:15.924890+00:00",
+      "latency_measured_at_utc": "2026-10-02T14:39:28.519376+00:00",
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 243305408,
+        "peak_rss_bytes": 286179328,
+        "load_ms": 4.0523,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "latency": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 243305408,
+        "peak_rss_bytes": 252694528,
+        "load_ms": 4.2066,
+        "prefill_p50_ms": 380.2857,
+        "decode_p50_ms": 18.3121,
+        "prefill_samples_ms": [
+          381.5959,
+          381.3079,
+          394.579,
+          375.2945,
+          374.5671,
+          375.4214,
+          376.4849,
+          378.5136,
+          374.6787,
+          374.4869,
+          378.6124,
+          378.0567,
+          380.2857,
+          375.246,
+          393.3876,
+          380.3615,
+          387.5989,
+          423.475,
+          405.2571,
+          407.8934,
+          391.3462
+        ],
+        "decode_samples_ms": [
+          18.2945,
+          18.0536,
+          19.1216,
+          17.9386,
+          17.8539,
+          17.965,
+          20.0227,
+          18.7335,
+          18.3225,
+          18.0504,
+          19.4763,
+          18.0517,
+          18.9116,
+          18.3121,
+          18.3349,
+          18.1571,
+          17.8496,
+          32.9546,
+          19.4226,
+          17.6986,
+          19.2062
+        ],
+        "generated_tokens": [],
+        "warmup": 10,
+        "runs": 21,
+        "latency_workload": {
+          "format": "leaf-decoder-latency-workload-v1",
+          "batch_size": 1,
+          "prefill": "all_prefix_tokens",
+          "decode": "one_token_with_prefill_kv_cache",
+          "logits": "last_token_only",
+          "use_cache": true
+        },
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 374.6787,
+            "p90_ms": 405.2571,
+            "p90_p10_ratio": 1.0816123254404373,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 17.8539,
+            "p90_ms": 19.4763,
+            "p90_p10_ratio": 1.0908709021558314,
+            "reason": "passed"
+          }
+        }
+      },
+      "latency_stability": {
+        "passed": true,
+        "minimum_samples": 5,
+        "max_p90_p10_ratio": 1.25,
+        "candidate": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 374.6787,
+            "p90_ms": 405.2571,
+            "p90_p10_ratio": 1.0816123254404373,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 17.8539,
+            "p90_ms": 19.4763,
+            "p90_p10_ratio": 1.0908709021558314,
+            "reason": "passed"
+          }
+        },
+        "leaf_fp32": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 346.1556,
+            "p90_ms": 359.0542,
+            "p90_p10_ratio": 1.0372624334258929,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 30.3367,
+            "p90_ms": 34.4222,
+            "p90_p10_ratio": 1.1346718660895878,
+            "reason": "passed"
+          }
+        },
+        "fastest_pytorch": {
+          "prefill": {
+            "passed": true,
+            "median_ms": 152.38759999920148,
+            "implementations": {
+              "sdpa": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 149.80320000177016,
+                "p90_ms": 158.68170000612736,
+                "p90_p10_ratio": 1.0592677593285877,
+                "reason": "passed"
+              }
+            }
+          },
+          "decode": {
+            "passed": true,
+            "median_ms": 28.67060000426136,
+            "implementations": {
+              "eager": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 27.779099997133017,
+                "p90_ms": 31.4825999957975,
+                "p90_p10_ratio": 1.1333196539501535,
+                "reason": "passed"
+              }
+            }
+          }
+        }
+      },
+      "latency_workload_match": {
+        "passed": true,
+        "expected": {
+          "format": "leaf-decoder-latency-workload-v1",
+          "batch_size": 1,
+          "prefill": "all_prefix_tokens",
+          "decode": "one_token_with_prefill_kv_cache",
+          "logits": "last_token_only",
+          "use_cache": true
+        }
+      },
+      "decode_speedup_vs_pytorch_sdpa": 1.5721899726095125,
+      "decode_speedup_vs_fastest_pytorch": 1.5656642331715838,
+      "prefill_speedup_vs_fastest_pytorch": 0.400718722789738,
+      "decode_speedup_vs_leaf_fp32": 1.6868081760147662,
+      "prefill_speedup_vs_leaf_fp32": 0.9217659249348582,
+      "eligible_for_automatic_selection": false
+    }
+  },
+  "scope": "Complete trained model; held-out subset perplexity is not whole-corpus perplexity."
+}

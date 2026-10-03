@@ -43,11 +43,33 @@ def configurations():
                       bos_token_id=1, eos_token_id=2, enable_bias=False)]
 
 
+def paired_native(executable, before_executable, artifact, sequences, checks, label, **options):
+    """Compare identical native protocol requests without recording timings."""
+    actual, metrics = run_native(executable, artifact, sequences, **options)
+    if before_executable is not None:
+        before, before_metrics = run_native(before_executable, artifact, sequences, **options)
+        if not np.array_equal(actual, before):
+            raise AssertionError(f"{label}: native logits are not exactly equal to the before executable")
+        if metrics.get("generated_tokens") != before_metrics.get("generated_tokens"):
+            raise AssertionError(f"{label}: native generated tokens differ from the before executable")
+        checks[label] = {"logits_array_equal": True, "generated_tokens_equal": True}
+    return actual, metrics
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--executable", type=Path, default=Path("build/leaf_decoder.exe"))
+    parser.add_argument("--before-executable", type=Path,
+                        help="optional frozen binary for exact paired native regression; no timing comparison")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    before_hash = None
+    if args.before_executable is not None:
+        if not args.executable.is_file() or not args.before_executable.is_file():
+            parser.error("Paired regression requires existing before and candidate executables")
+        if any(value for value in native_policy().values()):
+            parser.error("Paired regression requires the default native kernel policy; unset experimental/ISA flags")
+        before_hash = digest(args.before_executable)
     torch.set_num_threads(1)
     sequences = [[(i * 17 + 4) % 128 for i in range(length)] for length in (13, 37)]
     results = []
@@ -64,20 +86,27 @@ def main():
                 generated = model.generate(torch.tensor([sequences[0]]), max_new_tokens=4,
                                            do_sample=False, pad_token_id=2)[0, len(sequences[0]):].tolist()
             cases = {}
+            paired_checks = {}
+
+            def native(artifact, requests, label, **options):
+                return paired_native(args.executable, args.before_executable, artifact, requests,
+                                     paired_checks, label, **options)
+
             for bits in (32, 8, 4):
                 artifact = root / f"{config.model_type}-{bits}.leaf"
                 export_decoder(snapshot, artifact, bits)
-                actual, _ = run_native(args.executable, artifact, sequences)
+                actual, _ = native(artifact, sequences, f"{bits}/verify-a32")
                 actual = actual.reshape(expected.shape)
                 measurements = quality(actual, expected, sequences)
                 if bits == 32:
                     np.testing.assert_allclose(actual, expected, atol=5e-5, rtol=5e-4)
                     for scalar, threads in ((True, 1), (False, 2)):
-                        alternative, _ = run_native(args.executable, artifact, sequences, scalar=scalar, threads=threads)
+                        alternative, _ = native(artifact, sequences, f"32/verify-scalar{int(scalar)}-threads{threads}",
+                                                scalar=scalar, threads=threads)
                         np.testing.assert_allclose(alternative.reshape(expected.shape), expected, atol=5e-5, rtol=5e-4)
-                    chunked, _ = run_native(args.executable, artifact, sequences, mode="chunked", chunk=3)
+                    chunked, _ = native(artifact, sequences, "32/chunk3-a32", mode="chunked", chunk=3)
                     np.testing.assert_allclose(chunked.reshape(expected.shape), expected, atol=5e-5, rtol=5e-4)
-                    _, native_generation = run_native(args.executable, artifact, [sequences[0]], mode="generate", generate=4)
+                    _, native_generation = native(artifact, [sequences[0]], "32/greedy-a32", mode="generate", generate=4)
                     if native_generation["generated_tokens"] != generated:
                         raise AssertionError(f"{config.model_type}: greedy generation differs")
                     if config.model_type == "llama":
@@ -106,16 +135,26 @@ def main():
                         (snapshot / "config.json").write_text(json.dumps(saved_config))
                         custom_artifact = root / "custom.leaf"
                         export_decoder(snapshot, custom_artifact, plan_path=custom_plan)
-                        custom, _ = run_native(args.executable, custom_artifact, sequences)
+                        custom, _ = native(custom_artifact, sequences, "custom-plan/verify-a32")
                         np.testing.assert_allclose(custom.reshape(expected.shape), expected, atol=5e-5, rtol=5e-4)
                         saved_config["model_type"] = "llama"
                         (snapshot / "config.json").write_text(json.dumps(saved_config))
                 elif measurements["relative_logit_rmse"] > (0.03 if bits == 8 else 0.25):
                     raise AssertionError(f"{config.model_type}: quantized logits diverge")
                 if bits != 32:
-                    vector, _ = run_native(args.executable, artifact, sequences, activation_bits=8)
-                    scalar, _ = run_native(args.executable, artifact, sequences, activation_bits=8, scalar=True)
+                    vector, _ = native(artifact, sequences, f"{bits}/verify-a8", activation_bits=8)
+                    scalar, _ = native(artifact, sequences, f"{bits}/verify-a8-scalar", activation_bits=8, scalar=True)
                     np.testing.assert_allclose(vector, scalar, atol=5e-5, rtol=5e-4)
+                if args.before_executable is not None:
+                    # Multiple requests force reset after a populated KV cache;
+                    # repeating the first prefix also exercises table reuse.
+                    reset_requests = [sequences[0], sequences[1], sequences[0]]
+                    native(artifact, reset_requests, f"{bits}/greedy-reset-a32", mode="generate", generate=4)
+                    if bits != 32:
+                        native(artifact, sequences, f"{bits}/chunk3-a32", mode="chunked", chunk=3)
+                        native(artifact, sequences, f"{bits}/chunk3-a8", mode="chunked", chunk=3, activation_bits=8)
+                        native(artifact, reset_requests, f"{bits}/greedy-reset-a8", mode="generate", generate=4,
+                               activation_bits=8)
                 cases[str(bits)] = measurements
             calibration = root / f"{config.model_type}-calibration.npz"
             arrays = collect(model, sequences, make_plan(config.to_dict()))
@@ -125,13 +164,17 @@ def main():
             np.savez(calibration, **arrays, __metadata__=json.dumps(metadata))
             smoothed = root / f"{config.model_type}-smooth.leaf"
             export_decoder(snapshot, smoothed, 8, calibration_path=calibration)
-            vector, _ = run_native(args.executable, smoothed, sequences, activation_bits=8)
-            scalar, _ = run_native(args.executable, smoothed, sequences, activation_bits=8, scalar=True)
+            vector, _ = native(smoothed, sequences, "8-smooth/verify-a8", activation_bits=8)
+            scalar, _ = native(smoothed, sequences, "8-smooth/verify-a8-scalar", activation_bits=8, scalar=True)
             np.testing.assert_allclose(vector, scalar, atol=5e-5, rtol=5e-4)
             measured_smooth = quality(vector.reshape(expected.shape), expected, sequences)
             if measured_smooth["relative_logit_rmse"] > 0.05:
                 raise AssertionError("Smoothed random-weight logits diverge")
             cases["8-smooth"] = measured_smooth
+            if args.before_executable is not None:
+                native(smoothed, sequences, "8-smooth/chunk3-a8", mode="chunked", chunk=3, activation_bits=8)
+                native(smoothed, [sequences[0], sequences[1], sequences[0]], "8-smooth/greedy-reset-a8",
+                       mode="generate", generate=4, activation_bits=8)
             results.append({"architecture": config.model_type, "random_weights": True,
                             "hidden_size": getattr(config, "hidden_size", None),
                             "attention_bias": getattr(config, "attention_bias", None),
@@ -139,6 +182,8 @@ def main():
                             "tie_word_embeddings": config.tie_word_embeddings,
                             "fp32_scalar_and_threads2_passed": True, "chunked_cache_passed": True,
                             "greedy_generation_passed": True, "cases": cases})
+            if args.before_executable is not None:
+                results[-1]["paired_bit_exact_regression"] = {"passed": True, "checks": paired_checks}
             print(config.model_type + " passed", flush=True)
     record = {"benchmark": "native-decoder-cross-architecture-parity",
               "measured_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -147,6 +192,11 @@ def main():
               "native_policy": native_policy(),
               "scope": "Complete reduced-size random-weight models; trained quality is evaluated separately.",
               "results": results}
+    if args.before_executable is not None:
+        if digest(args.before_executable) != before_hash:
+            raise AssertionError("Before executable changed during paired native regression")
+        record.update(before_executable_sha256=before_hash, paired_bit_exact_regression_passed=True,
+                      paired_scope="Identical artifacts and requests under default kernel policy; no latency qualification")
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")

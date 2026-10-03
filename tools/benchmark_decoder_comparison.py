@@ -24,7 +24,11 @@ from leaf.power import keep_awake
 from tools.decoder_validation import (MAX_LATENCY_P90_P10_RATIO, MIN_LATENCY_SAMPLES,
                                       benchmark_stability, latency_median,
                                       latency_stability, quality, run_native)
-from tools.validate_decoder import GATES, digest, utc_now, write_record
+from tools.validate_decoder import GATES, digest, native_policy, utc_now, write_record
+
+
+NATIVE_POLICY_NAMES = ("LEAF_DISABLE_VNNI", "LEAF_EXPERIMENTAL_FLOAT_TILES", "LEAF_EXPERIMENTAL_FLOAT_GEMV")
+DEFAULT_NATIVE_POLICY = {name: False for name in NATIVE_POLICY_NAMES}
 
 
 @contextmanager
@@ -38,6 +42,29 @@ def profiling_disabled():
             os.environ["LEAF_DECODER_PROFILE"] = previous
 
 
+@contextmanager
+def native_stage_policy(stage: str, after_float_tiles: bool = False):
+    """Apply an experiment only to its owned stage, restoring the caller exactly."""
+    if stage not in ("before", "after"):
+        raise ValueError("Native experiment stage must be before or after")
+    if not after_float_tiles:
+        yield native_policy()
+        return
+    previous = {name: os.environ.get(name) for name in NATIVE_POLICY_NAMES}
+    try:
+        for name in NATIVE_POLICY_NAMES:
+            os.environ.pop(name, None)
+        if stage == "after":
+            os.environ["LEAF_EXPERIMENTAL_FLOAT_TILES"] = "1"
+        yield native_policy()
+    finally:
+        for name, value in previous.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
+
+
 def _tokens(values, *, nonempty=True):
     return (isinstance(values, list) and (bool(values) or not nonempty) and
             all(isinstance(value, int) and not isinstance(value, bool) and value >= 0 for value in values))
@@ -47,9 +74,21 @@ def validate_inputs(args) -> dict:
     """Preflight all frozen quality and artifact provenance before execution."""
     if getattr(args, "windows_high_qos", False) and os.name != "nt":
         raise ValueError("--windows-high-qos requires Windows")
+    scoped_tiles = bool(getattr(args, "after_float_tiles", False))
+    if scoped_tiles:
+        conflicts = sorted(name for name, value in os.environ.items() if value and
+                           (name == "LEAF_DISABLE_VNNI" or name.startswith("LEAF_EXPERIMENTAL_")))
+        if conflicts:
+            raise ValueError("--after-float-tiles conflicts with parent native policy: " + ", ".join(conflicts))
     record = json.loads(args.record.read_text(encoding="utf-8"))
     if not isinstance(record, dict) or not isinstance(record.get("pytorch"), dict):
         raise ValueError("Frozen record has no PyTorch quality provenance")
+    if scoped_tiles:
+        frozen_policy = record.get("native_policy")
+        if (not isinstance(frozen_policy, dict) or set(frozen_policy) != set(DEFAULT_NATIVE_POLICY) or
+                any(not isinstance(value, bool) for value in frozen_policy.values()) or
+                frozen_policy != DEFAULT_NATIVE_POLICY):
+            raise ValueError("--after-float-tiles requires an explicitly default frozen BEFORE native policy")
     baseline = record["pytorch"]
     if (baseline.get("platform") != platform.platform() or
             baseline.get("cpu") != platform.processor()):
@@ -124,7 +163,8 @@ def validate_inputs(args) -> dict:
             "reference": reference, "keys": keys, "artifacts": artifacts,
             "before_sha256": before_hash, "after_sha256": after_hash,
             "quality_cache_sha256": cache_hashes, "threads": threads, "cpu": cpu,
-            "high_qos": bool(getattr(args, "windows_high_qos", False))}
+            "high_qos": bool(getattr(args, "windows_high_qos", False)),
+            "after_float_tiles": scoped_tiles}
 
 
 def stage_summary(passes: list[dict]) -> dict:
@@ -180,6 +220,13 @@ def _quality_gate(measured: dict, bits: int) -> bool:
 
 
 def verify_after(args, context: dict, key: str) -> dict:
+    with native_stage_policy("after", bool(getattr(args, "after_float_tiles", False))) as policy:
+        result = _verify_after(args, context, key)
+        result["native_policy"] = policy
+        return result
+
+
+def _verify_after(args, context: dict, key: str) -> dict:
     case = context["record"]["native"][key]
     bits, activations = case["weight_bits"], case["activation_bits"]
     artifact, data, reference = context["artifacts"][key], context["data"], context["reference"]
@@ -230,6 +277,10 @@ def compare(args) -> dict:
     context = validate_inputs(args)
     pin_cpu(context["cpu"])
     cases = {}
+    stage_policies = {stage: dict(native_policy()) for stage in ("before", "after")}
+    if context["after_float_tiles"]:
+        stage_policies = {"before": dict(DEFAULT_NATIVE_POLICY),
+                          "after": {**DEFAULT_NATIVE_POLICY, "LEAF_EXPERIMENTAL_FLOAT_TILES": True}}
     with keep_awake(), profiling_disabled():
         for key in context["keys"]:
             print(f"Candidate {key}: AFTER trained quality/generation/chunked parity", flush=True)
@@ -239,12 +290,14 @@ def compare(args) -> dict:
             for index, stage in enumerate(("before", "after", "after", "before")):
                 print(f"Candidate {key}: ABBA {index + 1}/4 ({stage})", flush=True)
                 executable = args.before if stage == "before" else args.after
-                _, metrics = run_native(executable, context["artifacts"][key], [context["data"]["benchmark_ids"]],
-                                         mode="bench", threads=context["threads"], runs=args.runs,
-                                         warmup=args.warmup, activation_bits=cases[key]["activation_bits"],
-                                         high_qos=context["high_qos"])
+                with native_stage_policy(stage, context["after_float_tiles"]) as policy:
+                    _, metrics = run_native(executable, context["artifacts"][key], [context["data"]["benchmark_ids"]],
+                                             mode="bench", threads=context["threads"], runs=args.runs,
+                                             warmup=args.warmup, activation_bits=cases[key]["activation_bits"],
+                                             high_qos=context["high_qos"])
                 records.append({"index": index, "stage": stage, "measured_at_utc": utc_now(),
-                                "latency": metrics, "stability": benchmark_stability(metrics)})
+                                "latency": metrics, "stability": benchmark_stability(metrics),
+                                "native_policy": policy})
             before = stage_summary([item["latency"] for item in records if item["stage"] == "before"])
             after = stage_summary([item["latency"] for item in records if item["stage"] == "after"])
             cases[key]["timing"] = {"order": [item["stage"] for item in records], "passes": records,
@@ -265,6 +318,7 @@ def compare(args) -> dict:
               "frozen_reference_pinned_cpu": context["record"]["pytorch"].get("pinned_cpu"),
               "warmup_per_pass": args.warmup, "profiling_enabled": False,
               "windows_high_qos": context["high_qos"],
+              "after_float_tiles": context["after_float_tiles"], "native_policy_by_stage": stage_policies,
               "isa_policy": {"LEAF_DISABLE_VNNI": os.environ.get("LEAF_DISABLE_VNNI")},
               "experimental_policy": {name: os.environ.get(name) for name in
                   ("LEAF_EXPERIMENTAL_FLOAT_TILES", "LEAF_EXPERIMENTAL_FLOAT_GEMV")},
@@ -290,6 +344,8 @@ def main():
     parser.add_argument("--cpu", type=int, help="pin BOTH native stages to this CPU; frozen PyTorch timing is not reused as a gate")
     parser.add_argument("--windows-high-qos", action="store_true",
                         help="opt in both owned native child processes to Windows HighQoS; no global power changes")
+    parser.add_argument("--after-float-tiles", action="store_true",
+                        help="scope experimental FP32 tiles to AFTER quality/timing only; BEFORE stays default")
     parser.add_argument("--output", type=Path, default=Path("benchmark/results/decoder_comparison.json"))
     args = parser.parse_args()
     result = compare(args)

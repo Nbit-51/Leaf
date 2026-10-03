@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import hashlib
+import inspect
 import json
 import os
 from pathlib import Path
@@ -34,6 +35,27 @@ GATES = {
     "8": {"min_next_token_agreement": 0.95, "max_perplexity_ratio": 1.02},
     "4": {"min_next_token_agreement": 0.90, "max_perplexity_ratio": 1.05},
 }
+
+
+LATENCY_WORKLOAD = {
+    "format": "leaf-decoder-latency-workload-v1",
+    "batch_size": 1,
+    "prefill": "all_prefix_tokens",
+    "decode": "one_token_with_prefill_kv_cache",
+    "logits": "last_token_only",
+    "use_cache": True,
+}
+
+
+def latency_workload_matches(record) -> bool:
+    """Strict canonical comparison; bool/int lookalikes are not equivalent."""
+    if not isinstance(record, dict):
+        return False
+    try:
+        return (json.dumps(record.get("latency_workload"), sort_keys=True, separators=(",", ":")) ==
+                json.dumps(LATENCY_WORKLOAD, sort_keys=True, separators=(",", ":")))
+    except (TypeError, ValueError):
+        return False
 
 
 def native_policy() -> dict:
@@ -198,7 +220,27 @@ def write_export_provenance(artifact: Path, request: dict) -> None:
 
 
 def measure_pytorch_latency(model, benchmark_ids: list[int], args) -> dict:
+    try:
+        parameter = inspect.signature(model.forward).parameters.get("logits_to_keep")
+    except (AttributeError, TypeError, ValueError) as error:
+        raise ValueError("Cannot verify PyTorch last-token logits support") from error
+    if parameter is None or parameter.kind not in (inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                                                    inspect.Parameter.KEYWORD_ONLY):
+        raise ValueError("PyTorch forward must explicitly support logits_to_keep for matched latency")
+    if len(benchmark_ids) < 2:
+        raise ValueError("Latency requires a prefix and a cached final token")
     import torch
+
+    def verify_logits(output):
+        try:
+            shape = tuple(output.logits.shape)
+        except (AttributeError, TypeError) as error:
+            raise ValueError("PyTorch latency must return last-token logits [1, 1, vocabulary]") from error
+        configured_vocab = getattr(getattr(model, "config", None), "vocab_size", None)
+        if (len(shape) != 3 or shape[0] != 1 or shape[1] != 1 or shape[2] <= 0 or
+                (configured_vocab is not None and shape[2] != configured_vocab)):
+            raise ValueError("PyTorch latency must return last-token logits [1, 1, vocabulary]")
+
     benchmarks = {}
     for implementation in ("eager", "sdpa"):
         model.set_attn_implementation(implementation)
@@ -207,15 +249,24 @@ def measure_pytorch_latency(model, benchmark_ids: list[int], args) -> dict:
         prefill_times, decode_times = [], []
         with torch.inference_mode():
             for iteration in range(args.warmup + args.runs):
-                start = time.perf_counter(); state = model(prefix, use_cache=True)
+                start = time.perf_counter(); state = model(prefix, use_cache=True, logits_to_keep=1)
                 prefill = (time.perf_counter() - start) * 1000
-                start = time.perf_counter(); model(final, past_key_values=state.past_key_values, use_cache=True)
+                verify_logits(state)
+                if getattr(state, "past_key_values", None) is None:
+                    raise ValueError("PyTorch latency must return a KV cache for cached decode")
+                start = time.perf_counter(); decoded = model(final, past_key_values=state.past_key_values,
+                                                             use_cache=True, logits_to_keep=1)
                 decode = (time.perf_counter() - start) * 1000
+                verify_logits(decoded)
                 if iteration >= args.warmup:
                     prefill_times.append(prefill); decode_times.append(decode)
+                # A new prefill must not retain a previous request's cache or
+                # logits. Session reset is outside the timed native call too.
+                del decoded, state
         benchmarks[implementation] = {"prefill_p50_ms": statistics.median(prefill_times),
                                       "decode_p50_ms": statistics.median(decode_times),
-                                      "prefill_samples_ms": prefill_times, "decode_samples_ms": decode_times}
+                                      "prefill_samples_ms": prefill_times, "decode_samples_ms": decode_times,
+                                      "latency_workload": dict(LATENCY_WORKLOAD)}
         benchmarks[implementation]["stability"] = benchmark_stability(benchmarks[implementation])
     return benchmarks
 
@@ -253,6 +304,10 @@ def apply_speed_gates(cases: dict, pytorch: dict) -> None:
             latency["stability"] = benchmark_stability(latency)
         stability = comparison_stability(latency, fp32_latency, baseline_latencies)
         case["latency_stability"] = stability
+        workload_match = (latency_workload_matches(pytorch) and bool(baseline_latencies) and
+                          all(latency_workload_matches(item) for item in baseline_latencies.values()) and
+                          latency_workload_matches(fp32_latency) and latency_workload_matches(latency))
+        case["latency_workload_match"] = {"passed": workload_match, "expected": dict(LATENCY_WORKLOAD)}
         prefill, decode = latency_median(latency, "prefill"), latency_median(latency, "decode")
         case["decode_speedup_vs_pytorch_sdpa"] = sdpa_decode / decode if sdpa_decode and decode else None
         case["decode_speedup_vs_fastest_pytorch"] = fastest_decode / decode if fastest_decode and decode else None
@@ -260,7 +315,7 @@ def apply_speed_gates(cases: dict, pytorch: dict) -> None:
         case["decode_speedup_vs_leaf_fp32"] = fp32_decode / decode if fp32_decode and decode else None
         case["prefill_speedup_vs_leaf_fp32"] = fp32_prefill / prefill if fp32_prefill and prefill else None
         case["eligible_for_automatic_selection"] = bool(
-            case.get("quality_gate_passed") is True and stability["passed"] and
+            case.get("quality_gate_passed") is True and workload_match and stability["passed"] and
             prefill and decode and fp32_prefill and fp32_decode and fastest_prefill and fastest_decode and
             decode < fp32_decode and prefill <= fp32_prefill * 1.02 and
             decode < fastest_decode * 0.98 and prefill <= fastest_prefill * 1.02)
@@ -303,6 +358,7 @@ def baseline(args):
     latency_timestamp = utc_now()
     record = {"measured_at_utc": latency_timestamp, "quality_measured_at_utc": quality_timestamp,
               "latency_measured_at_utc": latency_timestamp,
+              "latency_workload": dict(LATENCY_WORKLOAD),
               "quality_cache_sha256": quality_cache_hashes(args.workdir), "model": args.model.name,
               "model_config_sha256": digest(args.model / "config.json"),
               "source_weight_sha256": {p.name: digest(p) for p in sorted(args.model.glob("*.safetensors"))},
@@ -329,12 +385,13 @@ def baseline_latency(args):
     model, load_seconds = load_pytorch_model(args)
     record["latency"] = measure_pytorch_latency(model, data["benchmark_ids"], args)
     record.update(latency_measured_at_utc=utc_now(), warmup=args.warmup, runs=args.runs,
-                  latency_load_seconds=load_seconds)
+                  latency_load_seconds=load_seconds, latency_workload=dict(LATENCY_WORKLOAD))
     write_record(args.workdir / "pytorch.json", record)
 
 
 def native(args):
     data, pytorch = load_baseline_cache(args)
+    executable_sha256 = digest(args.executable)
     reference = np.load(args.workdir / "reference.npy")
     cases = {}
     candidates = [(str(bits), bits, 32, None, [], 0) for bits in args.bits]
@@ -370,6 +427,7 @@ def native(args):
                 command += ["--keep-fp32-tensors", *kept_fp32]
             subprocess.run(command, check=True)
             write_export_provenance(artifact, request)
+        artifact_sha256 = digest(artifact)
         print(f"Native {key} held-out quality", flush=True)
         actual, execution = run_native(args.executable, artifact, data["sequences"], threads=args.threads,
                                         activation_bits=activation_bits)
@@ -390,7 +448,7 @@ def native(args):
         _, latency = run_native(args.executable, artifact, [data["benchmark_ids"]], mode="bench",
                                  threads=args.threads, runs=args.runs, warmup=args.warmup, activation_bits=activation_bits)
         latency_timestamp = utc_now()
-        latency.update(warmup=args.warmup, runs=args.runs)
+        latency.update(warmup=args.warmup, runs=args.runs, latency_workload=dict(LATENCY_WORKLOAD))
         gate = GATES[str(bits)]
         passed = (measured["next_token_agreement"] >= gate["min_next_token_agreement"] and
                   measured["perplexity_ratio"] <= gate["max_perplexity_ratio"])
@@ -398,7 +456,7 @@ def native(args):
                             "export_provenance": request,
                             "keep_fp32_tensors": sorted(kept_fp32),
                             "int8_group_size": int8_group_size if bits == 8 else None,
-                            "artifact": artifact.name, "artifact_sha256": digest(artifact),
+                            "artifact": artifact.name, "artifact_sha256": artifact_sha256,
                             "quality": measured, "quality_gate_passed": passed,
                             "generation_exact_match": generation_match,
                             "generated_tokens": generation["generated_tokens"],
@@ -408,13 +466,17 @@ def native(args):
         print(json.dumps({"candidate": key, "quality": measured, "quality_gate_passed": passed,
                           "prefill_ms": latency["prefill_p50_ms"], "decode_ms": latency["decode_p50_ms"]}), flush=True)
         del actual
+    if (digest(args.executable) != executable_sha256 or any(
+            digest(args.workdir / case["artifact"]) != case["artifact_sha256"] for case in cases.values())):
+        raise ValueError("Native executable or artifacts changed during validation; rerun full validation")
     apply_speed_gates(cases, pytorch)
     result = {"benchmark": "trained-full-decoder-quality-and-latency", "pytorch": pytorch,
               "measured_at_utc": utc_now(),
               "quality_measured_at_utc": max(case["quality_measured_at_utc"] for case in cases.values()),
               "latency_measured_at_utc": max(case["latency_measured_at_utc"] for case in cases.values()),
-              "native_executable_sha256": digest(args.executable),
+              "native_executable_sha256": executable_sha256,
               "native_policy": native_policy(),
+              "latency_workload": dict(LATENCY_WORKLOAD),
               "latency_stability_gate": {"minimum_samples": MIN_LATENCY_SAMPLES,
                                           "max_p90_p10_ratio": MAX_LATENCY_P90_P10_RATIO},
               "native": cases, "scope": "Complete trained model; held-out subset perplexity is not whole-corpus perplexity."}
@@ -488,14 +550,18 @@ def native_latency(args):
         _, latency = run_native(args.executable, artifacts[key], [data["benchmark_ids"]], mode="bench",
                                  threads=args.threads, runs=args.runs, warmup=args.warmup,
                                  activation_bits=case["activation_bits"])
-        latency.update(warmup=args.warmup, runs=args.runs)
+        latency.update(warmup=args.warmup, runs=args.runs, latency_workload=dict(LATENCY_WORKLOAD))
         case["latency"] = latency
         case.setdefault("quality_measured_at_utc", original_quality_timestamp)
         case["latency_measured_at_utc"] = utc_now()
+    if (digest(args.executable) != result["native_executable_sha256"] or any(
+            digest(path) != cases[key]["artifact_sha256"] for key, path in artifacts.items())):
+        raise ValueError("Native executable or artifacts changed during timing refresh; rerun full validation")
     apply_speed_gates(cases, pytorch)
     result["pytorch"] = pytorch
     result.update(quality_measured_at_utc=original_quality_timestamp,
                   latency_measured_at_utc=utc_now(),
+                  latency_workload=dict(LATENCY_WORKLOAD),
                   latency_stability_gate={"minimum_samples": MIN_LATENCY_SAMPLES,
                                           "max_p90_p10_ratio": MAX_LATENCY_P90_P10_RATIO})
     result["measured_at_utc"] = result["latency_measured_at_utc"]

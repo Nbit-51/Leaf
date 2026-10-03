@@ -7,18 +7,20 @@ import pytest
 
 from tools.decoder_validation import (benchmark_stability, comparison_stability,
                                       latency_median, latency_stability, quality)
-from tools.validate_decoder import apply_speed_gates, digest, native
+from tools.validate_decoder import LATENCY_WORKLOAD, apply_speed_gates, digest, native
 
 
 def latency(prefill=100.0, decode=10.0):
     return {"prefill_p50_ms": prefill, "decode_p50_ms": decode,
-            "prefill_samples_ms": [prefill] * 5, "decode_samples_ms": [decode] * 5}
+            "prefill_samples_ms": [prefill] * 5, "decode_samples_ms": [decode] * 5,
+            "latency_workload": dict(LATENCY_WORKLOAD)}
 
 
 def speed_comparison(prefill=100.0, decode=9.0):
     return ({"32": {"latency": latency(120.0, 12.0), "quality_gate_passed": True},
              "8": {"latency": latency(prefill, decode), "quality_gate_passed": True}},
-            {"latency": {"eager": latency(), "sdpa": latency(105.0, 11.0)}})
+            {"latency": {"eager": latency(), "sdpa": latency(105.0, 11.0)},
+             "latency_workload": dict(LATENCY_WORKLOAD)})
 
 
 @pytest.mark.parametrize("samples", [None, {}, "1,2,3,4,5", 10,
@@ -85,6 +87,38 @@ def test_both_timing_phases_are_required(malformed):
     assert benchmark_stability(malformed)["passed"] is False
 
 
+@pytest.mark.parametrize("phase", ["prefill", "decode"])
+def test_stable_raw_samples_cannot_bless_an_inconsistent_declared_median(phase):
+    measured = latency()
+    measured[f"{phase}_p50_ms"] *= 0.1
+    before = copy.deepcopy(measured)
+    result = benchmark_stability(measured)
+    assert result["passed"] is False
+    assert result[phase]["median_consistent"] is False
+    assert result[phase]["reason"] == "reported_median_does_not_match_samples"
+    assert measured == before
+
+
+def test_median_consistency_tolerates_native_six_digit_json_rounding():
+    values = [100.1004999] * 3 + [100.1014999] * 3
+    measured = latency()
+    measured["prefill_samples_ms"] = [float(format(value, ".6g")) for value in values]
+    measured["prefill_p50_ms"] = float(format(float(np.median(values)), ".6g"))
+    assert benchmark_stability(measured)["passed"] is True
+
+
+@pytest.mark.parametrize("target", ["candidate", "leaf", "eager", "sdpa"])
+@pytest.mark.parametrize("phase", ["prefill", "decode"])
+def test_speed_gates_reject_inconsistent_medians_in_any_baseline_or_candidate(target, phase):
+    cases, baseline = speed_comparison()
+    measured = (cases["8" if target == "candidate" else "32"]["latency"]
+                if target in ("candidate", "leaf") else baseline["latency"][target])
+    measured[f"{phase}_p50_ms"] *= 2
+    apply_speed_gates(cases, baseline)
+    assert cases["8"]["eligible_for_automatic_selection"] is False
+    assert cases["8"]["latency_stability"]["passed"] is False
+
+
 @pytest.mark.parametrize("value", [None, "10", True, np.bool_(True), 0, -1,
                                    float("nan"), float("inf"), 10 ** 400])
 def test_invalid_medians_fail_closed(value):
@@ -135,10 +169,35 @@ def test_speed_gates_accept_only_validated_stable_improvement_and_preserve_sampl
     apply_speed_gates(cases, baseline)
     assert cases["8"]["eligible_for_automatic_selection"] is True
     assert cases["8"]["latency_stability"]["passed"] is True
+    assert cases["8"]["latency_workload_match"]["passed"] is True
     assert cases["32"]["eligible_for_automatic_selection"] is False
     assert cases["8"]["decode_speedup_vs_fastest_pytorch"] == pytest.approx(10 / 9)
     assert cases["8"]["latency"]["decode_samples_ms"] == samples["decode_samples_ms"]
     assert cases["8"]["latency"]["prefill_samples_ms"] == samples["prefill_samples_ms"]
+
+
+@pytest.mark.parametrize("target", ["baseline", "eager", "sdpa", "leaf", "candidate"])
+@pytest.mark.parametrize("change", ["missing", "full_logits", "malformed_cache"])
+def test_speed_gates_preserve_legacy_measurements_without_qualifying_unmatched_workload(target, change):
+    cases, baseline = speed_comparison()
+    selected = (baseline if target == "baseline" else baseline["latency"][target]
+                if target in ("eager", "sdpa") else cases["32" if target == "leaf" else "8"]["latency"])
+    if change == "missing":
+        selected.pop("latency_workload")
+    else:
+        selected["latency_workload"]["logits" if change == "full_logits" else "use_cache"] = (
+            "all_tokens" if change == "full_logits" else 1)
+    original_candidate = copy.deepcopy(cases["8"]["latency"])
+    original_baseline = copy.deepcopy(baseline["latency"])
+    apply_speed_gates(cases, baseline)
+    assert cases["8"]["eligible_for_automatic_selection"] is False
+    assert cases["8"]["latency_workload_match"]["passed"] is False
+    assert cases["8"]["latency_stability"]["passed"] is True
+    assert cases["8"]["decode_speedup_vs_fastest_pytorch"] == pytest.approx(10 / 9)
+    for field in ("prefill_p50_ms", "decode_p50_ms", "prefill_samples_ms", "decode_samples_ms"):
+        assert cases["8"]["latency"][field] == original_candidate[field]
+        for implementation in ("eager", "sdpa"):
+            assert baseline["latency"][implementation][field] == original_baseline[implementation][field]
 
 
 @pytest.mark.parametrize("prefill,decode,eligible", [(102, 9, True), (102.001, 9, False),

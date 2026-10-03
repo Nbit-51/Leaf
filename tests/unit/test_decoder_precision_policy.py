@@ -162,8 +162,10 @@ def test_validation_adds_precision_candidates_without_replacing_originals(model_
     runtime.write_bytes(b"test executable")
     data = {"sequences": [[0, 1]], "benchmark_ids": [0, 1], "generation_ids": [0, 1], "generated_tokens": [0]}
     latency = {"prefill_p50_ms": 50.0, "decode_p50_ms": 10.0,
-               "prefill_samples_ms": [50.0] * 5, "decode_samples_ms": [10.0] * 5}
+               "prefill_samples_ms": [50.0] * 5, "decode_samples_ms": [10.0] * 5,
+               "latency_workload": dict(validator.LATENCY_WORKLOAD)}
     pytorch = {"dataset_sha256": "2" * 64, "latency": {"eager": latency},
+               "latency_workload": dict(validator.LATENCY_WORKLOAD),
                "model_config_sha256": validator.digest(model_fixture.snapshot / "config.json"),
                "source_weight_sha256": {"model.safetensors": validator.digest(model_fixture.snapshot / "model.safetensors")}}
     args = SimpleNamespace(model=model_fixture.snapshot, workdir=workdir, plan=model_fixture.plan_path,
@@ -193,6 +195,8 @@ def test_validation_adds_precision_candidates_without_replacing_originals(model_
     monkeypatch.setattr(validator, "run_native", fake_native)
     validator.native(args)
     result = json.loads(args.output.read_text())
+    assert validator.latency_workload_matches(result)
+    assert all(validator.latency_workload_matches(case["latency"]) for case in result["native"].values())
     assert set(result["native"]) == {"32", "8", "4", "8-smooth", "8-protected", "8-grouped", "8-grouped-smooth"}
     assert result["native"]["8-protected"]["keep_fp32_tensors"] == sorted(exporter.protected_int8_tensors(model_fixture.plan))
     assert result["native"]["8-protected"]["activation_bits"] == 32

@@ -85,3 +85,12 @@ endif()
 if(WIN32)
   target_link_libraries(leaf_decoder PRIVATE psapi)
 endif()
+
+# Header-only token-panel primitive exercises portable scalar execution and
+# runtime-dispatched AVX2/FMA without depending on whole-model artifacts.
+add_executable(leaf_token_panel_tests ../tests/native/test_token_panel.cpp)
+target_include_directories(leaf_token_panel_tests PRIVATE include)
+if(NOT MSVC AND LEAF_ENABLE_AVX2)
+  target_compile_options(leaf_token_panel_tests PRIVATE -mno-avx2 -mno-fma)
+endif()
+add_test(NAME leaf_token_panel_tests COMMAND leaf_token_panel_tests)

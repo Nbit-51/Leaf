@@ -45,6 +45,7 @@ def test_wheel_build_bundles_portable_native_runtime(setup_module, monkeypatch, 
     assert output.parent.is_dir()
     assert options == {"check": True}
     assert "-std=c++17" in command
+    assert command[command.index("-I") + 1] == str(ROOT / "engine/include")
     assert not any(flag.startswith(("-march", "-mavx", "-mfma")) for flag in command)
     sources = {Path(value).name for value in command if value.endswith(".cpp")}
     assert sources == {"decoder.cpp", "main_decoder.cpp", "kv_cache.cpp", "transformer.cpp"}
@@ -52,6 +53,20 @@ def test_wheel_build_bundles_portable_native_runtime(setup_module, monkeypatch, 
         assert {"-static", "-static-libgcc", "-static-libstdc++", "-lpsapi"}.issubset(command)
     else:
         assert "-lpsapi" not in command
+
+
+def test_token_panel_header_is_included_in_packaged_native_sources():
+    # TOML parsing is stdlib on the hosted Python 3.12 validation matrix.
+    # Python 3.10 installations can also run this check when tomli is present.
+    try:
+        import tomllib
+    except ImportError:
+        tomllib = pytest.importorskip("tomli")
+    config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    headers = config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/kernels"]
+    source = "engine/include/leaf/kernels/token_panel.h"
+    assert source in headers
+    assert (ROOT / source).is_file()
 
 
 def test_source_wheel_build_without_compiler_fails_explicitly(setup_module, monkeypatch, tmp_path):

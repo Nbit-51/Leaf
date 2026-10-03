@@ -1,5 +1,6 @@
 #include "leaf/runtime/decoder.h"
 #include "leaf/runtime/kv_cache.h"
+#include "leaf/kernels/token_panel.h"
 
 #include <algorithm>
 #include <atomic>
@@ -724,6 +725,8 @@ struct Decoder::Impl {
     std::vector<std::uint8_t> quant_bytes;
     std::vector<float> quant_scales;
     std::vector<float> transformed_input;
+    leaf::kernels::TokenPanelsF32 packed_float_input;
+    std::vector<float> rotary_frequencies, rotary_cosines, rotary_sines;
     std::vector<float> hidden, normalized, q, k, v, q_heads, k_heads, v_heads,
                        attention, projected, attn_projected, gate, up, mask;
 
@@ -824,6 +827,11 @@ struct Decoder::Impl {
             require_weight(prefix + "mlp.down_proj.weight", h, f);
             caches.emplace_back(1, kv_heads, dim);
         }
+        if (position_kind == 0) {
+            rotary_frequencies.resize(rotary_dim / 2);
+            for (std::size_t i = 0; i < rotary_dim / 2; ++i)
+                rotary_frequencies[i] = 1.0f / std::pow(theta, static_cast<float>(2 * i) / rotary_dim);
+        }
     }
     ~Impl() { profile.emit(); }
     void normalize(const std::vector<float>& input, const std::string& name, std::vector<float>& output) {
@@ -891,9 +899,20 @@ struct Decoder::Impl {
                         quant_input[t * weight.cols + col] = static_cast<std::int16_t>(std::max(-127L, std::min(127L, std::lrint(values[col] / quant_scales[t]))));
             }
         }
+        const bool packed_float = experimental_float_tiles && weight.bits == 32 && tokens >= 8 &&
+                                  (!bias || bias->bits == 32);
+        if (packed_float) packed_float_input.pack(input, tokens, weight.cols, weight.cols);
         output.resize(tokens * weight.rows);
         used_vnni = used_vnni || vnni_integer;
         workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
+            if (packed_float) {
+                leaf::kernels::gemm_token_panels_f32(
+                    reinterpret_cast<const float*>(weight.data) + first * weight.cols,
+                    last - first, weight.cols, weight.cols, packed_float_input,
+                    output.data() + first, weight.rows,
+                    bias ? reinterpret_cast<const float*>(bias->data) + first : nullptr);
+                return;
+            }
             std::size_t row = first;
 #if LEAF_DECODER_VNNI
             if (vnni_integer) {
@@ -915,23 +934,9 @@ struct Decoder::Impl {
             }
 #endif
 #if LEAF_DECODER_AVX
-            if (!integer && experimental_float_tiles && tokens > 1) {
-                float result[8];
-                for (; row + 2 <= last; row += 2) {
-                    for (std::size_t token = 0; token < tokens; token += 4) {
-                        const auto count = std::min<std::size_t>(4, tokens - token);
-                        if (count == 4 && weight.bits == 32)
-                            float_tile4_avx<32>(weight, row, input + token * weight.cols, result);
-                        else if (count == 4 && weight.bits == 8)
-                            float_tile4_avx<8>(weight, row, input + token * weight.cols, result);
-                        else float_tile_avx(weight, row, input + token * weight.cols, count, result);
-                        for (std::size_t r = 0; r < 2; ++r)
-                            for (std::size_t t = 0; t < count; ++t)
-                                output[(token + t) * weight.rows + row + r] = result[r * 4 + t] +
-                                    (bias ? bias->value(0, row + r) : 0);
-                    }
-                }
-            }
+            // The opt-in token-panel experiment only changes FP32 GEMM above.
+            // Keep short inputs and weight-only INT8 on their default paths so
+            // a scoped before/after run isolates this kernel's real cost.
             if (integer && avx && tokens > 1) {
                 float result[8];
                 for (; row + 4 <= last; row += 4) {
@@ -960,8 +965,33 @@ struct Decoder::Impl {
             }
         });
     }
+    void prepare_rotary_tables(std::size_t tokens, std::size_t position) {
+        if (position_kind != 0) return;
+        DecoderProfile::Scope scope(profile, DecoderProfile::Phase::RoPE, tokens);
+        const std::size_t half = rotary_dim / 2;
+        check(half && tokens <= std::numeric_limits<std::size_t>::max() / sizeof(float) / half,
+              "rotary coefficient workspace dimensions overflow address space");
+        const std::size_t count = tokens * half;
+        check(count <= rotary_cosines.max_size() && count <= rotary_sines.max_size(),
+              "rotary coefficient workspace exceeds vector limits");
+        // Logical size follows the current chunk, not the accumulated KV cache
+        // or max_positions. Reuse capacity like the other decoder workspaces.
+        rotary_cosines.resize(count);
+        rotary_sines.resize(count);
+        for (std::size_t token = 0; token < tokens; ++token) {
+            for (std::size_t i = 0; i < half; ++i) {
+                // Keep the original float expressions and libm calls: changing
+                // precision, angle order, or sin/cos implementation can affect
+                // whole-model parity even if a local rotation looks close.
+                const float angle = static_cast<float>(position + token) * rotary_frequencies[i];
+                const float cosine = std::cos(angle), sine = std::sin(angle);
+                rotary_cosines[token * half + i] = cosine;
+                rotary_sines[token * half + i] = sine;
+            }
+        }
+    }
     void rotary(std::vector<float>& values, std::vector<float>& reordered,
-                std::size_t nheads, std::size_t tokens, std::size_t position) {
+                std::size_t nheads, std::size_t tokens) {
         DecoderProfile::Scope scope(profile, position_kind == 0 ? DecoderProfile::Phase::RoPE : DecoderProfile::Phase::PositionReorder,
                                      tokens);
         reordered.resize(values.size());
@@ -972,9 +1002,8 @@ struct Decoder::Impl {
                 }
                 if (position_kind != 0) continue;
                 for (std::size_t i = 0; i < rotary_dim / 2; ++i) {
-                    const float frequency = 1.0f / std::pow(theta, static_cast<float>(2 * i) / rotary_dim);
-                    const float angle = static_cast<float>(position + token) * frequency;
-                    const float cosine = std::cos(angle), sine = std::sin(angle);
+                    const auto coefficient = token * (rotary_dim / 2) + i;
+                    const float cosine = rotary_cosines[coefficient], sine = rotary_sines[coefficient];
                     const auto from = (token * nheads + head) * dim + i;
                     const auto to = (head * tokens + token) * dim + i;
                     const float a = values[from], b = values[from + rotary_dim / 2];
@@ -991,6 +1020,7 @@ struct Decoder::Impl {
         for (auto id : ids) check(id < vocab, "token id exceeds vocabulary");
         profile.forward_tokens(tokens);
         DecoderProfile::Scope forward_scope(profile, DecoderProfile::Phase::Forward, tokens);
+        prepare_rotary_tables(tokens, position);
         {
             DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Embedding, tokens);
             hidden.resize(tokens * h);
@@ -1016,7 +1046,7 @@ struct Decoder::Impl {
             linear(normalized.data(), tokens, prefix + "self_attn.q_proj", q);
             linear(normalized.data(), tokens, prefix + "self_attn.k_proj", k);
             linear(normalized.data(), tokens, prefix + "self_attn.v_proj", v);
-            rotary(q, q_heads, heads, tokens, position); rotary(k, k_heads, kv_heads, tokens, position);
+            rotary(q, q_heads, heads, tokens); rotary(k, k_heads, kv_heads, tokens);
             v_heads.resize(v.size());
             for (std::size_t head = 0; head < kv_heads; ++head)
                 for (std::size_t t = 0; t < tokens; ++t)

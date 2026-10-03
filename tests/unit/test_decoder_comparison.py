@@ -23,7 +23,8 @@ def stage(prefill=100.0, decode=10.0):
 
 @pytest.fixture
 def frozen(tmp_path, monkeypatch):
-    monkeypatch.delenv("LEAF_DISABLE_VNNI", raising=False)
+    for name in comparison.NATIVE_POLICY_NAMES:
+        monkeypatch.delenv(name, raising=False)
     workdir = tmp_path / "work"
     workdir.mkdir()
     before, after = tmp_path / "before.exe", tmp_path / "after.exe"
@@ -60,6 +61,12 @@ def frozen(tmp_path, monkeypatch):
 
 def save_record(frozen):
     comparison.write_record(frozen.args.record, frozen.record)
+
+
+def enable_scoped_tiles(frozen):
+    frozen.args.after_float_tiles = True
+    frozen.record["native_policy"] = dict(comparison.DEFAULT_NATIVE_POLICY)
+    save_record(frozen)
 
 
 def test_frozen_provenance_resolves_precisions_without_model_name(frozen):
@@ -159,6 +166,41 @@ def test_frozen_os_and_cpu_description_must_match_current_host(frozen, changed):
 def test_changed_isa_policy_is_rejected_before_execution(frozen, monkeypatch, disabled):
     monkeypatch.setenv("LEAF_DISABLE_VNNI", disabled)
     with pytest.raises(ValueError, match="Unset LEAF_DISABLE_VNNI"):
+        comparison.validate_inputs(frozen.args)
+
+
+@pytest.mark.parametrize("flag", [*comparison.NATIVE_POLICY_NAMES, "LEAF_EXPERIMENTAL_FUTURE_KERNEL"])
+@pytest.mark.parametrize("value", ["1", "0", "false"])
+def test_scoped_tiles_rejects_conflicting_parent_native_flags_before_execution(frozen, monkeypatch, flag, value):
+    enable_scoped_tiles(frozen)
+    monkeypatch.setenv(flag, value)
+    monkeypatch.setattr(comparison, "run_native", lambda *args, **kwargs: pytest.fail("policy conflict reached child"))
+    monkeypatch.setattr(comparison, "pin_cpu", lambda *args: pytest.fail("policy conflict changed affinity"))
+    original = dict(comparison.os.environ)
+    with pytest.raises(ValueError, match="conflicts with parent native policy.*" + flag):
+        comparison.compare(frozen.args)
+    assert dict(comparison.os.environ) == original
+    assert not frozen.args.output.exists()
+
+
+@pytest.mark.parametrize("policy", [None, {}, [], False, 0,
+    {"LEAF_DISABLE_VNNI": False},
+    {**comparison.DEFAULT_NATIVE_POLICY, "unknown": False},
+    {**comparison.DEFAULT_NATIVE_POLICY, "LEAF_EXPERIMENTAL_FLOAT_TILES": True},
+    {**comparison.DEFAULT_NATIVE_POLICY, "LEAF_EXPERIMENTAL_FLOAT_GEMV": True},
+    {**comparison.DEFAULT_NATIVE_POLICY, "LEAF_EXPERIMENTAL_FLOAT_TILES": 0}])
+def test_scoped_tiles_requires_explicit_default_before_quality_policy(frozen, policy):
+    enable_scoped_tiles(frozen)
+    frozen.record["native_policy"] = policy
+    save_record(frozen)
+    with pytest.raises(ValueError, match="explicitly default frozen BEFORE native policy"):
+        comparison.validate_inputs(frozen.args)
+
+
+def test_scoped_tiles_cannot_relabel_legacy_missing_before_policy(frozen):
+    frozen.args.after_float_tiles = True
+    assert "native_policy" not in frozen.record
+    with pytest.raises(ValueError, match="explicitly default frozen BEFORE native policy"):
         comparison.validate_inputs(frozen.args)
 
 
@@ -335,6 +377,102 @@ def test_comparison_is_serial_abba_disables_profiling_and_never_promotes_auto(fr
         assert result["native"][key]["timing"]["order"] == ["before", "after", "after", "before"]
 
 
+def test_scoped_tiles_changes_only_after_quality_and_abba_children_and_restores_parent(frozen, monkeypatch):
+    enable_scoped_tiles(frozen)
+    execute, calls = mock_native(frozen)
+    observed = []
+    for name in comparison.NATIVE_POLICY_NAMES:
+        monkeypatch.setenv(name, "")
+    monkeypatch.setenv("LEAF_DECODER_PROFILE", "parent profiling policy")
+    monkeypatch.setenv("LEAF_UNRELATED_SETTING", "retained")
+    original = dict(comparison.os.environ)
+
+    def scoped_execute(executable, *args, **kwargs):
+        expected = dict(comparison.DEFAULT_NATIVE_POLICY)
+        expected["LEAF_EXPERIMENTAL_FLOAT_TILES"] = executable == frozen.args.after
+        assert comparison.native_policy() == expected
+        assert comparison.os.environ.get("LEAF_EXPERIMENTAL_FLOAT_TILES") == (
+            "1" if executable == frozen.args.after else None)
+        assert "LEAF_EXPERIMENTAL_FLOAT_GEMV" not in comparison.os.environ
+        assert "LEAF_DISABLE_VNNI" not in comparison.os.environ
+        assert "LEAF_DECODER_PROFILE" not in comparison.os.environ
+        observed.append((executable, kwargs.get("mode", "verify"), comparison.native_policy()))
+        return execute(executable, *args, **kwargs)
+
+    monkeypatch.setattr(comparison, "run_native", scoped_execute)
+    monkeypatch.setattr(comparison, "pin_cpu", lambda cpu: None)
+    monkeypatch.setattr(comparison, "keep_awake", nullcontext)
+    record_before = frozen.args.record.read_bytes()
+    result = comparison.compare(frozen.args)
+    assert dict(comparison.os.environ) == original
+    assert frozen.args.record.read_bytes() == record_before
+    after_policy = {**comparison.DEFAULT_NATIVE_POLICY, "LEAF_EXPERIMENTAL_FLOAT_TILES": True}
+    assert result["after_float_tiles"] is True
+    assert result["native_policy_by_stage"] == {"before": comparison.DEFAULT_NATIVE_POLICY, "after": after_policy}
+    assert result["automatic_selection_authorized"] is False
+    assert result["experimental_policy"] == {"LEAF_EXPERIMENTAL_FLOAT_TILES": "",
+                                              "LEAF_EXPERIMENTAL_FLOAT_GEMV": ""}
+    for key, case in result["native"].items():
+        assert case["native_policy"] == after_policy
+        assert case["gate"]["accepted_native_experiment"] is True
+        for timing_pass in case["timing"]["passes"]:
+            assert timing_pass["native_policy"] == result["native_policy_by_stage"][timing_pass["stage"]]
+        native_calls = [item for item in calls if item[1] == key + ".leaf"]
+        assert [call[0] for call in native_calls[:3]] == [frozen.args.after] * 3
+    assert len(observed) == 14
+
+
+@pytest.mark.parametrize("failure", ["verify", "chunked", "generate", "before_bench", "after_bench"])
+def test_scoped_tiles_restores_parent_environment_when_any_child_fails(frozen, monkeypatch, failure):
+    enable_scoped_tiles(frozen)
+    execute, _ = mock_native(frozen)
+    monkeypatch.setenv("LEAF_EXPERIMENTAL_FLOAT_GEMV", "")
+    monkeypatch.setenv("LEAF_DECODER_PROFILE", "parent profiling policy")
+    original = dict(comparison.os.environ)
+
+    def fail(executable, *args, **kwargs):
+        mode = kwargs.get("mode", "verify")
+        actual_stage = "before" if executable == frozen.args.before else "after"
+        if (mode if mode != "bench" else actual_stage + "_bench") == failure:
+            assert comparison.native_policy()["LEAF_EXPERIMENTAL_FLOAT_TILES"] == (actual_stage == "after")
+            raise RuntimeError("owned child failed")
+        return execute(executable, *args, **kwargs)
+
+    monkeypatch.setattr(comparison, "run_native", fail)
+    monkeypatch.setattr(comparison, "pin_cpu", lambda cpu: None)
+    monkeypatch.setattr(comparison, "keep_awake", nullcontext)
+    with pytest.raises(RuntimeError, match="owned child failed"):
+        comparison.compare(frozen.args)
+    assert dict(comparison.os.environ) == original
+    assert not frozen.args.output.exists()
+
+
+def test_existing_global_experimental_policy_is_unchanged_without_scoped_option(frozen, monkeypatch):
+    execute, _ = mock_native(frozen)
+    monkeypatch.setenv("LEAF_EXPERIMENTAL_FLOAT_TILES", "global tiles policy")
+    monkeypatch.setenv("LEAF_EXPERIMENTAL_FLOAT_GEMV", "global gemv policy")
+    expected = {**comparison.DEFAULT_NATIVE_POLICY, "LEAF_EXPERIMENTAL_FLOAT_TILES": True,
+                "LEAF_EXPERIMENTAL_FLOAT_GEMV": True}
+    original = dict(comparison.os.environ)
+
+    def global_execute(*args, **kwargs):
+        assert comparison.native_policy() == expected
+        return execute(*args, **kwargs)
+
+    monkeypatch.setattr(comparison, "run_native", global_execute)
+    monkeypatch.setattr(comparison, "pin_cpu", lambda cpu: None)
+    monkeypatch.setattr(comparison, "keep_awake", nullcontext)
+    result = comparison.compare(frozen.args)
+    assert dict(comparison.os.environ) == original
+    assert result["after_float_tiles"] is False
+    assert result["native_policy_by_stage"] == {"before": expected, "after": expected}
+    assert result["experimental_policy"] == {"LEAF_EXPERIMENTAL_FLOAT_TILES": "global tiles policy",
+                                              "LEAF_EXPERIMENTAL_FLOAT_GEMV": "global gemv policy"}
+    for case in result["native"].values():
+        assert case["native_policy"] == expected
+        assert all(item["native_policy"] == expected for item in case["timing"]["passes"])
+
+
 def test_cpu_override_is_applied_to_both_stages_and_recorded_separately_from_frozen_pin(frozen, monkeypatch):
     frozen.args.cpu = 3
     frozen.args.keys = ["32"]
@@ -361,6 +499,16 @@ def test_cli_cpu_override_is_parsed_as_integer(frozen, monkeypatch):
     monkeypatch.setattr(comparison, "compare", lambda args: received.append(args.cpu) or {"native": {}})
     comparison.main()
     assert received == [0]
+
+
+def test_cli_scoped_after_float_tiles_option_is_parsed(frozen, monkeypatch):
+    received = []
+    monkeypatch.setattr(comparison.sys, "argv", ["benchmark_decoder_comparison.py", "--before", str(frozen.args.before),
+                                                "--after", str(frozen.args.after), "--workdir", str(frozen.args.workdir),
+                                                "--record", str(frozen.args.record), "--after-float-tiles"])
+    monkeypatch.setattr(comparison, "compare", lambda args: received.append(args.after_float_tiles) or {"native": {}})
+    comparison.main()
+    assert received == [True]
 
 
 def test_profiling_environment_is_restored_on_failure(monkeypatch):

@@ -19,10 +19,16 @@ single-model prototype, but does **not** mean every LLM or architecture is
 supported today. Compatibility is determined by operator semantics and tensor
 layouts; unsupported features fail explicitly.
 
-The latest trained-model checks show a useful distinction: calibrated W8A8
-passes the measured TinyLlama quality and speed gates, while GPT-2 quantization
-and CIFAR INT8 do not qualify for automatic promotion. The
-[current results](#7-current-trained-model-and-dataset-results) include successes,
+The trained-model checks establish FP32 parity and quantized task-quality
+boundaries. Fresh matched Windows measurements qualify smoothed W8A8 for the
+tested TinyLlama runtime; GPT-2 fails prefill promotion on Windows and Linux.
+These decisions belong to their exact recorded workloads and binaries.
+The earlier TinyLlama speed qualification is **superseded**: its
+PyTorch prefill projected logits for every prefix token, while Leaf projected
+only the last token. Those preserved timings cannot authorize current automatic
+selection. Both runtimes now require matched last-token-only logits and KV
+cache semantics before speed qualification. The
+[result records](#7-current-trained-model-and-dataset-results) include successes,
 failures, memory, and baseline comparisons. All previous benchmark tables remain
 in the [historical measurements](#9-historical-benchmarks-preserved).
 
@@ -74,6 +80,10 @@ gate, have stable repeated timings, decode faster than native FP32 and at least
 regression greater than 2% against either reference. The fastest PyTorch
 implementation is selected independently for each phase. These are local,
 tested-configuration gates—not a universal speed guarantee.
+Both references must use batch-one prefill over the same prefix, one-token
+decode with the resulting KV cache, and last-token-only output logits. Missing
+or mismatched workload metadata invalidates automatic selection; a decode-only
+gain cannot compensate for an unfair or slower prefill comparison.
 
 ## 2. Install and run with one command
 
@@ -174,6 +184,15 @@ to another machine and treat it as validation there. Revalidate on that device.
 Nonempty experimental-kernel flags, or a persisted experimental native policy,
 cannot authorize automatic lower precision. A rebuilt binary also needs its
 own qualification; it does not inherit an older binary's speed profile.
+Profiles also require the canonical `leaf-decoder-latency-workload-v1` tag with
+`logits: last_token_only` and KV-cached decode. Legacy full-prefix PyTorch-logit
+profiles fail closed even when their saved eligibility field is true and all
+binary/artifact hashes still match.
+Selection checks workload tags for both PyTorch implementations, native FP32,
+and the candidate, then recomputes quality, stability, and speed gates from the
+recorded measurements. Stored `true` flags are not authorization; conservative
+stored rejections remain rejected. Reported phase medians must agree with their
+retained samples within the narrow native JSON rounding tolerance.
 
 `--cpu` optionally pins to a logical CPU. Use the same pin for optimization and
 generation, or omit it in both. A pin from the published measurements is not a
@@ -433,6 +452,17 @@ A timing phase requires at least five finite positive samples. Linear
 percentiles must satisfy `p90/p10 <= 1.25` in both phases for the candidate and
 native FP32, and for the fastest PyTorch reference in each relevant phase.
 Outliers are retained; unstable runs cannot enable automatic selection.
+Reported p50 values are checked against the raw-sample median, allowing only
+the native serializer's six-significant-digit rounding tolerance. Invalid or
+inconsistent medians fail the gate instead of becoming a faster reference.
+
+Latency uses the same generation work on both sides: prefill all prefix tokens
+with a KV cache and project logits only for the last token, then decode one new
+token using that cache. PyTorch must explicitly support `logits_to_keep=1`,
+return `[1, 1, vocabulary]` logits, and supply a KV cache. The harness rejects
+unsupported or mismatched behavior rather than timing a different workload.
+Full held-out quality still evaluates logits for all scored positions; that
+quality workload is intentionally separate from latency.
 
 Classification uses a separate task gate: trained accuracy may drop by at most
 0.5 percentage points, and FP32 outputs must pass the stated logit tolerance.
@@ -467,12 +497,14 @@ python -m pip install -r requirements-dev.txt
 ./scripts/verify_all.ps1
 ~~~
 
-The last completed full Python suite passed **598 tests**, with no skips and
+The last completed full Python suite passed **724 tests**, with no skips and
 four existing ONNX-export deprecation warnings. The complete native verification
 command also passed: native correctness, executor/buffer tests, scalar-versus-
 optimized kernel speed gates, synthetic PyTorch/NumPy checks, full FP32 ResNet
 parity, INT8 graph integration, memory planning, norms, attention, SwiGLU,
 RoPE/RepeatKV, KV-session tests, and reduced complete decoder architecture checks.
+The new token-panel CMake/CTest target also passed under Linux/WSL; direct
+full-K/blocked-K primitive checks passed on both Windows and Linux/WSL.
 
 This automated command does not download trained models or substitute its
 synthetic checks for trained quality/latency results.
@@ -610,6 +642,8 @@ python tools/benchmark_decoder_comparison.py --before C:\runtimes\validated_deco
 Use the model's matching reference record, artifact directory, and frozen
 baseline binary. The harness verifies hashes, rechecks the complete held-out
 quality/chunked cache/generation, and runs before–after–after–before serially.
+Executable, artifact, reference-record, and cache identities are checked again
+after the comparison; changed inputs invalidate the run.
 Within-pass p90/p10 and between-pass median ratios must stay within 1.25; both
 prefill and decode may regress by no more than 2%, and prefill must improve by
 at least 2% for native acceptance. This does not run fresh PyTorch timings or
@@ -622,14 +656,21 @@ or persistent system power-plan change. The API policy is described in
 [Microsoft's SetProcessInformation documentation](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setprocessinformation).
 It does not, by itself, prove why a particular CPU timing window drifted.
 
+`--after-float-tiles` scopes the current packed FP32 token-panel experiment to
+AFTER quality/timing children only; BEFORE stays at its explicitly recorded
+default policy. Use a matching fresh record such as `gpt2_windows_fair.json`,
+not an older record without explicit native-policy metadata. It does not permit
+a changed parent policy or automatic precision promotion.
+
 Measure cached command startup, visible streaming, and total time separately:
 
 ~~~powershell
-python tools/benchmark_cli.py --model C:\models\decoder --profile benchmark/results/tinyllama_full_decoder.json --artifacts-dir build/decoder --executable C:\runtimes\validated_decoder.exe --cases 32 auto --runs 5 --output benchmark/results/cli_runtime.json
+python tools/benchmark_cli.py --model C:\models\decoder --profile benchmark/results/trained_decoder.json --artifacts-dir build/decoder --executable C:\runtimes\validated_decoder.exe --cases 32 auto --runs 5 --output benchmark/results/cli_runtime.json
 ~~~
 
 This uses a complete local model, matching saved prompt IDs, an unchanged
-validation profile, and its exact native binary. It stages existing artifacts
+matched-workload validation profile, and its exact native binary. It stages
+existing artifacts
 in a fresh cache without exporting/building/downloading, then starts a fresh
 Python/native process for every sample. `auto` must genuinely select a qualified
 candidate. Integrity preflight warms the OS file cache; this is not a cold-disk
@@ -652,10 +693,18 @@ not a phase-profile display tool.
 
 ## 7. Current trained-model and dataset results
 
-Measurements below were completed on October 2, 2026. The decoder latency
-window used one CPU thread pinned to logical CPU 2, five warmups and eleven
-samples per phase. The host is an Intel Core i7-14700HX, Windows 11, with
-PyTorch 2.12.0+cpu and GCC 15.2.0 native builds. These are observations on that
+For current matched decoder results, see
+[GPT-2 on Windows/Linux](#76-matched-last-token-logit-gpt-2-evaluation) and
+[TinyLlama on Windows](#77-matched-tinyllama-11b-windows-evaluation).
+The earlier decoder tables below preserve trained quality and historical
+latency; [full CIFAR results](#73-trained-resnet-20-complete-cifar-10-test-split)
+retain their separate image-workload decision.
+
+Measurements below were completed on October 2, 2026. The historical decoder
+latency window in sections 7.1–7.2 used one CPU thread pinned to logical CPU 2,
+five warmups and eleven samples per phase. Those earlier Windows runs used an
+Intel Core i7-14700HX, Windows 11, PyTorch 2.12.0+cpu and GCC 15.2.0 native
+builds. These are observations on that
 configuration, not promises for other devices.
 
 All latency tables report warmed native forward work. Model download/export,
@@ -669,7 +718,17 @@ including decoder SHA-256
 Later research binaries and full-command observations are separate experiments;
 they do not replace or requalify those recorded baselines.
 
-### 7.1 Complete trained TinyLlama-1.1B decoder
+The decoder latency tables in sections 7.1–7.2 are now **historical, unmatched
+prefill comparisons**. Their PyTorch calls computed logits for every prefix
+position, whereas native prefill computed only last-token logits. Quality,
+artifact sizes, memory, and raw timings remain preserved; the old prefill
+speedup and automatic-eligibility conclusions are superseded. The current
+validator and CLI require explicit matched workload tags before promotion.
+Single-token decode timings remain observations but cannot independently
+qualify an automatic precision policy. This correction does not change the
+separate full-CIFAR workload or its rejected timing decisions.
+
+### 7.1 Preserved TinyLlama quality and historical latency
 
 The complete 22-layer model uses RMSNorm, RoPE, GQA, and a gated FFN.
 Source weights/configuration hashes, independent calibration, every candidate,
@@ -690,7 +749,7 @@ FP32 maximum absolute logit error is `2.2316e-4`, relative RMSE `1.0808e-6`,
 and its greedy generation matches PyTorch exactly. W8A8 passing the aggregate
 quality gate does **not** make its generated text token-identical.
 
-Warmed latency and artifact/memory cost:
+Historical warmed latency and artifact/memory cost (prefill work unmatched):
 
 | Runtime | 63-token prefill p50 | Cached one-token decode p50 | Artifact bytes | Held-out native peak RSS |
 |---|---:|---:|---:|---:|
@@ -706,18 +765,21 @@ loading is 5,195,530,240 bytes. Native peak RSS above comes from held-out
 evaluation, not the timing process; resident mapped pages and process overhead
 mean artifact size and RSS are different quantities.
 
-On the frozen tested runtime, smoothed W8A8 passes the quality, stability, and
-automatic-selection gates. Against the fastest PyTorch phase baseline it is
-`1.1504×` faster for prefill and `2.0986×` faster for decode. Against native FP32
-it is `2.4916×` and `2.7042×` faster respectively. Ordinary W8A32 has faster decode
-but slower prefill than PyTorch, so it remains unpromoted; INT4 fails quality.
+The frozen record classified smoothed W8A8 as passing quality, stability, and
+automatic selection under the earlier harness. That automatic-selection
+conclusion is superseded by the workload correction. Its recorded ratios are
+`1.1504×` for prefill and `2.0986×` for decode against the fastest old PyTorch
+phase, and `2.4916×` / `2.7042×` against native FP32. The prefill ratio is not a
+matched PyTorch speedup; the decode ratio alone cannot qualify promotion.
+The held-out quality pass remains valid. Ordinary W8A32 remains an observed
+decode improvement, not a currently qualified policy; INT4 fails quality.
 
 W8A8's timed constructor reports `500.9569 ms` versus FP32's `0.6668 ms` in this
 window. These constructor observations exclude mapped-page costs subsequently
 paid by inference and are not cold-start distributions. Startup preprocessing
 must still be considered when choosing precision for short requests.
 
-### 7.2 Complete trained GPT-2 decoder
+### 7.2 Preserved GPT-2 quality and historical latency
 
 GPT-2 supplies a different trained architecture: affine LayerNorm, learned
 positions, fused QKV/Conv1D source layouts, and an ordinary GELU-new FFN.
@@ -740,7 +802,9 @@ All seven Leaf candidates were evaluated on the same 1,016 scored targets:
 A lower perplexity alone cannot override a failed next-token-agreement gate.
 One matching short generation also cannot establish held-out quality.
 
-| Runtime | 63-token prefill p50 | Cached one-token decode p50 | Artifact bytes | Automatic selection |
+Historical latency and decisions (prefill work unmatched):
+
+| Runtime | 63-token prefill p50 | Cached one-token decode p50 | Artifact bytes | Recorded decision, not current qualification |
 |---|---:|---:|---:|---|
 | PyTorch eager FP32 | 219.9268 ms | 28.4353 ms | — | Reference |
 | PyTorch SDPA FP32 | 215.4603 ms | 29.5759 ms | — | Reference |
@@ -754,10 +818,11 @@ One matching short generation also cannot establish held-out quality.
 
 Protected W8A32 keeps `model.embed_tokens.weight`,
 `model.position_embeddings.weight`, and `lm_head.weight` in source FP32.
-It repairs the quality failure, but prefill remains slower than the fastest
-PyTorch reference. Consequently no GPT-2 quantized candidate is automatically
-selected. Native FP32 remains the conservative fallback; that fallback is not
-a claim that Leaf beats PyTorch.
+It repairs the quality failure, but lost prefill against the earlier unmatched
+PyTorch reference. Those old timing verdicts are retained as history, not a new
+matched-workload qualification. No quantized candidate from this legacy record
+can be automatically selected. Native FP32 remains the conservative fallback;
+that fallback is not a claim that Leaf beats PyTorch.
 
 ### 7.3 Trained ResNet-20, complete CIFAR-10 test split
 
@@ -818,7 +883,9 @@ did not improve whole-model latency:
 
 Stage timings are from distinct sessions/binaries and cannot be subtracted to
 claim a controlled end-to-end speedup. The trained quality/latency decisions in
-sections 7.1–7.3 are the authoritative current model comparisons.
+sections 7.1–7.2 retain trained quality and historical unmatched latency; their
+former automatic-selection conclusion is superseded. Section 7.3 remains the
+complete trained CIFAR comparison.
 
 Records:
 [initial decoder](benchmark/results/tinyllama_decoder_initial.json),
@@ -867,6 +934,15 @@ host. Its frozen quality reference remains valid, but the historical PyTorch
 latency was measured on CPU 2 and is not reused as a performance gate. All
 quality checks pass in that experiment; both stability gates still fail.
 
+A separate default-policy comparison used the guarded `244d6d…` binary with
+both experimental flags unset, no HighQoS, 20 warmups, and 21 samples per pass.
+Both FP32 and protected INT8 passed full trained quality/chunk/generation
+checks. FP32 prefill/decode ratios were `1.9335` / `1.3258`; protected INT8 ratios
+were `0.8447` / `1.0118`. Both stability gates failed, so both were rejected.
+[gpt2_default_runtime_abba.json](benchmark/results/gpt2_default_runtime_abba.json)
+preserves every sample. It is native-only comparison evidence, not a fresh
+matched PyTorch baseline or automatic promotion.
+
 ### 7.5 Latest automated kernel and synthetic checks
 
 These are correctness/microkernel checks, not trained full-model speed claims.
@@ -891,6 +967,163 @@ The NumPy executor is an oracle, not deployment inference. See
 [latest.json](benchmark/results/latest.json) for the refreshed deterministic
 records and exact samples. Their previous numbers remain in section 9.9.
 
+### 7.6 Matched last-token-logit GPT-2 evaluation
+
+The fresh Windows evaluation uses batch-one 63-token prefill and one-token
+decode with a populated KV cache. Both PyTorch implementations explicitly
+project only last-token logits with `logits_to_keep=1`; all baseline, native,
+and profile workload tags match. The RoPE-cache runtime uses its default policy,
+one thread pinned to logical CPU 2, ten warmups, and 21 samples per phase.
+
+| Windows runtime | Matched prefill p50 | Cached decode p50 | Timing stability | Automatic selection |
+|---|---:|---:|---|---|
+| PyTorch eager FP32 | 153.9340 ms | 28.6706 ms | Pass | Reference |
+| PyTorch SDPA FP32 | 152.3876 ms | 28.7901 ms | Pass | Reference |
+| Leaf FP32 | 350.5344 ms | 30.8890 ms | Pass | FP32 fallback |
+| Leaf protected W8A32 | 380.2857 ms | 18.3121 ms | Pass | No: prefill |
+
+Full held-out quality still scores all 1,016 targets: FP32 has 100% next-token
+agreement and perplexity `62.5801`; protected INT8 has 96.8504% agreement,
+perplexity `62.7824`, and reference ratio `1.00323`. Both pass quality and their
+16-token greedy generations match PyTorch. Protected INT8's faster decode does
+not qualify it: prefill is slower than both native FP32 and the fastest matched
+PyTorch baseline. No automatic lower precision is enabled by this run.
+
+[gpt2_windows_fair.json](benchmark/results/gpt2_windows_fair.json) records fresh
+reference-quality/cache identities, hashes, export provenance, workload tags,
+all samples, and passed stability checks. Its Windows native binary is
+`e952aeafe3a76aed6f4d0a8fe80858a3424140874f65042f992341c18919fbf0`.
+These are matched baseline measurements, not proof that the RoPE-cache change
+itself caused a speed improvement against the preceding native binary.
+
+The same complete GPT-2 checks also ran on Linux under WSL on the same physical
+host, with one thread pinned to logical CPU 2, ten warmups, and 21 samples:
+
+| Linux/WSL runtime | Matched prefill p50 | Cached decode p50 | Timing stability | Automatic selection |
+|---|---:|---:|---|---|
+| PyTorch eager FP32 | 155.808288 ms | 30.077958 ms | Pass | Reference |
+| PyTorch SDPA FP32 | 151.412496 ms | 28.872263 ms | Pass | Reference |
+| Leaf FP32 | 458.464712 ms | 31.451446 ms | Pass | FP32 fallback |
+| Leaf protected W8A32 | 419.546159 ms | 19.064593 ms | Pass | No: PyTorch prefill |
+
+Both native policies pass full 1,016-target quality and exact reference greedy
+generation. FP32 maximum absolute logit error is `0.0014496`; protected INT8
+agreement is 96.8504%, perplexity `62.7824`, and reference ratio `1.00323`.
+The quantized decode improvement does not offset its slower matched PyTorch
+prefill, so no automatic promotion is made.
+[gpt2_linux_fair.json](benchmark/results/gpt2_linux_fair.json) records native SHA
+`7f0b991c715109182d1b9d453c3a2d9f0475d692ae697790f5628a9caa518f82`.
+
+The Windows environment uses PyTorch `2.12.0+cpu`; Linux uses `2.13.0+cu130`
+with computation on the CPU. These are distinct software/build environments
+on one physical machine, not an independent-device test or a controlled
+operating-system speed comparison. No cross-OS speed ratio is inferred.
+
+### 7.7 Matched TinyLlama-1.1B Windows evaluation
+
+The fresh full-model run uses the same matched 63-token prefill/one-token cached
+decode workload, one thread pinned to logical CPU 2, five warmups, and eleven
+samples. Calibration uses 512 tokens from WikiText-2 train, independent of the
+1,016 held-out scored targets. This run retests FP32, W8A32, and smoothed W8A8;
+the earlier INT4 quality failure remains historical rather than being relabeled
+as a fresh evaluation.
+
+| Candidate | Next-token agreement | Subset perplexity | Perplexity / reference | Quality | 16-token generation exact |
+|---|---:|---:|---:|---|---|
+| PyTorch FP32 reference | 100% | 13.6974 | 1.0000 | Reference | Reference |
+| Leaf FP32 | 100% | 13.6974 | 1.0000 | Pass | Yes |
+| Leaf W8A32 | 97.3425% | 13.7338 | 1.00266 | Pass | Yes |
+| Leaf smoothed W8A8 | 95.0787% | 13.8673 | 1.01240 | Pass | No |
+
+| Runtime | Matched prefill p50 | Cached decode p50 | Artifact bytes | Held-out native peak RSS | Automatic selection |
+|---|---:|---:|---:|---:|---|
+| PyTorch eager FP32 | 1,750.8382 ms | 207.2916 ms | — | — | Reference |
+| PyTorch SDPA FP32 | 1,736.1027 ms | 201.9269 ms | — | — | Reference |
+| Leaf FP32 | 3,612.9758 ms | 265.6973 ms | 4,400,212,544 | 4,181,966,848 bytes | FP32 fallback |
+| Leaf W8A32 | 3,240.5264 ms | 96.4582 ms | 1,102,176,832 | 1,078,677,504 bytes | No: prefill |
+| Leaf smoothed W8A8 | 1,311.0678 ms | 87.1424 ms | 1,103,777,152 | 1,085,865,984 bytes | Yes, exact tested configuration |
+
+Every candidate/reference timing phase is stable, and all workload tags match.
+Smoothed W8A8 passes the fixed quality, stability, and automatic-selection gates
+on Windows native SHA
+`e952aeafe3a76aed6f4d0a8fe80858a3424140874f65042f992341c18919fbf0`.
+Against the fastest matched PyTorch baseline it is `1.3242×` faster for prefill
+and `2.3172×` for decode; against native FP32 it is `2.7558×` and `3.0490×`.
+Ordinary W8A32 decodes faster but fails prefill. Smoothed W8A8 generation is
+not token-identical despite its aggregate quality pass. These are held-out
+subset quality and workload/device-specific speed results, not universal LLM
+quality or CPU performance guarantees.
+
+PyTorch parameter storage is 4,400,193,536 bytes and recorded post-load resident
+memory is 5,188,759,552 bytes. Held-out native RSS above is separate from timing
+process RSS and includes mapped resident pages. Constructor observations in the
+timing processes are `0.4822 ms` for FP32, `19.3207 ms` for W8A32, and
+`459.0651 ms` for smoothed W8A8; they are not cold-start distributions.
+[tinyllama_windows_fair.json](benchmark/results/tinyllama_windows_fair.json)
+preserves quality, calibration/export provenance, raw samples, and identities.
+Changed source builds or installed-wheel binaries need their own matching
+validation rather than inheriting this binary's eligibility.
+
+### 7.8 Packed FP32 token-panel experiments
+
+The research-only `LEAF_EXPERIMENTAL_FLOAT_TILES` path now tests a packed 6×16
+FP32 token panel for linear operations with at least eight input tokens. Short
+inputs and weight-only INT8 retain their default paths; the earlier 2×4 float
+and weight-only experimental dispatches are removed to isolate this candidate.
+The packed kernel's inner loop was inspected for spills, and
+[decoder_token_panel_architectures.json](benchmark/results/decoder_token_panel_architectures.json)
+passes all eight reduced configurations across five families with the flag on.
+Neither finding is a whole-model speed qualification.
+The full-K kernel and separate RB96/BK256 blocked-K primitive also pass Windows
+and Linux/WSL AVX2/FMA tests, including bit-exact blocked-vector/full-K results,
+scalar fallback, odd K, row/token strides, and tails. The blocked-K primitive is
+not dispatched by the decoder and has no latency measurement or promotion.
+
+The native-only comparisons use AFTER-only experimental policy and retain all
+full trained quality, chunked-cache, generation, and raw ABBA timing evidence:
+
+| Candidate model/environment / policy | Prefill before → after p50 | Decode before → after p50 | Verdict |
+|---|---:|---:|---|
+| GPT-2 Windows / FP32 | 630.28335 → 221.55740 ms | 40.50685 → 32.35820 ms | Reject: unstable |
+| GPT-2 Windows / protected INT8 | 333.78125 → 349.26565 ms | 19.07040 → 19.09320 ms | Reject: unstable; prefill regression |
+| GPT-2 Linux/WSL / FP32 | 450.8723145 → 220.6642555 ms | 30.4669930 → 29.7870875 ms | Accepted native experiment only |
+| GPT-2 Linux/WSL / protected INT8 | 425.159692 → 432.033920 ms | 18.5091845 → 19.2210455 ms | Reject: unstable; decode regression |
+| GPT-2 Windows HighQoS / FP32 | 408.53230 → 225.56200 ms | 34.11440 → 32.05765 ms | Reject: unstable |
+| GPT-2 Windows HighQoS / protected INT8 | 344.13620 → 348.15790 ms | 20.30470 → 19.25535 ms | Reject: unstable; no prefill improvement |
+| TinyLlama Windows / FP32 | 3,636.23800 → 2,167.06375 ms | 269.63765 → 271.22740 ms | Accepted native experiment only |
+| TinyLlama Windows / smoothed W8A8 | 1,391.03085 → 1,416.40645 ms | 92.27600 → 92.86190 ms | Reject: unstable; no prefill improvement |
+
+Linux FP32 passes full quality, timing stability, and no-slowdown checks, with
+`2.0433×` native prefill speedup. This is not a fresh PyTorch comparison,
+automatic precision authorization, or justification to enable the candidate by
+default. Protected INT8 fails, and GPT-2 Windows results are unstable. The flag
+remains off; none of these records replaces the matched baselines above.
+
+Records: [Windows ABBA](benchmark/results/gpt2_token_panel_windows_abba.json),
+[Linux/WSL ABBA](benchmark/results/gpt2_token_panel_linux_abba.json).
+The separately verified child-only Windows HighQoS experiment is retained in
+[gpt2_token_panel_windows_highqos_abba.json](benchmark/results/gpt2_token_panel_windows_highqos_abba.json);
+its FP32 prefill/decode ratios are `0.55213` / `0.93971` and protected INT8 ratios
+`1.01169` / `0.94832`. Both are unstable and rejected; protected INT8 also lacks
+the required prefill improvement. No process-priority or global power-policy
+change is made, and HighQoS is not a production CLI/default policy.
+
+The larger TinyLlama comparison passes full quality and stable native FP32
+gates: prefill improves `1.6780×`, while decode increases `0.5896%`, within the
+defined 2% non-regression allowance. Smoothed W8A8 is unstable and lacks a
+prefill improvement, so it is rejected. This AFTER-only experiment uses the
+`20baa0…` Windows binary, ten warmups and eleven samples per pass; it does not
+replace the matched PyTorch qualification of the distinct `e952ae…` runtime.
+[tinyllama_token_panel_windows_abba.json](benchmark/results/tinyllama_token_panel_windows_abba.json)
+preserves the full held-out checks and all raw timing passes.
+
+At this implementation checkpoint, fresh repeated full-command measurements
+using the matched TinyLlama profile remain incomplete. The current installed
+wheel's offline first/cached correctness smoke passes, as described below.
+The packed candidate stays disabled by default; no native-only
+pass or unfinished check promotes it. These are the next validation steps,
+not a claim that optimization work is finished.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package
@@ -907,7 +1140,23 @@ FP32. Package preparation/inference did not load heavy model libraries.
 This is stronger than a mocked command test, but the two startup observations
 are not latency speed gates or cold-file-cache tests.
 
-The final installed-wheel observations are:
+Current installed-wheel checkpoint observations:
+
+| Stage | External first visible text | External complete command | CLI first-token timer | CLI complete execution | Native prefill | Native decode p50 |
+|---|---:|---:|---:|---:|---:|---:|
+| First offline preparation | 2,539.2746 ms | 3,130.2889 ms | 2,299.2208 ms | 2,922.6766 ms | 267.1150 ms | 33.5820 ms |
+| Cached repeat | 927.6871 ms | 1,492.7168 ms | 679.6706 ms | 1,286.4191 ms | 293.1409 ms | 35.1482 ms |
+
+These are one observation per stage, not repeated-command medians or a speed
+gate. The current wheel is `leaf_cpu-0.2.0-py3-none-win_amd64.whl`, SHA-256
+`34ffce87c1163a8388d605632ecadd6d9b70f583993a3aec926a7ac51b63c416`;
+its bundled runtime SHA is
+`40f73a9bac708dda8fdf97f595f3b27a80a1095f4206b87d3af3bb42106350e5`.
+[package_runtime_checkpoint.json](benchmark/results/package_runtime_checkpoint.json)
+records the exact reference IDs, absence of heavy-library imports/compiler,
+artifact reuse, and conservative FP32 fallback. OS file cache was not flushed.
+
+Prior installed-wheel observations are preserved separately:
 
 | Stage | External first visible text | External complete command | CLI first-token timer | CLI complete execution | Native prefill | Native decode p50 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -915,8 +1164,8 @@ The final installed-wheel observations are:
 | Cached repeat | 897.9553 ms | 1,562.5659 ms | 636.8798 ms | 1,350.0816 ms | 334.5409 ms | 39.0359 ms |
 
 These are one observation per stage, not medians across repeated commands.
-The final wheel identity, generated IDs, native constructor/RSS observations,
-and runtime policy are recorded in
+That earlier wheel identity, generated IDs, native constructor/RSS observations,
+and runtime policy remain recorded in
 [package_runtime_final.json](benchmark/results/package_runtime_final.json).
 The earlier installed-wheel observations remain historical in
 [package_runtime.json](benchmark/results/package_runtime.json): external
@@ -944,6 +1193,17 @@ experimental float policies disabled.
 [decoder_architectures_experimental.json](benchmark/results/decoder_architectures_experimental.json)
 passes the same eight reduced cases with both research float flags enabled;
 this correctness check does not overturn their rejected speed experiments.
+The subsequent RoPE-cache change passes paired, bit-exact regression against
+the preceding default binary across all eight reduced cases:
+[decoder_rope_regression.json](benchmark/results/decoder_rope_regression.json).
+Checks include FP32/INT8/INT4/smoothed INT8, scalar and two-thread execution,
+custom plans, odd lengths, chunked cache, and reset/generation behavior. This
+establishes correctness on those requests, not trained latency improvement.
+The candidate binary with its experimental flag unset also passes paired
+bit-exact regression against the RoPE-cache baseline on all eight cases,
+precision policies, cache/reset, and generation requests:
+[decoder_token_panel_default_regression.json](benchmark/results/decoder_token_panel_default_regression.json).
+This proves the tested default outputs remain unchanged, not a latency gain.
 The earlier
 [portability record](benchmark/results/decoder_portability.json) and
 [architecture record](benchmark/results/decoder_architectures.json) are retained.
@@ -962,15 +1222,17 @@ The [hosted-check record](benchmark/results/hosted_cpu_validation.json) identifi
 the exact tested implementation. ARM-specific acceleration and broader CPU
 performance qualification remain development work.
 
-### 8.3 Cached full-command TinyLlama measurements
+### 8.3 Historical cached full-command TinyLlama measurements
 
-Five fresh command processes per case compared explicit FP32 with genuinely
-eligible `auto` (smoothed W8A8), using the same frozen validated decoder binary
+Five fresh command processes per case compared explicit FP32 with the then-
+selected `auto` (smoothed W8A8), using the same frozen decoder binary
 and 16 generated tokens. Order alternated between cases. Exact saved prompt IDs
 and generated IDs for each selected native reference were verified; auto matches
-its quantized native reference, not the FP32/PyTorch token sequence.
+its quantized native reference, not the FP32/PyTorch token sequence. Selection
+used the historical profile whose prefill workload mismatch was discovered
+later; the current CLI rejects that profile rather than reusing its eligibility.
 
-| Full-command observation | Explicit FP32 p50 | Auto W8A8 p50 | Stability |
+| Historical full-command observation | Explicit FP32 p50 | Then-selected W8A8 p50 | Stability |
 |---|---:|---:|---|
 | External first visible text | 6,246.1153 ms | 3,103.3198 ms | FP32 fails; auto passes |
 | External complete command | 11,040.3993 ms | 4,778.9251 ms | Both pass |
@@ -984,12 +1246,14 @@ Native rows summarize per-command metrics across the five commands. Prompt
 prefill uses the saved 29-token chat input, not the 63-token warmed-workload
 shape in section 7.1.
 
-The external complete-command median is `2.3102×` faster for auto in this
-cached, 16-token workload, with both total-time sample sets passing the existing
+The observed ratio of FP32 to W8A8 external complete-command medians is
+`2.3102×` in this cached, 16-token workload, with both total-time sample sets
+passing the existing
 spread check. The observed first-visible-text ratio is `2.0127×`, but its FP32
 reference is unstable, so no first-token speed qualification is claimed.
-These are not fresh PyTorch CLI comparisons or automatic precision qualification
-for another binary/device.
+These remain full-command observations, not current automatic eligibility,
+fresh PyTorch CLI comparisons, or precision qualification for this or another
+binary/device.
 
 External timers include interpreter startup; CLI timers begin later. Native
 constructor/prefill/decode do not include frontend integrity hashing,
@@ -1396,9 +1660,21 @@ framework tied to Qwen, Llama, CIFAR, one operating system, or a fixed RAM targe
 Implementation checkpoint (2026-10-02): the Python suite, default and
 experimental reduced-model decoder checks, same-host Windows/Linux checks, and
 installed Windows wheel checks pass. The new float-kernel experiments remain
-disabled because stable whole-model speed qualification is incomplete. The
-next iteration starts with native dense-kernel profiling and fresh matched
-baselines; a successful correctness check does not close the performance work.
+disabled because stable whole-model speed qualification is incomplete.
+Matched last-token-logit latency validation and fail-closed legacy-profile
+checks are implemented. The former TinyLlama promotion is superseded; fresh
+matched measurements independently qualify smoothed W8A8 on the exact tested
+Windows TinyLlama runtime, while GPT-2 fails prefill promotion on both OS
+environments. The packed FP32 token-panel experiment passes stable native-only
+FP32 checks for Linux GPT-2 and Windows TinyLlama, but noisy Windows GPT-2 and
+quantized candidates remain rejected; it stays off by default. The blocked-K
+primitive is tested but undispatched and unmeasured. Fresh matched-profile
+full-command checks remain in progress; the current installed wheel's offline
+first/cached smoke passes without a compiler or heavy-library imports. Native
+dense-kernel work and fresh matched baselines continue.
+The RoPE-cache candidate
+passes paired bit-exact reduced-model checks but is not a claimed speed
+improvement; a successful correctness check does not close the performance work.
 
 Implemented and checked:
 
@@ -1413,7 +1689,7 @@ Implemented and checked:
 - [x] Check complete trained TinyLlama and GPT-2 FP32 parity, chunked cache, and generation.
 - [x] Establish independent text calibration and held-out agreement/perplexity quality gates.
 - [x] Implement/test weight-only INT8/INT4, dynamic W8A8, smoothing, grouped INT8, and FP32 protection.
-- [x] Measure full-model precision candidates, including failures; qualify smoothed W8A8 on the tested TinyLlama configuration.
+- [x] Measure full-model precision candidates and retain failures; supersede the old TinyLlama promotion after identifying unmatched prefill work.
 - [x] Add scalar fallback, optional AVX2/FMA/VNNI decoder dispatch, and native kernel regression tests.
 - [x] Profile/test prefill tiling and packing; reject inconsistent/spilling alternatives.
 - [x] Run all 10,000 trained CIFAR-10 test images, FP32 parity, INT8 accuracy, and baseline comparisons.
@@ -1421,13 +1697,21 @@ Implemented and checked:
 - [x] Provide `leaf run`, aliases, offline mode, reusable preparation, and validated precision selection.
 - [x] Verify an installed native wheel without heavy-library imports or an available compiler, including first preparation and cached generation.
 - [x] Add hashed export/cache provenance and fail-closed timing-only refresh checks.
+- [x] Require matched last-token-only logits/KV-cache latency metadata and reject legacy profiles for automatic selection.
+- [x] Recompute profile gates from measurements, validate all reference/candidate workload tags and sample medians, and recheck comparison identities at both boundaries.
+- [x] Rerun matched trained GPT-2 on Windows/Linux and TinyLlama on Windows; qualify only the fresh tested TinyLlama smoothed W8A8 policy.
+- [x] Check reusable RoPE-cache behavior against the preceding runtime with bit-exact reduced-model regression.
 - [x] Preserve saved chat/raw prompt IDs through a narrow structural nonlegacy-tokenizer compatibility fix.
 - [x] Measure cached complete commands separately from warmed native forwards and installed-package startup.
 - [x] Add native phase diagnostics and full-quality ABBA experiments; keep unstable/slow float candidates off by default.
+- [x] Test packed FP32 token panels across reduced architectures, full GPT-2, and TinyLlama; retain native-only FP32 passes and all rejected outcomes without enabling a default.
+- [x] Test the separate blocked-K primitive on Windows/WSL, including vector/scalar paths, bit-exactness, strides and tails; leave it undispatched and unmeasured.
 - [x] Check reduced-model execution across Windows/Linux on the same host and configure portable CI.
 
 Next measured steps:
 
+- [ ] Complete fresh matched-profile full-command checks; qualify any changed packed runtime against fresh PyTorch before promotion.
+- [ ] Requalify changed runtime binaries and further device/model configurations against matched PyTorch/native workloads before promotion.
 - [ ] Improve native FP32/GPT-2 prefill and CNN whole-model latency without weakening quality gates.
 - [ ] Measure native GEMM/GEMV bottlenecks, per-core frequency behavior, and CNN packing before proposing another default kernel change.
 - [ ] Reduce measured startup/integrity/tokenizer costs safely; do not attribute the mixed frontend interval to Python alone.

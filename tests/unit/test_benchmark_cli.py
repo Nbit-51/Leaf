@@ -10,6 +10,13 @@ import pytest
 
 from leaf import cli
 from tools import benchmark_cli as benchmark
+from tools.validate_decoder import GATES, LATENCY_WORKLOAD
+
+
+def latency_record(prefill, decode, activations=32):
+    return {"prefill_p50_ms": prefill, "decode_p50_ms": decode,
+            "prefill_samples_ms": [prefill] * 7, "decode_samples_ms": [decode] * 7,
+            "threads": 1, "activation_bits": activations, "latency_workload": dict(LATENCY_WORKLOAD)}
 
 
 @pytest.fixture
@@ -24,7 +31,9 @@ def frozen(tmp_path, monkeypatch):
     baseline = {"model_config_sha256": benchmark.digest(model / "config.json"),
                 "source_weight_sha256": {"model.safetensors": benchmark.digest(model / "model.safetensors")},
                 "generation_prompt": "A reference prompt", "generated_tokens": [1, 2],
-                "threads": 1, "pinned_cpu": 2, "platform": platform.platform(), "cpu": platform.processor()}
+                "threads": 1, "pinned_cpu": 2, "platform": platform.platform(), "cpu": platform.processor(),
+                "latency_workload": dict(LATENCY_WORKLOAD), "quality_gate_thresholds": copy.deepcopy(GATES),
+                "latency": {"eager": latency_record(100, 10), "sdpa": latency_record(105, 11)}}
     (artifacts / "tokens.json").write_text(json.dumps({"generation_ids": [3, 4], "generated_tokens": [1, 2]}))
     baseline["quality_cache_sha256"] = {"tokens.json": benchmark.digest(artifacts / "tokens.json")}
     native = {}
@@ -34,12 +43,13 @@ def frozen(tmp_path, monkeypatch):
         artifact.write_bytes(key.encode())
         native[key] = {"artifact": artifact.name, "artifact_sha256": benchmark.digest(artifact),
                        "weight_bits": bits, "activation_bits": activations,
+                       "quality": {"next_token_agreement": 1.0, "perplexity_ratio": 1.0},
                        "quality_gate_passed": True, "eligible_for_automatic_selection": eligible,
                        "latency_stability": {"passed": True},
-                       "latency": {"decode_p50_ms": 1.0, "threads": 1, "activation_bits": activations},
+                       "latency": latency_record(120 if bits == 32 else 90, 12 if bits == 32 else 1, activations),
                        "generated_tokens": tokens}
     profile = tmp_path / "profile.json"
-    profile.write_text(json.dumps({"pytorch": baseline, "native": native,
+    profile.write_text(json.dumps({"pytorch": baseline, "native": native, "latency_workload": dict(LATENCY_WORKLOAD),
                                   "native_executable_sha256": benchmark.digest(executable)}))
     monkeypatch.setattr(cli, "validate_model_generation", lambda model: None)
     monkeypatch.setattr(cli, "encode_prompt", lambda model, prompt, raw=False: (None, [3, 4]))

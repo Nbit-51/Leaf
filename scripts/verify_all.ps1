@@ -28,6 +28,8 @@ try {
     & (Join-Path $PSScriptRoot "build_native.ps1")
     & (Join-Path $root "build/leaf_native_tests.exe")
     if ($LASTEXITCODE -ne 0) { throw "native correctness tests failed" }
+    & (Join-Path $root "build/leaf_token_panel_tests.exe")
+    if ($LASTEXITCODE -ne 0) { throw "FP32 token-panel correctness tests failed" }
 
     foreach ($test in @("test_gemm.exe", "test_im2col.exe", "test_executor.exe", "test_executor_buffer_pool.exe")) {
         & (Join-Path $root "build/$test")

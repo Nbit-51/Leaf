@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1520" viewBox="0 0 1680 1520" role="img" aria-labelledby="optimization-title optimization-desc">
   <title id="optimization-title">Leaf measured optimization loop</title>
-  <desc id="optimization-desc">Calibration and held-out evaluation use independent data splits. Offline candidates are compared against native FP32 and the best PyTorch baseline on the same full workload and hardware. Automatic promotion requires trained-model quality gates, stable repeated timings for candidates and references, and no prefill or decode slowdown. Noisy measurements cannot promote an optimization. A failed candidate stays unpromoted; profiling, a scoped change, export, and both gates repeat. Passing results apply only to the tested configuration.</desc>
+  <desc id="optimization-desc">Calibration and held-out evaluation use independent data splits. Offline candidates are compared against native FP32 and the best PyTorch baseline on the same full workload and hardware. Generation latency uses last-token-only logits and identical KV-cache semantics; full-logit quality is evaluated separately. Automatic promotion requires trained-model quality gates, stable repeated timings for candidates and references, and no prefill or decode slowdown. Noisy or unmatched measurements cannot promote an optimization. A failed candidate stays unpromoted; profiling, a scoped change, export, and both gates repeat. Passing results apply only to the tested configuration.</desc>
   <defs>
     <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="userSpaceOnUse">
       <path d="M 0 1 L 10 6 L 0 11 Z" fill="#52657b"/>
@@ -53,7 +53,7 @@
   <rect x="936" y="370" width="672" height="188" rx="16" class="prepare"/>
   <text x="964" y="414" class="heading">Reference baselines</text>
   <text x="964" y="456" class="body">Best PyTorch configuration + native FP32</text>
-  <text x="964" y="494" class="body">Match shapes, cache mode, threads and hardware</text>
+  <text x="964" y="494" class="body">Match last-token logits, KV mode and threads</text>
   <text x="964" y="532" class="note">Measure the full workload, not only a proxy kernel</text>
   <path d="M 408 558 V 626" class="flow"/>
   <path d="M 1272 558 V 626" class="flow"/>

@@ -1,0 +1,1958 @@
+{
+  "benchmark": "trained-decoder-native-experiment-abba",
+  "measured_at_utc": "2026-10-02T15:15:48.884846+00:00",
+  "before_executable_sha256": "7f0b991c715109182d1b9d453c3a2d9f0475d692ae697790f5628a9caa518f82",
+  "after_executable_sha256": "070fc074e1a396f3af9e343a211efb560d4790693e3e28d9ed71b1c6c64f18d0",
+  "frozen_record_sha256": "470550fe57e2b0789fcca1b48e21c355c83bcf0ec5fc5c7a0446a6d72dec9528",
+  "quality_cache_sha256": {
+    "reference.npy": "c29bc5f34075bff8437c4701e66a9873e41f0299308bb1f87552eafcd65ccb2f",
+    "tokens.json": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6"
+  },
+  "frozen_quality_measured_at_utc": "2026-10-02T14:43:23.331921+00:00",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "cpu": "x86_64",
+  "machine": "x86_64",
+  "threads": 1,
+  "pinned_cpu": 2,
+  "runs_per_pass": 21,
+  "frozen_reference_pinned_cpu": 2,
+  "warmup_per_pass": 20,
+  "profiling_enabled": false,
+  "windows_high_qos": false,
+  "after_float_tiles": true,
+  "native_policy_by_stage": {
+    "before": {
+      "LEAF_DISABLE_VNNI": false,
+      "LEAF_EXPERIMENTAL_FLOAT_TILES": false,
+      "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+    },
+    "after": {
+      "LEAF_DISABLE_VNNI": false,
+      "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+      "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+    }
+  },
+  "isa_policy": {
+    "LEAF_DISABLE_VNNI": null
+  },
+  "experimental_policy": {
+    "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+    "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+  },
+  "stability_thresholds": {
+    "minimum_samples_per_pass": 5,
+    "maximum_p90_p10_ratio": 1.25,
+    "maximum_between_pass_median_ratio": 1.25
+  },
+  "frozen_pytorch_context": {
+    "measured_at_utc": "2026-10-02T14:41:51.328799+00:00",
+    "quality_measured_at_utc": "2026-10-02T14:41:39.805886+00:00",
+    "latency_measured_at_utc": "2026-10-02T14:41:51.328799+00:00",
+    "latency_workload": {
+      "format": "leaf-decoder-latency-workload-v1",
+      "batch_size": 1,
+      "prefill": "all_prefix_tokens",
+      "decode": "one_token_with_prefill_kv_cache",
+      "logits": "last_token_only",
+      "use_cache": true
+    },
+    "quality_cache_sha256": {
+      "reference.npy": "c29bc5f34075bff8437c4701e66a9873e41f0299308bb1f87552eafcd65ccb2f",
+      "tokens.json": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6"
+    },
+    "model": "gpt2",
+    "model_config_sha256": "0daed7749b4f02b8f76240d5444551d7b08712dab4d0adb8239c56ba823bb7b4",
+    "source_weight_sha256": {
+      "model.safetensors": "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707"
+    },
+    "dataset": "wikitext2-test.parquet, contiguous blocks from first nonempty text",
+    "dataset_source": "WikiText-2 held-out test split",
+    "dataset_sha256": "5f1bea067869d04849c0f975a2b29c4ff47d867f484f5010ea5e861eab246d91",
+    "text_column": "text",
+    "sequence_length": 128,
+    "blocks": 8,
+    "threads": 1,
+    "warmup": 10,
+    "runs": 21,
+    "pinned_cpu": 2,
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "cpu": "x86_64",
+    "logical_cpus": 28,
+    "physical_memory_bytes": 8169594880,
+    "torch": "2.13.0+cu130",
+    "load_seconds": 0.7890385099999992,
+    "parameter_bytes": 497759232,
+    "resident_bytes": 1778720768,
+    "generation_prompt": "Explain in one sentence why careful measurement matters when optimizing software.",
+    "generated_tokens": [
+      198,
+      198,
+      464,
+      1708,
+      318,
+      257,
+      1351,
+      286,
+      262,
+      749,
+      2219,
+      10135,
+      326,
+      460,
+      307,
+      925
+    ],
+    "generated_text": "\n\nThe following is a list of the most common mistakes that can be made",
+    "latency": {
+      "eager": {
+        "prefill_p50_ms": 155.80828799999935,
+        "decode_p50_ms": 30.077957999999683,
+        "prefill_samples_ms": [
+          153.23688100000155,
+          155.3538639999985,
+          157.09780199999912,
+          155.80828799999935,
+          157.6551780000024,
+          152.59964099999834,
+          154.29797499999864,
+          153.43979600000068,
+          154.36650199999846,
+          156.75255800000087,
+          155.2679579999996,
+          154.51006099999987,
+          156.57939299999768,
+          154.99861900000056,
+          156.33711599999955,
+          170.9128650000018,
+          151.04331699999918,
+          171.112664999999,
+          160.07956900000053,
+          159.79988000000134,
+          162.59449000000004
+        ],
+        "decode_samples_ms": [
+          34.98363900000001,
+          29.626624999998796,
+          29.29814899999883,
+          30.324174000000426,
+          30.0537779999992,
+          30.035459000000486,
+          29.662706999999955,
+          30.077957999999683,
+          29.53714799999929,
+          30.57875400000043,
+          29.309699999998884,
+          29.18727099999785,
+          30.320830000000853,
+          29.428931000001768,
+          29.840083999999933,
+          32.41616899999755,
+          30.334520000000254,
+          32.03285300000047,
+          30.563549000000023,
+          30.23835300000144,
+          32.715265000000215
+        ],
+        "latency_workload": {
+          "format": "leaf-decoder-latency-workload-v1",
+          "batch_size": 1,
+          "prefill": "all_prefix_tokens",
+          "decode": "one_token_with_prefill_kv_cache",
+          "logits": "last_token_only",
+          "use_cache": true
+        },
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 153.23688100000155,
+            "p90_ms": 162.59449000000004,
+            "p90_p10_ratio": 1.061066297740675,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 29.309699999998884,
+            "p90_ms": 32.41616899999755,
+            "p90_p10_ratio": 1.1059877446715178,
+            "reason": "passed"
+          }
+        }
+      },
+      "sdpa": {
+        "prefill_p50_ms": 151.4124960000025,
+        "decode_p50_ms": 28.87226300000023,
+        "prefill_samples_ms": [
+          157.8931059999995,
+          155.35158899999857,
+          167.44331700000004,
+          157.193178,
+          149.76037099999928,
+          150.39697799999985,
+          154.92612700000308,
+          156.21981100000326,
+          149.525907000001,
+          148.56163600000016,
+          151.36968899999914,
+          152.6175589999994,
+          152.63527800000176,
+          151.4124960000025,
+          157.90742200000096,
+          151.97018599999979,
+          150.62491099999775,
+          149.967316999998,
+          150.62127599999542,
+          149.05037599999815,
+          147.43797399999892
+        ],
+        "decode_samples_ms": [
+          28.383764999997396,
+          28.474384000002573,
+          28.94119000000117,
+          28.844671999998184,
+          28.646159000000893,
+          28.906043000002768,
+          30.098849999998123,
+          28.22890700000258,
+          30.409670999997473,
+          28.413742000001463,
+          29.293601999999197,
+          28.013454999999965,
+          27.882017999999675,
+          29.050248000000778,
+          38.92141000000038,
+          28.87226300000023,
+          29.474101999998226,
+          29.15101600000014,
+          28.67456100000254,
+          29.578796999999213,
+          28.222796000001438
+        ],
+        "latency_workload": {
+          "format": "leaf-decoder-latency-workload-v1",
+          "batch_size": 1,
+          "prefill": "all_prefix_tokens",
+          "decode": "one_token_with_prefill_kv_cache",
+          "logits": "last_token_only",
+          "use_cache": true
+        },
+        "stability": {
+          "passed": true,
+          "prefill": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 149.05037599999815,
+            "p90_ms": 157.8931059999995,
+            "p90_p10_ratio": 1.0593271230661065,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 21,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 28.222796000001438,
+            "p90_ms": 30.098849999998123,
+            "p90_p10_ratio": 1.0664730028873324,
+            "reason": "passed"
+          }
+        }
+      }
+    },
+    "quality_gate_thresholds": {
+      "32": {
+        "min_next_token_agreement": 0.999,
+        "max_perplexity_ratio": 1.001
+      },
+      "8": {
+        "min_next_token_agreement": 0.95,
+        "max_perplexity_ratio": 1.02
+      },
+      "4": {
+        "min_next_token_agreement": 0.9,
+        "max_perplexity_ratio": 1.05
+      }
+    }
+  },
+  "native": {
+    "32": {
+      "weight_bits": 32,
+      "activation_bits": 32,
+      "artifact": "decoder-32.leaf",
+      "artifact_sha256": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 0.002960205078125,
+        "relative_logit_rmse": 1.1832864856842207e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 62.5800786513881,
+        "pytorch_perplexity": 62.58009847076152,
+        "perplexity_ratio": 0.9999996832959055
+      },
+      "trained_quality_gate_passed": true,
+      "quality_gate_passed": true,
+      "fp32_allclose": true,
+      "chunked": {
+        "sequence_index": 0,
+        "chunk_tokens": 16,
+        "quality": {
+          "evaluated_tokens": 127,
+          "max_abs_logit_error": 0.0009002685546875,
+          "relative_logit_rmse": 8.755363865020627e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 47.31869383117623,
+          "pytorch_perplexity": 47.318672284572,
+          "perplexity_ratio": 1.0000004553509891
+        },
+        "quality_gate_passed": true,
+        "parity_vs_full": true,
+        "fp32_allclose_pytorch": true
+      },
+      "generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "generation_exact_match_pytorch": true,
+      "generation_exact_match_before": true,
+      "frozen_before_quality_gate_passed": true,
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 541650944,
+        "load_ms": 1.622729,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "quality_measured_at_utc": "2026-10-02T15:12:53.977763+00:00",
+      "native_policy": {
+        "LEAF_DISABLE_VNNI": false,
+        "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+        "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+      },
+      "timing": {
+        "order": [
+          "before",
+          "after",
+          "after",
+          "before"
+        ],
+        "passes": [
+          {
+            "index": 0,
+            "stage": "before",
+            "measured_at_utc": "2026-10-02T15:13:33.164251+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 497777600,
+              "peak_rss_bytes": 1092911104,
+              "load_ms": 1.614827,
+              "prefill_p50_ms": 447.201052,
+              "decode_p50_ms": 30.105198,
+              "prefill_samples_ms": [
+                452.589421,
+                498.798493,
+                531.342172,
+                474.331382,
+                449.772112,
+                444.607308,
+                447.201052,
+                472.722026,
+                417.445875,
+                446.824402,
+                423.138732,
+                424.488709,
+                463.410696,
+                495.806386,
+                452.623253,
+                420.807641,
+                426.869656,
+                417.651406,
+                436.585154,
+                422.180607,
+                460.979244
+              ],
+              "decode_samples_ms": [
+                30.675052,
+                32.315858,
+                29.219264,
+                29.618806,
+                30.617335,
+                36.799065,
+                33.346719,
+                29.63129,
+                31.170398,
+                29.351515,
+                29.383088,
+                34.14621,
+                36.569379,
+                29.792781,
+                28.77709,
+                30.197117,
+                29.628896,
+                29.888832,
+                30.146839,
+                30.105198,
+                28.210202
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 420.807641,
+                "p90_ms": 495.806386,
+                "p90_p10_ratio": 1.1782257204783029,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 29.219264,
+                "p90_ms": 34.14621,
+                "p90_p10_ratio": 1.1686197845366675,
+                "reason": "passed"
+              }
+            },
+            "native_policy": {
+              "LEAF_DISABLE_VNNI": false,
+              "LEAF_EXPERIMENTAL_FLOAT_TILES": false,
+              "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+            }
+          },
+          {
+            "index": 1,
+            "stage": "after",
+            "measured_at_utc": "2026-10-02T15:13:46.171921+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 497777600,
+              "peak_rss_bytes": 1092911104,
+              "load_ms": 1.438138,
+              "prefill_p50_ms": 219.850354,
+              "decode_p50_ms": 29.783534,
+              "prefill_samples_ms": [
+                220.743245,
+                219.850354,
+                211.605726,
+                220.265485,
+                215.70803,
+                224.470442,
+                227.112912,
+                222.059495,
+                223.280086,
+                222.066881,
+                213.708815,
+                218.391475,
+                219.511236,
+                215.645761,
+                215.419035,
+                220.585266,
+                215.757951,
+                220.057426,
+                245.120188,
+                218.721125,
+                214.989196
+              ],
+              "decode_samples_ms": [
+                28.967284,
+                29.476324,
+                30.362002,
+                31.042073,
+                29.683096,
+                29.363912,
+                30.389097,
+                29.530827,
+                29.783534,
+                29.0446,
+                29.790641,
+                29.99535,
+                34.731963,
+                30.771043,
+                29.355367,
+                33.207166,
+                30.105727,
+                31.154879,
+                29.630211,
+                28.839397,
+                29.271525
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 214.989196,
+                "p90_ms": 224.470442,
+                "p90_p10_ratio": 1.0441010347329267,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 29.0446,
+                "p90_ms": 31.154879,
+                "p90_p10_ratio": 1.0726565006920392,
+                "reason": "passed"
+              }
+            },
+            "native_policy": {
+              "LEAF_DISABLE_VNNI": false,
+              "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+              "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+            }
+          },
+          {
+            "index": 2,
+            "stage": "after",
+            "measured_at_utc": "2026-10-02T15:13:59.967910+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 497777600,
+              "peak_rss_bytes": 1092911104,
+              "load_ms": 1.998998,
+              "prefill_p50_ms": 224.472165,
+              "decode_p50_ms": 30.333143,
+              "prefill_samples_ms": [
+                219.120517,
+                226.492159,
+                214.924181,
+                216.198977,
+                224.11173,
+                214.811583,
+                218.6456,
+                226.363186,
+                223.537489,
+                218.030673,
+                223.764352,
+                224.780916,
+                216.788494,
+                227.425182,
+                226.109352,
+                227.288241,
+                224.472165,
+                231.610025,
+                241.214037,
+                227.231721,
+                230.230455
+              ],
+              "decode_samples_ms": [
+                36.082741,
+                29.189491,
+                39.316505,
+                28.629984,
+                28.234436,
+                28.755298,
+                30.582896,
+                32.842338,
+                28.809725,
+                29.254966,
+                28.252136,
+                30.629312,
+                28.757834,
+                30.333143,
+                29.568388,
+                34.407865,
+                32.275127,
+                29.045079,
+                31.599887,
+                32.688506,
+                33.205971
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 216.198977,
+                "p90_ms": 230.230455,
+                "p90_p10_ratio": 1.0649007603768634,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 28.629984,
+                "p90_ms": 34.407865,
+                "p90_p10_ratio": 1.2018122329373289,
+                "reason": "passed"
+              }
+            },
+            "native_policy": {
+              "LEAF_DISABLE_VNNI": false,
+              "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+              "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+            }
+          },
+          {
+            "index": 3,
+            "stage": "before",
+            "measured_at_utc": "2026-10-02T15:14:23.469772+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 497777600,
+              "peak_rss_bytes": 1092911104,
+              "load_ms": 1.749451,
+              "prefill_p50_ms": 457.978466,
+              "decode_p50_ms": 31.235695,
+              "prefill_samples_ms": [
+                442.91907,
+                457.978466,
+                451.972517,
+                448.005228,
+                469.551649,
+                562.722059,
+                504.749891,
+                432.323818,
+                433.19898,
+                427.035705,
+                441.924486,
+                436.362129,
+                441.794115,
+                446.028528,
+                462.221748,
+                534.912182,
+                481.084756,
+                559.489635,
+                499.420973,
+                470.676015,
+                512.72317
+              ],
+              "decode_samples_ms": [
+                30.473011,
+                29.879008,
+                31.772052,
+                30.106911,
+                32.446168,
+                35.342818,
+                31.462112,
+                29.662303,
+                28.934553,
+                31.235695,
+                29.246839,
+                29.681506,
+                29.342832,
+                32.2614,
+                30.983039,
+                34.583596,
+                34.734165,
+                34.341549,
+                34.618931,
+                35.578431,
+                30.460975
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 433.19898,
+                "p90_ms": 534.912182,
+                "p90_p10_ratio": 1.2347955713099787,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 29.342832,
+                "p90_ms": 34.734165,
+                "p90_p10_ratio": 1.1837359461418038,
+                "reason": "passed"
+              }
+            },
+            "native_policy": {
+              "LEAF_DISABLE_VNNI": false,
+              "LEAF_EXPERIMENTAL_FLOAT_TILES": false,
+              "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+            }
+          }
+        ],
+        "before": {
+          "prefill_samples_ms": [
+            452.589421,
+            498.798493,
+            531.342172,
+            474.331382,
+            449.772112,
+            444.607308,
+            447.201052,
+            472.722026,
+            417.445875,
+            446.824402,
+            423.138732,
+            424.488709,
+            463.410696,
+            495.806386,
+            452.623253,
+            420.807641,
+            426.869656,
+            417.651406,
+            436.585154,
+            422.180607,
+            460.979244,
+            442.91907,
+            457.978466,
+            451.972517,
+            448.005228,
+            469.551649,
+            562.722059,
+            504.749891,
+            432.323818,
+            433.19898,
+            427.035705,
+            441.924486,
+            436.362129,
+            441.794115,
+            446.028528,
+            462.221748,
+            534.912182,
+            481.084756,
+            559.489635,
+            499.420973,
+            470.676015,
+            512.72317
+          ],
+          "prefill_p50_ms": 450.8723145,
+          "decode_samples_ms": [
+            30.675052,
+            32.315858,
+            29.219264,
+            29.618806,
+            30.617335,
+            36.799065,
+            33.346719,
+            29.63129,
+            31.170398,
+            29.351515,
+            29.383088,
+            34.14621,
+            36.569379,
+            29.792781,
+            28.77709,
+            30.197117,
+            29.628896,
+            29.888832,
+            30.146839,
+            30.105198,
+            28.210202,
+            30.473011,
+            29.879008,
+            31.772052,
+            30.106911,
+            32.446168,
+            35.342818,
+            31.462112,
+            29.662303,
+            28.934553,
+            31.235695,
+            29.246839,
+            29.681506,
+            29.342832,
+            32.2614,
+            30.983039,
+            34.583596,
+            34.734165,
+            34.341549,
+            34.618931,
+            35.578431,
+            30.460975
+          ],
+          "decode_p50_ms": 30.466993000000002,
+          "stability": {
+            "passed": true,
+            "prefill": {
+              "passed": true,
+              "sample_count": 42,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 423.2737297,
+              "p90_ms": 511.92584209999995,
+              "p90_p10_ratio": 1.20944392760409,
+              "reason": "passed"
+            },
+            "decode": {
+              "passed": true,
+              "sample_count": 42,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 29.256438300000003,
+              "p90_ms": 34.722641599999996,
+              "p90_p10_ratio": 1.1868376199436415,
+              "reason": "passed"
+            }
+          },
+          "pass_stability": [
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 420.807641,
+                "p90_ms": 495.806386,
+                "p90_p10_ratio": 1.1782257204783029,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 29.219264,
+                "p90_ms": 34.14621,
+                "p90_p10_ratio": 1.1686197845366675,
+                "reason": "passed"
+              }
+            },
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 433.19898,
+                "p90_ms": 534.912182,
+                "p90_p10_ratio": 1.2347955713099787,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 29.342832,
+                "p90_ms": 34.734165,
+                "p90_p10_ratio": 1.1837359461418038,
+                "reason": "passed"
+              }
+            }
+          ],
+          "pass_medians_ms": {
+            "prefill": [
+              447.201052,
+              457.978466
+            ],
+            "decode": [
+              30.105198,
+              31.235695
+            ]
+          },
+          "between_pass_stability": {
+            "prefill": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0240997062770774,
+              "maximum_ratio": 1.25
+            },
+            "decode": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0375515550503935,
+              "maximum_ratio": 1.25
+            }
+          },
+          "stability_passed": true
+        },
+        "after": {
+          "prefill_samples_ms": [
+            220.743245,
+            219.850354,
+            211.605726,
+            220.265485,
+            215.70803,
+            224.470442,
+            227.112912,
+            222.059495,
+            223.280086,
+            222.066881,
+            213.708815,
+            218.391475,
+            219.511236,
+            215.645761,
+            215.419035,
+            220.585266,
+            215.757951,
+            220.057426,
+            245.120188,
+            218.721125,
+            214.989196,
+            219.120517,
+            226.492159,
+            214.924181,
+            216.198977,
+            224.11173,
+            214.811583,
+            218.6456,
+            226.363186,
+            223.537489,
+            218.030673,
+            223.764352,
+            224.780916,
+            216.788494,
+            227.425182,
+            226.109352,
+            227.288241,
+            224.472165,
+            231.610025,
+            241.214037,
+            227.231721,
+            230.230455
+          ],
+          "prefill_p50_ms": 220.6642555,
+          "decode_samples_ms": [
+            28.967284,
+            29.476324,
+            30.362002,
+            31.042073,
+            29.683096,
+            29.363912,
+            30.389097,
+            29.530827,
+            29.783534,
+            29.0446,
+            29.790641,
+            29.99535,
+            34.731963,
+            30.771043,
+            29.355367,
+            33.207166,
+            30.105727,
+            31.154879,
+            29.630211,
+            28.839397,
+            29.271525,
+            36.082741,
+            29.189491,
+            39.316505,
+            28.629984,
+            28.234436,
+            28.755298,
+            30.582896,
+            32.842338,
+            28.809725,
+            29.254966,
+            28.252136,
+            30.629312,
+            28.757834,
+            30.333143,
+            29.568388,
+            34.407865,
+            32.275127,
+            29.045079,
+            31.599887,
+            32.688506,
+            33.205971
+          ],
+          "decode_p50_ms": 29.7870875,
+          "stability": {
+            "passed": true,
+            "prefill": {
+              "passed": true,
+              "sample_count": 42,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 215.0321799,
+              "p90_ms": 227.4114879,
+              "p90_p10_ratio": 1.0575695600805282,
+              "reason": "passed"
+            },
+            "decode": {
+              "passed": true,
+              "sample_count": 42,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 28.763023099999998,
+              "p90_ms": 33.2070465,
+              "p90_p10_ratio": 1.1545047398025419,
+              "reason": "passed"
+            }
+          },
+          "pass_stability": [
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 214.989196,
+                "p90_ms": 224.470442,
+                "p90_p10_ratio": 1.0441010347329267,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 29.0446,
+                "p90_ms": 31.154879,
+                "p90_p10_ratio": 1.0726565006920392,
+                "reason": "passed"
+              }
+            },
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 216.198977,
+                "p90_ms": 230.230455,
+                "p90_p10_ratio": 1.0649007603768634,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 28.629984,
+                "p90_ms": 34.407865,
+                "p90_p10_ratio": 1.2018122329373289,
+                "reason": "passed"
+              }
+            }
+          ],
+          "pass_medians_ms": {
+            "prefill": [
+              219.850354,
+              224.472165
+            ],
+            "decode": [
+              29.783534,
+              30.333143
+            ]
+          },
+          "between_pass_stability": {
+            "prefill": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.021022531535246,
+              "maximum_ratio": 1.25
+            },
+            "decode": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0184534514943726,
+              "maximum_ratio": 1.25
+            }
+          },
+          "stability_passed": true
+        }
+      },
+      "gate": {
+        "quality_passed": true,
+        "timing_stability_passed": true,
+        "prefill_ratio_after_before": 0.4894162901634538,
+        "decode_ratio_after_before": 0.9776838659463373,
+        "no_slowdown_passed": true,
+        "prefill_improvement_passed": true,
+        "maximum_slowdown_ratio": 1.02,
+        "required_prefill_ratio": 0.98,
+        "accepted_native_experiment": true,
+        "automatic_selection_authorized": false,
+        "fresh_pytorch_comparison": false
+      }
+    },
+    "8-protected": {
+      "weight_bits": 8,
+      "activation_bits": 32,
+      "artifact": "decoder-8-protected.leaf",
+      "artifact_sha256": "dc459d1585478ac3d73c5a6be7529232b0ddc89df81d05bb5e15ce16b8e01904",
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 35.867462158203125,
+        "relative_logit_rmse": 0.01564105972647667,
+        "next_token_agreement": 0.968503937007874,
+        "perplexity": 62.78233144148198,
+        "pytorch_perplexity": 62.58009847076152,
+        "perplexity_ratio": 1.0032315860099668
+      },
+      "trained_quality_gate_passed": true,
+      "quality_gate_passed": true,
+      "fp32_allclose": null,
+      "chunked": {
+        "sequence_index": 0,
+        "chunk_tokens": 16,
+        "quality": {
+          "evaluated_tokens": 127,
+          "max_abs_logit_error": 9.3958740234375,
+          "relative_logit_rmse": 0.01086384430527687,
+          "next_token_agreement": 0.9448818897637795,
+          "perplexity": 47.28297805298642,
+          "pytorch_perplexity": 47.318672284572,
+          "perplexity_ratio": 0.999245662867062
+        },
+        "quality_gate_passed": false,
+        "parity_vs_full": true,
+        "fp32_allclose_pytorch": null
+      },
+      "generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "generation_exact_match_pytorch": true,
+      "generation_exact_match_before": true,
+      "frozen_before_quality_gate_passed": true,
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 243305408,
+        "peak_rss_bytes": 1092911104,
+        "load_ms": 23.253205,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "quality_measured_at_utc": "2026-10-02T15:13:09.684843+00:00",
+      "native_policy": {
+        "LEAF_DISABLE_VNNI": false,
+        "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+        "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+      },
+      "timing": {
+        "order": [
+          "before",
+          "after",
+          "after",
+          "before"
+        ],
+        "passes": [
+          {
+            "index": 0,
+            "stage": "before",
+            "measured_at_utc": "2026-10-02T15:14:43.227938+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 243305408,
+              "peak_rss_bytes": 1092911104,
+              "load_ms": 22.900506,
+              "prefill_p50_ms": 424.691667,
+              "decode_p50_ms": 18.005697,
+              "prefill_samples_ms": [
+                428.952528,
+                428.136246,
+                419.83827,
+                429.768928,
+                425.143144,
+                426.093934,
+                425.782161,
+                429.756374,
+                457.846976,
+                424.691667,
+                423.671736,
+                431.855762,
+                421.690663,
+                421.739326,
+                403.707522,
+                413.736132,
+                414.299673,
+                403.306154,
+                417.548482,
+                418.070749,
+                424.987983
+              ],
+              "decode_samples_ms": [
+                17.471767,
+                17.939358,
+                21.431621,
+                21.287163,
+                17.524487,
+                17.783383,
+                17.415209,
+                36.870961,
+                19.93696,
+                19.718205,
+                18.005697,
+                18.68353,
+                21.924607,
+                16.816269,
+                16.697185,
+                18.385951,
+                18.312421,
+                18.632418,
+                17.773639,
+                16.939062,
+                16.826809
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 413.736132,
+                "p90_ms": 429.768928,
+                "p90_p10_ratio": 1.0387512589787542,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 16.826809,
+                "p90_ms": 21.431621,
+                "p90_p10_ratio": 1.273659254110509,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            },
+            "native_policy": {
+              "LEAF_DISABLE_VNNI": false,
+              "LEAF_EXPERIMENTAL_FLOAT_TILES": false,
+              "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+            }
+          },
+          {
+            "index": 1,
+            "stage": "after",
+            "measured_at_utc": "2026-10-02T15:15:03.237243+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 243305408,
+              "peak_rss_bytes": 1092911104,
+              "load_ms": 25.828211,
+              "prefill_p50_ms": 439.768054,
+              "decode_p50_ms": 19.331731,
+              "prefill_samples_ms": [
+                438.909598,
+                450.121251,
+                448.571192,
+                434.913644,
+                448.542202,
+                428.906861,
+                426.391396,
+                413.49033,
+                423.757339,
+                428.994522,
+                443.352539,
+                435.616759,
+                447.25859,
+                444.558485,
+                421.399551,
+                458.9804,
+                430.871366,
+                447.811484,
+                455.794588,
+                439.768054,
+                453.77244
+              ],
+              "decode_samples_ms": [
+                19.117851,
+                23.490066,
+                18.304906,
+                20.055971,
+                19.03351,
+                18.283103,
+                19.800959,
+                20.373703,
+                19.019215,
+                19.818672,
+                19.32424,
+                18.298391,
+                22.20574,
+                35.171572,
+                17.749454,
+                23.59807,
+                18.631736,
+                20.92432,
+                18.763431,
+                19.331731,
+                22.289325
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 423.757339,
+                "p90_ms": 453.77244,
+                "p90_p10_ratio": 1.070830870022997,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 18.298391,
+                "p90_ms": 23.490066,
+                "p90_p10_ratio": 1.2837230333530418,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            },
+            "native_policy": {
+              "LEAF_DISABLE_VNNI": false,
+              "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+              "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+            }
+          },
+          {
+            "index": 2,
+            "stage": "after",
+            "measured_at_utc": "2026-10-02T15:15:23.291273+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 243305408,
+              "peak_rss_bytes": 1092911104,
+              "load_ms": 27.066379,
+              "prefill_p50_ms": 423.923455,
+              "decode_p50_ms": 18.632296,
+              "prefill_samples_ms": [
+                397.764574,
+                411.786499,
+                405.111314,
+                431.076506,
+                413.853252,
+                428.667618,
+                414.994874,
+                423.923455,
+                442.470887,
+                433.513449,
+                451.828578,
+                450.84669,
+                468.32549,
+                420.724713,
+                417.462609,
+                426.370638,
+                417.763283,
+                422.810685,
+                445.631318,
+                432.991334,
+                416.29288
+              ],
+              "decode_samples_ms": [
+                16.569675,
+                16.863135,
+                18.959275,
+                19.601535,
+                17.800845,
+                19.644045,
+                21.00273,
+                18.231967,
+                19.497324,
+                18.632296,
+                20.849045,
+                20.874123,
+                21.983953,
+                17.518691,
+                17.04212,
+                18.482816,
+                19.332351,
+                17.523621,
+                20.632151,
+                17.942854,
+                18.408797
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 411.786499,
+                "p90_ms": 450.84669,
+                "p90_p10_ratio": 1.0948554435243882,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 17.04212,
+                "p90_ms": 20.874123,
+                "p90_p10_ratio": 1.224854830267596,
+                "reason": "passed"
+              }
+            },
+            "native_policy": {
+              "LEAF_DISABLE_VNNI": false,
+              "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+              "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+            }
+          },
+          {
+            "index": 3,
+            "stage": "before",
+            "measured_at_utc": "2026-10-02T15:15:43.397134+00:00",
+            "latency": {
+              "avx2": true,
+              "vnni": false,
+              "activation_bits": 32,
+              "threads": 1,
+              "artifact_bytes": 243305408,
+              "peak_rss_bytes": 1092911104,
+              "load_ms": 25.609688,
+              "prefill_p50_ms": 428.75795,
+              "decode_p50_ms": 19.271005,
+              "prefill_samples_ms": [
+                447.445542,
+                444.361135,
+                446.682738,
+                442.609526,
+                417.374603,
+                430.382631,
+                430.477053,
+                425.17624,
+                416.129102,
+                418.118799,
+                428.75795,
+                416.300726,
+                415.994009,
+                422.228876,
+                434.847753,
+                420.789346,
+                422.843541,
+                435.885832,
+                426.89153,
+                454.908473,
+                432.854291
+              ],
+              "decode_samples_ms": [
+                21.776913,
+                19.796369,
+                19.729158,
+                19.18404,
+                20.853876,
+                20.668417,
+                18.121179,
+                27.66697,
+                17.896953,
+                19.1846,
+                20.169435,
+                19.513681,
+                17.409061,
+                21.158612,
+                17.530794,
+                17.213918,
+                18.051919,
+                17.753907,
+                17.865704,
+                19.271005,
+                20.765309
+              ],
+              "generated_tokens": []
+            },
+            "stability": {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 416.300726,
+                "p90_ms": 446.682738,
+                "p90_p10_ratio": 1.0729809248519062,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 17.530794,
+                "p90_ms": 21.158612,
+                "p90_p10_ratio": 1.2069397427178712,
+                "reason": "passed"
+              }
+            },
+            "native_policy": {
+              "LEAF_DISABLE_VNNI": false,
+              "LEAF_EXPERIMENTAL_FLOAT_TILES": false,
+              "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+            }
+          }
+        ],
+        "before": {
+          "prefill_samples_ms": [
+            428.952528,
+            428.136246,
+            419.83827,
+            429.768928,
+            425.143144,
+            426.093934,
+            425.782161,
+            429.756374,
+            457.846976,
+            424.691667,
+            423.671736,
+            431.855762,
+            421.690663,
+            421.739326,
+            403.707522,
+            413.736132,
+            414.299673,
+            403.306154,
+            417.548482,
+            418.070749,
+            424.987983,
+            447.445542,
+            444.361135,
+            446.682738,
+            442.609526,
+            417.374603,
+            430.382631,
+            430.477053,
+            425.17624,
+            416.129102,
+            418.118799,
+            428.75795,
+            416.300726,
+            415.994009,
+            422.228876,
+            434.847753,
+            420.789346,
+            422.843541,
+            435.885832,
+            426.89153,
+            454.908473,
+            432.854291
+          ],
+          "prefill_p50_ms": 425.159692,
+          "decode_samples_ms": [
+            17.471767,
+            17.939358,
+            21.431621,
+            21.287163,
+            17.524487,
+            17.783383,
+            17.415209,
+            36.870961,
+            19.93696,
+            19.718205,
+            18.005697,
+            18.68353,
+            21.924607,
+            16.816269,
+            16.697185,
+            18.385951,
+            18.312421,
+            18.632418,
+            17.773639,
+            16.939062,
+            16.826809,
+            21.776913,
+            19.796369,
+            19.729158,
+            19.18404,
+            20.853876,
+            20.668417,
+            18.121179,
+            27.66697,
+            17.896953,
+            19.1846,
+            20.169435,
+            19.513681,
+            17.409061,
+            21.158612,
+            17.530794,
+            17.213918,
+            18.051919,
+            17.753907,
+            17.865704,
+            19.271005,
+            20.765309
+          ],
+          "decode_p50_ms": 18.5091845,
+          "stability": {
+            "passed": true,
+            "prefill": {
+              "passed": true,
+              "sample_count": 42,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 416.0075183,
+              "p90_ms": 444.1859741,
+              "p90_p10_ratio": 1.0677354484244665,
+              "reason": "passed"
+            },
+            "decode": {
+              "passed": true,
+              "sample_count": 42,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 17.2334323,
+              "p90_ms": 21.4171752,
+              "p90_p10_ratio": 1.2427689868837097,
+              "reason": "passed"
+            }
+          },
+          "pass_stability": [
+            {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 413.736132,
+                "p90_ms": 429.768928,
+                "p90_p10_ratio": 1.0387512589787542,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 16.826809,
+                "p90_ms": 21.431621,
+                "p90_p10_ratio": 1.273659254110509,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            },
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 416.300726,
+                "p90_ms": 446.682738,
+                "p90_p10_ratio": 1.0729809248519062,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 17.530794,
+                "p90_ms": 21.158612,
+                "p90_p10_ratio": 1.2069397427178712,
+                "reason": "passed"
+              }
+            }
+          ],
+          "pass_medians_ms": {
+            "prefill": [
+              424.691667,
+              428.75795
+            ],
+            "decode": [
+              18.005697,
+              19.271005
+            ]
+          },
+          "between_pass_stability": {
+            "prefill": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0095746710283346,
+              "maximum_ratio": 1.25
+            },
+            "decode": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0702726475959246,
+              "maximum_ratio": 1.25
+            }
+          },
+          "stability_passed": false
+        },
+        "after": {
+          "prefill_samples_ms": [
+            438.909598,
+            450.121251,
+            448.571192,
+            434.913644,
+            448.542202,
+            428.906861,
+            426.391396,
+            413.49033,
+            423.757339,
+            428.994522,
+            443.352539,
+            435.616759,
+            447.25859,
+            444.558485,
+            421.399551,
+            458.9804,
+            430.871366,
+            447.811484,
+            455.794588,
+            439.768054,
+            453.77244,
+            397.764574,
+            411.786499,
+            405.111314,
+            431.076506,
+            413.853252,
+            428.667618,
+            414.994874,
+            423.923455,
+            442.470887,
+            433.513449,
+            451.828578,
+            450.84669,
+            468.32549,
+            420.724713,
+            417.462609,
+            426.370638,
+            417.763283,
+            422.810685,
+            445.631318,
+            432.991334,
+            416.29288
+          ],
+          "prefill_p50_ms": 432.03391999999997,
+          "decode_samples_ms": [
+            19.117851,
+            23.490066,
+            18.304906,
+            20.055971,
+            19.03351,
+            18.283103,
+            19.800959,
+            20.373703,
+            19.019215,
+            19.818672,
+            19.32424,
+            18.298391,
+            22.20574,
+            35.171572,
+            17.749454,
+            23.59807,
+            18.631736,
+            20.92432,
+            18.763431,
+            19.331731,
+            22.289325,
+            16.569675,
+            16.863135,
+            18.959275,
+            19.601535,
+            17.800845,
+            19.644045,
+            21.00273,
+            18.231967,
+            19.497324,
+            18.632296,
+            20.849045,
+            20.874123,
+            21.983953,
+            17.518691,
+            17.04212,
+            18.482816,
+            19.332351,
+            17.523621,
+            20.632151,
+            17.942854,
+            18.408797
+          ],
+          "decode_p50_ms": 19.221045500000002,
+          "stability": {
+            "passed": false,
+            "prefill": {
+              "passed": true,
+              "sample_count": 42,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 413.9674142,
+              "p90_ms": 451.7303892,
+              "p90_p10_ratio": 1.0912220955192273,
+              "reason": "passed"
+            },
+            "decode": {
+              "passed": false,
+              "sample_count": 42,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 17.5462043,
+              "p90_ms": 22.183561299999997,
+              "p90_p10_ratio": 1.2642940273982788,
+              "reason": "timing_spread_exceeds_threshold"
+            }
+          },
+          "pass_stability": [
+            {
+              "passed": false,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 423.757339,
+                "p90_ms": 453.77244,
+                "p90_p10_ratio": 1.070830870022997,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": false,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 18.298391,
+                "p90_ms": 23.490066,
+                "p90_p10_ratio": 1.2837230333530418,
+                "reason": "timing_spread_exceeds_threshold"
+              }
+            },
+            {
+              "passed": true,
+              "prefill": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 411.786499,
+                "p90_ms": 450.84669,
+                "p90_p10_ratio": 1.0948554435243882,
+                "reason": "passed"
+              },
+              "decode": {
+                "passed": true,
+                "sample_count": 21,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 17.04212,
+                "p90_ms": 20.874123,
+                "p90_p10_ratio": 1.224854830267596,
+                "reason": "passed"
+              }
+            }
+          ],
+          "pass_medians_ms": {
+            "prefill": [
+              439.768054,
+              423.923455
+            ],
+            "decode": [
+              19.331731,
+              18.632296
+            ]
+          },
+          "between_pass_stability": {
+            "prefill": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.037376084793421,
+              "maximum_ratio": 1.25
+            },
+            "decode": {
+              "passed": true,
+              "max_min_pass_median_ratio": 1.0375388518945814,
+              "maximum_ratio": 1.25
+            }
+          },
+          "stability_passed": false
+        }
+      },
+      "gate": {
+        "quality_passed": true,
+        "timing_stability_passed": false,
+        "prefill_ratio_after_before": 1.016168578840724,
+        "decode_ratio_after_before": 1.0384598792021336,
+        "no_slowdown_passed": false,
+        "prefill_improvement_passed": false,
+        "maximum_slowdown_ratio": 1.02,
+        "required_prefill_ratio": 0.98,
+        "accepted_native_experiment": false,
+        "automatic_selection_authorized": false,
+        "fresh_pytorch_comparison": false
+      }
+    }
+  },
+  "automatic_selection_authorized": false,
+  "scope": "Complete trained decoder against frozen held-out subset logits. Serial same-machine native ABBA only; PyTorch timings are historical context, not a fresh promotion baseline. Timed forward excludes artifact preparation/process startup. Quantized greedy equality and individual chunk quality are diagnostic; full held-out quality and chunked-vs-full parity qualify all precisions. FP32 also requires exact generation and reference allclose."
+}

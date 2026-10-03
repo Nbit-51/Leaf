@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import copy
 import json
 import os
 from pathlib import Path
@@ -11,9 +12,16 @@ from types import SimpleNamespace
 import pytest
 
 from leaf import cli
+from tools.validate_decoder import GATES, LATENCY_WORKLOAD
 
 
 NATIVE_POLICY_NAMES = ("LEAF_DISABLE_VNNI", "LEAF_EXPERIMENTAL_FLOAT_TILES", "LEAF_EXPERIMENTAL_FLOAT_GEMV")
+
+
+def latency_record(prefill, decode, activations=32):
+    return {"prefill_p50_ms": prefill, "decode_p50_ms": decode,
+            "prefill_samples_ms": [prefill] * 7, "decode_samples_ms": [decode] * 7,
+            "threads": 1, "activation_bits": activations, "latency_workload": dict(LATENCY_WORKLOAD)}
 
 
 @pytest.fixture
@@ -27,7 +35,10 @@ def profile_files(tmp_path, monkeypatch):
     directory = tmp_path / "model-cache"
     directory.mkdir()
     result = {
-        "pytorch": {"platform": "test-os", "cpu": "test-cpu"},
+        "pytorch": {"platform": "test-os", "cpu": "test-cpu", "latency_workload": dict(LATENCY_WORKLOAD),
+                    "threads": 1, "quality_gate_thresholds": copy.deepcopy(GATES),
+                    "latency": {"eager": latency_record(100, 20), "sdpa": latency_record(105, 21)}},
+        "latency_workload": dict(LATENCY_WORKLOAD),
         "native_executable_sha256": hashlib.sha256(runtime.read_bytes()).hexdigest(),
         "native_policy": {name: False for name in NATIVE_POLICY_NAMES},
         "native": {},
@@ -40,21 +51,45 @@ def profile_files(tmp_path, monkeypatch):
             "artifact": artifact.name,
             "artifact_sha256": hashlib.sha256(artifact.read_bytes()).hexdigest(),
             "weight_bits": bits,
+            "activation_bits": activations,
+            "quality": {"next_token_agreement": 1.0, "perplexity_ratio": 1.0},
             "quality_gate_passed": True,
             "eligible_for_automatic_selection": eligible,
             "latency_stability": {"passed": True},
-            "latency": {"decode_p50_ms": latency, "threads": 1, "activation_bits": activations},
+            "latency": latency_record(120 if bits == 32 else 90, latency, activations),
         }
         return artifact
 
     def save():
         (directory / "validation.json").write_text(json.dumps(result))
 
+    candidate("32", 12.0, bits=32, eligible=False)
     return SimpleNamespace(directory=directory, runtime=runtime, result=result, candidate=candidate, save=save)
 
 
 def test_automatic_selection_without_profile_is_fp32(tmp_path):
     assert cli.select_configuration(tmp_path, tmp_path / "unused", "auto") == (32, 32, None)
+
+
+@pytest.mark.parametrize("location", ["profile", "pytorch", "candidate"])
+@pytest.mark.parametrize("mutation", ["missing", "full_logits", "boolean_integer", "unknown", "null"])
+def test_legacy_or_mismatched_generation_workload_cannot_enable_auto(profile_files, location, mutation):
+    case = profile_files
+    case.candidate()
+    target = (case.result if location == "profile" else case.result["pytorch"] if location == "pytorch"
+              else case.result["native"]["8"]["latency"])
+    if mutation == "missing":
+        target.pop("latency_workload")
+    elif mutation == "null":
+        target["latency_workload"] = None
+    elif mutation == "full_logits":
+        target["latency_workload"]["logits"] = "all_prefix_tokens"
+    elif mutation == "boolean_integer":
+        target["latency_workload"]["use_cache"] = 1
+    else:
+        target["latency_workload"]["unknown"] = True
+    case.save()
+    assert cli.select_configuration(case.directory, case.runtime, "auto") == (32, 32, None)
 
 
 def test_changed_isa_policy_does_not_reuse_speed_profile(profile_files, monkeypatch):
@@ -232,6 +267,59 @@ def test_historical_profile_without_stability_is_not_automatically_selected(prof
     case.result["native"]["8"].pop("latency_stability")
     case.save()
     assert cli.select_configuration(case.directory, case.runtime, "auto") == (32, 32, None)
+
+
+@pytest.mark.parametrize("target", ["eager", "sdpa", "leaf"])
+def test_auto_requires_matching_tags_on_every_underlying_baseline(profile_files, target):
+    case = profile_files
+    case.candidate()
+    latency = (case.result["native"]["32"]["latency"] if target == "leaf"
+               else case.result["pytorch"]["latency"][target])
+    latency.pop("latency_workload")
+    case.save()
+    original = (case.directory / "validation.json").read_bytes()
+    assert cli.select_configuration(case.directory, case.runtime, "auto") == (32, 32, None)
+    assert (case.directory / "validation.json").read_bytes() == original
+
+
+@pytest.mark.parametrize("target", ["candidate", "leaf", "eager", "sdpa"])
+@pytest.mark.parametrize("phase", ["prefill", "decode"])
+def test_auto_recomputes_median_consistency_instead_of_trusting_stored_passes(profile_files, target, phase):
+    case = profile_files
+    case.candidate()
+    timing = (case.result["native"]["8" if target == "candidate" else "32"]["latency"]
+              if target in ("candidate", "leaf") else case.result["pytorch"]["latency"][target])
+    timing[f"{phase}_p50_ms"] *= 2
+    case.save()
+    assert cli.select_configuration(case.directory, case.runtime, "auto") == (32, 32, None)
+
+
+@pytest.mark.parametrize("prefill,decode", [(103, 7), (90, 13)])
+def test_auto_recomputes_actual_no_slowdown_even_when_stored_eligibility_is_true(profile_files, prefill, decode):
+    case = profile_files
+    case.candidate(latency=decode)
+    case.result["native"]["8"]["latency"] = latency_record(prefill, decode)
+    case.save()
+    assert cli.select_configuration(case.directory, case.runtime, "auto") == (32, 32, None)
+
+
+@pytest.mark.parametrize("field,value", [("next_token_agreement", 0.94), ("perplexity_ratio", 1.021),
+                                       ("next_token_agreement", True), ("perplexity_ratio", float("nan"))])
+def test_auto_recomputes_quality_thresholds_without_trusting_stored_quality_true(profile_files, field, value):
+    case = profile_files
+    case.candidate()
+    case.result["native"]["8"]["quality"][field] = value
+    case.save()
+    assert cli.select_configuration(case.directory, case.runtime, "auto") == (32, 32, None)
+
+
+def test_auto_recomputed_gate_does_not_rewrite_or_relabel_frozen_profile(profile_files):
+    case = profile_files
+    expected = case.candidate()
+    case.save()
+    original = (case.directory / "validation.json").read_bytes()
+    assert cli.select_configuration(case.directory, case.runtime, "auto") == (8, 32, expected)
+    assert (case.directory / "validation.json").read_bytes() == original
 
 
 def test_auto_tries_next_stable_configuration(profile_files):

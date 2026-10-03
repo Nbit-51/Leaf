@@ -1,1 +1,4 @@
 * text=auto eol=lf
+# Benchmark records contain byte-level provenance hashes. Preserve their exact
+# bytes across staging and checkout rather than normalizing line endings.
+benchmark/results/*.json -text

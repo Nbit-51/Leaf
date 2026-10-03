@@ -19,6 +19,10 @@ $common = @(
 )
 & $Compiler @architectureFlags @common (Join-Path $root "tests/native/test_kernels.cpp") "-o" (Join-Path $output "leaf_native_tests.exe")
 if ($LASTEXITCODE -ne 0) { throw "native test build failed" }
+# Keep this header-only runtime-dispatch test portable even when graph kernels use AVX2.
+& $Compiler "-std=c++17" "-O3" "-DNDEBUG" "-I" (Join-Path $root "engine/include") `
+    (Join-Path $root "tests/native/test_token_panel.cpp") "-o" (Join-Path $output "leaf_token_panel_tests.exe")
+if ($LASTEXITCODE -ne 0) { throw "FP32 token-panel test build failed" }
 & $Compiler @architectureFlags @common (Join-Path $root "benchmark/native_benchmark.cpp") "-o" (Join-Path $output "leaf_kernel_bench.exe")
 if ($LASTEXITCODE -ne 0) { throw "native benchmark build failed" }
 

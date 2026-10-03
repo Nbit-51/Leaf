@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 import struct
 import subprocess
@@ -12,6 +13,10 @@ import numpy as np
 
 MIN_LATENCY_SAMPLES = 5
 MAX_LATENCY_P90_P10_RATIO = 1.25
+# Native JSON currently uses six significant digits. Even-count medians can
+# therefore differ slightly from the median of individually rounded samples.
+LATENCY_MEDIAN_REL_TOL = 1e-5
+LATENCY_MEDIAN_ABS_TOL_MS = 1e-6
 
 
 def latency_stability(samples) -> dict:
@@ -57,7 +62,7 @@ def latency_stability(samples) -> dict:
 def benchmark_stability(latency: dict) -> dict:
     """Check both phases of one whole-model benchmark."""
     latency = latency if isinstance(latency, dict) else {}
-    phases = {phase: latency_stability(latency.get(f"{phase}_samples_ms"))
+    phases = {phase: latency_phase_stability(latency, phase)
               for phase in ("prefill", "decode")}
     return {"passed": all(result["passed"] for result in phases.values()), **phases}
 
@@ -75,6 +80,30 @@ def latency_median(latency: dict | None, phase: str) -> float | None:
     return result if np.isfinite(result) and result > 0 else None
 
 
+def latency_phase_stability(latency: dict | None, phase: str) -> dict:
+    """Check spread and agreement between a reported median and retained data."""
+    latency = latency if isinstance(latency, dict) else {}
+    samples = latency.get(f"{phase}_samples_ms")
+    result = latency_stability(samples)
+    declared = latency_median(latency, phase)
+    raw_median = None
+    if result["p10_ms"] is not None:
+        with np.errstate(over="ignore", invalid="ignore"):
+            measured = float(np.median(np.asarray(samples, dtype=np.float64)))
+        if np.isfinite(measured) and measured > 0:
+            raw_median = measured
+    consistent = bool(declared is not None and raw_median is not None and math.isclose(
+        declared, raw_median, rel_tol=LATENCY_MEDIAN_REL_TOL, abs_tol=LATENCY_MEDIAN_ABS_TOL_MS))
+    result.update(reported_median_ms=declared, samples_median_ms=raw_median, median_consistent=consistent,
+                  median_relative_tolerance=LATENCY_MEDIAN_REL_TOL,
+                  median_absolute_tolerance_ms=LATENCY_MEDIAN_ABS_TOL_MS)
+    if not consistent:
+        result["passed"] = False
+        if result["reason"] == "passed":
+            result["reason"] = "reported_median_does_not_match_samples"
+    return result
+
+
 def comparison_stability(candidate: dict, leaf_fp32: dict | None, pytorch: dict) -> dict:
     """Require stable candidates and stable baselines used by the speed gate.
 
@@ -86,14 +115,16 @@ def comparison_stability(candidate: dict, leaf_fp32: dict | None, pytorch: dict)
     pytorch = pytorch if isinstance(pytorch, dict) else {}
     fastest = {}
     for phase in ("prefill", "decode"):
+        checks = {name: latency_phase_stability(latency, phase) for name, latency in pytorch.items()}
         valid = {name: value for name, latency in pytorch.items()
                  if (value := latency_median(latency, phase)) is not None}
-        if len(valid) != len(pytorch) or not valid:
+        if (len(valid) != len(pytorch) or not valid or
+                any(item["median_consistent"] is not True for item in checks.values())):
             fastest[phase] = {"passed": False, "implementations": {},
-                              "reason": "missing_or_invalid_pytorch_medians"}
+                              "reason": "missing_invalid_or_inconsistent_pytorch_medians"}
             continue
         minimum = min(valid.values())
-        implementations = {name: latency_stability(pytorch[name].get(f"{phase}_samples_ms"))
+        implementations = {name: checks[name]
                            for name, value in valid.items() if value == minimum}
         fastest[phase] = {"passed": all(result["passed"] for result in implementations.values()),
                           "median_ms": minimum, "implementations": implementations}
