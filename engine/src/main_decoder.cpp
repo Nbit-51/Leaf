@@ -129,6 +129,9 @@ int main(int argc, char** argv) {
         if (!metrics) throw std::runtime_error("cannot write metrics");
         metrics.precision(10);
         metrics << "{\"avx2\":" << (decoder.uses_avx2() ? "true" : "false")
+#ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
+                << ",\"experimental_vector_gelu_build\":true"
+#endif
                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")
                 << ",\"activation_bits\":" << decoder.activation_bits()
                 << ",\"threads\":" << threads << ",\"artifact_bytes\":" << decoder.weight_bytes()

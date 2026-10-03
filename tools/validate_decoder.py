@@ -315,6 +315,8 @@ def apply_speed_gates(cases: dict, pytorch: dict) -> None:
         case["decode_speedup_vs_leaf_fp32"] = fp32_decode / decode if fp32_decode and decode else None
         case["prefill_speedup_vs_leaf_fp32"] = fp32_prefill / prefill if fp32_prefill and prefill else None
         case["eligible_for_automatic_selection"] = bool(
+            (not isinstance(latency, dict) or latency.get("experimental_vector_gelu_build", False) is False) and
+            (not isinstance(fp32_latency, dict) or fp32_latency.get("experimental_vector_gelu_build", False) is False) and
             case.get("quality_gate_passed") is True and workload_match and stability["passed"] and
             prefill and decode and fp32_prefill and fp32_decode and fastest_prefill and fastest_decode and
             decode < fp32_decode and prefill <= fp32_prefill * 1.02 and

@@ -135,6 +135,25 @@ These new records preserve the earlier measurements. The current Windows
 build is 26300, while the historical matched baseline used 26200; the frozen
 comparison harness rejects that platform mismatch.
 
+The [GEMM/activation follow-up](../../docs/gemm-activation-followup.md) retains
+the next experiments separately:
+
+| Records | Outcome |
+|---|---|
+| [Weight-panel Windows shapes](gpt2_weight_panel_shapes_windows.json) | Numerically correct, slower observed medians and unstable; undispatched |
+| [Wide-token Windows](gpt2_wide_token_shapes_windows.json), [Linux](gpt2_wide_token_shapes_linux.json) | Correct; no stable improvement; undispatched |
+| [Unrolled Linux shapes](gpt2_unrolled_token_shapes_linux.json) | Correct and stable, but all four ratios within about 1% of full-K; below the 2% improvement threshold |
+| [GELU Windows BEFORE](gpt2_gelu_before_packed_windows.json), [initial ABBA](gpt2_gelu_packed_windows_abba.json), [final ABBA](gpt2_gelu_packed_windows_final_abba.json) | Trained quality passes; 21–24% lower observed prefill, unstable timing rejects promotion |
+| [GELU Linux BEFORE](gpt2_gelu_before_packed_linux.json), [ABBA](gpt2_gelu_packed_linux_abba.json) | Trained quality and AFTER stability pass; unstable first BEFORE pass rejects the combined gate |
+| [GELU Windows phases](gpt2_gelu_phase_windows.json) | Diagnostic means with warmups: packed-prefill activation around 2 ms / 1%; linear remains dominant |
+| [GELU Linux confirmation](gpt2_gelu_packed_linux_confirmation_abba.json) | Longer predeclared run; prefill and AFTER stable, first BEFORE decode unstable; combined gate rejects promotion |
+| [Default regression](gemm_activation_default_regression.json) | Eight reduced architecture cases bit-exact to the prior executable |
+| [Experimental architectures](gemm_activation_experimental_architectures.json) | Eight reduced architecture cases pass; implementation parity, not trained performance qualification |
+
+The vector GELU build is off by default. Its final binary emits an experimental
+build marker that disallows automatic precision selection. These ABBA runs use
+frozen quality references and do not constitute fresh PyTorch qualification.
+
 The full-command record uses cached artifacts, no export/build/download, and
 alternating case order. Its integrity preflight warms the OS file cache. External
 timers include interpreter startup; native constructor and prompt forward

@@ -1,18 +1,23 @@
 // Actual GPT-2 prefill shapes. Synthetic inputs; no model-level speed claim.
 #include "leaf/kernels/token_panel.h"
+#include "leaf/kernels/weight_panel.h"
+#include "leaf/kernels/wide_token.h"
+#include "leaf/kernels/unrolled_token.h"
 #include <chrono>
 #include <cmath>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 using Clock = std::chrono::steady_clock;
 using Gemm = decltype(&leaf::kernels::gemm_token_panels_f32);
 volatile double observed_checksum = 0;
 
-void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup) {
+void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup, const std::string& kind) {
+    const bool weight_panel = kind == "weight_panel", wide = kind == "wide_token";
     constexpr std::size_t tokens = 63;
     std::vector<float> input(tokens * columns), weights(rows * columns), bias(rows);
     for (std::size_t i = 0; i < input.size(); ++i)
@@ -22,13 +27,25 @@ void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup
     for (std::size_t i = 0; i < rows; ++i) bias[i] = static_cast<float>(i % 7) / 11.0f;
     leaf::kernels::TokenPanelsF32 panels;
     panels.pack(input.data(), tokens, columns, columns);
+    leaf::kernels::WideTokenPanelsF32 wide_panels;
+    wide_panels.pack(input.data(), tokens, columns, columns);
     std::vector<float> full(tokens * rows), blocked(full.size());
     leaf::kernels::gemm_token_panels_f32(weights.data(), rows, columns, columns,
         panels, full.data(), rows, bias.data());
-    leaf::kernels::gemm_token_panels_f32_kblocked(weights.data(), rows, columns, columns,
-        panels, blocked.data(), rows, bias.data());
+    if (kind == "unrolled")
+        leaf::kernels::gemm_token_panels_f32_unrolled(weights.data(), rows, columns, columns,
+            panels, blocked.data(), rows, bias.data());
+    else if (wide)
+        leaf::kernels::gemm_wide_tokens_f32(weights.data(), rows, columns, columns,
+            wide_panels, blocked.data(), rows, bias.data());
+    else if (weight_panel)
+        leaf::kernels::gemm_weight_panels_f32(input.data(), tokens, columns, weights.data(), rows,
+            columns, columns, blocked.data(), rows, bias.data());
+    else
+        leaf::kernels::gemm_token_panels_f32_kblocked(weights.data(), rows, columns, columns,
+            panels, blocked.data(), rows, bias.data());
     if (std::memcmp(full.data(), blocked.data(), full.size() * sizeof(float)))
-        throw std::runtime_error("blocked-K output is not bit-exact to full-K");
+        throw std::runtime_error("candidate output is not bit-exact to full-K");
     double max_error = 0;
     for (std::size_t t = 0; t < tokens; ++t)
         for (std::size_t r = 0; r < rows; ++r) {
@@ -44,18 +61,29 @@ void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup
               << ",\"bit_exact\":true,\"max_absolute_error_fp64\":" << max_error
               << ",\"packed_input_bytes\":" << panels.storage_size() * sizeof(float)
               << ",\"passes\":[";
-    // Same resident matrices and reusable panel/output storage in both stages.
-    // Every sample includes repacking input; no weights are packed.
+    // Same resident matrices and reusable output storage in both stages.
+    // Include each algorithm's packing: input panels for token candidates,
+    // bounded transient weight panels for the weight-panel candidate.
     for (unsigned pass = 0; pass < 4; ++pass) {
         const bool candidate = pass == 1 || pass == 2;
         Gemm gemm = candidate ? &leaf::kernels::gemm_token_panels_f32_kblocked
                               : &leaf::kernels::gemm_token_panels_f32;
+        if (candidate && kind == "unrolled") gemm = &leaf::kernels::gemm_token_panels_f32_unrolled;
         std::cout << (pass ? "," : "") << "{\"stage\":\""
-                  << (candidate ? "kblocked" : "full_k") << "\",\"samples_ms\":[";
+                  << (candidate ? kind : "full_k") << "\",\"samples_ms\":[";
         for (unsigned iteration = 0; iteration < warmup + runs; ++iteration) {
             const auto start = Clock::now();
-            panels.pack(input.data(), tokens, columns, columns);
-            gemm(weights.data(), rows, columns, columns, panels, blocked.data(), rows, bias.data(), true);
+            if (candidate && wide) {
+                wide_panels.pack(input.data(), tokens, columns, columns);
+                leaf::kernels::gemm_wide_tokens_f32(weights.data(), rows, columns, columns,
+                    wide_panels, blocked.data(), rows, bias.data());
+            } else if (candidate && weight_panel)
+                leaf::kernels::gemm_weight_panels_f32(input.data(), tokens, columns, weights.data(), rows,
+                    columns, columns, blocked.data(), rows, bias.data());
+            else {
+                panels.pack(input.data(), tokens, columns, columns);
+                gemm(weights.data(), rows, columns, columns, panels, blocked.data(), rows, bias.data(), true);
+            }
             const double ms = std::chrono::duration<double, std::milli>(Clock::now() - start).count();
             double checksum = 0;
             for (float value : blocked) checksum += value;
@@ -71,14 +99,16 @@ int main(int argc, char** argv) {
     try {
         const unsigned runs = argc > 1 ? std::stoul(argv[1]) : 21;
         const unsigned warmup = argc > 2 ? std::stoul(argv[2]) : 10;
+        const std::string candidate = argc > 3 ? argv[3] : "kblocked";
+        if (candidate != "kblocked" && candidate != "weight_panel" && candidate != "wide_token" && candidate != "unrolled") throw std::runtime_error("invalid candidate");
         if (runs < 5 || runs > 10000 || warmup > 10000) throw std::runtime_error("invalid runs/warmup");
         std::cout << std::setprecision(10) << "{\"avx2_fma\":"
                   << (leaf::kernels::token_panel_f32_avx2_available() ? "true" : "false")
-                  << ",\"packing_included\":true,\"reuses_workspace\":true,\"shapes\":[";
-        shape(768, 768, runs, warmup); std::cout << ',';
-        shape(3072, 768, runs, warmup); std::cout << ',';
-        shape(768, 3072, runs, warmup); std::cout << ',';
-        shape(2304, 768, runs, warmup);
+                  << ",\"candidate\":\"" << candidate << "\",\"packing_included\":true,\"reuses_workspace\":true,\"shapes\":[";
+        shape(768, 768, runs, warmup, candidate); std::cout << ',';
+        shape(3072, 768, runs, warmup, candidate); std::cout << ',';
+        shape(768, 3072, runs, warmup, candidate); std::cout << ',';
+        shape(2304, 768, runs, warmup, candidate);
         std::cout << "]}\n";
         return 0;
     } catch (const std::exception& error) {

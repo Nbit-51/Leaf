@@ -1,5 +1,8 @@
 // Standalone correctness checks, not a latency benchmark or model-quality gate.
 #include "leaf/kernels/token_panel.h"
+#include "leaf/kernels/weight_panel.h"
+#include "leaf/kernels/wide_token.h"
+#include "leaf/kernels/unrolled_token.h"
 
 #include <cmath>
 #include <cstring>
@@ -59,6 +62,28 @@ void check_matrix(std::size_t tokens, std::size_t rows, std::size_t columns, boo
             "K-blocked vector output is not bit-exact against full-K");
     require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
             "K-blocked scalar fallback changed the established scalar output");
+    leaf::kernels::gemm_weight_panels_f32(input.data(), tokens, input_stride, weights.data(), rows,
+        columns, weight_stride, blocked.data(), output_stride, offset, true);
+    leaf::kernels::gemm_weight_panels_f32(input.data(), tokens, input_stride, weights.data(), rows,
+        columns, weight_stride, blocked_scalar.data(), output_stride, offset, false);
+    require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
+            "weight-panel vector output is not bit-exact against full-K");
+    require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
+            "weight-panel scalar fallback changed the established scalar output");
+    leaf::kernels::WideTokenPanelsF32 wide;
+    wide.pack(input.data(), tokens, columns, input_stride);
+    leaf::kernels::gemm_wide_tokens_f32(weights.data(), rows, columns, weight_stride, wide,
+        blocked.data(), output_stride, offset, true);
+    leaf::kernels::gemm_wide_tokens_f32(weights.data(), rows, columns, weight_stride, wide,
+        blocked_scalar.data(), output_stride, offset, false);
+    require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
+            "wide-token output is not bit-exact against full-K");
+    require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
+            "wide-token scalar fallback changed the established scalar output");
+    leaf::kernels::gemm_token_panels_f32_unrolled(weights.data(), rows, columns, weight_stride, panels,
+        blocked.data(), output_stride, offset, true);
+    require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
+            "unrolled output is not bit-exact against full-K");
     for (std::size_t token = 0; token < tokens; ++token) {
         for (std::size_t row = 0; row < rows; ++row) {
             double expected = with_bias ? bias[row] : 0.0;
@@ -121,7 +146,8 @@ void check_invalid() {
     rejected<std::out_of_range>([&] { panels.panel(0); });
     panels.pack(&value, 1, 1, 1);
     rejected<std::out_of_range>([&] { panels.panel(1); });
-    for (auto gemm : {&leaf::kernels::gemm_token_panels_f32, &leaf::kernels::gemm_token_panels_f32_kblocked}) {
+    for (auto gemm : {&leaf::kernels::gemm_token_panels_f32, &leaf::kernels::gemm_token_panels_f32_kblocked,
+                     &leaf::kernels::gemm_token_panels_f32_unrolled}) {
         rejected<std::invalid_argument>([&] { gemm(nullptr, 1, 1, 1, panels, &output, 1, nullptr, true); });
         rejected<std::invalid_argument>([&] { gemm(&value, 1, 1, 1, panels, nullptr, 1, nullptr, true); });
         rejected<std::invalid_argument>([&] { gemm(&value, 0, 1, 1, panels, &output, 1, nullptr, true); });
@@ -137,13 +163,26 @@ void check_invalid() {
         two_tokens.pack(pair, 2, 1, 1);
         rejected<std::overflow_error>([&] { gemm(&value, 1, 1, 1, two_tokens, &output, maximum, nullptr, true); });
     }
+    leaf::kernels::WideTokenPanelsF32 wide;
+    rejected<std::invalid_argument>([&] { wide.pack(nullptr, 1, 1, 1); });
+    rejected<std::invalid_argument>([&] { wide.pack(&value, 0, 1, 1); });
+    rejected<std::invalid_argument>([&] { wide.pack(&value, 1, 2, 1); });
+    rejected<std::overflow_error>([&] { wide.pack(&value, maximum, 1, 1); });
+    wide.pack(&value, 1, 1, 1);
+    rejected<std::invalid_argument>([&] { leaf::kernels::gemm_wide_tokens_f32(nullptr, 1, 1, 1, wide, &output, 1); });
+    rejected<std::invalid_argument>([&] { leaf::kernels::gemm_wide_tokens_f32(&value, 1, 2, 2, wide, &output, 1); });
+    rejected<std::overflow_error>([&] { leaf::kernels::gemm_wide_tokens_f32(&value, 2, 1, maximum, wide, &output, 2); });
+    rejected<std::invalid_argument>([&] { leaf::kernels::gemm_weight_panels_f32(nullptr, 1, 1, &value, 1, 1, 1, &output, 1); });
+    rejected<std::invalid_argument>([&] { leaf::kernels::gemm_weight_panels_f32(&value, 1, 1, &value, 1, 1, 1, nullptr, 1); });
+    rejected<std::invalid_argument>([&] { leaf::kernels::gemm_weight_panels_f32(&value, 1, 1, &value, 2, 1, 1, &output, 1); });
+    rejected<std::overflow_error>([&] { leaf::kernels::gemm_weight_panels_f32(&value, 2, maximum, &value, 1, 1, 1, &output, 1); });
 }
 }  // namespace
 
 int main() {
     try {
-        for (std::size_t tokens : {1, 7, 8, 15, 16, 17, 29, 31, 32, 33, 127})
-            for (std::size_t rows : {1, 2, 5, 6, 7, 11, 12, 13})
+        for (std::size_t tokens : {1, 6, 7, 8, 12, 15, 16, 17, 29, 31, 32, 33, 127})
+            for (std::size_t rows : {1, 2, 5, 6, 7, 11, 12, 13, 16, 17, 31, 32})
                 for (std::size_t columns : {1, 7, 8, 15, 30, 64, 257})
                     for (bool bias : {false, true}) check_matrix(tokens, rows, columns, bias);
         check_matrix(29, 13, 2048, true);

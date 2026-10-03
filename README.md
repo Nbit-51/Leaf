@@ -1170,6 +1170,34 @@ also exceeds the 2% allowance. No default is enabled. All eight reduced
 architecture cases pass under both policies; the Python suite reports 726
 passed and six skipped. Earlier records remain preserved.
 
+### 7.10 GEMM candidates and vector GELU follow-up
+
+The [next measured iteration](docs/gemm-activation-followup.md) tests bounded
+weight panels, wider 3×32 token panels, and four-way unrolling of the existing
+6×16 loop. All pass numerical checks, but none demonstrates a stable 2% shape
+improvement. The decoder retains its existing GEMM paths.
+
+A separate `LEAF_EXPERIMENTAL_VECTOR_GELU` **build-time** option tests vector
+GELU-new for multi-token ordinary FFNs. Normal builds leave it off. The
+elementwise grid has maximum absolute error below `1e-6`; trained GPT-2 quality,
+chunked cache and exact generation pass. Windows whole-model observations
+show 21–24% lower prefill, but remain unstable and rejected. The initial Linux
+candidate stage is stable at 164.6251 ms versus a 221.1735 ms baseline;
+baseline instability rejects the combined comparison. Neither observation
+is automatic promotion or a fresh matched PyTorch qualification.
+
+A longer Linux confirmation observes 223.6888 → 165.5292 ms prefill, but
+baseline decode instability still rejects the combined gate. All attempts are
+retained. The Python suite passes 734 tests (6 skipped); normal-build outputs
+remain bit-exact in eight reduced architecture cases, and the experimental
+build passes the same architecture coverage.
+
+The candidate's packed-prefill profile puts activation at about 2 ms (1%),
+linear at 81%, and attention at 14%. Diagnostics include warmups and are
+separate from acceptance timing. Final experimental binaries emit a build
+marker that prevents automatic precision selection. Commands, all retained
+results, and remaining qualification work are in the follow-up document.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package

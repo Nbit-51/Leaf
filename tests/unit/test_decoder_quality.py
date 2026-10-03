@@ -176,6 +176,15 @@ def test_speed_gates_accept_only_validated_stable_improvement_and_preserve_sampl
     assert cases["8"]["latency"]["prefill_samples_ms"] == samples["prefill_samples_ms"]
 
 
+@pytest.mark.parametrize("key", ["32", "8"])
+@pytest.mark.parametrize("marker", [True, "true", 1, None])
+def test_experimental_gelu_build_cannot_authorize_automatic_selection(key, marker):
+    cases, baseline = speed_comparison()
+    cases[key]["latency"]["experimental_vector_gelu_build"] = marker
+    apply_speed_gates(cases, baseline)
+    assert cases["8"]["eligible_for_automatic_selection"] is False
+
+
 @pytest.mark.parametrize("target", ["baseline", "eager", "sdpa", "leaf", "candidate"])
 @pytest.mark.parametrize("change", ["missing", "full_logits", "malformed_cache"])
 def test_speed_gates_preserve_legacy_measurements_without_qualifying_unmatched_workload(target, change):

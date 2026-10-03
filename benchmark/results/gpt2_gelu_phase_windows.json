@@ -1,0 +1,970 @@
+{
+  "benchmark": "decoder-phase-diagnostics-v1",
+  "measured_at_utc": "2026-10-03T12:13:18.816044+00:00",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "threads": 1,
+  "pinned_cpu": 2,
+  "sha256": {
+    "executable": "b253ced366157df97c3df682c3e1c1e0573851ede6ea094620547ee39bbf3630",
+    "artifact": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8",
+    "tokens": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6"
+  },
+  "prefill_tokens": 63,
+  "decode_tokens": 1,
+  "logits": "last_token_only",
+  "runs": 5,
+  "warmup": 2,
+  "profile_includes_warmup": true,
+  "profile_includes_first_use": true,
+  "automatic_selection_authorized": false,
+  "acceptance_timing": false,
+  "order": [
+    "default",
+    "token_panel",
+    "token_panel",
+    "default"
+  ],
+  "passes": [
+    {
+      "stage": "default",
+      "summary": {
+        "prefill": {
+          "forward": {
+            "mean_ms_per_forward": 380.9716571428571,
+            "percent_of_forward": 100.0
+          },
+          "embedding": {
+            "mean_ms_per_forward": 3.2535714285714286,
+            "percent_of_forward": 0.8540192866240969
+          },
+          "layer_norm": {
+            "mean_ms_per_forward": 2.777014285714286,
+            "percent_of_forward": 0.7289293661740717
+          },
+          "linear_fp32": {
+            "mean_ms_per_forward": 342.84624285714284,
+            "percent_of_forward": 89.99258512519268
+          },
+          "position_reorder": {
+            "mean_ms_per_forward": 0.31741428571428576,
+            "percent_of_forward": 0.08331703415807162
+          },
+          "attention": {
+            "mean_ms_per_forward": 28.606428571428573,
+            "percent_of_forward": 7.508807554337751
+          },
+          "activation": {
+            "mean_ms_per_forward": 1.9099714285714284,
+            "percent_of_forward": 0.5013421320881164
+          },
+          "kv_append": {
+            "mean_ms_per_forward": 0.5037571428571429,
+            "percent_of_forward": 0.1322295591843053
+          },
+          "causal_mask": {
+            "mean_ms_per_forward": 0.0035428571428571427,
+            "percent_of_forward": 0.0009299529443810144
+          },
+          "residual": {
+            "mean_ms_per_forward": 0.48651428571428573,
+            "percent_of_forward": 0.12770353820096705
+          },
+          "unattributed": {
+            "mean_ms_per_forward": 0.2671999999999701,
+            "percent_of_forward": 0.07013645109556671
+          }
+        },
+        "decode": {
+          "forward": {
+            "mean_ms_per_forward": 29.702814285714286,
+            "percent_of_forward": 100.0
+          },
+          "embedding": {
+            "mean_ms_per_forward": 0.10064285714285715,
+            "percent_of_forward": 0.3388327320595403
+          },
+          "layer_norm": {
+            "mean_ms_per_forward": 0.07222857142857143,
+            "percent_of_forward": 0.24317080103520736
+          },
+          "linear_fp32": {
+            "mean_ms_per_forward": 27.74202857142857,
+            "percent_of_forward": 93.39865342245106
+          },
+          "position_reorder": {
+            "mean_ms_per_forward": 0.008885714285714285,
+            "percent_of_forward": 0.029915395222290142
+          },
+          "attention": {
+            "mean_ms_per_forward": 0.9165857142857143,
+            "percent_of_forward": 3.0858547795134372
+          },
+          "activation": {
+            "mean_ms_per_forward": 0.7668,
+            "percent_of_forward": 2.5815735594077904
+          },
+          "kv_append": {
+            "mean_ms_per_forward": 0.014214285714285716,
+            "percent_of_forward": 0.04785501325752202
+          },
+          "causal_mask": {
+            "mean_ms_per_forward": 0.00032857142857142856,
+            "percent_of_forward": 0.0011061962863547802
+          },
+          "residual": {
+            "mean_ms_per_forward": 0.010557142857142857,
+            "percent_of_forward": 0.035542567635486196
+          },
+          "unattributed": {
+            "mean_ms_per_forward": 0.07054285714286022,
+            "percent_of_forward": 0.23749553313131058
+          }
+        }
+      },
+      "raw": {
+        "avx2": true,
+        "experimental_vector_gelu_build": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 507125760,
+        "load_ms": 0.4026,
+        "prefill_p50_ms": 349.8448,
+        "decode_p50_ms": 29.9443,
+        "prefill_samples_ms": [
+          347.6079,
+          349.8448,
+          357.8416,
+          346.7096,
+          352.2963
+        ],
+        "decode_samples_ms": [
+          29.9443,
+          28.7106,
+          30.0974,
+          28.9472,
+          33.0639
+        ],
+        "generated_tokens": [],
+        "diagnostic_profile": {
+          "leaf_decoder_profile": 1,
+          "clock": "steady_clock",
+          "bucket_by": "forward_input_tokens",
+          "timings": {
+            "prefill": {
+              "forward": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 2666.8016
+              },
+              "embedding": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 22.775
+              },
+              "layer_norm": {
+                "calls": 175,
+                "tokens": 11025,
+                "milliseconds": 19.4391
+              },
+              "linear_fp32": {
+                "calls": 511,
+                "tokens": 31759,
+                "milliseconds": 2399.9237
+              },
+              "position_reorder": {
+                "calls": 168,
+                "tokens": 10584,
+                "milliseconds": 2.2219
+              },
+              "attention": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 200.245
+              },
+              "activation": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 13.3698
+              },
+              "kv_append": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 3.5263
+              },
+              "causal_mask": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 0.0248
+              },
+              "residual": {
+                "calls": 168,
+                "tokens": 10584,
+                "milliseconds": 3.4056
+              }
+            },
+            "decode": {
+              "forward": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 207.9197
+              },
+              "embedding": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 0.7045
+              },
+              "layer_norm": {
+                "calls": 175,
+                "tokens": 175,
+                "milliseconds": 0.5056
+              },
+              "linear_fp32": {
+                "calls": 511,
+                "tokens": 511,
+                "milliseconds": 194.1942
+              },
+              "position_reorder": {
+                "calls": 168,
+                "tokens": 168,
+                "milliseconds": 0.0622
+              },
+              "attention": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 6.4161
+              },
+              "activation": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 5.3676
+              },
+              "kv_append": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 0.0995
+              },
+              "causal_mask": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 0.0023
+              },
+              "residual": {
+                "calls": 168,
+                "tokens": 168,
+                "milliseconds": 0.0739
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "stage": "token_panel",
+      "summary": {
+        "prefill": {
+          "forward": {
+            "mean_ms_per_forward": 202.54389999999998,
+            "percent_of_forward": 99.99999999999999
+          },
+          "embedding": {
+            "mean_ms_per_forward": 3.2253285714285718,
+            "percent_of_forward": 1.5924096314075968
+          },
+          "layer_norm": {
+            "mean_ms_per_forward": 2.8072285714285714,
+            "percent_of_forward": 1.385985246373044
+          },
+          "linear_fp32": {
+            "mean_ms_per_forward": 163.7743857142857,
+            "percent_of_forward": 80.85871048907704
+          },
+          "position_reorder": {
+            "mean_ms_per_forward": 0.33745714285714284,
+            "percent_of_forward": 0.16660938337671136
+          },
+          "attention": {
+            "mean_ms_per_forward": 28.883314285714285,
+            "percent_of_forward": 14.260273592892348
+          },
+          "activation": {
+            "mean_ms_per_forward": 2.2036571428571428,
+            "percent_of_forward": 1.0879898840977895
+          },
+          "kv_append": {
+            "mean_ms_per_forward": 0.5152,
+            "percent_of_forward": 0.2543646093513554
+          },
+          "causal_mask": {
+            "mean_ms_per_forward": 0.003842857142857143,
+            "percent_of_forward": 0.0018972959160246953
+          },
+          "residual": {
+            "mean_ms_per_forward": 0.4796142857142857,
+            "percent_of_forward": 0.23679522598028663
+          },
+          "unattributed": {
+            "mean_ms_per_forward": 0.3138714285714416,
+            "percent_of_forward": 0.15496464152780787
+          }
+        },
+        "decode": {
+          "forward": {
+            "mean_ms_per_forward": 35.21202857142857,
+            "percent_of_forward": 100.0
+          },
+          "embedding": {
+            "mean_ms_per_forward": 0.0486,
+            "percent_of_forward": 0.13802101716864612
+          },
+          "layer_norm": {
+            "mean_ms_per_forward": 0.07304285714285715,
+            "percent_of_forward": 0.20743723127080763
+          },
+          "linear_fp32": {
+            "mean_ms_per_forward": 32.91735714285714,
+            "percent_of_forward": 93.48327397861608
+          },
+          "position_reorder": {
+            "mean_ms_per_forward": 0.009414285714285714,
+            "percent_of_forward": 0.026735993625554906
+          },
+          "attention": {
+            "mean_ms_per_forward": 1.0472714285714286,
+            "percent_of_forward": 2.9741865807220096
+          },
+          "activation": {
+            "mean_ms_per_forward": 1.0121,
+            "percent_of_forward": 2.8743018822301796
+          },
+          "kv_append": {
+            "mean_ms_per_forward": 0.014757142857142858,
+            "percent_of_forward": 0.04190937999271353
+          },
+          "causal_mask": {
+            "mean_ms_per_forward": 0.00032857142857142856,
+            "percent_of_forward": 0.0009331226910284716
+          },
+          "residual": {
+            "mean_ms_per_forward": 0.011757142857142857,
+            "percent_of_forward": 0.03338956411810575
+          },
+          "unattributed": {
+            "mean_ms_per_forward": 0.07739999999999522,
+            "percent_of_forward": 0.21981124956486728
+          }
+        }
+      },
+      "raw": {
+        "avx2": true,
+        "experimental_vector_gelu_build": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 507916288,
+        "load_ms": 1.0016,
+        "prefill_p50_ms": 175.6654,
+        "decode_p50_ms": 30.3201,
+        "prefill_samples_ms": [
+          175.6654,
+          183.1156,
+          173.5312,
+          179.4466,
+          174.1505
+        ],
+        "decode_samples_ms": [
+          30.3201,
+          41.4076,
+          28.2813,
+          29.5515,
+          31.2706
+        ],
+        "generated_tokens": [],
+        "diagnostic_profile": {
+          "leaf_decoder_profile": 1,
+          "clock": "steady_clock",
+          "bucket_by": "forward_input_tokens",
+          "timings": {
+            "prefill": {
+              "forward": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 1417.8073
+              },
+              "embedding": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 22.5773
+              },
+              "layer_norm": {
+                "calls": 175,
+                "tokens": 11025,
+                "milliseconds": 19.6506
+              },
+              "linear_fp32": {
+                "calls": 511,
+                "tokens": 31759,
+                "milliseconds": 1146.4207
+              },
+              "position_reorder": {
+                "calls": 168,
+                "tokens": 10584,
+                "milliseconds": 2.3622
+              },
+              "attention": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 202.1832
+              },
+              "activation": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 15.4256
+              },
+              "kv_append": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 3.6064
+              },
+              "causal_mask": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 0.0269
+              },
+              "residual": {
+                "calls": 168,
+                "tokens": 10584,
+                "milliseconds": 3.3573
+              }
+            },
+            "decode": {
+              "forward": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 246.4842
+              },
+              "embedding": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 0.3402
+              },
+              "layer_norm": {
+                "calls": 175,
+                "tokens": 175,
+                "milliseconds": 0.5113
+              },
+              "linear_fp32": {
+                "calls": 511,
+                "tokens": 511,
+                "milliseconds": 230.4215
+              },
+              "position_reorder": {
+                "calls": 168,
+                "tokens": 168,
+                "milliseconds": 0.0659
+              },
+              "attention": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 7.3309
+              },
+              "activation": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 7.0847
+              },
+              "kv_append": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 0.1033
+              },
+              "causal_mask": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 0.0023
+              },
+              "residual": {
+                "calls": 168,
+                "tokens": 168,
+                "milliseconds": 0.0823
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "stage": "token_panel",
+      "summary": {
+        "prefill": {
+          "forward": {
+            "mean_ms_per_forward": 202.17944285714287,
+            "percent_of_forward": 100.0
+          },
+          "embedding": {
+            "mean_ms_per_forward": 3.222642857142857,
+            "percent_of_forward": 1.593951794307758
+          },
+          "layer_norm": {
+            "mean_ms_per_forward": 2.759314285714286,
+            "percent_of_forward": 1.3647847905407366
+          },
+          "linear_fp32": {
+            "mean_ms_per_forward": 163.8598857142857,
+            "percent_of_forward": 81.04675895761905
+          },
+          "position_reorder": {
+            "mean_ms_per_forward": 0.3647,
+            "percent_of_forward": 0.180384313482203
+          },
+          "attention": {
+            "mean_ms_per_forward": 28.736271428571428,
+            "percent_of_forward": 14.213250873817111
+          },
+          "activation": {
+            "mean_ms_per_forward": 1.9132857142857145,
+            "percent_of_forward": 0.9463304909973539
+          },
+          "kv_append": {
+            "mean_ms_per_forward": 0.5041857142857143,
+            "percent_of_forward": 0.24937536040296876
+          },
+          "causal_mask": {
+            "mean_ms_per_forward": 0.0032857142857142855,
+            "percent_of_forward": 0.0016251475616321312
+          },
+          "residual": {
+            "mean_ms_per_forward": 0.5197142857142857,
+            "percent_of_forward": 0.2570559490964215
+          },
+          "unattributed": {
+            "mean_ms_per_forward": 0.2961571428571525,
+            "percent_of_forward": 0.14648232217476875
+          }
+        },
+        "decode": {
+          "forward": {
+            "mean_ms_per_forward": 30.2237,
+            "percent_of_forward": 100.0
+          },
+          "embedding": {
+            "mean_ms_per_forward": 0.0486,
+            "percent_of_forward": 0.16080096083537093
+          },
+          "layer_norm": {
+            "mean_ms_per_forward": 0.0752,
+            "percent_of_forward": 0.24881136326789904
+          },
+          "linear_fp32": {
+            "mean_ms_per_forward": 28.00517142857143,
+            "percent_of_forward": 92.6596393842297
+          },
+          "position_reorder": {
+            "mean_ms_per_forward": 0.010057142857142858,
+            "percent_of_forward": 0.033275683841299565
+          },
+          "attention": {
+            "mean_ms_per_forward": 1.1409285714285715,
+            "percent_of_forward": 3.7749467187292476
+          },
+          "activation": {
+            "mean_ms_per_forward": 0.7892571428571429,
+            "percent_of_forward": 2.6113849160001683
+          },
+          "kv_append": {
+            "mean_ms_per_forward": 0.06701428571428572,
+            "percent_of_forward": 0.22172760355047766
+          },
+          "causal_mask": {
+            "mean_ms_per_forward": 0.00032857142857142856,
+            "percent_of_forward": 0.0010871317164060938
+          },
+          "residual": {
+            "mean_ms_per_forward": 0.0116,
+            "percent_of_forward": 0.03838047624877165
+          },
+          "unattributed": {
+            "mean_ms_per_forward": 0.07554285714285568,
+            "percent_of_forward": 0.24994576158066575
+          }
+        }
+      },
+      "raw": {
+        "avx2": true,
+        "experimental_vector_gelu_build": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 507904000,
+        "load_ms": 0.696,
+        "prefill_p50_ms": 172.4978,
+        "decode_p50_ms": 29.282,
+        "prefill_samples_ms": [
+          172.2182,
+          192.8638,
+          171.9041,
+          177.2302,
+          172.4978
+        ],
+        "decode_samples_ms": [
+          29.184,
+          29.282,
+          29.8165,
+          34.4315,
+          28.31
+        ],
+        "generated_tokens": [],
+        "diagnostic_profile": {
+          "leaf_decoder_profile": 1,
+          "clock": "steady_clock",
+          "bucket_by": "forward_input_tokens",
+          "timings": {
+            "prefill": {
+              "forward": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 1415.2561
+              },
+              "embedding": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 22.5585
+              },
+              "layer_norm": {
+                "calls": 175,
+                "tokens": 11025,
+                "milliseconds": 19.3152
+              },
+              "linear_fp32": {
+                "calls": 511,
+                "tokens": 31759,
+                "milliseconds": 1147.0192
+              },
+              "position_reorder": {
+                "calls": 168,
+                "tokens": 10584,
+                "milliseconds": 2.5529
+              },
+              "attention": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 201.1539
+              },
+              "activation": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 13.393
+              },
+              "kv_append": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 3.5293
+              },
+              "causal_mask": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 0.023
+              },
+              "residual": {
+                "calls": 168,
+                "tokens": 10584,
+                "milliseconds": 3.638
+              }
+            },
+            "decode": {
+              "forward": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 211.5659
+              },
+              "embedding": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 0.3402
+              },
+              "layer_norm": {
+                "calls": 175,
+                "tokens": 175,
+                "milliseconds": 0.5264
+              },
+              "linear_fp32": {
+                "calls": 511,
+                "tokens": 511,
+                "milliseconds": 196.0362
+              },
+              "position_reorder": {
+                "calls": 168,
+                "tokens": 168,
+                "milliseconds": 0.0704
+              },
+              "attention": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 7.9865
+              },
+              "activation": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 5.5248
+              },
+              "kv_append": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 0.4691
+              },
+              "causal_mask": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 0.0023
+              },
+              "residual": {
+                "calls": 168,
+                "tokens": 168,
+                "milliseconds": 0.0812
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "stage": "default",
+      "summary": {
+        "prefill": {
+          "forward": {
+            "mean_ms_per_forward": 391.5031142857143,
+            "percent_of_forward": 100.0
+          },
+          "embedding": {
+            "mean_ms_per_forward": 3.4757857142857143,
+            "percent_of_forward": 0.8878053807125345
+          },
+          "layer_norm": {
+            "mean_ms_per_forward": 2.7607571428571425,
+            "percent_of_forward": 0.7051686288355742
+          },
+          "linear_fp32": {
+            "mean_ms_per_forward": 351.95034285714286,
+            "percent_of_forward": 89.8972013285937
+          },
+          "position_reorder": {
+            "mean_ms_per_forward": 0.6160428571428571,
+            "percent_of_forward": 0.1573532456483287
+          },
+          "attention": {
+            "mean_ms_per_forward": 29.52837142857143,
+            "percent_of_forward": 7.54230818379186
+          },
+          "activation": {
+            "mean_ms_per_forward": 1.8915142857142857,
+            "percent_of_forward": 0.48314156814953996
+          },
+          "kv_append": {
+            "mean_ms_per_forward": 0.5092714285714286,
+            "percent_of_forward": 0.13008106704350975
+          },
+          "causal_mask": {
+            "mean_ms_per_forward": 0.003557142857142857,
+            "percent_of_forward": 0.0009085860948086601
+          },
+          "residual": {
+            "mean_ms_per_forward": 0.4625714285714286,
+            "percent_of_forward": 0.11815268172652377
+          },
+          "unattributed": {
+            "mean_ms_per_forward": 0.3049000000000238,
+            "percent_of_forward": 0.07787932940362549
+          }
+        },
+        "decode": {
+          "forward": {
+            "mean_ms_per_forward": 30.28505714285714,
+            "percent_of_forward": 99.99999999999999
+          },
+          "embedding": {
+            "mean_ms_per_forward": 0.054028571428571426,
+            "percent_of_forward": 0.1784000973606031
+          },
+          "layer_norm": {
+            "mean_ms_per_forward": 0.12905714285714284,
+            "percent_of_forward": 0.4261413219343439
+          },
+          "linear_fp32": {
+            "mean_ms_per_forward": 28.284114285714285,
+            "percent_of_forward": 93.39296984745896
+          },
+          "position_reorder": {
+            "mean_ms_per_forward": 0.008814285714285714,
+            "percent_of_forward": 0.029104405095582264
+          },
+          "attention": {
+            "mean_ms_per_forward": 0.9101714285714285,
+            "percent_of_forward": 3.005348229254031
+          },
+          "activation": {
+            "mean_ms_per_forward": 0.7909714285714287,
+            "percent_of_forward": 2.6117547833585073
+          },
+          "kv_append": {
+            "mean_ms_per_forward": 0.013871428571428573,
+            "percent_of_forward": 0.045802880628541945
+          },
+          "causal_mask": {
+            "mean_ms_per_forward": 0.00024285714285714283,
+            "percent_of_forward": 0.0008019041922607754
+          },
+          "residual": {
+            "mean_ms_per_forward": 0.01072857142857143,
+            "percent_of_forward": 0.03542529696399073
+          },
+          "unattributed": {
+            "mean_ms_per_forward": 0.08305714285714316,
+            "percent_of_forward": 0.2742512337531862
+          }
+        }
+      },
+      "raw": {
+        "avx2": true,
+        "experimental_vector_gelu_build": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 507121664,
+        "load_ms": 0.3956,
+        "prefill_p50_ms": 370.3627,
+        "decode_p50_ms": 31.5021,
+        "prefill_samples_ms": [
+          352.2953,
+          351.5353,
+          370.3627,
+          400.5008,
+          376.4121
+        ],
+        "decode_samples_ms": [
+          31.5021,
+          32.497,
+          31.3932,
+          31.7765,
+          27.2196
+        ],
+        "generated_tokens": [],
+        "diagnostic_profile": {
+          "leaf_decoder_profile": 1,
+          "clock": "steady_clock",
+          "bucket_by": "forward_input_tokens",
+          "timings": {
+            "prefill": {
+              "forward": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 2740.5218
+              },
+              "embedding": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 24.3305
+              },
+              "layer_norm": {
+                "calls": 175,
+                "tokens": 11025,
+                "milliseconds": 19.3253
+              },
+              "linear_fp32": {
+                "calls": 511,
+                "tokens": 31759,
+                "milliseconds": 2463.6524
+              },
+              "position_reorder": {
+                "calls": 168,
+                "tokens": 10584,
+                "milliseconds": 4.3123
+              },
+              "attention": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 206.6986
+              },
+              "activation": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 13.2406
+              },
+              "kv_append": {
+                "calls": 84,
+                "tokens": 5292,
+                "milliseconds": 3.5649
+              },
+              "causal_mask": {
+                "calls": 7,
+                "tokens": 441,
+                "milliseconds": 0.0249
+              },
+              "residual": {
+                "calls": 168,
+                "tokens": 10584,
+                "milliseconds": 3.238
+              }
+            },
+            "decode": {
+              "forward": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 211.9954
+              },
+              "embedding": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 0.3782
+              },
+              "layer_norm": {
+                "calls": 175,
+                "tokens": 175,
+                "milliseconds": 0.9034
+              },
+              "linear_fp32": {
+                "calls": 511,
+                "tokens": 511,
+                "milliseconds": 197.9888
+              },
+              "position_reorder": {
+                "calls": 168,
+                "tokens": 168,
+                "milliseconds": 0.0617
+              },
+              "attention": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 6.3712
+              },
+              "activation": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 5.5368
+              },
+              "kv_append": {
+                "calls": 84,
+                "tokens": 84,
+                "milliseconds": 0.0971
+              },
+              "causal_mask": {
+                "calls": 7,
+                "tokens": 7,
+                "milliseconds": 0.0017
+              },
+              "residual": {
+                "calls": 168,
+                "tokens": 168,
+                "milliseconds": 0.0751
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -67,6 +67,7 @@ def test_token_panel_header_is_included_in_packaged_native_sources():
     source = "engine/include/leaf/kernels/token_panel.h"
     assert source in headers
     assert (ROOT / source).is_file()
+    assert "engine/include/leaf/kernels/gelu.h" in headers
 
 
 def test_source_wheel_build_without_compiler_fails_explicitly(setup_module, monkeypatch, tmp_path):

@@ -1,6 +1,9 @@
 #include "leaf/runtime/decoder.h"
 #include "leaf/runtime/kv_cache.h"
 #include "leaf/kernels/token_panel.h"
+#ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
+#include "leaf/kernels/gelu.h"
+#endif
 
 #include <algorithm>
 #include <atomic>
@@ -1076,6 +1079,11 @@ struct Decoder::Impl {
                 for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= activate(gate[j]);
             } else {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
+#ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
+                if (avx && tokens >= 8 && activation == 2)
+                    leaf::kernels::gelu_new_inplace(up.data(), up.size());
+                else
+#endif
                 for (auto& value : up) value = activate(value);
             }
             linear(up.data(), tokens, prefix + "mlp.down_proj", projected);
