@@ -116,8 +116,24 @@ passes but its single observations are not promotion evidence. The packed
 candidate stays off by default;
 current command observations remain the separately labeled historical record.
 The separate RB96/BK256 blocked-K primitive passes Windows/WSL vector/scalar,
-bit-exactness, stride and tail tests but is not decoder-dispatched or latency
-qualified.
+bit-exactness, stride and tail tests but is not decoder-dispatched. The
+2026-10-03 shape experiments below show no demonstrated advantage.
+
+| Follow-up record | Scope and outcome |
+|---|---|
+| [gpt2_phase_diagnostics_windows.json](gpt2_phase_diagnostics_windows.json) | Same-binary default/packed/packed/default phase profiles; warmup-inclusive means, no acceptance timing. Linear occupies about 81% default and 65–66% packed prefill; activation is next |
+| [gpt2_token_panel_shapes_windows.json](gpt2_token_panel_shapes_windows.json) | Packing-inclusive full-K vs RB96/BK256 on four M=63 shapes. FP64 reference and bit-exactness pass; all timing comparisons unstable |
+| [gpt2_token_panel_shapes_linux.json](gpt2_token_panel_shapes_linux.json) | Same-host WSL shape checks pass; three stable comparisons show blocked-K 0.8–3.0% slower; prospective fused QKV unstable. No integration or promotion |
+| [gpt2_prefill_followup_matched_windows.json](gpt2_prefill_followup_matched_windows.json) | Fresh Windows 26300 PyTorch/native FP32 baseline; quality and timing stability pass. Fastest PyTorch 156.2839 / 28.1867 ms prefill/decode; default Leaf 392.9278 / 33.3914 ms |
+| [gpt2_prefill_followup_windows_abba.json](gpt2_prefill_followup_windows_abba.json) | Same-binary default/packed comparison against the new frozen quality reference. Quality passes; unstable timings and +3.69% decode reject promotion, despite lower observed prefill |
+| [decoder_prefill_followup_default_architectures.json](decoder_prefill_followup_default_architectures.json) | Fresh binary, default policy: eight reduced cases/five families pass scalar/vector, two-thread FP32, cache and generation checks |
+| [decoder_prefill_followup_packed_architectures.json](decoder_prefill_followup_packed_architectures.json) | Same reduced architecture checks with packed FP32 enabled; correctness only |
+
+See [the investigation](../../docs/prefill-investigation.md) for commands,
+phase normalization, dimensions, limitations, and the prioritized next steps.
+These new records preserve the earlier measurements. The current Windows
+build is 26300, while the historical matched baseline used 26200; the frozen
+comparison harness rejects that platform mismatch.
 
 The full-command record uses cached artifacts, no export/build/download, and
 alternating case order. Its integrity preflight warms the OS file cache. External

@@ -42,8 +42,8 @@
   <text x="964" y="270" class="note">References and candidates receive identical inputs</text>
   <path d="M 408 292 V 370" class="flow"/>
   <path d="M 1272 292 V 370" class="flow"/>
-  <text x="802" y="211" class="tag" text-anchor="middle">INDEPENDENT</text>
-  <text x="802" y="243" class="tag" text-anchor="middle">DATA SPLITS</text>
+  <text x="840" y="211" class="tag" text-anchor="middle">INDEPENDENT</text>
+  <text x="840" y="243" class="tag" text-anchor="middle">DATA SPLITS</text>
 
   <rect x="72" y="370" width="672" height="188" rx="16" class="prepare"/>
   <text x="100" y="414" class="heading">Prepare candidates offline</text>
@@ -89,9 +89,9 @@
   <text x="100" y="1372" class="note">Other architectures or hardware require new validation</text>
   <rect x="936" y="1210" width="672" height="180" rx="16" class="rejected"/>
   <text x="964" y="1254" class="heading">Keep the candidate unpromoted</text>
-  <text x="964" y="1296" class="body">Profile bottlenecks and change one factor at a time</text>
-  <text x="964" y="1334" class="body">Re-export and repeat quality plus latency checks</text>
-  <text x="964" y="1372" class="note">No unvalidated automatic precision selection</text>
+  <text x="964" y="1296" class="body">Profile phases → test actual matrix shapes</text>
+  <text x="964" y="1334" class="body">Integrate winners → repeat full quality and timing</text>
+  <text x="964" y="1372" class="note">Diagnostic timings never authorize promotion</text>
   <path d="M 1272 1390 V 1430 H 32 V 464 H 72" class="loop"/>
   <text x="840" y="1478" class="note" text-anchor="middle">Iterative development continues until a candidate passes both gates, or the verified FP32 path is retained.</text>
 </svg>

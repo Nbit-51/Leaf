@@ -140,7 +140,7 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
                mode: str = "verify", threads: int = 1, runs: int = 3,
                warmup: int = 1, generate: int = 16, scalar: bool = False,
                chunk: int = 1, activation_bits: int | None = None,
-               high_qos: bool = False) -> tuple[np.ndarray, dict]:
+               high_qos: bool = False, capture_profile: bool = False) -> tuple[np.ndarray, dict]:
     with tempfile.TemporaryDirectory(prefix="leaf_decoder_") as temp:
         root = Path(temp)
         request, output, metrics = root / "tokens.bin", root / "logits.bin", root / "metrics.json"
@@ -171,6 +171,12 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
         if completed.returncode:
             raise RuntimeError(f"Native decoder failed ({completed.returncode}): {completed.stderr.strip()}")
         measured = json.loads(metrics.read_text())
+        if capture_profile:
+            profiles = [json.loads(line) for line in completed.stderr.splitlines()
+                        if line.startswith('{"leaf_decoder_profile":')]
+            if len(profiles) != 1 or profiles[0].get("leaf_decoder_profile") != 1:
+                raise ValueError("Expected exactly one native decoder phase profile")
+            measured["diagnostic_profile"] = profiles[0]
         if policy is not None:
             measured["windows_process_qos"] = policy
         return np.fromfile(output, dtype="<f4"), measured

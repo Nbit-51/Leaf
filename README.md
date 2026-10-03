@@ -485,6 +485,10 @@ reports operation classes, calls, tokens, and aggregate milliseconds. It include
 all forward calls, including warmups; nested phase totals are not independent
 additive end-to-end timers. Profiling adds measurement cost and is for diagnosis
 only. The native comparison harness clears profiling for its timed children.
+`tools/profile_decoder.py` retains these diagnostics in default/packed/packed/default
+order, reports phase cost per forward, and explicitly excludes the result from
+promotion. The [prefill investigation](docs/prefill-investigation.md) records the
+measured priorities and packing-inclusive shape experiments.
 
 ## 6. Reproduce validation and benchmarks
 
@@ -1077,7 +1081,8 @@ Neither finding is a whole-model speed qualification.
 The full-K kernel and separate RB96/BK256 blocked-K primitive also pass Windows
 and Linux/WSL AVX2/FMA tests, including bit-exact blocked-vector/full-K results,
 scalar fallback, odd K, row/token strides, and tails. The blocked-K primitive is
-not dispatched by the decoder and has no latency measurement or promotion.
+not dispatched by the decoder. The subsequent shape measurements below do not
+justify integration or promotion.
 
 The native-only comparisons use AFTER-only experimental policy and retain all
 full trained quality, chunked-cache, generation, and raw ABBA timing evidence:
@@ -1123,6 +1128,47 @@ wheel's offline first/cached correctness smoke passes, as described below.
 The packed candidate stays disabled by default; no native-only
 pass or unfinished check promotes it. These are the next validation steps,
 not a claim that optimization work is finished.
+
+### 7.9 Profile-first FP32 prefill follow-up (2026-10-03)
+
+The [investigation and reproduction commands](docs/prefill-investigation.md)
+continue the diagnostic sequence before changing any kernel. In two Windows
+default-policy profile passes, FP32 linear accounts for 80.6–80.9% of prefill.
+With 6×16 token panels it accounts for 65.1–66.0%; activation is 18.5–19.1%,
+attention 12.2–12.5%, and LayerNorm 1.18–1.21%. These are inclusive-forward
+normalized diagnostics over warmup and measured calls, **not acceptance
+latencies**. The [raw profiles](benchmark/results/gpt2_phase_diagnostics_windows.json)
+preserve both passes and their drift.
+
+RB96/BK256 was then measured against full-K on M=63 projection, MLP up/down,
+and prospective fused-QKV shapes, with input packing included. Both primitives
+pass an FP64 reference check and produce bit-exact outputs. Three
+[Linux/WSL shape comparisons](benchmark/results/gpt2_token_panel_shapes_linux.json)
+pass timing stability, but blocked-K is respectively 0.8%, 1.7%, and 3.0%
+slower. The fused-QKV shape and all four
+[Windows comparisons](benchmark/results/gpt2_token_panel_shapes_windows.json)
+are unstable. There is no demonstrated blocked-K win and it remains
+undispatched. These are resident synthetic matrices on one host, not
+whole-model or independent-device speed qualifications.
+
+The priority is now evidence-based: investigate another GEMM candidate first,
+then activation and other measured costs. LayerNorm is a lower priority on
+this workload. Prefill's GEMM reuse and decode's one-token GEMV bandwidth need
+different strategies; neither a shape win nor a diagnostic profile can replace
+trained quality and unprofiled whole-model gates. Windows timing-state causes
+remain unresolved and are investigated separately.
+
+The saved Windows 26200 baseline could not authorize reuse on the current
+26300 build. A [fresh matched FP32 run](benchmark/results/gpt2_prefill_followup_matched_windows.json)
+passes trained quality and timing stability: fastest PyTorch prefill/decode
+is 156.2839 / 28.1867 ms, versus default Leaf 392.9278 / 33.3914 ms.
+The following [unprofiled native ABBA](benchmark/results/gpt2_prefill_followup_windows_abba.json)
+passes packed trained quality, cache parity, and exact generation, but rejects
+promotion: observed prefill is 367.5453 → 225.5586 ms, decode is
+34.5861 → 35.8612 ms, and timing stability fails. The 3.69% decode regression
+also exceeds the 2% allowance. No default is enabled. All eight reduced
+architecture cases pass under both policies; the Python suite reports 726
+passed and six skipped. Earlier records remain preserved.
 
 ## 8. Package and portability checks
 
@@ -1668,7 +1714,9 @@ Windows TinyLlama runtime, while GPT-2 fails prefill promotion on both OS
 environments. The packed FP32 token-panel experiment passes stable native-only
 FP32 checks for Linux GPT-2 and Windows TinyLlama, but noisy Windows GPT-2 and
 quantized candidates remain rejected; it stays off by default. The blocked-K
-primitive is tested but undispatched and unmeasured. Fresh matched-profile
+primitive is tested and shape-benchmarked but remains undispatched: the
+2026-10-03 follow-up shows no stable speed improvement. Phase profiles confirm
+linear dominates prefill and put activation ahead of LayerNorm. Fresh matched-profile
 full-command checks remain in progress; the current installed wheel's offline
 first/cached smoke passes without a compiler or heavy-library imports. Native
 dense-kernel work and fresh matched baselines continue.
@@ -1705,11 +1753,13 @@ Implemented and checked:
 - [x] Measure cached complete commands separately from warmed native forwards and installed-package startup.
 - [x] Add native phase diagnostics and full-quality ABBA experiments; keep unstable/slow float candidates off by default.
 - [x] Test packed FP32 token panels across reduced architectures, full GPT-2, and TinyLlama; retain native-only FP32 passes and all rejected outcomes without enabling a default.
-- [x] Test the separate blocked-K primitive on Windows/WSL, including vector/scalar paths, bit-exactness, strides and tails; leave it undispatched and unmeasured.
+- [x] Test the separate blocked-K primitive on Windows/WSL, including vector/scalar paths, bit-exactness, strides and tails.
+- [x] Profile default/packed FP32 GPT-2 and measure packing-inclusive actual projection shapes; retain noise and reject blocked-K integration without a speed win.
 - [x] Check reduced-model execution across Windows/Linux on the same host and configure portable CI.
 
 Next measured steps:
 
+- [ ] Follow the [profile-first prefill priorities](docs/prefill-investigation.md): another measured GEMM candidate, whole-model validation, then activation and other measured costs; keep decode separate.
 - [ ] Complete fresh matched-profile full-command checks; qualify any changed packed runtime against fresh PyTorch before promotion.
 - [ ] Requalify changed runtime binaries and further device/model configurations against matched PyTorch/native workloads before promotion.
 - [ ] Improve native FP32/GPT-2 prefill and CNN whole-model latency without weakening quality gates.

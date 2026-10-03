@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1510" viewBox="0 0 1680 1510" role="img" aria-labelledby="architecture-title architecture-desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1730" viewBox="0 0 1680 1730" role="img" aria-labelledby="architecture-title architecture-desc">
   <title id="architecture-title">Leaf execution architecture</title>
   <desc id="architecture-desc">Local model weights and custom decoder plans enter an explicit import adapter boundary. ONNX graphs enter a separate graph intermediate representation. Unsupported semantics are rejected. Offline preparation produces versioned decoder or graph artifacts. The native C++ decoder selects scalar, AVX2, or optional VNNI kernels through runtime CPU capability dispatch; the graph executor uses a portable build or an explicitly enabled AVX2 build. Decoder sessions retain their own key-value caches; graph execution uses the exported memory plan where available.</desc>
   <defs>
@@ -22,7 +22,7 @@
       .divider { stroke: #c3d0db; stroke-width: 2; }
     </style>
   </defs>
-  <rect width="1680" height="1510" fill="#fafbfd"/>
+  <rect width="1680" height="1730" fill="#fafbfd"/>
   <text x="56" y="68" class="title">Leaf execution architecture</text>
   <text x="56" y="108" class="subtitle">Model import is separate from the execution engine. Every artifact has explicit semantics.</text>
 
@@ -92,5 +92,12 @@
   <rect x="1144" y="1320" width="480" height="118" rx="16" class="source"/>
   <text x="1172" y="1364" class="heading">Graph outputs</text>
   <text x="1172" y="1403" class="body">Named result tensors + metrics</text>
-  <text x="56" y="1480" class="note">Supported operators and adapter semantics define coverage; a model identifier alone never establishes compatibility.</text>
+  <rect x="56" y="1480" width="1568" height="170" rx="16" class="runtime"/>
+  <text x="84" y="1522" class="heading">FP32 linear execution: distinct prefill and decode regimes</text>
+  <line x1="840" y1="1544" x2="840" y2="1628" class="divider"/>
+  <text x="84" y="1576" class="body">Prefill: default four-token dot groups</text>
+  <text x="84" y="1616" class="note">Opt-in 6×16 packed GEMM; RB96/BK256 stays undispatched</text>
+  <text x="876" y="1576" class="body">Decode: one-token GEMV / AVX dot</text>
+  <text x="876" y="1616" class="note">Weight bandwidth and KV reuse remain separate concerns</text>
+  <text x="56" y="1700" class="note">Supported operators and adapter semantics define coverage; a model identifier alone never establishes compatibility.</text>
 </svg>
