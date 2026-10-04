@@ -1,6 +1,9 @@
 #include "leaf/runtime/decoder.h"
 #include "leaf/runtime/kv_cache.h"
 #include "leaf/kernels/token_panel.h"
+#ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
+#include "leaf/kernels/attention_vector.h"
+#endif
 #ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
 #include "leaf/kernels/gelu.h"
 #endif
@@ -1062,6 +1065,14 @@ struct Decoder::Impl {
             {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Attention, tokens);
                 attention.resize(tokens * h);
+#ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
+                if (avx && tokens > 1) {
+                    const auto& cache = caches[layer];
+                    leaf::kernels::attention_f32_gqa_strided_vector(q_heads.data(), cache.keys_data(),
+                        cache.values_data(), mask.data(), attention.data(), 1, heads, kv_heads, tokens,
+                        total, cache.capacity(), dim, mask_shape, 1.0f / std::sqrt(std::sqrt(static_cast<float>(dim))));
+                } else
+#endif
                 caches[layer].attend(q_heads.data(), mask.data(), attention.data(), heads, tokens,
                                       // The shared fused graph kernel scales both Q and K.
                                       mask_shape, 1.0f / std::sqrt(std::sqrt(static_cast<float>(dim))));

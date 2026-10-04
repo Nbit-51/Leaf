@@ -132,6 +132,9 @@ int main(int argc, char** argv) {
 #ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
                 << ",\"experimental_vector_gelu_build\":true"
 #endif
+#ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
+                << ",\"experimental_attention_avx2_build\":true"
+#endif
                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")
                 << ",\"activation_bits\":" << decoder.activation_bits()
                 << ",\"threads\":" << threads << ",\"artifact_bytes\":" << decoder.weight_bytes()

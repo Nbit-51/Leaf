@@ -154,10 +154,18 @@ the next experiments separately:
 | [Windows environment diagnosis](gpt2_windows_environment_summary.json) | Aggregate telemetry and raw timing; monitored controls stable, HighQoS not a large remedy; initial high-overhead probe retained separately |
 | [Quiet Windows GELU ABBA](gpt2_gelu_quiet_windows_abba.json) | Quality passes; first baseline decode spread 1.26092 rejects the full gate despite lower prefill |
 | [Quiet matched PyTorch/Leaf](gpt2_gelu_quiet_matched_windows.json) | Experimental Leaf stable, PyTorch decode unstable; observed Leaf gap 8.71% prefill / 6.81% decode, no promotion |
+| [Initial linear/attention Windows](linear_attention_shapes_windows.json), [Linux](linear_attention_shapes_linux.json) | Synthetic attention/QKV ABBA; stable Linux shared packing is 1.16% slower, so no linear dispatch change |
+| [Refined linear/attention Windows](linear_attention_shapes_windows_refined.json), [Linux](linear_attention_shapes_linux_refined.json) | Stable attention operator cases reduce time 35–58%; QKV evidence mixed; no whole-model claim |
+| [Attention default regression](attention_default_regression.json), [experimental architectures](attention_vector_architectures.json) | Eight cases each: default bit-exact; experimental parity, cache and generation checks pass |
+| [Attention Windows ABBA](gpt2_attention_windows_abba.json) | Trained quality passes; observed prefill 7.95% lower, baseline decode unstable; rejected |
+| [Attention Linux BEFORE](gpt2_attention_before_linux.json), [ABBA](gpt2_attention_linux_abba.json) | Trained quality passes; observed prefill 2.22% lower, decode 5.84% higher and unstable; rejected |
+| [Attention Windows phases](gpt2_attention_phase_windows.json) | Diagnostic warmup-inclusive means: packed prefill linear 85–86%, attention 9–10%, activation about 1% |
 
 The vector GELU build is off by default. Its final binary emits an experimental
 build marker that disallows automatic precision selection. These ABBA runs use
 frozen quality references and do not constitute fresh PyTorch qualification.
+The attention build is also off by default and excluded from automatic selection;
+see the [follow-up and decision diagram](../../docs/linear-attention-followup.md).
 
 The full-command record uses cached artifacts, no export/build/download, and
 alternating case order. Its integrity preflight warms the OS file cache. External

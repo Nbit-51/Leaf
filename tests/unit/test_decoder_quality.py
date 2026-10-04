@@ -178,9 +178,10 @@ def test_speed_gates_accept_only_validated_stable_improvement_and_preserve_sampl
 
 @pytest.mark.parametrize("key", ["32", "8"])
 @pytest.mark.parametrize("marker", [True, "true", 1, None])
-def test_experimental_gelu_build_cannot_authorize_automatic_selection(key, marker):
+@pytest.mark.parametrize("field", ["experimental_vector_gelu_build", "experimental_attention_avx2_build"])
+def test_experimental_build_cannot_authorize_automatic_selection(key, marker, field):
     cases, baseline = speed_comparison()
-    cases[key]["latency"]["experimental_vector_gelu_build"] = marker
+    cases[key]["latency"][field] = marker
     apply_speed_gates(cases, baseline)
     assert cases["8"]["eligible_for_automatic_selection"] is False
 

@@ -1215,6 +1215,24 @@ prefill and 6.81% decode gap, but PyTorch decode is unstable: this remains an
 optimization target, not qualified performance parity. The historical large
 slowdown was not reproduced with telemetry and has no proven root cause.
 
+### 7.11 Linear and attention follow-up
+
+The [linear/attention investigation](docs/linear-attention-followup.md) adds
+off-by-default `LEAF_EXPERIMENTAL_ATTENTION_AVX2` runtime dispatch for
+multi-token attention in portable decoder builds. Stable synthetic attention
+cases show 35% lower time on Windows and 56–58% on Linux; these are operator
+results, not whole-model speedups. Shared QKV input packing gave mixed results
+and was not retained in decoder dispatch.
+
+Trained GPT-2 quality, cache parity and exact generation pass on both platforms.
+Windows whole-model prefill observes 7.95% lower time, but baseline decode
+instability rejects the gate. Linux observes 2.22% lower prefill and 5.84% higher
+decode, with candidate decode instability; its gate also rejects promotion.
+All raw results are retained. Default behavior remains bit-exact in eight
+reduced architecture cases; 771 Python tests pass, with six skipped.
+The updated diagram and phase breakdown identify linear operations as the
+remaining dominant cost. No whole-model improvement or PyTorch parity is claimed.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package
