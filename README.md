@@ -1198,6 +1198,15 @@ separate from acceptance timing. Final experimental binaries emit a build
 marker that prevents automatic precision selection. Commands, all retained
 results, and remaining qualification work are in the follow-up document.
 
+The [inference-error and benchmark audit](docs/gelu-benchmark-audit.md)
+independently reproduces perplexity with PyTorch cross-entropy and replays all
+four timing verdicts. Direct scalar/vector GELU logit differences pass the
+existing tolerance; mean loss changes by about `3e-10` nats per target on the
+1,016-target subset. These are inference-quality checks, not training results.
+An identical-binary A/A control also produces an apparent 15.31% prefill
+reduction, with unstable timing and slower decode. Its rejection confirms
+that this measurement session cannot establish a reliable speedup.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package

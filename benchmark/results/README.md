@@ -149,6 +149,8 @@ the next experiments separately:
 | [GELU Linux confirmation](gpt2_gelu_packed_linux_confirmation_abba.json) | Longer predeclared run; prefill and AFTER stable, first BEFORE decode unstable; combined gate rejects promotion |
 | [Default regression](gemm_activation_default_regression.json) | Eight reduced architecture cases bit-exact to the prior executable |
 | [Experimental architectures](gemm_activation_experimental_architectures.json) | Eight reduced architecture cases pass; implementation parity, not trained performance qualification |
+| [GELU error/benchmark audit](gpt2_gelu_error_benchmark_audit.json) | Fresh paired logits, independent float64 cross-entropy, exact replay of all four saved timing verdicts; no new latency qualification |
+| [Identical-binary Windows A/A](gpt2_gelu_benchmark_aa_windows.json) | Same binary/settings appear 15.31% faster in pooled prefill; unstable timing and slower decode correctly reject the control |
 
 The vector GELU build is off by default. Its final binary emits an experimental
 build marker that disallows automatic precision selection. These ABBA runs use

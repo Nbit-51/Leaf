@@ -1,0 +1,232 @@
+{
+  "audit": "decoder-inference-error-and-benchmark-replay-v1",
+  "measured_at_utc": "2026-10-04T03:33:12.380970+00:00",
+  "input_sha256": {
+    "benchmark\\results\\gpt2_gelu_packed_windows_abba.json": "161495b00ec9e1081958e336e9bdc2d2dd894f4174ccf314c03264139ca5af79",
+    "benchmark\\results\\gpt2_gelu_packed_windows_final_abba.json": "bcef7b1cd2468ae122acb5c240c4732493f0ebee3d11ef7a43f953f326035199",
+    "benchmark\\results\\gpt2_gelu_packed_linux_abba.json": "50183ee212e0938bbfb47cbddb2b16e75191b1ce387d6968c72bbc9283fab41b",
+    "benchmark\\results\\gpt2_gelu_packed_linux_confirmation_abba.json": "f6beec83a6df21222fe837f96fd0e54a75c95976172b2a153f5d79d5e88546e3",
+    "benchmark\\results\\gpt2_gelu_before_packed_windows.json": "5b6be88930df4a6a89e5c9f92cff7f2d3a9f2c5e692947e27665cf2b1516e75c",
+    "build\\prefill-diagnostics\\leaf_decoder.exe": "ab34d59195e24f4f53ae3b84859e2c26737d4f0e40bee35863fb438da625ba84",
+    "build\\gemm-followup\\gelu-final\\leaf_decoder.exe": "b253ced366157df97c3df682c3e1c1e0573851ede6ea094620547ee39bbf3630",
+    "build\\gpt2_prefill_followup\\reference.npy": "c9f5a7f75bb0c8023c94587c3f73e4ae43b273f29b3c7a90ffaabbaa3cfa8c19",
+    "build\\gpt2_prefill_followup\\tokens.json": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6",
+    "C:\\Users\\navaneeth\\leaf\\tools\\audit_decoder_experiment.py": "c1893b0479639554d9d2c4996c0dc99c7332eb6ea185370e3eaafa484e56b67d",
+    "C:\\Users\\navaneeth\\leaf\\tools\\decoder_validation.py": "ac50bb02ac1d372933f5a2359d630f580c24d08f4172fa57cd4b18324554a364",
+    "C:\\Users\\navaneeth\\leaf\\tools\\benchmark_decoder_comparison.py": "fd06310be94639f46d10ecae32fe2fc94b9cdc610bfcec19ce969412e30d6732",
+    "build\\gpt2_prefill_followup\\decoder-32.leaf": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8"
+  },
+  "native_policy": {
+    "LEAF_DISABLE_VNNI": false,
+    "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+    "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+  },
+  "timing_replay": {
+    "benchmark\\results\\gpt2_gelu_packed_windows_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": false,
+          "prefill_ratio_after_before": 0.7561217639141794,
+          "decode_ratio_after_before": 0.954470266559515,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": false,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    },
+    "benchmark\\results\\gpt2_gelu_packed_windows_final_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": false,
+          "prefill_ratio_after_before": 0.7900115489019021,
+          "decode_ratio_after_before": 0.9737822947196203,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": false,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    },
+    "benchmark\\results\\gpt2_gelu_packed_linux_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": false,
+          "prefill_ratio_after_before": 0.744325455518808,
+          "decode_ratio_after_before": 1.0174511026248332,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": false,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    },
+    "benchmark\\results\\gpt2_gelu_packed_linux_confirmation_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": false,
+          "prefill_ratio_after_before": 0.7399974485539766,
+          "decode_ratio_after_before": 0.9725761463402337,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": false,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    }
+  },
+  "fresh_quality": {
+    "before": {
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 0.0046539306640625,
+        "relative_logit_rmse": 1.4997769994806731e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 62.58005334472094,
+        "pytorch_perplexity": 62.58010265069033,
+        "perplexity_ratio": 0.9999992121142776
+      },
+      "execution": {
+        "avx2": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 542281728,
+        "load_ms": 0.7209,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "error_vs_pytorch": {
+        "max_absolute_error": 0.0046539306640625,
+        "rmse": 0.00015867070354016964,
+        "max_fraction_of_allclose_tolerance": 0.25788100854194596,
+        "allclose_passed": true
+      }
+    },
+    "after": {
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 0.003662109375,
+        "relative_logit_rmse": 1.282284529224853e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 62.580053363458326,
+        "pytorch_perplexity": 62.58010265069033,
+        "perplexity_ratio": 0.9999992124136919
+      },
+      "execution": {
+        "avx2": true,
+        "experimental_vector_gelu_build": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 543453184,
+        "load_ms": 0.7038,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "error_vs_pytorch": {
+        "max_absolute_error": 0.003662109375,
+        "rmse": 0.00013566084704954497,
+        "max_fraction_of_allclose_tolerance": 0.2634646170327181,
+        "allclose_passed": true
+      }
+    }
+  },
+  "independent_float64_cross_entropy": {
+    "pytorch": {
+      "evaluated_tokens": 1016,
+      "mean_nll": 4.136447378550843,
+      "perplexity": 62.58010265069066,
+      "block_mean_nll": [
+        3.8569042770680793,
+        4.491402768063541,
+        3.902469531394436,
+        3.863643592636132,
+        4.331040575741075,
+        4.036102513141818,
+        4.451435020293944,
+        4.158580750067718
+      ]
+    },
+    "before": {
+      "evaluated_tokens": 1016,
+      "mean_nll": 4.136446590664807,
+      "perplexity": 62.5800533447211,
+      "block_mean_nll": [
+        3.856904571577763,
+        4.491405590768235,
+        3.902465579715128,
+        3.8636375574976674,
+        4.331044708062867,
+        4.0361001822509355,
+        4.451436147198537,
+        4.158578388247329
+      ]
+    },
+    "after": {
+      "evaluated_tokens": 1016,
+      "mean_nll": 4.136446590964223,
+      "perplexity": 62.580053363458546,
+      "block_mean_nll": [
+        3.8569048611771457,
+        4.491406881425152,
+        3.9024658467001276,
+        3.8636372160500208,
+        4.331043824120232,
+        4.036101221405725,
+        4.451434583769009,
+        4.1585782930663795
+      ]
+    }
+  },
+  "independent_loss_agreement_passed": true,
+  "paired_gelu_error": {
+    "max_absolute_error": 0.0012664794921875,
+    "rmse": 7.756298974394076e-05,
+    "max_fraction_of_allclose_tolerance": 0.19970075540137885,
+    "allclose_passed": true,
+    "mean_nll_delta_after_before": 2.994156034219486e-10,
+    "perplexity_ratio_after_before": 1.0000000002994156,
+    "block_mean_nll_deltas": [
+      2.895993826967924e-07,
+      1.290656917340982e-06,
+      2.6698499944188825e-07,
+      -3.4144764660126725e-07,
+      -8.839426355322644e-07,
+      1.0391547897725673e-06,
+      -1.563429528061988e-06,
+      -9.51809493443534e-08
+    ]
+  },
+  "fresh_latency_measured": false,
+  "automatic_selection_authorized": false,
+  "scope": "Inference on frozen trained GPT-2 subset, not training loss or gradient validation. No new timing qualification."
+}

@@ -5,6 +5,9 @@ Three new GEMM candidates pass numerical checks, but none earns decoder
 integration. A separate vector GELU-new experiment passes elementwise and
 trained GPT-2 quality checks. It remains disabled in normal builds.
 
+The [2026-10-04 audit](gelu-benchmark-audit.md) independently checks loss,
+isolates the additional GELU logit error, and replays all saved timing verdicts.
+
 ## GEMM results
 
 All shape tests include packing, use M=63, and compare against the existing

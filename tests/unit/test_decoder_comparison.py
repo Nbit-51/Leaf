@@ -45,6 +45,7 @@ def frozen(tmp_path, monkeypatch):
                       "quality": {"evaluated_tokens": 4}, "quality_gate_passed": True,
                       "generated_tokens": [2, 3]}
     record = {"benchmark": "trained-full-decoder-quality-and-latency",
+              "native_policy": dict(comparison.DEFAULT_NATIVE_POLICY),
               "native_executable_sha256": comparison.digest(before),
               "quality_measured_at_utc": "2026-10-01T00:00:00+00:00", "native": cases,
               "pytorch": {"threads": 1, "pinned_cpu": 2, "blocks": 2, "sequence_length": 3,
@@ -199,6 +200,8 @@ def test_scoped_tiles_requires_explicit_default_before_quality_policy(frozen, po
 
 def test_scoped_tiles_cannot_relabel_legacy_missing_before_policy(frozen):
     frozen.args.after_float_tiles = True
+    del frozen.record["native_policy"]
+    save_record(frozen)
     assert "native_policy" not in frozen.record
     with pytest.raises(ValueError, match="explicitly default frozen BEFORE native policy"):
         comparison.validate_inputs(frozen.args)
@@ -298,7 +301,9 @@ def mock_native(frozen, *, changed_generation=False):
         if mode == "generate":
             return np.zeros(0, dtype=np.float32), {"generated_tokens": [1, 2] if changed_generation else [2, 3]}
         if mode == "bench":
-            return np.zeros(0, dtype=np.float32), latency(100, 10) if executable == frozen.args.before else latency(90, 9)
+            measured = latency(100, 10) if executable == frozen.args.before else latency(90, 9)
+            measured.update(threads=options["threads"], activation_bits=options["activation_bits"])
+            return np.zeros(0, dtype=np.float32), measured
         expected = frozen.reference if mode == "verify" else frozen.reference[:3]
         return expected.reshape(-1).copy(), {"mode": mode}
 
@@ -453,6 +458,8 @@ def test_existing_global_experimental_policy_is_unchanged_without_scoped_option(
     monkeypatch.setenv("LEAF_EXPERIMENTAL_FLOAT_GEMV", "global gemv policy")
     expected = {**comparison.DEFAULT_NATIVE_POLICY, "LEAF_EXPERIMENTAL_FLOAT_TILES": True,
                 "LEAF_EXPERIMENTAL_FLOAT_GEMV": True}
+    frozen.record["native_policy"] = expected
+    save_record(frozen)
     original = dict(comparison.os.environ)
 
     def global_execute(*args, **kwargs):
@@ -531,3 +538,31 @@ def test_comparison_requires_repeated_samples_before_any_execution(frozen, runs,
     frozen.args.runs, frozen.args.warmup = runs, warmup
     with pytest.raises(ValueError, match="at least 5 runs"):
         comparison.compare(frozen.args)
+
+
+@pytest.mark.parametrize("policy", [None, {}, {**comparison.DEFAULT_NATIVE_POLICY,
+    "LEAF_EXPERIMENTAL_FLOAT_TILES": True}, {**comparison.DEFAULT_NATIVE_POLICY, "LEAF_DISABLE_VNNI": 0}])
+def test_unscoped_comparison_cannot_reuse_quality_under_different_policy(frozen, policy):
+    frozen.record["native_policy"] = policy
+    save_record(frozen)
+    with pytest.raises(ValueError, match="explicit frozen BEFORE quality policy"):
+        comparison.validate_inputs(frozen.args)
+
+
+@pytest.mark.parametrize("stage_name", ["before", "after"])
+@pytest.mark.parametrize("field,value", [("threads", 2), ("threads", True), ("activation_bits", 8),
+    ("prefill_samples_ms", [100] * 5), ("decode_samples_ms", [10] * 8)])
+def test_comparison_rejects_mismatched_child_workload(frozen, monkeypatch, stage_name, field, value):
+    execute, _ = mock_native(frozen)
+    def wrong(executable, *args, **options):
+        output, measured = execute(executable, *args, **options)
+        stage = "before" if executable == frozen.args.before else "after"
+        if options.get("mode") == "bench" and stage == stage_name:
+            measured[field] = value
+        return output, measured
+    monkeypatch.setattr(comparison, "run_native", wrong)
+    monkeypatch.setattr(comparison, "pin_cpu", lambda cpu: None)
+    monkeypatch.setattr(comparison, "keep_awake", nullcontext)
+    with pytest.raises(ValueError, match="differs from requested"):
+        comparison.compare(frozen.args)
+    assert not frozen.args.output.exists()

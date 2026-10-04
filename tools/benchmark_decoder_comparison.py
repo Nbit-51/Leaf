@@ -83,18 +83,24 @@ def validate_inputs(args) -> dict:
     record = json.loads(args.record.read_text(encoding="utf-8"))
     if not isinstance(record, dict) or not isinstance(record.get("pytorch"), dict):
         raise ValueError("Frozen record has no PyTorch quality provenance")
+    if os.environ.get("LEAF_DISABLE_VNNI"):
+        raise ValueError("Unset LEAF_DISABLE_VNNI; comparison cannot reuse quality under a changed ISA policy")
     if scoped_tiles:
         frozen_policy = record.get("native_policy")
         if (not isinstance(frozen_policy, dict) or set(frozen_policy) != set(DEFAULT_NATIVE_POLICY) or
                 any(not isinstance(value, bool) for value in frozen_policy.values()) or
                 frozen_policy != DEFAULT_NATIVE_POLICY):
             raise ValueError("--after-float-tiles requires an explicitly default frozen BEFORE native policy")
+    else:
+        frozen_policy = record.get("native_policy")
+        if (not isinstance(frozen_policy, dict) or set(frozen_policy) != set(DEFAULT_NATIVE_POLICY) or
+                any(not isinstance(value, bool) for value in frozen_policy.values()) or
+                frozen_policy != native_policy()):
+            raise ValueError("Current native policy differs from explicit frozen BEFORE quality policy")
     baseline = record["pytorch"]
     if (baseline.get("platform") != platform.platform() or
             baseline.get("cpu") != platform.processor()):
         raise ValueError("Current OS/CPU description differs from the frozen baseline")
-    if os.environ.get("LEAF_DISABLE_VNNI"):
-        raise ValueError("Unset LEAF_DISABLE_VNNI; comparison cannot reuse quality under a changed ISA policy")
     if baseline.get("quality_gate_thresholds") != GATES:
         raise ValueError("Frozen quality thresholds differ; rerun trained validation")
     threads, cpu = baseline.get("threads"), baseline.get("pinned_cpu")
@@ -213,6 +219,19 @@ def native_experiment_gate(before: dict, after: dict, quality_passed: bool) -> d
             "automatic_selection_authorized": False, "fresh_pytorch_comparison": False}
 
 
+def validate_timing_request(metrics: dict, *, runs: int, threads: int, activation_bits: int) -> None:
+    """Reject a child result that does not match the requested measurement."""
+    if not isinstance(metrics, dict):
+        raise ValueError("Native timing metrics must be an object")
+    for name, expected in (("threads", threads), ("activation_bits", activation_bits)):
+        if type(metrics.get(name)) is not int or metrics[name] != expected:
+            raise ValueError(f"Native timing {name} differs from requested workload")
+    for phase in ("prefill", "decode"):
+        samples = metrics.get(f"{phase}_samples_ms")
+        if not isinstance(samples, list) or len(samples) != runs:
+            raise ValueError(f"Native timing {phase} sample count differs from requested runs")
+
+
 def _quality_gate(measured: dict, bits: int) -> bool:
     gate = GATES[str(bits)]
     return bool(measured["next_token_agreement"] >= gate["min_next_token_agreement"] and
@@ -295,6 +314,8 @@ def compare(args) -> dict:
                                              mode="bench", threads=context["threads"], runs=args.runs,
                                              warmup=args.warmup, activation_bits=cases[key]["activation_bits"],
                                              high_qos=context["high_qos"])
+                validate_timing_request(metrics, runs=args.runs, threads=context["threads"],
+                                        activation_bits=cases[key]["activation_bits"])
                 records.append({"index": index, "stage": stage, "measured_at_utc": utc_now(),
                                 "latency": metrics, "stability": benchmark_stability(metrics),
                                 "native_policy": policy})
