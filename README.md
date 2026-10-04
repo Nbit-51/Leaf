@@ -1252,6 +1252,14 @@ A fresh Windows comparison still places Leaf behind stable PyTorch eager:
 unstable in that run. The linked investigation retains all shape/model samples,
 separates WSL2 evidence and records the decision diagram and reproduction steps.
 
+Windows is the primary performance acceptance platform for current optimization
+work. Passing its unchanged quality, stability and speed gates qualifies the
+measured Windows configuration. WSL2 results remain supporting diagnostics and
+do not veto a Windows timing pass; Linux performance requires independent
+native-Linux qualification. Windows and Linux are the current targets, with
+macOS optimization outside the current priority. See the
+[platform acceptance policy](docs/linear-row-reuse.md#platform-acceptance-policy).
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package

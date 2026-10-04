@@ -145,6 +145,27 @@ All experimental options remain off in normal builds. Further prefix lengths,
 models and independent hardware need their own qualification; this result is
 specific to the recorded single-thread GPT-2 workload on this host.
 
+## Platform acceptance policy
+
+Windows is the primary optimization and performance acceptance platform for
+the next development steps. A Windows candidate that passes trained quality,
+cache/generation checks and the unchanged whole-model ABBA stability and speed
+gates counts as an accepted improvement for its measured Windows configuration.
+A failed WSL2 timing run does not veto that Windows result. The row-reuse
+candidate therefore has an accepted 4.07% Windows prefill improvement.
+
+WSL2 remains supporting build, correctness and performance-diagnostic evidence;
+its failed timing verdicts remain visible. Correctness failures on any supported
+platform still require investigation. Native Linux machines must independently
+qualify Linux performance before a Linux speed claim is made. Windows and Linux
+are the current targets; macOS optimization is outside the current priority.
+
+Guest/host CPU placement is a hypothesis to investigate, not a measured latency
+penalty or established explanation for the WSL2 spread. Acceptance thresholds
+are unchanged, and a native Leaf improvement does not imply superiority to
+PyTorch: that requires a fresh matched framework comparison. Broad default
+promotion remains distinct from accepting a measured configuration.
+
 ```mermaid
 flowchart TD
     P[Linear dominates prefill] --> C[Reuse six weight rows across token panels]
@@ -152,7 +173,9 @@ flowchart TD
     Q --> S[Rotating weights: stable gains on active Windows shapes]
     S --> W[Windows full-model ABBA passes all gates]
     W --> F[Fresh matched framework comparison]
-    W --> L[WSL2: quality passes, decode instability rejects timing]
+    W --> A[Accept measured Windows improvement]
+    Q --> L[WSL2 diagnostics: retain separate verdict]
+    A --> N[Native Linux performance qualification pending]
     F --> E[Retain scoped evidence and off-by-default option]
     L --> E
 ```
