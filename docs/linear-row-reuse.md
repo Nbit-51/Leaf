@@ -147,24 +147,47 @@ specific to the recorded single-thread GPT-2 workload on this host.
 
 ## Platform acceptance policy
 
-Windows is the primary optimization and performance acceptance platform for
-the next development steps. A Windows candidate that passes trained quality,
+Windows is the sole active optimization and evaluation platform for
+this development phase. A Windows candidate that passes trained quality,
 cache/generation checks and the unchanged whole-model ABBA stability and speed
 gates counts as an accepted improvement for its measured Windows configuration.
 A failed WSL2 timing run does not veto that Windows result. The row-reuse
 candidate therefore has an accepted 4.07% Windows prefill improvement.
 
-WSL2 remains supporting build, correctness and performance-diagnostic evidence;
-its failed timing verdicts remain visible. Correctness failures on any supported
-platform still require investigation. Native Linux machines must independently
-qualify Linux performance before a Linux speed claim is made. Windows and Linux
-are the current targets; macOS optimization is outside the current priority.
+Existing WSL2 records remain historical supporting evidence, including their
+failed timing verdicts. Further WSL2/Linux builds, tests, benchmarks and noise
+investigations are deferred during this phase. Existing Linux support is
+retained; Linux remains a target, and macOS optimization is outside scope.
+
+The milestone for starting native Linux evaluation is a measured, stable
+Windows advantage over a freshly measured PyTorch baseline on the agreed
+workload, with quality and regression checks passing. The user will then
+initiate the Linux phase: clone the repository on native Linux hardware, run
+the models and independently qualify that platform. A Windows result does
+not establish a Linux performance claim.
 
 Guest/host CPU placement is a hypothesis to investigate, not a measured latency
 penalty or established explanation for the WSL2 spread. Acceptance thresholds
 are unchanged, and a native Leaf improvement does not imply superiority to
 PyTorch: that requires a fresh matched framework comparison. Broad default
 promotion remains distinct from accepting a measured configuration.
+
+## Current Windows iteration sequence
+
+1. Profile the remaining latency and state a concrete optimization hypothesis.
+   Immediate candidates are one-token linear/GEMV and MLP up/down scheduling.
+2. Implement an isolated candidate and check numerical correctness on Windows.
+3. Measure relevant operator shapes with packing and realistic weight working
+   sets included; integrate promising candidates experimentally.
+4. Validate trained-model quality, cache/generation behavior and regressions,
+   then run unprofiled Windows whole-model ABBA with unchanged acceptance gates.
+5. Retain failed and unstable attempts. Diagnose the Windows measurement when
+   needed; do not accept improvements from intuition or selected medians alone.
+6. Compare accepted candidates against fresh, matched Windows PyTorch timings.
+   Record prefill and decode separately and scope any lead to the measured
+   model, workload, precision and thread count.
+7. Update the implementation, records and documentation before moving on.
+   Reorder planned optimizations when measurements justify it, recording why.
 
 ```mermaid
 flowchart TD
@@ -174,10 +197,10 @@ flowchart TD
     S --> W[Windows full-model ABBA passes all gates]
     W --> F[Fresh matched framework comparison]
     W --> A[Accept measured Windows improvement]
-    Q --> L[WSL2 diagnostics: retain separate verdict]
-    A --> N[Native Linux performance qualification pending]
+    F --> G{Stable measured Windows lead over PyTorch?}
+    G -->|No| P
+    G -->|Yes and user starts Linux phase| N[Clone and qualify on native Linux]
     F --> E[Retain scoped evidence and off-by-default option]
-    L --> E
 ```
 
 Reproduce the Windows candidate with:
