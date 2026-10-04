@@ -5,6 +5,10 @@ vector GELU enabled. It is not an accepted speedup, training improvement, or
 21% reduction in numerical error. All four previous comparisons failed the
 combined timing-stability gate. This audit keeps that verdict unchanged.
 
+Follow-up: [Windows telemetry and fresh matched timings](windows-timing-diagnosis.md)
+narrow the current optimization target; they do not identify the historical
+slowdown's root cause or authorize promotion.
+
 ## Numerical accuracy
 
 These are inference checks on a frozen trained GPT-2 checkpoint. No weights

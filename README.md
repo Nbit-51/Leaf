@@ -1207,6 +1207,14 @@ An identical-binary A/A control also produces an apparent 15.31% prefill
 reduction, with unstable timing and slower decode. Its rejection confirms
 that this measurement session cannot establish a reliable speedup.
 
+The subsequent [Windows environment diagnosis](docs/windows-timing-diagnosis.md)
+finds stable monitored controls on a performance core and no large HighQoS
+benefit. A quiet unmonitored GELU comparison still fails baseline decode
+stability. Fresh experimental-Leaf/PyTorch medians show an observed 8.71%
+prefill and 6.81% decode gap, but PyTorch decode is unstable: this remains an
+optimization target, not qualified performance parity. The historical large
+slowdown was not reproduced with telemetry and has no proven root cause.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package

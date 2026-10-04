@@ -151,6 +151,9 @@ the next experiments separately:
 | [Experimental architectures](gemm_activation_experimental_architectures.json) | Eight reduced architecture cases pass; implementation parity, not trained performance qualification |
 | [GELU error/benchmark audit](gpt2_gelu_error_benchmark_audit.json) | Fresh paired logits, independent float64 cross-entropy, exact replay of all four saved timing verdicts; no new latency qualification |
 | [Identical-binary Windows A/A](gpt2_gelu_benchmark_aa_windows.json) | Same binary/settings appear 15.31% faster in pooled prefill; unstable timing and slower decode correctly reject the control |
+| [Windows environment diagnosis](gpt2_windows_environment_summary.json) | Aggregate telemetry and raw timing; monitored controls stable, HighQoS not a large remedy; initial high-overhead probe retained separately |
+| [Quiet Windows GELU ABBA](gpt2_gelu_quiet_windows_abba.json) | Quality passes; first baseline decode spread 1.26092 rejects the full gate despite lower prefill |
+| [Quiet matched PyTorch/Leaf](gpt2_gelu_quiet_matched_windows.json) | Experimental Leaf stable, PyTorch decode unstable; observed Leaf gap 8.71% prefill / 6.81% decode, no promotion |
 
 The vector GELU build is off by default. Its final binary emits an experimental
 build marker that disallows automatic precision selection. These ABBA runs use
