@@ -1233,6 +1233,25 @@ reduced architecture cases; 771 Python tests pass, with six skipped.
 The updated diagram and phase breakdown identify linear operations as the
 remaining dominant cost. No whole-model improvement or PyTorch parity is claimed.
 
+### 7.12 Weight-row reuse in linear GEMM
+
+The [next linear experiment](docs/linear-row-reuse.md) reuses six weight rows
+across token panels while preserving the existing 6×16 tile and FP32 reduction.
+It adds no persistent weight copy. `LEAF_EXPERIMENTAL_ROW_REUSE` is off by
+default and operates inside the already opt-in packed FP32 path.
+
+The Windows single-thread GPT-2 comparison **passes all native experiment
+gates**: prefill 167.4866 → 160.6633 ms (4.07% lower), decode 31.5473 →
+31.0278 ms, trained quality, cache/generation parity and timing stability.
+This is incremental to the experimental attention/GELU build, not a
+retrospective qualification of those earlier changes. All 779 Python tests
+pass with six skipped; eight default architecture cases remain bit-exact.
+
+A fresh Windows comparison still places Leaf behind stable PyTorch eager:
+159.6631 vs 152.3990 ms prefill and 31.9788 vs 28.5796 ms decode. SDPA is
+unstable in that run. The linked investigation retains all shape/model samples,
+separates WSL2 evidence and records the decision diagram and reproduction steps.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package

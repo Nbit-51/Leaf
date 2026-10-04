@@ -42,22 +42,28 @@ def main():
     parser.add_argument("--runs", type=int, default=21)
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--candidate", choices=("kblocked", "weight_panel", "wide_token", "unrolled"), default="kblocked")
+    parser.add_argument("--candidate", choices=("kblocked", "weight_panel", "wide_token", "unrolled", "row_reuse"), default="kblocked")
+    parser.add_argument("--weight-copies", type=int, default=1, help="Rotate resident replicas; samples are per-matrix means")
     args = parser.parse_args()
+    if not 1 <= args.weight_copies <= 32:
+        parser.error("weight-copies must be 1..32")
+    if args.output.exists():
+        parser.error("Require a new output path; preserve previous measurements")
     if not 5 <= args.runs <= 10000 or not 0 <= args.warmup <= 10000:
         parser.error("runs must be 5..10000 and warmup 0..10000")
     paths = {"executable": args.executable, "source": ROOT / "benchmark/token_panel_benchmark.cpp",
              "kernel": ROOT / "engine/include/leaf/kernels/token_panel.h",
              "weight_panel_kernel": ROOT / "engine/include/leaf/kernels/weight_panel.h",
              "wide_token_kernel": ROOT / "engine/include/leaf/kernels/wide_token.h",
+             "row_reuse_kernel": ROOT / "engine/include/leaf/kernels/row_reuse.h",
              "unrolled_kernel": ROOT / "engine/include/leaf/kernels/unrolled_token.h"}
     hashes = {name: digest(path) for name, path in paths.items()}
     pin_cpu(args.cpu)
     with keep_awake():
-        completed = subprocess.run([str(args.executable.resolve()), str(args.runs), str(args.warmup), args.candidate],
+        completed = subprocess.run([str(args.executable.resolve()), str(args.runs), str(args.warmup), args.candidate, str(args.weight_copies)],
                                    capture_output=True, text=True, check=True)
     record = json.loads(completed.stdout)
-    if record.get("candidate") != args.candidate:
+    if record.get("candidate") != args.candidate or record.get("weight_copies") != args.weight_copies:
         raise ValueError("Benchmark binary did not execute the requested candidate")
     if hashes != {name: digest(path) for name, path in paths.items()}:
         raise ValueError("Benchmark binary/source changed during execution")
@@ -65,6 +71,8 @@ def main():
                   platform=platform.platform(), cpu=platform.processor(), pinned_cpu=args.cpu,
                   threads=1, runs_per_pass=args.runs, warmup_per_pass=args.warmup, sha256=hashes,
                   synthetic_inputs=True, model_latency_measured=False,
+                  sample_unit="milliseconds per matrix, averaged over resident weight replicas",
+                  weight_replica_values="identical synthetic values at distinct addresses",
                   automatic_selection_authorized=False, maximum_stability_ratio=MAX_LATENCY_P90_P10_RATIO)
     for shape in record["shapes"]:
         shape["summary"] = summarize(shape["passes"], args.candidate)

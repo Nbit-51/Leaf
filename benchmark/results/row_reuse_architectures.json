@@ -1,0 +1,410 @@
+{
+  "benchmark": "native-decoder-cross-architecture-parity",
+  "measured_at_utc": "2026-10-04T14:20:17.539936+00:00",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "machine": "AMD64",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "torch": "2.12.0+cpu",
+  "threads": 1,
+  "native_executable_sha256": "ae641360dea0c6fc7f7d8f0b757e081bddbb68d3bb644a8f7eec59bf69b2d7f1",
+  "native_policy": {
+    "LEAF_DISABLE_VNNI": false,
+    "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+    "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+  },
+  "scope": "Complete reduced-size random-weight models; trained quality is evaluated separately.",
+  "results": [
+    {
+      "architecture": "llama",
+      "random_weights": true,
+      "hidden_size": 64,
+      "attention_bias": false,
+      "enable_bias": null,
+      "tie_word_embeddings": false,
+      "fp32_scalar_and_threads2_passed": true,
+      "chunked_cache_passed": true,
+      "greedy_generation_passed": true,
+      "cases": {
+        "32": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 1.4901161193847656e-07,
+          "relative_logit_rmse": 2.1385481829838682e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 131.56075713355813,
+          "pytorch_perplexity": 131.56075775050184,
+          "perplexity_ratio": 0.9999999953105796
+        },
+        "8": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.007803529500961304,
+          "relative_logit_rmse": 0.010825035162270069,
+          "next_token_agreement": 1.0,
+          "perplexity": 131.53622385294736,
+          "pytorch_perplexity": 131.56075775050184,
+          "perplexity_ratio": 0.9998135165989162
+        },
+        "4": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.10762430727481842,
+          "relative_logit_rmse": 0.18840643763542175,
+          "next_token_agreement": 0.625,
+          "perplexity": 132.23537416990393,
+          "pytorch_perplexity": 131.56075775050184,
+          "perplexity_ratio": 1.0051277936592724
+        },
+        "8-smooth": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.009840242564678192,
+          "relative_logit_rmse": 0.013589026406407356,
+          "next_token_agreement": 0.9791666666666666,
+          "perplexity": 131.49245533514303,
+          "pytorch_perplexity": 131.56075775050184,
+          "perplexity_ratio": 0.9994808298726257
+        }
+      }
+    },
+    {
+      "architecture": "qwen2",
+      "random_weights": true,
+      "hidden_size": 64,
+      "attention_bias": null,
+      "enable_bias": null,
+      "tie_word_embeddings": false,
+      "fp32_scalar_and_threads2_passed": true,
+      "chunked_cache_passed": true,
+      "greedy_generation_passed": true,
+      "cases": {
+        "32": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 1.7881393432617188e-07,
+          "relative_logit_rmse": 2.2654290887658135e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 128.45367114128905,
+          "pytorch_perplexity": 128.4536723622312,
+          "perplexity_ratio": 0.9999999904950779
+        },
+        "8": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.007064491510391235,
+          "relative_logit_rmse": 0.010371505282819271,
+          "next_token_agreement": 0.9583333333333334,
+          "perplexity": 128.4732412411805,
+          "pytorch_perplexity": 128.4536723622312,
+          "perplexity_ratio": 1.0001523419189924
+        },
+        "4": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.114964559674263,
+          "relative_logit_rmse": 0.16695454716682434,
+          "next_token_agreement": 0.6041666666666666,
+          "perplexity": 129.09652309593125,
+          "pytorch_perplexity": 128.4536723622312,
+          "perplexity_ratio": 1.0050045337114788
+        },
+        "8-smooth": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.008249245584011078,
+          "relative_logit_rmse": 0.012457628734409809,
+          "next_token_agreement": 1.0,
+          "perplexity": 128.39020542702374,
+          "pytorch_perplexity": 128.4536723622312,
+          "perplexity_ratio": 0.9995059157590412
+        }
+      }
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "hidden_size": 64,
+      "attention_bias": null,
+      "enable_bias": null,
+      "tie_word_embeddings": true,
+      "fp32_scalar_and_threads2_passed": true,
+      "chunked_cache_passed": true,
+      "greedy_generation_passed": true,
+      "cases": {
+        "32": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 2.5331974029541016e-07,
+          "relative_logit_rmse": 2.94093013053498e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 124.00435172140976,
+          "pytorch_perplexity": 124.00434945948474,
+          "perplexity_ratio": 1.000000018240691
+        },
+        "8": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.007787987589836121,
+          "relative_logit_rmse": 0.010542250238358974,
+          "next_token_agreement": 1.0,
+          "perplexity": 123.9522539676388,
+          "pytorch_perplexity": 124.00434945948474,
+          "perplexity_ratio": 0.999579889801664
+        },
+        "4": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.14794039726257324,
+          "relative_logit_rmse": 0.19200097024440765,
+          "next_token_agreement": 0.9166666666666666,
+          "perplexity": 123.50349104631226,
+          "pytorch_perplexity": 124.00434945948474,
+          "perplexity_ratio": 0.9959609609230995
+        },
+        "8-smooth": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.009080658666789532,
+          "relative_logit_rmse": 0.013598943129181862,
+          "next_token_agreement": 1.0,
+          "perplexity": 124.03101986913433,
+          "pytorch_perplexity": 124.00434945948474,
+          "perplexity_ratio": 1.0002150764047055
+        }
+      }
+    },
+    {
+      "architecture": "gpt_neox",
+      "random_weights": true,
+      "hidden_size": 64,
+      "attention_bias": true,
+      "enable_bias": null,
+      "tie_word_embeddings": false,
+      "fp32_scalar_and_threads2_passed": true,
+      "chunked_cache_passed": true,
+      "greedy_generation_passed": true,
+      "cases": {
+        "32": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 2.384185791015625e-07,
+          "relative_logit_rmse": 3.1841520353736996e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 126.88362946244001,
+          "pytorch_perplexity": 126.88362729643374,
+          "perplexity_ratio": 1.0000000170708099
+        },
+        "8": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.006921906024217606,
+          "relative_logit_rmse": 0.011353248730301857,
+          "next_token_agreement": 0.9791666666666666,
+          "perplexity": 126.84709485787317,
+          "pytorch_perplexity": 126.88362729643374,
+          "perplexity_ratio": 0.9997120791757063
+        },
+        "4": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.13640449941158295,
+          "relative_logit_rmse": 0.1991194784641266,
+          "next_token_agreement": 0.7916666666666666,
+          "perplexity": 126.70458443639062,
+          "pytorch_perplexity": 126.88362729643374,
+          "perplexity_ratio": 0.998588920699557
+        },
+        "8-smooth": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.009485878050327301,
+          "relative_logit_rmse": 0.014979862608015537,
+          "next_token_agreement": 1.0,
+          "perplexity": 126.89620190343074,
+          "pytorch_perplexity": 126.88362729643374,
+          "perplexity_ratio": 1.0000991034640554
+        }
+      }
+    },
+    {
+      "architecture": "opt",
+      "random_weights": true,
+      "hidden_size": 64,
+      "attention_bias": null,
+      "enable_bias": true,
+      "tie_word_embeddings": true,
+      "fp32_scalar_and_threads2_passed": true,
+      "chunked_cache_passed": true,
+      "greedy_generation_passed": true,
+      "cases": {
+        "32": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 2.980232238769531e-07,
+          "relative_logit_rmse": 2.933453799869312e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 128.3081103227231,
+          "pytorch_perplexity": 128.30811087195252,
+          "perplexity_ratio": 0.999999995719449
+        },
+        "8": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.0076616071164608,
+          "relative_logit_rmse": 0.011497494764626026,
+          "next_token_agreement": 1.0,
+          "perplexity": 128.2398538922431,
+          "pytorch_perplexity": 128.30811087195252,
+          "perplexity_ratio": 0.9994680228767647
+        },
+        "4": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.14528772234916687,
+          "relative_logit_rmse": 0.19330798089504242,
+          "next_token_agreement": 0.9583333333333334,
+          "perplexity": 126.99029000552966,
+          "pytorch_perplexity": 128.30811087195252,
+          "perplexity_ratio": 0.9897292473759667
+        },
+        "8-smooth": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.00912894681096077,
+          "relative_logit_rmse": 0.01363888755440712,
+          "next_token_agreement": 1.0,
+          "perplexity": 128.3684421288295,
+          "pytorch_perplexity": 128.30811087195252,
+          "perplexity_ratio": 1.0004702061036281
+        }
+      }
+    },
+    {
+      "architecture": "gpt2",
+      "random_weights": true,
+      "hidden_size": 30,
+      "attention_bias": null,
+      "enable_bias": null,
+      "tie_word_embeddings": true,
+      "fp32_scalar_and_threads2_passed": true,
+      "chunked_cache_passed": true,
+      "greedy_generation_passed": true,
+      "cases": {
+        "32": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 8.940696716308594e-08,
+          "relative_logit_rmse": 1.5451394119736506e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 127.31271649922773,
+          "pytorch_perplexity": 127.31271635378694,
+          "perplexity_ratio": 1.0000000011423902
+        },
+        "8": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.003949407488107681,
+          "relative_logit_rmse": 0.007713802624493837,
+          "next_token_agreement": 1.0,
+          "perplexity": 127.32717297492164,
+          "pytorch_perplexity": 127.31271635378694,
+          "perplexity_ratio": 1.0001135520594386
+        },
+        "4": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.06959784775972366,
+          "relative_logit_rmse": 0.14053381979465485,
+          "next_token_agreement": 0.9583333333333334,
+          "perplexity": 127.8147277895201,
+          "pytorch_perplexity": 127.31271635378694,
+          "perplexity_ratio": 1.0039431366332499
+        },
+        "8-smooth": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.00421375036239624,
+          "relative_logit_rmse": 0.009650723077356815,
+          "next_token_agreement": 0.9791666666666666,
+          "perplexity": 127.30646290846221,
+          "pytorch_perplexity": 127.31271635378694,
+          "perplexity_ratio": 0.9999508812198512
+        }
+      }
+    },
+    {
+      "architecture": "gpt_neox",
+      "random_weights": true,
+      "hidden_size": 64,
+      "attention_bias": false,
+      "enable_bias": null,
+      "tie_word_embeddings": true,
+      "fp32_scalar_and_threads2_passed": true,
+      "chunked_cache_passed": true,
+      "greedy_generation_passed": true,
+      "cases": {
+        "32": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 2.421438694000244e-07,
+          "relative_logit_rmse": 3.2838505603649537e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 131.25047878751215,
+          "pytorch_perplexity": 131.25047983647298,
+          "perplexity_ratio": 0.9999999920079468
+        },
+        "8": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.008187606930732727,
+          "relative_logit_rmse": 0.01130365114659071,
+          "next_token_agreement": 1.0,
+          "perplexity": 131.31028779395828,
+          "pytorch_perplexity": 131.25047983647298,
+          "perplexity_ratio": 1.0004556780101668
+        },
+        "4": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.16043990850448608,
+          "relative_logit_rmse": 0.20517805218696594,
+          "next_token_agreement": 0.9583333333333334,
+          "perplexity": 131.9224698339948,
+          "pytorch_perplexity": 131.25047983647298,
+          "perplexity_ratio": 1.0051199050727972
+        },
+        "8-smooth": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.009575650095939636,
+          "relative_logit_rmse": 0.013937088660895824,
+          "next_token_agreement": 1.0,
+          "perplexity": 131.2382064634065,
+          "pytorch_perplexity": 131.25047983647298,
+          "perplexity_ratio": 0.999906488928027
+        }
+      }
+    },
+    {
+      "architecture": "opt",
+      "random_weights": true,
+      "hidden_size": 64,
+      "attention_bias": null,
+      "enable_bias": false,
+      "tie_word_embeddings": true,
+      "fp32_scalar_and_threads2_passed": true,
+      "chunked_cache_passed": true,
+      "greedy_generation_passed": true,
+      "cases": {
+        "32": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 2.682209014892578e-07,
+          "relative_logit_rmse": 2.8250966011000855e-07,
+          "next_token_agreement": 1.0,
+          "perplexity": 130.10762309542488,
+          "pytorch_perplexity": 130.1076232364637,
+          "perplexity_ratio": 0.9999999989159835
+        },
+        "8": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.007307730615139008,
+          "relative_logit_rmse": 0.012178158387541771,
+          "next_token_agreement": 0.9583333333333334,
+          "perplexity": 130.08939669923257,
+          "pytorch_perplexity": 130.1076232364637,
+          "perplexity_ratio": 0.999859911842383
+        },
+        "4": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.12137538194656372,
+          "relative_logit_rmse": 0.19631211459636688,
+          "next_token_agreement": 0.8958333333333334,
+          "perplexity": 129.61009393073394,
+          "pytorch_perplexity": 130.1076232364637,
+          "perplexity_ratio": 0.9961760172589924
+        },
+        "8-smooth": {
+          "evaluated_tokens": 48,
+          "max_abs_logit_error": 0.008617207407951355,
+          "relative_logit_rmse": 0.014333194121718407,
+          "next_token_agreement": 1.0,
+          "perplexity": 130.15488653816615,
+          "pytorch_perplexity": 130.1076232364637,
+          "perplexity_ratio": 1.0003632631242256
+        }
+      }
+    }
+  ]
+}

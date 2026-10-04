@@ -317,7 +317,7 @@ def apply_speed_gates(cases: dict, pytorch: dict) -> None:
         case["eligible_for_automatic_selection"] = bool(
             all(not isinstance(item, dict) or item.get(marker, False) is False
                 for item in (latency, fp32_latency)
-                for marker in ("experimental_vector_gelu_build", "experimental_attention_avx2_build")) and
+                for marker in ("experimental_vector_gelu_build", "experimental_attention_avx2_build", "experimental_row_reuse_build")) and
             case.get("quality_gate_passed") is True and workload_match and stability["passed"] and
             prefill and decode and fp32_prefill and fp32_decode and fastest_prefill and fastest_decode and
             decode < fp32_decode and prefill <= fp32_prefill * 1.02 and

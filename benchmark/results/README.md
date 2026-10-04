@@ -160,12 +160,20 @@ the next experiments separately:
 | [Attention Windows ABBA](gpt2_attention_windows_abba.json) | Trained quality passes; observed prefill 7.95% lower, baseline decode unstable; rejected |
 | [Attention Linux BEFORE](gpt2_attention_before_linux.json), [ABBA](gpt2_attention_linux_abba.json) | Trained quality passes; observed prefill 2.22% lower, decode 5.84% higher and unstable; rejected |
 | [Attention Windows phases](gpt2_attention_phase_windows.json) | Diagnostic warmup-inclusive means: packed prefill linear 85–86%, attention 9–10%, activation about 1% |
+| [Row reuse single-matrix Windows](gpt2_row_reuse_shapes_windows.json), [rotating weights](gpt2_row_reuse_rotating_windows.json) | Warm-matrix evidence mixed; rotating active projection shapes stable and 2.08–4.45% lower time |
+| [Row reuse Windows BEFORE](gpt2_row_reuse_before_windows.json), [ABBA](gpt2_row_reuse_windows_abba.json) | All native experiment gates pass: 4.07% lower prefill, no decode regression, stable timing and trained quality |
+| [Row reuse fresh Windows framework comparison](gpt2_row_reuse_matched_windows.json) | Leaf and eager stable; Leaf remains 4.77% slower prefill / 11.89% slower decode than eager; SDPA unstable |
+| [Row reuse default regression](row_reuse_default_regression.json), [experimental architectures](row_reuse_architectures.json) | Eight cases each pass; default bit-exact; scalar/two-thread/cache/generation checks |
+| [Row reuse WSL2 shapes](gpt2_row_reuse_rotating_wsl.json), [BEFORE](gpt2_row_reuse_before_wsl.json), [ABBA](gpt2_row_reuse_wsl_abba.json) | MLP shapes improve; whole-model quality passes and prefill observes 4.53% lower time, but decode instability rejects the gate |
 
 The vector GELU build is off by default. Its final binary emits an experimental
 build marker that disallows automatic precision selection. These ABBA runs use
 frozen quality references and do not constitute fresh PyTorch qualification.
 The attention build is also off by default and excluded from automatic selection;
 see the [follow-up and decision diagram](../../docs/linear-attention-followup.md).
+The [row-reuse investigation](../../docs/linear-row-reuse.md) records a passing
+incremental Windows native experiment. Its build option remains off by default;
+the measured configuration does not qualify broader model/hardware performance.
 
 The full-command record uses cached artifacts, no export/build/download, and
 alternating case order. Its integrity preflight warms the OS file cache. External

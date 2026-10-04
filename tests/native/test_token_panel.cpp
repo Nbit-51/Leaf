@@ -3,6 +3,7 @@
 #include "leaf/kernels/weight_panel.h"
 #include "leaf/kernels/wide_token.h"
 #include "leaf/kernels/unrolled_token.h"
+#include "leaf/kernels/row_reuse.h"
 
 #include <cmath>
 #include <cstring>
@@ -84,6 +85,14 @@ void check_matrix(std::size_t tokens, std::size_t rows, std::size_t columns, boo
         blocked.data(), output_stride, offset, true);
     require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
             "unrolled output is not bit-exact against full-K");
+    leaf::kernels::gemm_token_panels_f32_row_reuse(weights.data(), rows, columns, weight_stride, panels,
+        blocked.data(), output_stride, offset, true);
+    leaf::kernels::gemm_token_panels_f32_row_reuse(weights.data(), rows, columns, weight_stride, panels,
+        blocked_scalar.data(), output_stride, offset, false);
+    require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
+            "row-reuse output is not bit-exact against full-K");
+    require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
+            "row-reuse scalar fallback changed");
     for (std::size_t token = 0; token < tokens; ++token) {
         for (std::size_t row = 0; row < rows; ++row) {
             double expected = with_bias ? bias[row] : 0.0;
@@ -147,7 +156,8 @@ void check_invalid() {
     panels.pack(&value, 1, 1, 1);
     rejected<std::out_of_range>([&] { panels.panel(1); });
     for (auto gemm : {&leaf::kernels::gemm_token_panels_f32, &leaf::kernels::gemm_token_panels_f32_kblocked,
-                     &leaf::kernels::gemm_token_panels_f32_unrolled}) {
+                     &leaf::kernels::gemm_token_panels_f32_unrolled,
+                     &leaf::kernels::gemm_token_panels_f32_row_reuse}) {
         rejected<std::invalid_argument>([&] { gemm(nullptr, 1, 1, 1, panels, &output, 1, nullptr, true); });
         rejected<std::invalid_argument>([&] { gemm(&value, 1, 1, 1, panels, nullptr, 1, nullptr, true); });
         rejected<std::invalid_argument>([&] { gemm(&value, 0, 1, 1, panels, &output, 1, nullptr, true); });

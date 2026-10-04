@@ -3,6 +3,7 @@
 #include "leaf/kernels/weight_panel.h"
 #include "leaf/kernels/wide_token.h"
 #include "leaf/kernels/unrolled_token.h"
+#include "leaf/kernels/row_reuse.h"
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -16,14 +17,14 @@ using Clock = std::chrono::steady_clock;
 using Gemm = decltype(&leaf::kernels::gemm_token_panels_f32);
 volatile double observed_checksum = 0;
 
-void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup, const std::string& kind) {
+void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup, const std::string& kind, unsigned copies) {
     const bool weight_panel = kind == "weight_panel", wide = kind == "wide_token";
     constexpr std::size_t tokens = 63;
-    std::vector<float> input(tokens * columns), weights(rows * columns), bias(rows);
+    std::vector<float> input(tokens * columns), weights(copies * rows * columns), bias(rows);
     for (std::size_t i = 0; i < input.size(); ++i)
         input[i] = static_cast<float>(static_cast<int>((i * 17 + 3) % 101) - 50) / 53.0f;
     for (std::size_t i = 0; i < weights.size(); ++i)
-        weights[i] = static_cast<float>(static_cast<int>((i * 13 + 7) % 97) - 48) / 71.0f;
+        weights[i] = static_cast<float>(static_cast<int>(((i % (rows * columns)) * 13 + 7) % 97) - 48) / 71.0f;
     for (std::size_t i = 0; i < rows; ++i) bias[i] = static_cast<float>(i % 7) / 11.0f;
     leaf::kernels::TokenPanelsF32 panels;
     panels.pack(input.data(), tokens, columns, columns);
@@ -32,7 +33,10 @@ void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup
     std::vector<float> full(tokens * rows), blocked(full.size());
     leaf::kernels::gemm_token_panels_f32(weights.data(), rows, columns, columns,
         panels, full.data(), rows, bias.data());
-    if (kind == "unrolled")
+    if (kind == "row_reuse")
+        leaf::kernels::gemm_token_panels_f32_row_reuse(weights.data(), rows, columns, columns,
+            panels, blocked.data(), rows, bias.data());
+    else if (kind == "unrolled")
         leaf::kernels::gemm_token_panels_f32_unrolled(weights.data(), rows, columns, columns,
             panels, blocked.data(), rows, bias.data());
     else if (wide)
@@ -68,23 +72,27 @@ void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup
         const bool candidate = pass == 1 || pass == 2;
         Gemm gemm = candidate ? &leaf::kernels::gemm_token_panels_f32_kblocked
                               : &leaf::kernels::gemm_token_panels_f32;
+        if (candidate && kind == "row_reuse") gemm = &leaf::kernels::gemm_token_panels_f32_row_reuse;
         if (candidate && kind == "unrolled") gemm = &leaf::kernels::gemm_token_panels_f32_unrolled;
         std::cout << (pass ? "," : "") << "{\"stage\":\""
                   << (candidate ? kind : "full_k") << "\",\"samples_ms\":[";
         for (unsigned iteration = 0; iteration < warmup + runs; ++iteration) {
             const auto start = Clock::now();
+            for (unsigned copy = 0; copy < copies; ++copy) {
+            const auto* current_weights = weights.data() + copy * rows * columns;
             if (candidate && wide) {
                 wide_panels.pack(input.data(), tokens, columns, columns);
-                leaf::kernels::gemm_wide_tokens_f32(weights.data(), rows, columns, columns,
+                leaf::kernels::gemm_wide_tokens_f32(current_weights, rows, columns, columns,
                     wide_panels, blocked.data(), rows, bias.data());
             } else if (candidate && weight_panel)
-                leaf::kernels::gemm_weight_panels_f32(input.data(), tokens, columns, weights.data(), rows,
+                leaf::kernels::gemm_weight_panels_f32(input.data(), tokens, columns, current_weights, rows,
                     columns, columns, blocked.data(), rows, bias.data());
             else {
                 panels.pack(input.data(), tokens, columns, columns);
-                gemm(weights.data(), rows, columns, columns, panels, blocked.data(), rows, bias.data(), true);
+                gemm(current_weights, rows, columns, columns, panels, blocked.data(), rows, bias.data(), true);
             }
-            const double ms = std::chrono::duration<double, std::milli>(Clock::now() - start).count();
+            }
+            const double ms = std::chrono::duration<double, std::milli>(Clock::now() - start).count() / copies;
             double checksum = 0;
             for (float value : blocked) checksum += value;
             observed_checksum = checksum;
@@ -100,15 +108,17 @@ int main(int argc, char** argv) {
         const unsigned runs = argc > 1 ? std::stoul(argv[1]) : 21;
         const unsigned warmup = argc > 2 ? std::stoul(argv[2]) : 10;
         const std::string candidate = argc > 3 ? argv[3] : "kblocked";
-        if (candidate != "kblocked" && candidate != "weight_panel" && candidate != "wide_token" && candidate != "unrolled") throw std::runtime_error("invalid candidate");
+        if (candidate != "kblocked" && candidate != "weight_panel" && candidate != "wide_token" && candidate != "unrolled" && candidate != "row_reuse") throw std::runtime_error("invalid candidate");
+        const unsigned copies = argc > 4 ? std::stoul(argv[4]) : 1;
+        if (copies < 1 || copies > 32) throw std::runtime_error("invalid weight copies");
         if (runs < 5 || runs > 10000 || warmup > 10000) throw std::runtime_error("invalid runs/warmup");
         std::cout << std::setprecision(10) << "{\"avx2_fma\":"
                   << (leaf::kernels::token_panel_f32_avx2_available() ? "true" : "false")
-                  << ",\"candidate\":\"" << candidate << "\",\"packing_included\":true,\"reuses_workspace\":true,\"shapes\":[";
-        shape(768, 768, runs, warmup, candidate); std::cout << ',';
-        shape(3072, 768, runs, warmup, candidate); std::cout << ',';
-        shape(768, 3072, runs, warmup, candidate); std::cout << ',';
-        shape(2304, 768, runs, warmup, candidate);
+                  << ",\"weight_copies\":" << copies << ",\"candidate\":\"" << candidate << "\",\"packing_included\":true,\"reuses_workspace\":true,\"shapes\":[";
+        shape(768, 768, runs, warmup, candidate, copies); std::cout << ',';
+        shape(3072, 768, runs, warmup, candidate, copies); std::cout << ',';
+        shape(768, 3072, runs, warmup, candidate, copies); std::cout << ',';
+        shape(2304, 768, runs, warmup, candidate, copies);
         std::cout << "]}\n";
         return 0;
     } catch (const std::exception& error) {

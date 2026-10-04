@@ -1,5 +1,5 @@
 param([string]$Compiler = "g++", [string]$BuildDirectory = "build", [switch]$ExperimentalVectorGelu,
-      [switch]$ExperimentalAttentionAvx2)
+      [switch]$ExperimentalAttentionAvx2, [switch]$ExperimentalRowReuse)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $output = Join-Path $root $BuildDirectory
@@ -7,6 +7,7 @@ New-Item -ItemType Directory -Force -Path $output | Out-Null
 # AVX2/FMA functions use runtime dispatch; the executable itself stays portable.
 [string[]]$experimentFlags = if ($ExperimentalVectorGelu) { @("-DLEAF_EXPERIMENTAL_VECTOR_GELU=1") } else { @() }
 if ($ExperimentalAttentionAvx2) { $experimentFlags += "-DLEAF_EXPERIMENTAL_ATTENTION_AVX2=1" }
+if ($ExperimentalRowReuse) { $experimentFlags += "-DLEAF_EXPERIMENTAL_ROW_REUSE=1" }
 & $Compiler @experimentFlags "-std=c++17" "-O3" "-DNDEBUG" "-pthread" "-static" "-static-libgcc" "-static-libstdc++" "-I" (Join-Path $root "engine/include") `
     (Join-Path $root "engine/src/decoder.cpp") (Join-Path $root "engine/src/kv_cache.cpp") `
     (Join-Path $root "engine/src/kernels/transformer.cpp") (Join-Path $root "engine/src/main_decoder.cpp") `

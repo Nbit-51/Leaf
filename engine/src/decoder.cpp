@@ -1,6 +1,9 @@
 #include "leaf/runtime/decoder.h"
 #include "leaf/runtime/kv_cache.h"
 #include "leaf/kernels/token_panel.h"
+#ifdef LEAF_EXPERIMENTAL_ROW_REUSE
+#include "leaf/kernels/row_reuse.h"
+#endif
 #ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
 #include "leaf/kernels/attention_vector.h"
 #endif
@@ -912,7 +915,11 @@ struct Decoder::Impl {
         used_vnni = used_vnni || vnni_integer;
         workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
             if (packed_float) {
+#ifdef LEAF_EXPERIMENTAL_ROW_REUSE
+                leaf::kernels::gemm_token_panels_f32_row_reuse(
+#else
                 leaf::kernels::gemm_token_panels_f32(
+#endif
                     reinterpret_cast<const float*>(weight.data) + first * weight.cols,
                     last - first, weight.cols, weight.cols, packed_float_input,
                     output.data() + first, weight.rows,
