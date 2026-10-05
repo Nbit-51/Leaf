@@ -174,6 +174,10 @@ promotion remains distinct from accepting a measured configuration.
 
 ## Current Windows iteration sequence
 
+The [decode GEMV path trace](decode-gemv-investigation.md) records the actual
+dispatch, vocabulary-head workload, existing specialization and the required
+predeclared decode objective before the next kernel experiment.
+
 1. Profile the remaining latency and state a concrete optimization hypothesis.
    Immediate candidates are one-token linear/GEMV and MLP up/down scheduling.
 2. Implement an isolated candidate and check numerical correctness on Windows.
