@@ -187,6 +187,23 @@ to FP32/PyTorch.
 They are not additive independent forward components and are excluded from
 timed experiment children. Profiling is not a precision/performance qualification.
 
+## Paired-row GEMV Windows experiment (2026-10-06)
+
+The [engineering report](../../docs/decode-gemv-results.md) explains the
+accepted native decode gain, prefill tradeoff and framework-order limitation.
+
+| File | Evidence |
+|---|---|
+| [gpt2_decode_gemv_before_windows.json](gpt2_decode_gemv_before_windows.json) | Fresh before-build trained quality baseline |
+| [gpt2_gemv_specialization_windows.json](gpt2_gemv_specialization_windows.json) | Existing specialization control; unstable |
+| [gpt2_gemv_pair_shapes_windows.json](gpt2_gemv_pair_shapes_windows.json) | Paired shape timings; no qualified isolated speed gain |
+| [gpt2_gemv_pair_windows_abba.json](gpt2_gemv_pair_windows_abba.json) | Native decode -10.52%, prefill +0.91%; all gates pass |
+| [gpt2_gemv_pair_matched_windows.json](gpt2_gemv_pair_matched_windows.json) | Sequential eager, SDPA, Leaf comparison; not order-balanced |
+| [gpt2_gemv_pair_cached_logits_windows.json](gpt2_gemv_pair_cached_logits_windows.json) | All held-out tokens decoded individually; bit-exact before/after |
+| [gemv_pair_default_regression.json](gemv_pair_default_regression.json) | Eight default architecture cases |
+| [gemv_pair_architectures.json](gemv_pair_architectures.json) | Eight experimental architecture cases |
+| [gemv_pair_validation_windows.json](gemv_pair_validation_windows.json) | Python/native checks, hashes and gate replay |
+
 ## Current automated checks
 
 | File | What it records |

@@ -42,7 +42,7 @@ def replay(record: dict) -> dict:
                   for name in ("before", "after")}
         if any(stages[name] != timing[name] for name in stages):
             raise ValueError("Saved stage summary differs from raw samples")
-        gate = native_experiment_gate(stages["before"], stages["after"], case["quality_gate_passed"])
+        gate = native_experiment_gate(stages["before"], stages["after"], case["quality_gate_passed"], record.get("objective", "prefill"))
         if gate != case["gate"]:
             raise ValueError("Saved verdict differs from recomputed gate")
         checks[key] = {"raw_sample_replay_passed": True, "gate": gate}

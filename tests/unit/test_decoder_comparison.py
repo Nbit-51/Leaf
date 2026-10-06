@@ -566,3 +566,17 @@ def test_comparison_rejects_mismatched_child_workload(frozen, monkeypatch, stage
     with pytest.raises(ValueError, match="differs from requested"):
         comparison.compare(frozen.args)
     assert not frozen.args.output.exists()
+
+
+@pytest.mark.parametrize("prefill,decode,accepted", [(100, 98, True), (102, 98, True),
+    (102.0001, 97, False), (98, 98.0001, False), (100, 100, False)])
+def test_decode_objective_preserves_thresholds(prefill, decode, accepted):
+    gate = comparison.native_experiment_gate(stage(100, 100), stage(prefill, decode), True, "decode")
+    assert gate["accepted_native_experiment"] is accepted
+    assert gate["required_decode_ratio"] == .98
+    assert "required_prefill_ratio" not in gate
+
+
+def test_invalid_objective_rejected():
+    with pytest.raises(ValueError, match="objective"):
+        comparison.native_experiment_gate(stage(), stage(), True, "fastest")

@@ -1,6 +1,9 @@
 #include "leaf/runtime/decoder.h"
 #include "leaf/runtime/kv_cache.h"
 #include "leaf/kernels/token_panel.h"
+#if defined(LEAF_EXPERIMENTAL_GEMV_PAIR) || defined(LEAF_TEST_GEMV)
+#include "leaf/kernels/gemv_pair.h"
+#endif
 #ifdef LEAF_EXPERIMENTAL_ROW_REUSE
 #include "leaf/kernels/row_reuse.h"
 #endif
@@ -927,6 +930,16 @@ struct Decoder::Impl {
                 return;
             }
             std::size_t row = first;
+#if LEAF_DECODER_AVX && defined(LEAF_EXPERIMENTAL_GEMV_PAIR)
+            if (avx && weight.bits == 32 && tokens == 1 && weight.cols >= 8 && weight.cols % 8 == 0) {
+                for (; last - row >= 2; row += 2) {
+                    leaf::kernels::gemv_pair_f32(reinterpret_cast<const float*>(weight.data) + row * weight.cols,
+                                                input, weight.cols, output.data() + row);
+                    output[row] += bias ? bias->value(0, row) : 0.0f;
+                    output[row + 1] += bias ? bias->value(0, row + 1) : 0.0f;
+                }
+            }
+#endif
 #if LEAF_DECODER_VNNI
             if (vnni_integer) {
                 constexpr std::size_t tile_rows = 2, tile_tokens = 4;
@@ -1133,4 +1146,28 @@ std::uint64_t Decoder::weight_bytes() const { return impl_->mapping.size; }
 bool Decoder::uses_avx2() const { return impl_->avx; }
 bool Decoder::uses_vnni() const { return impl_->used_vnni; }
 unsigned Decoder::activation_bits() const { return impl_->activation_precision; }
+// Test-only access to the actual decoder dot kernels; absent from normal builds.
+#ifdef LEAF_TEST_GEMV
+namespace testing {
+void gemv_f32(const float* weights, const float* input, float* output,
+              std::size_t rows, std::size_t columns, unsigned variant) {
+    Weight weight;
+    weight.data = reinterpret_cast<const std::uint8_t*>(weights);
+    weight.rows = rows; weight.cols = columns; weight.bits = 32;
+    Dot kernel = dot_scalar;
+#if LEAF_DECODER_AVX
+    if (__builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma"))
+        kernel = variant == 1 ? dot_specialized_avx : dot_avx;
+#endif
+    std::size_t row = 0;
+#if LEAF_DECODER_AVX
+    if (variant == 2 && columns >= 8 && columns % 8 == 0 && __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma")) {
+        for (; rows - row >= 2; row += 2)
+            leaf::kernels::gemv_pair_f32(weights + row * columns, input, columns, output + row);
+    }
+#endif
+    for (; row < rows; ++row) kernel(weight, row, input, 1, output + row);
+}
+} // namespace testing
+#endif
 }  // namespace leaf::runtime

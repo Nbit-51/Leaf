@@ -59,3 +59,12 @@ def test_replay_rejects_inconsistent_saved_evidence(change):
         case["timing"]["passes"][0]["native_policy"] = {"unexpected": True}
     with pytest.raises(ValueError):
         replay(record)
+
+
+def test_decode_objective_replay_keeps_historical_prefill_default():
+    record = saved_comparison()
+    record["objective"] = "decode"
+    case = record["native"]["32"]
+    case["gate"] = native_experiment_gate(case["timing"]["before"], case["timing"]["after"], True, "decode")
+    assert replay(record)["32"]["gate"]["accepted_native_experiment"] is False
+    assert replay(saved_comparison())["32"]["gate"]["accepted_native_experiment"] is True

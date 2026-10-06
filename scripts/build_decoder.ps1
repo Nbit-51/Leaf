@@ -1,5 +1,5 @@
 param([string]$Compiler = "g++", [string]$BuildDirectory = "build", [switch]$ExperimentalVectorGelu,
-      [switch]$ExperimentalAttentionAvx2, [switch]$ExperimentalRowReuse)
+      [switch]$ExperimentalAttentionAvx2, [switch]$ExperimentalRowReuse, [switch]$ExperimentalGemvPair)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $output = Join-Path $root $BuildDirectory
@@ -8,6 +8,7 @@ New-Item -ItemType Directory -Force -Path $output | Out-Null
 [string[]]$experimentFlags = if ($ExperimentalVectorGelu) { @("-DLEAF_EXPERIMENTAL_VECTOR_GELU=1") } else { @() }
 if ($ExperimentalAttentionAvx2) { $experimentFlags += "-DLEAF_EXPERIMENTAL_ATTENTION_AVX2=1" }
 if ($ExperimentalRowReuse) { $experimentFlags += "-DLEAF_EXPERIMENTAL_ROW_REUSE=1" }
+if ($ExperimentalGemvPair) { $experimentFlags += "-DLEAF_EXPERIMENTAL_GEMV_PAIR=1" }
 & $Compiler @experimentFlags "-std=c++17" "-O3" "-DNDEBUG" "-pthread" "-static" "-static-libgcc" "-static-libstdc++" "-I" (Join-Path $root "engine/include") `
     (Join-Path $root "engine/src/decoder.cpp") (Join-Path $root "engine/src/kv_cache.cpp") `
     (Join-Path $root "engine/src/kernels/transformer.cpp") (Join-Path $root "engine/src/main_decoder.cpp") `

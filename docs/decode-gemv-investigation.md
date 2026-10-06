@@ -117,5 +117,6 @@ p90/p10 <= 1.25, between-pass drift <= 1.25, sample requirements and raw data.
 Test both objective modes and historical replay. This changes the declared
 optimization target, not numerical thresholds or the objective after seeing data.
 
-The implementation and measurements are the next stage. This trace alone does
-not establish which hardware resource limits GEMV or justify a speed claim.
+The [implementation and measurements](decode-gemv-results.md) now record an
+accepted Windows decode experiment and its prefill tradeoff. This trace alone
+does not establish which hardware resource limits GEMV or justify a speed claim.

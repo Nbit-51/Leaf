@@ -1,0 +1,52 @@
+{
+  "benchmark": "decode-gemv-cached-one-token-parity",
+  "measured_at_utc": "2026-10-06T15:54:40.829646+00:00",
+  "hashes": {
+    "build\\linear-reuse\\candidate\\leaf_decoder.exe": "ae641360dea0c6fc7f7d8f0b757e081bddbb68d3bb644a8f7eec59bf69b2d7f1",
+    "build\\decode-gemv\\candidate\\leaf_decoder.exe": "969644c7e34238ac288ff61ec1d5dd3dbbf824b40a646f12de812767eb05137d",
+    "build\\gpt2_prefill_followup\\decoder-32.leaf": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8",
+    "build\\gpt2_prefill_followup\\tokens.json": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6",
+    "build\\gpt2_prefill_followup\\reference.npy": "c9f5a7f75bb0c8023c94587c3f73e4ae43b273f29b3c7a90ffaabbaa3cfa8c19"
+  },
+  "native_policy": {
+    "LEAF_DISABLE_VNNI": false,
+    "LEAF_EXPERIMENTAL_FLOAT_TILES": true,
+    "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+  },
+  "pinned_cpu": 2,
+  "threads": 1,
+  "chunk_tokens": 1,
+  "output_rows": 1024,
+  "quality": {
+    "evaluated_tokens": 1016,
+    "max_abs_logit_error": 0.0018768310546875,
+    "relative_logit_rmse": 6.724033028149279e-07,
+    "next_token_agreement": 1.0,
+    "perplexity": 62.58012653155534,
+    "pytorch_perplexity": 62.58010265069033,
+    "perplexity_ratio": 1.0000003816047593
+  },
+  "bit_exact_before_after": true,
+  "fp32_allclose_pytorch": true,
+  "max_abs_before_after": 0.0,
+  "passed": true,
+  "execution": {
+    "avx2": true,
+    "experimental_vector_gelu_build": true,
+    "experimental_gemv_pair_build": true,
+    "experimental_row_reuse_build": true,
+    "experimental_attention_avx2_build": true,
+    "vnni": false,
+    "activation_bits": 32,
+    "threads": 1,
+    "artifact_bytes": 497777600,
+    "peak_rss_bytes": 510140416,
+    "load_ms": 0.3952,
+    "prefill_p50_ms": 0,
+    "decode_p50_ms": 0,
+    "prefill_samples_ms": [],
+    "decode_samples_ms": [],
+    "generated_tokens": []
+  },
+  "scope": "All held-out tokens decoded one at a time; no latency measurement or performance qualification."
+}

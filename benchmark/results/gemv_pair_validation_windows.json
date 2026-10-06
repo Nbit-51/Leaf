@@ -1,0 +1,94 @@
+{
+  "measured_at_utc": "2026-10-06T15:51:45.081544+00:00",
+  "python_tests": {
+    "passed": 794,
+    "skipped": 6,
+    "existing_onnx_warnings": 4
+  },
+  "native_tests_passed": true,
+  "default_architecture_cases": 8,
+  "experimental_architecture_cases": 8,
+  "raw_sample_replay": {
+    "gpt2_row_reuse_windows_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": true,
+          "prefill_ratio_after_before": 0.9592606092847454,
+          "decode_ratio_after_before": 0.9835326375516091,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": true,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    },
+    "gpt2_row_reuse_wsl_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": false,
+          "prefill_ratio_after_before": 0.9546881976678567,
+          "decode_ratio_after_before": 0.9757653409870732,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": false,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    },
+    "gpt2_attention_windows_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": false,
+          "prefill_ratio_after_before": 0.9205160109266171,
+          "decode_ratio_after_before": 0.9886386679740995,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": false,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    },
+    "gpt2_gemv_pair_windows_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": true,
+          "prefill_ratio_after_before": 1.0091349594586314,
+          "decode_ratio_after_before": 0.8948265284256194,
+          "no_slowdown_passed": true,
+          "decode_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_decode_ratio": 0.98,
+          "accepted_native_experiment": true,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    }
+  },
+  "sha256": {
+    "engine/src/decoder.cpp": "e362ea62c40f1f43aa350d3e5673c117041b93d635854381b006ab029c39003a",
+    "engine/include/leaf/kernels/gemv_pair.h": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef",
+    "tests/native/test_decode_gemv.cpp": "67c53801690a578b317094de7101c3105d2a269afe7b667a8dd70a60f5c65600",
+    "build/decode-gemv/tests-final.exe": "02acaa6bfd040d531384bcedf2edaa28869492870eff97263363cb1c6fc128a8",
+    "build/decode-gemv/candidate/leaf_decoder.exe": "969644c7e34238ac288ff61ec1d5dd3dbbf824b40a646f12de812767eb05137d",
+    "build/decode-gemv/decoder.s": "6bb225f1c2199a64a221978c38cc34740a3024a0ba1093a4faa4a7e9b71cf5bc"
+  },
+  "scope": "Windows only. Full pytest, native checks and architecture runs completed separately from timings. Assembly is diagnostic, not a hardware performance-counter measurement. CMake targets added but CMake unavailable on Windows; binaries built using MinGW g++ directly."
+}

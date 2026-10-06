@@ -132,6 +132,9 @@ int main(int argc, char** argv) {
 #ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
                 << ",\"experimental_vector_gelu_build\":true"
 #endif
+#ifdef LEAF_EXPERIMENTAL_GEMV_PAIR
+                << ",\"experimental_gemv_pair_build\":true"
+#endif
 #ifdef LEAF_EXPERIMENTAL_ROW_REUSE
                 << ",\"experimental_row_reuse_build\":true"
 #endif

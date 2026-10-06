@@ -1260,6 +1260,22 @@ the user starts native Linux qualification. Existing Linux support and historica
 WSL2 records remain available; macOS optimization is outside scope. See the
 [platform acceptance policy](docs/linear-row-reuse.md#platform-acceptance-policy).
 
+### 7.13 Paired-row FP32 GEMV (2026-10-06)
+
+The [paired-row GEMV experiment](docs/decode-gemv-results.md) passes the
+predeclared Windows decode gate: native ABBA decode time falls from 34.0661 to
+30.48325 ms (**10.52% lower**). Prefill increases from 172.9838 to 174.5640 ms
+(**0.91% higher**), within the unchanged 2% allowance. Quality and stability pass;
+the compile option remains off by default.
+
+A separate fresh sequential comparison records Leaf prefill/decode at
+163.1301/29.3924 ms and PyTorch SDPA at 154.5930/30.4743 ms. Prefill remains
+8.54 ms behind. The observed 3.55% decode lead needs an alternating framework
+comparison to exclude order effects; it is not an overall PyTorch win.
+Cached one-token logits are bit-exact before/after; 794 Python tests and both
+eight-case architecture checks pass. Next priorities are MLP prefill and an
+order-balanced framework comparison. See the report for raw records and limits.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package

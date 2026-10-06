@@ -201,7 +201,9 @@ def stage_summary(passes: list[dict]) -> dict:
     return aggregate
 
 
-def native_experiment_gate(before: dict, after: dict, quality_passed: bool) -> dict:
+def native_experiment_gate(before: dict, after: dict, quality_passed: bool, objective: str = "prefill") -> dict:
+    if objective not in ("prefill", "decode"):
+        raise ValueError("Unknown performance objective")
     values = {phase: (latency_median(before, phase), latency_median(after, phase))
               for phase in ("prefill", "decode")}
     ratios = {phase: candidate / baseline if baseline is not None and candidate is not None else None
@@ -210,11 +212,11 @@ def native_experiment_gate(before: dict, after: dict, quality_passed: bool) -> d
               for phase, value in ratios.items()}
     stable = before.get("stability_passed") is True and after.get("stability_passed") is True
     no_slowdown = all(value is not None and value <= 1.02 for value in ratios.values())
-    improved = ratios["prefill"] is not None and ratios["prefill"] <= 0.98
+    improved = ratios[objective] is not None and ratios[objective] <= 0.98
     return {"quality_passed": quality_passed is True, "timing_stability_passed": stable,
             "prefill_ratio_after_before": ratios["prefill"], "decode_ratio_after_before": ratios["decode"],
-            "no_slowdown_passed": no_slowdown, "prefill_improvement_passed": improved,
-            "maximum_slowdown_ratio": 1.02, "required_prefill_ratio": 0.98,
+            "no_slowdown_passed": no_slowdown, f"{objective}_improvement_passed": improved,
+            "maximum_slowdown_ratio": 1.02, f"required_{objective}_ratio": 0.98,
             "accepted_native_experiment": bool(quality_passed is True and stable and no_slowdown and improved),
             "automatic_selection_authorized": False, "fresh_pytorch_comparison": False}
 
@@ -293,6 +295,8 @@ def compare(args) -> dict:
         raise ValueError(f"Require at least {MIN_LATENCY_SAMPLES} runs and nonnegative warmup")
     if args.output.resolve() == args.record.resolve():
         raise ValueError("Output must not overwrite the frozen quality record")
+    if args.output.exists():
+        raise ValueError("Output exists; preserve previous measurements")
     context = validate_inputs(args)
     pin_cpu(context["cpu"])
     cases = {}
@@ -323,14 +327,14 @@ def compare(args) -> dict:
             after = stage_summary([item["latency"] for item in records if item["stage"] == "after"])
             cases[key]["timing"] = {"order": [item["stage"] for item in records], "passes": records,
                                     "before": before, "after": after}
-            cases[key]["gate"] = native_experiment_gate(before, after, cases[key]["quality_gate_passed"])
+            cases[key]["gate"] = native_experiment_gate(before, after, cases[key]["quality_gate_passed"], getattr(args, "objective", "prefill"))
     # Files must remain frozen for the entire comparison, not just its start.
     if (digest(args.before) != context["before_sha256"] or digest(args.after) != context["after_sha256"] or
             digest(args.record) != context["record_sha256"] or
             any(digest(args.workdir / name) != value for name, value in context["quality_cache_sha256"].items()) or
             any(digest(path) != cases[key]["artifact_sha256"] for key, path in context["artifacts"].items())):
         raise ValueError("Frozen inputs or executables changed during comparison")
-    result = {"benchmark": "trained-decoder-native-experiment-abba", "measured_at_utc": utc_now(),
+    result = {"benchmark": "trained-decoder-native-experiment-abba", "objective": getattr(args, "objective", "prefill"), "measured_at_utc": utc_now(),
               "before_executable_sha256": context["before_sha256"], "after_executable_sha256": context["after_sha256"],
               "frozen_record_sha256": context["record_sha256"], "quality_cache_sha256": context["quality_cache_sha256"],
               "frozen_quality_measured_at_utc": context["record"].get("quality_measured_at_utc", context["record"].get("measured_at_utc")),
@@ -355,6 +359,7 @@ def compare(args) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--objective", choices=("prefill", "decode"), default="prefill")
     parser.add_argument("--before", type=Path, required=True)
     parser.add_argument("--after", type=Path, required=True)
     parser.add_argument("--workdir", type=Path, required=True)
