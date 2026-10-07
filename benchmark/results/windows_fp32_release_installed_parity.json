@@ -1,0 +1,8 @@
+{
+  "default_sha256": "f5a5b39b6fa92aa4895f3330ce592c84645044c61a7f1b687b712a6ba5c500a8",
+  "installed_sha256": "5aa09888d0b02b069cd7c21f274ba84c40ec767c054b92afdf12f8739460c326",
+  "tokens_sha256": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6",
+  "full_heldout_logits_bit_exact": true,
+  "logits_compared": 51463168,
+  "optimized_fp32_active": true
+}

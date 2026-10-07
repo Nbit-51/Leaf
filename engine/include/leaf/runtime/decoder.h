@@ -26,6 +26,7 @@ public:
     std::size_t cache_tokens() const;
     std::uint64_t weight_bytes() const;
     bool uses_avx2() const;
+    bool uses_optimized_fp32() const;
     bool uses_vnni() const;
     unsigned activation_bits() const;
 private:

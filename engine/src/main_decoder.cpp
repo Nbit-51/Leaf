@@ -164,6 +164,7 @@ int main(int argc, char** argv) {
 #ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
                 << ",\"experimental_attention_avx2_build\":true"
 #endif
+                << ",\"optimized_fp32_active\":" << (decoder.uses_optimized_fp32() ? "true" : "false")
                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")
                 << ",\"activation_bits\":" << decoder.activation_bits()
                 << ",\"threads\":" << threads << ",\"artifact_bytes\":" << decoder.weight_bytes()

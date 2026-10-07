@@ -50,7 +50,8 @@ def child(args):
     data = json.loads((args.workdir / "tokens.json").read_text())
     args.threads = len(args.cores)
     if args.child == "leaf":
-        os.environ["LEAF_EXPERIMENTAL_FLOAT_TILES"] = "1"
+        if not args.default_kernels:
+            os.environ["LEAF_EXPERIMENTAL_FLOAT_TILES"] = "1"
         _, metrics = run_native(args.executable, args.workdir / "decoder-32.leaf",
                                 [data["benchmark_ids"]], mode="bench", threads=args.threads,
                                 runs=args.runs, warmup=args.warmup, windows_above_normal=True)
@@ -83,6 +84,8 @@ def main():
     parser.add_argument("--runs", type=int, default=31)
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--child", choices=["leaf", "eager", "sdpa"])
+    parser.add_argument("--default-kernels", action="store_true",
+                        help="measure the shipped default without experimental environment flags")
     args = parser.parse_args()
     if sys.platform != "win32" or args.output.exists() or args.runs < 5 or args.warmup < 1:
         parser.error("Require Windows, a fresh output, >=5 samples and >=1 warmup")
@@ -119,6 +122,7 @@ def main():
     record = dict(format="leaf-core-scaling-v1", measured_at_utc=utc_now(), platform=platform.platform(),
                   cpu=platform.processor(), topology=selected, hashes=hashes, runs=args.runs, warmup=args.warmup,
                   passes=[], automatic_selection_authorized=False, quality_validated=False,
+                  native_default_kernels=args.default_kernels,
                   scope=__doc__, complete=False)
     write_record(args.output, record)
     child_dir = args.output.parent / (args.output.stem + "-passes")
@@ -131,6 +135,8 @@ def main():
                        "--model", str(args.model.resolve()), "--output", str(output.resolve()),
                        "--runs", str(args.runs), "--warmup", str(args.warmup),
                        "--cores", *map(str, args.cores[:count])]
+            if args.default_kernels:
+                command.append("--default-kernels")
             env = dict(os.environ, OMP_NUM_THREADS=str(count), MKL_NUM_THREADS=str(count))
             result = subprocess.run(command, env=env, capture_output=True, text=True,
                                     creationflags=subprocess.ABOVE_NORMAL_PRIORITY_CLASS)

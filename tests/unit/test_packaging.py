@@ -18,7 +18,6 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @pytest.fixture
 def setup_module(monkeypatch):
-    pytest.importorskip("wheel")
     import setuptools
     monkeypatch.setattr(setuptools, "setup", lambda **kwargs: None)
     specification = importlib.util.spec_from_file_location("leaf_package_setup", ROOT / "setup.py")
@@ -63,6 +62,7 @@ def test_token_panel_header_is_included_in_packaged_native_sources():
     except ImportError:
         tomllib = pytest.importorskip("tomli")
     config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    assert "engine/include/leaf/runtime/decoder_config.h" in config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/runtime"]
     headers = config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/kernels"]
     source = "engine/include/leaf/kernels/token_panel.h"
     assert source in headers

@@ -1,0 +1,41 @@
+{
+  "format": "leaf-windows-fp32-release-validation-v1",
+  "validated_at_utc": "2026-10-07T11:09:42.687650+00:00",
+  "sources_sha256": {
+    "engine/src/decoder.cpp": "2c73f86be1a12fab50a8b42cfabc152694a84a1854c2bb1d16fe122b7709bf4a",
+    "engine/src/main_decoder.cpp": "9f1a7852d1b4ed342c7fadea92653f0a86bc0313e022f6543726e0ed038175eb",
+    "engine/include/leaf/runtime/decoder.h": "3e00f958ee08eb8ef7a63213df890e21a4063b3a9afac1ec21891cd0dfb3b062",
+    "engine/include/leaf/runtime/decoder_config.h": "674f2fe6a92a5ea8a8e64c9696143fc30fbe40f9aa45b03d27f5e178e2e7b80d",
+    "scripts/build_decoder.ps1": "a2c8d85a030d93620afe909d291ec5e8be91f1467a1d04e2f771fbbc50d20ba2",
+    "pyproject.toml": "9cdc8d2240dea731c74a8c9720f96fc78a53b25293f65f4ffc4e55791952bdf7",
+    "tests/native/test_kernels.cpp": "2dd705d7c34f3c6f4dc227ec319dc40355385ec827a9a4924077182d5ef7a05d",
+    "tests/unit/test_packaging.py": "5c1ffeb5f311bf6d23aec4a8fefd2a96d6f909b5d3fe7ea7aa6df2d1beebfbb8",
+    "tests/unit/test_fp32_release.py": "537d55127aa9e2f806eb24290031689e9b423e01c6a500a23871523f174ace15",
+    "tools/qualify_fp32_release.py": "7eb2947adafdd924eebc05df4be2fdfeb16a2b417e488d9aba21607a9f03034f",
+    "tools/verify_decoder_architectures.py": "9cad251a58e7c63260849c76126bb19ae87cfbc9d6384ddd3b561c9aef84f3ab",
+    "tools/benchmark_core_scaling.py": "5c1653f41125b69ca9dab0242e7b9ca2fade7f911e16382c28ca21f9b112c0e0"
+  },
+  "records_sha256": {
+    "windows_fp32_release.json": "84529766de425a0b3333ccffce280c22f59727b1b31e0e9a0faff606f8b6faee",
+    "windows_fp32_release_architectures.json": "788dbc27716ceb7ea8e81bb15a44ef3ca9fa6fc294c418aa950c9cbe1754610a",
+    "windows_fp32_release_package.json": "41fc70a25b3c71de16653259646750ce721152b55f1b5874ff98990dd70161ae",
+    "windows_fp32_release_installed_parity.json": "1019effd99d4e820851be901d641305e77f20c905165a6a71e184cb2d2ee9a0f",
+    "windows_fp32_release_pytorch.json": "16b3859d251aaa34af5628ef70d84bb367c6cada82fb91b7cf098fe182318d83"
+  },
+  "python_tests": {
+    "command": "python -m pytest -q -rs --basetemp build/fp32-release/pytest-final-tmp -o cache_dir=build/fp32-release/pytest-cache",
+    "passed": 831,
+    "skipped": 0,
+    "existing_onnx_warnings": 4,
+    "log_sha256": "fdfa8ef574bbef758c0f96c8328914b84ee3af1a847de15dbae87c463e0b43e8"
+  },
+  "native_tests": {
+    "portable_kernel_and_dynamic_kv_tests_passed": true,
+    "binary_sha256": "03a655ceb999cbedbaa4c433a1b777e8cec9e4ae437a4cc9a419c65a1b43d060"
+  },
+  "reduced_architecture_cases_passed": 8,
+  "installed_first_and_cached_generation_passed": true,
+  "installed_fp32_active": true,
+  "qualified_windows_default": true,
+  "pytorch_speed_win_qualified": false
+}

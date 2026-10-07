@@ -11,14 +11,18 @@ CPU hardware. Success means useful inference latency, manageable memory, and a
 simple way to run supported models on local inputs, backed by reproducible
 quality and performance checks.
 
-**Current focus:** Windows FP32 MLP prefill optimization, using the
-[validated paired-row decode build](docs/decode-gemv-results.md) as the baseline.
-Keep its decode gain, measure each prefill candidate against the current kernel,
-and require a fresh order-balanced PyTorch comparison before claiming a lead.
-Broader architecture and platform optimization follow this milestone.
-The [current MLP experiment](docs/mlp-prefill-experiment.md) isolates packing
-savings and timing stalls. A controlled whole-model follow-up is stable and
-1.46% faster, below the predeclared 2% target; it remains experimental.
+**Windows release milestone:** ordinary FP32 builds now use the validated
+packed GEMM, row reuse, vector GELU, vector attention and paired GEMV stack on
+AVX2/FMA-capable CPUs. Ten alternating before/after pairs measured **59.3% lower
+prefill latency and 9.3% lower decode latency** than the conservative build;
+all twenty passes meet the existing stability limits. The installed wheel uses
+this path without research flags. See the [release evidence and remaining work](docs/windows-fp32-release.md).
+
+These gains are relative to the previous Leaf default, not a general claim of
+superiority over PyTorch. A fresh installed-wheel comparison observed faster
+runs but failed Leaf's repeatability gate; the remaining work is reliable
+framework-relative speed and complete-command latency. The separate MLP vector-pack and
+96-row worker experiments remain unpromoted.
 
 Two preparation routes share that purpose:
 
@@ -225,6 +229,13 @@ portable recommendation for other machines.
 | `--metrics path.json` | Record artifact, native timings, memory, generated IDs, CLI first-token and end-to-end time |
 | `--plan path.json` | Supply a custom decoder plan with supported block semantics and tensor mappings |
 
+Windows FP32 acceleration is a default runtime capability, independent of the
+research environment flags above. Metrics report `optimized_fp32_active`.
+Unsupported CPUs use the portable path. For a conservative comparison build,
+use `./scripts/build_decoder.ps1 -ConservativeFp32 -BuildDirectory build/conservative`
+or CMake `-DLEAF_CONSERVATIVE_FP32=ON`, then select that executable with
+`LEAF_DECODER_BIN`. Other OS defaults are unchanged pending their own validation.
+
 On Windows, use ASCII cache/artifact paths for the current native decoder,
 for example `$env:LEAF_CACHE_DIR = 'C:\leaf-cache'`. Its mapped-file path API
 does not yet support arbitrary Unicode paths. This is a known implementation
@@ -312,9 +323,34 @@ own reproducible input adapter and appropriate held-out quality gate.
 
 ## 4. Architecture
 
-![Leaf architecture: import adapters, separate artifact routes, and native execution](docs/architecture.svg)
-
-[Open the full-size architecture diagram](docs/architecture.svg).
+```mermaid
+%%{init: {"themeVariables": {"fontSize": "20px"}, "flowchart": {"nodeSpacing": 65, "rankSpacing": 80}}}%%
+flowchart TB
+    subgraph BUILD["1. Offline model preparation"]
+      direction LR
+      MODEL["Trained model"] --> SNAP["Safetensors snapshot"]
+      SNAP --> PLAN["Validated decoder plan<br/>Operator semantics and tensor mappings"]
+      MODEL --> ONNX["ONNX export"] --> IR["Validated Leaf graph IR"]
+      IR --> OPT["Constant folding<br/>CNN and Transformer rewrites"]
+    end
+    subgraph ARTIFACT["2. Versioned native artifacts"]
+      direction LR
+      PLAN --> DEC["Decoder artifact<br/>FP32 or calibrated precision candidates"]
+      OPT --> GRAPH["Graph artifact v2 or v3<br/>Typed weights and optional liveness plan"]
+    end
+    subgraph DEPLOY["3. Local CPU inference"]
+      direction LR
+      DEC --> RUNTIME["Native C++ decoder"]
+      RUNTIME --> CACHE["Per-session dynamic KV cache<br/>Grow, append, reset and reuse"]
+      CACHE --> KERNEL["Windows FP32 default<br/>Tiled GEMM, SIMD and paired GEMV<br/>CPU feature checks and scalar fallback"]
+      GRAPH --> EXEC["C++ graph executor<br/>Reusable buffers or planned arena"]
+      KERNEL --> OUTPUT["Generated tokens and logits"]
+      EXEC --> RESULTS["Graph outputs"]
+    end
+    MODEL -. "numerical reference" .-> CHECK["Quality, latency and memory checks"]
+    OUTPUT --> CHECK
+    RESULTS --> CHECK
+```
 
 Offline preparation and deployed execution are separate. ONNX graph artifacts
 and decoder artifacts have different formats and runtimes; neither is silently
@@ -328,9 +364,29 @@ but no PyTorch or Transformers model is needed in its inference loop.
 
 ## 5. Implementation pipeline, step by step
 
-![Leaf optimization loop: independent data, trained quality, stable full-workload speed, and iterative rejection](docs/optimization-loop.svg)
-
-[Open the full-size optimization-loop diagram](docs/optimization-loop.svg).
+```mermaid
+%%{init: {"themeVariables": {"fontSize": "20px"}, "flowchart": {"nodeSpacing": 65, "rankSpacing": 85}}}%%
+flowchart TB
+    A["Import supported semantics and validate tensors"]
+    B["Prepare native FP32 execution"]
+    C["Optional precision candidates<br/>Independent calibration data"]
+    D["Held-out quality, generation and cache checks"]
+    E["Matched native and PyTorch workloads<br/>Same threads, logits and KV-cache semantics"]
+    F{"Automatic precision selection<br/>Quality AND stable measured speed?"}
+    G["Use the qualified precision profile<br/>Bind artifact, binary, CPU and workload"]
+    H["Keep the shipped FP32 fallback"]
+    I["Profile a remaining bottleneck<br/>Implement and validate a focused change"]
+    J{"Release validation passes?"}
+    K["Integrate into the normal build<br/>Verify the installed product"]
+    A --> B --> D
+    B --> C --> D
+    D --> E --> F
+    F -- "yes" --> G
+    F -- "no" --> H
+    H --> I --> J
+    J -- "yes" --> K
+    J -- "no" --> I
+```
 
 ### Step 1: Import explicit semantics
 
@@ -442,6 +498,13 @@ byte-packed unsigned activations, cached signed-weight sums, and zero-point
 correction. The tested AVX2 fallback remains available; single-token decode
 uses its existing kernel. Persistent workers avoid creating threads per op.
 
+For entirely FP32 artifacts, Windows now defaults to packed 6-row × 16-token
+GEMM with row reuse, vector GELU-new and multi-token attention, plus paired-row
+GEMV for eligible single-token projections. Dispatch checks AVX2/FMA support
+and retains scalar and shape-tail fallbacks. Quantized/mixed artifacts keep
+their previous execution paths. Dynamic KV capacity grows geometrically;
+reset clears the logical length while retaining storage for reuse.
+
 Packing and weight-sum preprocessing add startup cost. Warmed prefill/decode
 tables exclude constructor/export/tokenization time, so CLI first-token and
 end-to-end observations are recorded separately.
@@ -515,9 +578,13 @@ python -m pip install -r requirements-dev.txt
 ./scripts/verify_all.ps1
 ~~~
 
-The last completed full Python suite passed **724 tests**, with no skips and
-four existing ONNX-export deprecation warnings. The complete native verification
-command also passed: native correctness, executor/buffer tests, scalar-versus-
+The current Windows release suite passes **831 tests with zero skips**, using
+an explicit `--basetemp`; four existing ONNX deprecation warnings remain.
+The earlier complete verification command passed 724 Python tests and the
+native graph/decoder checks below. The latest Windows release checks, including
+the current test count and installed wheel, are recorded in the
+[release report](docs/windows-fp32-release.md). The earlier native verification
+covered native correctness, executor/buffer tests, scalar-versus-
 optimized kernel speed gates, synthetic PyTorch/NumPy checks, full FP32 ResNet
 parity, INT8 graph integration, memory planning, norms, attention, SwiGLU,
 RoPE/RepeatKV, KV-session tests, and reduced complete decoder architecture checks.
@@ -1290,6 +1357,22 @@ Cached one-token logits are bit-exact before/after; 794 Python tests and both
 eight-case architecture checks pass. Next priorities are MLP prefill and an
 order-balanced framework comparison. See the report for raw records and limits.
 
+### 7.14 Shipped Windows FP32 stack (2026-10-07)
+
+The [release report](docs/windows-fp32-release.md) supersedes the earlier
+off-by-default status for the combined Windows FP32 stack. Across ten
+alternating pairs, conservative/default pooled medians are 389.4917/158.8321 ms
+for prefill and 31.1941/28.27235 ms for decode. All twenty passes meet the
+existing stability limit; trained output matches the prior stack exactly.
+
+The normal installed wheel uses the optimized path. A separate fresh PyTorch
+comparison includes a 132.3031 ms Leaf prefill pass, but its reverse-order pass
+is 157.5968 ms and pooled stability fails. This is not a qualified PyTorch win.
+The [core-scaling record](benchmark/results/gpt2_core_scaling_windows.json)
+uses distinct physical P-cores; the [96-row experiment](benchmark/results/gpt2_mlp_grain96_windows.json)
+failed qualification and was not integrated. These outcomes do not disable the
+independently qualified Windows release stack.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package
@@ -1805,8 +1888,7 @@ Leaf/
 ├── scripts/                    Portable/native builds and full verification command
 ├── .github/workflows/          Portable hosted-OS validation matrix
 ├── docs/
-│   ├── architecture.svg        Large two-route execution diagram
-│   ├── optimization-loop.svg   Quality/stability/speed decision loop
+│   ├── windows-fp32-release.md Shipped Windows stack and release evidence
 │   └── decisions.md            Earlier performance decisions and measurement context
 ├── pyproject.toml              Installable CLI and optional validation dependencies
 └── README.md                   Purpose, methods, limits, results, iterative roadmap
@@ -1823,28 +1905,23 @@ Development continues through measured implementation, testing, bottleneck
 analysis, and revision. The goal remains broad local CPU inference—not a
 framework tied to Qwen, Llama, CIFAR, one operating system, or a fixed RAM target.
 
-Implementation checkpoint (2026-10-02): the Python suite, default and
-experimental reduced-model decoder checks, same-host Windows/Linux checks, and
-installed Windows wheel checks pass. The new float-kernel experiments remain
-disabled because stable whole-model speed qualification is incomplete.
-Matched last-token-logit latency validation and fail-closed legacy-profile
-checks are implemented. The former TinyLlama promotion is superseded; fresh
-matched measurements independently qualify smoothed W8A8 on the exact tested
-Windows TinyLlama runtime, while GPT-2 fails prefill promotion on both OS
-environments. The packed FP32 token-panel experiment passes stable native-only
-FP32 checks for Linux GPT-2 and Windows TinyLlama, but noisy Windows GPT-2 and
-quantized candidates remain rejected; it stays off by default. The blocked-K
-primitive is tested and shape-benchmarked but remains undispatched: the
-2026-10-03 follow-up shows no stable speed improvement. Phase profiles confirm
-linear dominates prefill and put activation ahead of LayerNorm. Fresh matched-profile
-full-command checks remain in progress; the current installed wheel's offline
-first/cached smoke passes without a compiler or heavy-library imports. Native
-dense-kernel work and fresh matched baselines continue.
-The RoPE-cache candidate
-passes paired bit-exact reduced-model checks but is not a claimed speed
-improvement; a successful correctness check does not close the performance work.
+Implementation checkpoint (2026-10-07): the established FP32 stack is now the
+Windows default, with a verified installed wheel and conservative fallback.
+The release comparison passes all twenty individual stability checks; trained
+GPT-2 logits match the prior validated stack exactly. Eight reduced architecture
+cases cover FP32, scalar, threaded, cached and quantized execution. Historical
+sections above preserve their original experimental decisions; the release
+record supersedes those off-by-default statements for this combined Windows
+FP32 stack only. MLP vector packing, blocked-K and 96-row scheduling remain
+unpromoted. Existing precision profiles require fresh qualification after a
+binary change, including the earlier TinyLlama W8A8 profile.
 
 Implemented and checked:
+
+- [x] Ship the validated Windows FP32 stack through normal builds, the CLI source cache and native wheel.
+- [x] Verify dynamic KV growth, preservation at capacity boundaries, reset/reuse and session isolation.
+- [x] Preserve bit-exact quantized/scalar behavior while enabling the FP32 release path.
+- [x] Record distinct-P-core scaling and reject the unqualified 96-row worker change without altering runtime scheduling.
 
 - [x] Load/validate ONNX graphs and a full ResNet architecture through Leaf IR.
 - [x] Fold export-time constants and apply CNN/Transformer graph rewrites.
@@ -1877,15 +1954,19 @@ Implemented and checked:
 - [x] Profile default/packed FP32 GPT-2 and measure packing-inclusive actual projection shapes; retain noise and reject blocked-K integration without a speed win.
 - [x] Check reduced-model execution across Windows/Linux on the same host and configure portable CI.
 
-Next measured steps:
+Current CPU-decoder release priorities:
 
-- [ ] Follow the [profile-first prefill priorities](docs/prefill-investigation.md): another measured GEMM candidate, whole-model validation, then activation and other measured costs; keep decode separate.
-- [ ] Complete fresh matched-profile full-command checks; qualify any changed packed runtime against fresh PyTorch before promotion.
+- [ ] Close the remaining GPT-2 prefill gap against fresh, order-balanced PyTorch measurements; keep decode separate.
+- [ ] Qualify complete-command latency separately from warmed native forwards; installed first/cached smoke is already verified.
 - [ ] Requalify changed runtime binaries and further device/model configurations against matched PyTorch/native workloads before promotion.
-- [ ] Improve native FP32/GPT-2 prefill and CNN whole-model latency without weakening quality gates.
 - [ ] Measure native GEMM/GEMV bottlenecks, per-core frequency behavior, and CNN packing before proposing another default kernel change.
 - [ ] Reduce measured startup/integrity/tokenizer costs safely; do not attribute the mixed frontend interval to Python alone.
 - [ ] Broaden quality evaluation beyond short text prefixes: larger corpora, more prompts, and task-specific metrics.
+- [ ] Add a matched llama.cpp Q8_0 comparison before positioning TinyLlama quantization against specialized CPU inference engines.
+
+Future coverage and performance work (not prerequisites for the current release):
+
+- [ ] Improve CNN whole-model latency without weakening quality gates.
 - [ ] Run full trained Qwen and further independently trained architecture families when compatible weights are available.
 - [ ] Add scaled RoPE, sliding-window attention, Q/K normalization, and multiple-EOS/sampling policies with reference tests.
 - [ ] Extend plan/operators for encoder-decoder models, MoE routing, and additional model domains.
