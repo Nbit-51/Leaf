@@ -6,6 +6,17 @@ execution, graph simplification, compact weight formats, and reusable memory.
 Models and datasets are validation workloads, not identities embedded in the
 execution engine.
 
+The practical target is people running smaller trained models locally on modest
+CPU hardware. Success means useful inference latency, manageable memory, and a
+simple way to run supported models on local inputs, backed by reproducible
+quality and performance checks.
+
+**Current focus:** Windows FP32 MLP prefill optimization, using the
+[validated paired-row decode build](docs/decode-gemv-results.md) as the baseline.
+Keep its decode gain, measure each prefill candidate against the current kernel,
+and require a fresh order-balanced PyTorch comparison before claiming a lead.
+Broader architecture and platform optimization follow this milestone.
+
 Two preparation routes share that purpose:
 
 - ONNX graphs become validated Leaf IR, optimized graph artifacts, and native
