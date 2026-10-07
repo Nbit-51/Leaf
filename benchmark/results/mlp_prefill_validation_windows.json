@@ -1,0 +1,39 @@
+{
+  "measured_at_utc": "2026-10-07T01:50:32.669065+00:00",
+  "python_tests": {
+    "passed": 802,
+    "skipped": 6,
+    "existing_onnx_warnings": 4
+  },
+  "native_token_panel_tests_passed": true,
+  "default_architecture_cases": 8,
+  "experimental_architecture_cases": 8,
+  "raw_sample_replay": {
+    "32": {
+      "raw_sample_replay_passed": true,
+      "gate": {
+        "quality_passed": true,
+        "timing_stability_passed": false,
+        "prefill_ratio_after_before": 0.9754066518968919,
+        "decode_ratio_after_before": 0.9927407686537716,
+        "no_slowdown_passed": true,
+        "prefill_improvement_passed": true,
+        "maximum_slowdown_ratio": 1.02,
+        "required_prefill_ratio": 0.98,
+        "accepted_native_experiment": false,
+        "automatic_selection_authorized": false,
+        "fresh_pytorch_comparison": false
+      }
+    }
+  },
+  "sha256": {
+    "engine/src/decoder.cpp": "69edbfb1facc1d11ba5baf565dc7e0108638e798e757856dda604b397bec98a1",
+    "engine/include/leaf/kernels/token_panel.h": "5b3609bad5de9723a7fca27c606cf6ba261cd7b829eeab65c35670ac5db5f556",
+    "engine/include/leaf/kernels/mlp_panel.h": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+    "tests/native/test_token_panel.cpp": "b6beec8644024f116925a4554954a67650d76239da4ef7e0c3ac3e204267cffe",
+    "build/mlp-panel/pack-tests.exe": "61ca6d1e05128dfeabd4ab65fd1b33b8a9a8d53561c8df4ec50bf8b306dfaa82",
+    "build/mlp-panel/candidate/leaf_decoder.exe": "59010060fec66062b18be5185b741feade35d943d64f1bbffbe9a334830c514a",
+    "build/mlp-panel/default/leaf_decoder.exe": "a8db7de908ecb0a19ec95edfa0960bf74ae707fffeb284d8c95f0b6f4ee8eee5"
+  },
+  "scope": "Windows MinGW builds; no concurrent tests/builds during timing. CMake unavailable. No Linux or fresh PyTorch qualification. Whole-model stability fails; candidate remains off by default."
+}

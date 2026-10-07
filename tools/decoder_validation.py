@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 import struct
 import subprocess
+import sys
 import tempfile
 
 import numpy as np
@@ -140,7 +141,10 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
                mode: str = "verify", threads: int = 1, runs: int = 3,
                warmup: int = 1, generate: int = 16, scalar: bool = False,
                chunk: int = 1, activation_bits: int | None = None,
-               high_qos: bool = False, capture_profile: bool = False) -> tuple[np.ndarray, dict]:
+               high_qos: bool = False, capture_profile: bool = False,
+               windows_above_normal: bool = False) -> tuple[np.ndarray, dict]:
+    if windows_above_normal and sys.platform != "win32":
+        raise ValueError("Above-normal child priority requires Windows")
     with tempfile.TemporaryDirectory(prefix="leaf_decoder_") as temp:
         root = Path(temp)
         request, output, metrics = root / "tokens.bin", root / "logits.bin", root / "metrics.json"
@@ -155,11 +159,18 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
         if activation_bits is not None:
             command.append(str(activation_bits))
         policy = None
-        if high_qos:
+        if high_qos or windows_above_normal:
             from leaf.power import set_child_high_qos
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            flags = subprocess.ABOVE_NORMAL_PRIORITY_CLASS if windows_above_normal else 0
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                                       creationflags=flags)
             try:
-                policy = set_child_high_qos(process)
+                if high_qos:
+                    policy = set_child_high_qos(process)
+                if windows_above_normal:
+                    import psutil
+                    if psutil.Process(process.pid).nice() != psutil.ABOVE_NORMAL_PRIORITY_CLASS:
+                        raise RuntimeError("Child priority does not match requested above-normal class")
                 stdout, stderr = process.communicate()
             except BaseException:
                 process.kill()
@@ -179,6 +190,8 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
             measured["diagnostic_profile"] = profiles[0]
         if policy is not None:
             measured["windows_process_qos"] = policy
+        if windows_above_normal:
+            measured["windows_process_priority"] = "above_normal"
         return np.fromfile(output, dtype="<f4"), measured
 
 

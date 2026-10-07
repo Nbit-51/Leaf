@@ -74,6 +74,8 @@ def validate_inputs(args) -> dict:
     """Preflight all frozen quality and artifact provenance before execution."""
     if getattr(args, "windows_high_qos", False) and os.name != "nt":
         raise ValueError("--windows-high-qos requires Windows")
+    if getattr(args, "windows_above_normal", False) and os.name != "nt":
+        raise ValueError("--windows-above-normal requires Windows")
     scoped_tiles = bool(getattr(args, "after_float_tiles", False))
     if scoped_tiles:
         conflicts = sorted(name for name, value in os.environ.items() if value and
@@ -170,6 +172,7 @@ def validate_inputs(args) -> dict:
             "before_sha256": before_hash, "after_sha256": after_hash,
             "quality_cache_sha256": cache_hashes, "threads": threads, "cpu": cpu,
             "high_qos": bool(getattr(args, "windows_high_qos", False)),
+            "above_normal": bool(getattr(args, "windows_above_normal", False)),
             "after_float_tiles": scoped_tiles}
 
 
@@ -225,6 +228,8 @@ def validate_timing_request(metrics: dict, *, runs: int, threads: int, activatio
     """Reject a child result that does not match the requested measurement."""
     if not isinstance(metrics, dict):
         raise ValueError("Native timing metrics must be an object")
+    if metrics.get("diagnostic_timing_build"):
+        raise ValueError("Diagnostic timing builds cannot qualify performance")
     for name, expected in (("threads", threads), ("activation_bits", activation_bits)):
         if type(metrics.get(name)) is not int or metrics[name] != expected:
             raise ValueError(f"Native timing {name} differs from requested workload")
@@ -317,7 +322,10 @@ def compare(args) -> dict:
                     _, metrics = run_native(executable, context["artifacts"][key], [context["data"]["benchmark_ids"]],
                                              mode="bench", threads=context["threads"], runs=args.runs,
                                              warmup=args.warmup, activation_bits=cases[key]["activation_bits"],
-                                             high_qos=context["high_qos"])
+                                             high_qos=context["high_qos"],
+                                             windows_above_normal=context["above_normal"])
+                if context["above_normal"] and metrics.get("windows_process_priority") != "above_normal":
+                    raise ValueError("Native child priority was not verified")
                 validate_timing_request(metrics, runs=args.runs, threads=context["threads"],
                                         activation_bits=cases[key]["activation_bits"])
                 records.append({"index": index, "stage": stage, "measured_at_utc": utc_now(),
@@ -343,6 +351,7 @@ def compare(args) -> dict:
               "frozen_reference_pinned_cpu": context["record"]["pytorch"].get("pinned_cpu"),
               "warmup_per_pass": args.warmup, "profiling_enabled": False,
               "windows_high_qos": context["high_qos"],
+              "windows_above_normal": context["above_normal"],
               "after_float_tiles": context["after_float_tiles"], "native_policy_by_stage": stage_policies,
               "isa_policy": {"LEAF_DISABLE_VNNI": os.environ.get("LEAF_DISABLE_VNNI")},
               "experimental_policy": {name: os.environ.get(name) for name in
@@ -360,6 +369,8 @@ def compare(args) -> dict:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--objective", choices=("prefill", "decode"), default="prefill")
+    parser.add_argument("--windows-above-normal", action="store_true",
+                        help="diagnostic follow-up: above-normal priority for both timed children only")
     parser.add_argument("--before", type=Path, required=True)
     parser.add_argument("--after", type=Path, required=True)
     parser.add_argument("--workdir", type=Path, required=True)

@@ -1,6 +1,9 @@
 #include "leaf/runtime/decoder.h"
 #include "leaf/runtime/kv_cache.h"
 #include "leaf/kernels/token_panel.h"
+#ifdef LEAF_DIAGNOSTIC_TIMING
+#include "../../tests/native/decoder_diagnostic.h"
+#endif
 #if defined(LEAF_EXPERIMENTAL_GEMV_PAIR) || defined(LEAF_TEST_GEMV)
 #include "leaf/kernels/gemv_pair.h"
 #endif
@@ -866,7 +869,11 @@ struct Decoder::Impl {
               "missing or incompatible tensor " + name);
         return found->second;
     }
-    void linear(const float* input, std::size_t tokens, const std::string& name, std::vector<float>& output) {
+    void linear(const float* input, std::size_t tokens, const std::string& name, std::vector<float>& output,
+                bool mlp_projection = false) {
+#ifdef LEAF_DIAGNOSTIC_TIMING
+        leaf::diagnostics::Scope linear_detail(tokens, mlp_projection ? leaf::diagnostics::MlpTotal : leaf::diagnostics::OtherTotal);
+#endif
         const auto& weight = weights.at(name + ".weight");
         const auto phase = weight.bits == 32 ? DecoderProfile::Phase::LinearFP32 :
             weight.bits == 8 ? (activation_precision == 8 ? DecoderProfile::Phase::LinearW8A8 : DecoderProfile::Phase::LinearW8A32) :
@@ -913,7 +920,18 @@ struct Decoder::Impl {
         }
         const bool packed_float = experimental_float_tiles && weight.bits == 32 && tokens >= 8 &&
                                   (!bias || bias->bits == 32);
-        if (packed_float) packed_float_input.pack(input, tokens, weight.cols, weight.cols);
+        bool vector_pack = false;
+#ifdef LEAF_EXPERIMENTAL_MLP_PACK
+        vector_pack = mlp_projection && avx;
+#else
+        (void)mlp_projection;
+#endif
+        if (packed_float) {
+#ifdef LEAF_DIAGNOSTIC_TIMING
+            leaf::diagnostics::Scope pack_detail(tokens, mlp_projection ? leaf::diagnostics::MlpPack : leaf::diagnostics::OtherPack);
+#endif
+            packed_float_input.pack(input, tokens, weight.cols, weight.cols, vector_pack);
+        }
         output.resize(tokens * weight.rows);
         used_vnni = used_vnni || vnni_integer;
         workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
@@ -1103,9 +1121,9 @@ struct Decoder::Impl {
                 for (std::size_t j = 0; j < hidden.size(); ++j) hidden[j] += attn_projected[j];
             }
             normalize(hidden, prefix + "post_attention_layernorm", normalized);
-            linear(normalized.data(), tokens, prefix + "mlp.up_proj", up);
+            linear(normalized.data(), tokens, prefix + "mlp.up_proj", up, true);
             if (gated) {
-                linear(normalized.data(), tokens, prefix + "mlp.gate_proj", gate);
+                linear(normalized.data(), tokens, prefix + "mlp.gate_proj", gate, true);
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
                 for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= activate(gate[j]);
             } else {
@@ -1117,7 +1135,7 @@ struct Decoder::Impl {
 #endif
                 for (auto& value : up) value = activate(value);
             }
-            linear(up.data(), tokens, prefix + "mlp.down_proj", projected);
+            linear(up.data(), tokens, prefix + "mlp.down_proj", projected, true);
             {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Residual, tokens);
                 for (std::size_t j = 0; j < hidden.size(); ++j) hidden[j] += projected[j] + (parallel ? attn_projected[j] : 0.0f);

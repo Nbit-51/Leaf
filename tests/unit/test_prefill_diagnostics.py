@@ -83,3 +83,34 @@ def test_shape_summary_rejects_noise_and_between_pass_drift_without_dropping_sam
     assert noisy == saved
     passes[-1]["samples_ms"] = [13] * 21
     assert summarize(passes)["stable"] is False
+
+
+@pytest.mark.parametrize("verified", [True, False])
+def test_above_normal_applies_only_to_child_and_requires_verification(monkeypatch, verified):
+    import psutil
+    created = {}
+    monkeypatch.setattr(decoder_validation.sys, "platform", "win32")
+    monkeypatch.setattr(decoder_validation.subprocess, "ABOVE_NORMAL_PRIORITY_CLASS", 0x8000, raising=False)
+    monkeypatch.setattr(psutil, "ABOVE_NORMAL_PRIORITY_CLASS", 0x8000, raising=False)
+    monkeypatch.setattr(psutil, "Process", lambda pid: SimpleNamespace(nice=lambda: 0x8000 if verified else 0x20))
+    class Child:
+        pid = 123
+        returncode = 0
+        def __init__(self, command, **kwargs):
+            created.update(kwargs)
+            self.command = command
+        def communicate(self):
+            Path(self.command[3]).write_bytes(np.array([1], dtype="<f4").tobytes())
+            Path(self.command[4]).write_text("{}")
+            return "", ""
+        def kill(self):
+            created["killed"] = True
+    monkeypatch.setattr(decoder_validation.subprocess, "Popen", Child)
+    if verified:
+        _, metrics = decoder_validation.run_native(Path("native"), Path("artifact"), [[1, 2]], windows_above_normal=True)
+        assert metrics["windows_process_priority"] == "above_normal"
+    else:
+        with pytest.raises(RuntimeError, match="priority"):
+            decoder_validation.run_native(Path("native"), Path("artifact"), [[1, 2]], windows_above_normal=True)
+        assert created["killed"] is True
+    assert created["creationflags"] == 0x8000

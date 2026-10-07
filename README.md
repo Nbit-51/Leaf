@@ -16,6 +16,9 @@ quality and performance checks.
 Keep its decode gain, measure each prefill candidate against the current kernel,
 and require a fresh order-balanced PyTorch comparison before claiming a lead.
 Broader architecture and platform optimization follow this milestone.
+The [current MLP experiment](docs/mlp-prefill-experiment.md) isolates packing
+savings and timing stalls. A controlled whole-model follow-up is stable and
+1.46% faster, below the predeclared 2% target; it remains experimental.
 
 Two preparation routes share that purpose:
 

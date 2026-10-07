@@ -4,6 +4,7 @@
 #include "leaf/kernels/wide_token.h"
 #include "leaf/kernels/unrolled_token.h"
 #include "leaf/kernels/row_reuse.h"
+#include "leaf/kernels/mlp_panel.h"
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -18,7 +19,7 @@ using Gemm = decltype(&leaf::kernels::gemm_token_panels_f32);
 volatile double observed_checksum = 0;
 
 void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup, const std::string& kind, unsigned copies) {
-    const bool weight_panel = kind == "weight_panel", wide = kind == "wide_token";
+    const bool weight_panel = kind == "weight_panel", wide = kind == "wide_token" || kind == "wide_row_reuse";
     constexpr std::size_t tokens = 63;
     std::vector<float> input(tokens * columns), weights(copies * rows * columns), bias(rows);
     for (std::size_t i = 0; i < input.size(); ++i)
@@ -33,7 +34,14 @@ void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup
     std::vector<float> full(tokens * rows), blocked(full.size());
     leaf::kernels::gemm_token_panels_f32(weights.data(), rows, columns, columns,
         panels, full.data(), rows, bias.data());
-    if (kind == "row_reuse")
+    if (kind == "mlp_pack") {
+        panels.pack(input.data(), tokens, columns, columns, true);
+        leaf::kernels::gemm_token_panels_f32_row_reuse(weights.data(), rows, columns, columns,
+            panels, blocked.data(), rows, bias.data());
+    } else if (kind == "mlp_panel")
+        leaf::kernels::gemm_token_panels_f32_mlp_panel(weights.data(), rows, columns, columns,
+            panels, blocked.data(), rows, bias.data());
+    else if (kind == "row_reuse")
         leaf::kernels::gemm_token_panels_f32_row_reuse(weights.data(), rows, columns, columns,
             panels, blocked.data(), rows, bias.data());
     else if (kind == "unrolled")
@@ -41,7 +49,7 @@ void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup
             panels, blocked.data(), rows, bias.data());
     else if (wide)
         leaf::kernels::gemm_wide_tokens_f32(weights.data(), rows, columns, columns,
-            wide_panels, blocked.data(), rows, bias.data());
+            wide_panels, blocked.data(), rows, bias.data(), true, kind == "wide_row_reuse");
     else if (weight_panel)
         leaf::kernels::gemm_weight_panels_f32(input.data(), tokens, columns, weights.data(), rows,
             columns, columns, blocked.data(), rows, bias.data());
@@ -73,6 +81,10 @@ void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup
         Gemm gemm = candidate ? &leaf::kernels::gemm_token_panels_f32_kblocked
                               : &leaf::kernels::gemm_token_panels_f32;
         if (candidate && kind == "row_reuse") gemm = &leaf::kernels::gemm_token_panels_f32_row_reuse;
+        if (kind == "mlp_panel") gemm = candidate ? &leaf::kernels::gemm_token_panels_f32_mlp_panel
+                                                 : &leaf::kernels::gemm_token_panels_f32_row_reuse;
+        if (kind == "mlp_pack") gemm = &leaf::kernels::gemm_token_panels_f32_row_reuse;
+        if (kind == "wide_row_reuse") gemm = &leaf::kernels::gemm_token_panels_f32_row_reuse;
         if (candidate && kind == "unrolled") gemm = &leaf::kernels::gemm_token_panels_f32_unrolled;
         std::cout << (pass ? "," : "") << "{\"stage\":\""
                   << (candidate ? kind : "full_k") << "\",\"samples_ms\":[";
@@ -83,12 +95,12 @@ void shape(std::size_t rows, std::size_t columns, unsigned runs, unsigned warmup
             if (candidate && wide) {
                 wide_panels.pack(input.data(), tokens, columns, columns);
                 leaf::kernels::gemm_wide_tokens_f32(current_weights, rows, columns, columns,
-                    wide_panels, blocked.data(), rows, bias.data());
+                    wide_panels, blocked.data(), rows, bias.data(), true, kind == "wide_row_reuse");
             } else if (candidate && weight_panel)
                 leaf::kernels::gemm_weight_panels_f32(input.data(), tokens, columns, current_weights, rows,
                     columns, columns, blocked.data(), rows, bias.data());
             else {
-                panels.pack(input.data(), tokens, columns, columns);
+                panels.pack(input.data(), tokens, columns, columns, candidate && kind == "mlp_pack");
                 gemm(current_weights, rows, columns, columns, panels, blocked.data(), rows, bias.data(), true);
             }
             }
@@ -108,7 +120,7 @@ int main(int argc, char** argv) {
         const unsigned runs = argc > 1 ? std::stoul(argv[1]) : 21;
         const unsigned warmup = argc > 2 ? std::stoul(argv[2]) : 10;
         const std::string candidate = argc > 3 ? argv[3] : "kblocked";
-        if (candidate != "kblocked" && candidate != "weight_panel" && candidate != "wide_token" && candidate != "unrolled" && candidate != "row_reuse") throw std::runtime_error("invalid candidate");
+        if (candidate != "kblocked" && candidate != "weight_panel" && candidate != "wide_token" && candidate != "unrolled" && candidate != "row_reuse" && candidate != "mlp_panel" && candidate != "mlp_pack" && candidate != "wide_row_reuse") throw std::runtime_error("invalid candidate");
         const unsigned copies = argc > 4 ? std::stoul(argv[4]) : 1;
         if (copies < 1 || copies > 32) throw std::runtime_error("invalid weight copies");
         if (runs < 5 || runs > 10000 || warmup > 10000) throw std::runtime_error("invalid runs/warmup");

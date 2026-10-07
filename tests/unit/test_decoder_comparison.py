@@ -17,6 +17,12 @@ def latency(prefill=100.0, decode=10.0, count=7):
             "prefill_samples_ms": [prefill] * count, "decode_samples_ms": [decode] * count}
 
 
+def test_diagnostic_build_cannot_qualify_timing():
+    metrics = dict(latency(), threads=1, activation_bits=32, diagnostic_timing_build=True)
+    with pytest.raises(ValueError, match="Diagnostic timing"):
+        comparison.validate_timing_request(metrics, runs=7, threads=1, activation_bits=32)
+
+
 def stage(prefill=100.0, decode=10.0):
     return comparison.stage_summary([latency(prefill, decode), latency(prefill, decode)])
 

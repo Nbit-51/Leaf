@@ -204,6 +204,25 @@ accepted native decode gain, prefill tradeoff and framework-order limitation.
 | [gemv_pair_architectures.json](gemv_pair_architectures.json) | Eight experimental architecture cases |
 | [gemv_pair_validation_windows.json](gemv_pair_validation_windows.json) | Python/native checks, hashes and gate replay |
 
+## MLP prefill Windows experiment (2026-10-07)
+
+See the [MLP report](../../docs/mlp-prefill-experiment.md). No whole-model
+improvement is accepted from this experiment.
+
+| File | Evidence |
+|---|---|
+| [gpt2_mlp_panel_rotating_windows.json](gpt2_mlp_panel_rotating_windows.json) | Panel-blocking candidate; all shape comparisons unstable; not dispatched |
+| [gpt2_mlp_pack_rotating_windows.json](gpt2_mlp_pack_rotating_windows.json) | Vector packing: stable MLP-up/down reductions of 1.09% / 2.85% |
+| [gpt2_mlp_pack_windows_abba.json](gpt2_mlp_pack_windows_abba.json) | Quality passes; observed prefill -2.46%, but stability fails |
+| [gpt2_mlp_pack_above_normal_windows_abba.json](gpt2_mlp_pack_above_normal_windows_abba.json) | Controlled priority: all stability checks pass, prefill -1.46%, below 2% target |
+| [mlp_cost_diagnostic_windows.json](mlp_cost_diagnostic_windows.json) | Thread counters distinguish major off-CPU stalls; packing saves about 0.85 ms |
+| [mlp_pack_environment_windows.json](mlp_pack_environment_windows.json) | Aggregate host counters; HighQoS has no demonstrated advantage |
+| [gpt2_mlp_wide_reuse_rotating_windows.json](gpt2_mlp_wide_reuse_rotating_windows.json) | Three-row/wide-panel reuse; MLP shapes unstable, not integrated |
+| [mlp_pack_default_regression.json](mlp_pack_default_regression.json) | Eight paired bit-exact default architecture cases |
+| [mlp_pack_architectures.json](mlp_pack_architectures.json) | Eight experimental architecture cases |
+| [mlp_prefill_validation_windows.json](mlp_prefill_validation_windows.json) | Tests, hashes and raw-sample replay |
+| [mlp_prefill_final_validation_windows.json](mlp_prefill_final_validation_windows.json) | 813 tests, both gate replays, and byte-identical normal-build PE sections after diagnostic additions |
+
 ## Current automated checks
 
 | File | What it records |

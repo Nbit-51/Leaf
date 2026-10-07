@@ -1,4 +1,7 @@
 #include "leaf/runtime/decoder.h"
+#ifdef LEAF_DIAGNOSTIC_TIMING
+#include "../../tests/native/decoder_diagnostic.h"
+#endif
 
 #include <algorithm>
 #include <chrono>
@@ -93,6 +96,10 @@ int main(int argc, char** argv) {
         std::ofstream outputs(argv[3], std::ios::binary);
         if (!outputs) throw std::runtime_error("cannot open logits output");
         std::vector<double> prefills, decodes;
+#ifdef LEAF_DIAGNOSTIC_TIMING
+        if (threads != 1) throw std::runtime_error("Thread-counter diagnostics require one inference thread");
+        leaf::diagnostics::Samples prefill_counters, decode_counters;
+#endif
         std::vector<std::uint32_t> generated;
         for (const auto& ids : requests) {
             decoder.reset();
@@ -107,8 +114,21 @@ int main(int argc, char** argv) {
                 if (ids.size() < 2) throw std::runtime_error("benchmark requires a prefix and final token");
                 const std::vector<std::uint32_t> prefix(ids.begin(), ids.end() - 1), last{ids.back()};
                 for (unsigned iteration = 0; iteration < runs + warmup; ++iteration) {
+#ifdef LEAF_DIAGNOSTIC_TIMING
+                    decoder.reset();
+                    const auto cpu_start = leaf::diagnostics::stamp();
+                    auto start = Clock::now(); decoder.forward(prefix); const double prefill = elapsed(start);
+                    const auto cpu_middle = leaf::diagnostics::stamp();
+                    start = Clock::now(); decoder.forward(last); const double decode = elapsed(start);
+                    const auto cpu_end = leaf::diagnostics::stamp();
+                    if (iteration >= warmup) {
+                        prefill_counters.add(cpu_start, cpu_middle);
+                        decode_counters.add(cpu_middle, cpu_end);
+                    }
+#else
                     decoder.reset(); auto start = Clock::now(); decoder.forward(prefix); const double prefill = elapsed(start);
                     start = Clock::now(); decoder.forward(last); const double decode = elapsed(start);
+#endif
                     if (iteration >= warmup) { prefills.push_back(prefill); decodes.push_back(decode); }
                 }
             } else {
@@ -135,6 +155,9 @@ int main(int argc, char** argv) {
 #ifdef LEAF_EXPERIMENTAL_GEMV_PAIR
                 << ",\"experimental_gemv_pair_build\":true"
 #endif
+#ifdef LEAF_EXPERIMENTAL_MLP_PACK
+                << ",\"experimental_mlp_pack_build\":true"
+#endif
 #ifdef LEAF_EXPERIMENTAL_ROW_REUSE
                 << ",\"experimental_row_reuse_build\":true"
 #endif
@@ -149,6 +172,9 @@ int main(int argc, char** argv) {
                 << ",\"prefill_samples_ms\":"; array(metrics, prefills);
         metrics << ",\"decode_samples_ms\":"; array(metrics, decodes);
         metrics << ",\"generated_tokens\":"; array(metrics, generated);
+#ifdef LEAF_DIAGNOSTIC_TIMING
+        leaf::diagnostics::emit(metrics, prefill_counters, decode_counters);
+#endif
         metrics << "}\n";
         std::cout << "Leaf decoder completed; AVX2=" << decoder.uses_avx2() << ", peak RSS=" << peak_rss() << '\n';
         return 0;

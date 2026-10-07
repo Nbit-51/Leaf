@@ -4,6 +4,7 @@
 #include "leaf/kernels/wide_token.h"
 #include "leaf/kernels/unrolled_token.h"
 #include "leaf/kernels/row_reuse.h"
+#include "leaf/kernels/mlp_panel.h"
 
 #include <cmath>
 #include <cstring>
@@ -42,6 +43,11 @@ void check_matrix(std::size_t tokens, std::size_t rows, std::size_t columns, boo
     const auto saved_input = input, saved_weights = weights;
     leaf::kernels::TokenPanelsF32 panels;
     panels.pack(input.data(), tokens, columns, input_stride);
+    leaf::kernels::TokenPanelsF32 vector_panels;
+    vector_panels.pack(input.data(), tokens, columns, input_stride, true);
+    for (std::size_t p = 0; p < panels.panels(); ++p)
+        require(std::memcmp(panels.panel(p), vector_panels.panel(p), columns * 16 * sizeof(float)) == 0,
+                "vector pack differs from scalar pack");
     require(panels.storage_size() == ((tokens - 1) / 16 + 1) * columns * 16, "unexpected packed workspace size");
     for (std::size_t panel = 0; panel < panels.panels(); ++panel)
         for (std::size_t col = 0; col < columns; ++col)
@@ -81,6 +87,16 @@ void check_matrix(std::size_t tokens, std::size_t rows, std::size_t columns, boo
             "wide-token output is not bit-exact against full-K");
     require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
             "wide-token scalar fallback changed the established scalar output");
+    std::fill(blocked.begin(), blocked.end(), sentinel);
+    std::fill(blocked_scalar.begin(), blocked_scalar.end(), sentinel);
+    leaf::kernels::gemm_wide_tokens_f32(weights.data(), rows, columns, weight_stride, wide,
+        blocked.data(), output_stride, offset, true, true);
+    leaf::kernels::gemm_wide_tokens_f32(weights.data(), rows, columns, weight_stride, wide,
+        blocked_scalar.data(), output_stride, offset, false, true);
+    require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
+            "wide row-reuse vector output differs");
+    require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
+            "wide row-reuse scalar fallback differs");
     leaf::kernels::gemm_token_panels_f32_unrolled(weights.data(), rows, columns, weight_stride, panels,
         blocked.data(), output_stride, offset, true);
     require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
@@ -93,6 +109,16 @@ void check_matrix(std::size_t tokens, std::size_t rows, std::size_t columns, boo
             "row-reuse output is not bit-exact against full-K");
     require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
             "row-reuse scalar fallback changed");
+    std::fill(blocked.begin(), blocked.end(), sentinel);
+    std::fill(blocked_scalar.begin(), blocked_scalar.end(), sentinel);
+    leaf::kernels::gemm_token_panels_f32_mlp_panel(weights.data(), rows, columns, weight_stride, panels,
+        blocked.data(), output_stride, offset, true);
+    leaf::kernels::gemm_token_panels_f32_mlp_panel(weights.data(), rows, columns, weight_stride, panels,
+        blocked_scalar.data(), output_stride, offset, false);
+    require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
+            "MLP-panel output is not bit-exact against full-K");
+    require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
+            "MLP-panel scalar fallback changed");
     for (std::size_t token = 0; token < tokens; ++token) {
         for (std::size_t row = 0; row < rows; ++row) {
             double expected = with_bias ? bias[row] : 0.0;
@@ -136,6 +162,14 @@ void check_row_slices(std::size_t rows, std::size_t columns, std::size_t slice_r
     }
     require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
             "independent K-blocked output row slice is not bit-exact");
+    std::fill(blocked.begin(), blocked.end(), sentinel);
+    for (std::size_t first = 0; first < rows; first += slice_rows) {
+        const auto count = std::min(slice_rows, rows - first);
+        leaf::kernels::gemm_token_panels_f32_mlp_panel(weights.data() + first * columns, count, columns, columns,
+                                                    panels, blocked.data() + first, rows, bias.data() + first);
+    }
+    require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
+            "independent MLP-panel output row slice is not bit-exact");
     for (std::size_t token = 0; token < tokens; ++token)
         for (std::size_t row = 0; row < rows; ++row)
             require(blocked[token * rows + row] == static_cast<float>(columns) * 0.125f + bias[row],
@@ -157,7 +191,8 @@ void check_invalid() {
     rejected<std::out_of_range>([&] { panels.panel(1); });
     for (auto gemm : {&leaf::kernels::gemm_token_panels_f32, &leaf::kernels::gemm_token_panels_f32_kblocked,
                      &leaf::kernels::gemm_token_panels_f32_unrolled,
-                     &leaf::kernels::gemm_token_panels_f32_row_reuse}) {
+                     &leaf::kernels::gemm_token_panels_f32_row_reuse,
+                     &leaf::kernels::gemm_token_panels_f32_mlp_panel}) {
         rejected<std::invalid_argument>([&] { gemm(nullptr, 1, 1, 1, panels, &output, 1, nullptr, true); });
         rejected<std::invalid_argument>([&] { gemm(&value, 1, 1, 1, panels, nullptr, 1, nullptr, true); });
         rejected<std::invalid_argument>([&] { gemm(&value, 0, 1, 1, panels, &output, 1, nullptr, true); });

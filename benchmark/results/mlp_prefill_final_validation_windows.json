@@ -1,0 +1,117 @@
+{
+  "measured_at_utc": "2026-10-07T02:08:00.724007+00:00",
+  "python_tests": {
+    "passed": 813,
+    "skipped": 6,
+    "existing_onnx_warnings": 4
+  },
+  "native_tests_passed": true,
+  "architecture_cases": {
+    "default_paired": 8,
+    "candidate": 8
+  },
+  "final_build_equivalence": {
+    "candidate": {
+      "frozen_binary_sha256": "59010060fec66062b18be5185b741feade35d943d64f1bbffbe9a334830c514a",
+      "rebuilt_binary_sha256": "71e224c06838fb0297d6518a701f1d32b75333aa943c10e34e8c5f80f75aef92",
+      "all_pe_section_contents_identical": true,
+      "section_sha256": {
+        ".text": "da022027a8ca511e51cd503eb1d9d15d5e2801ad04fed1b09fd1fc24f907c7b1",
+        ".data": "48dfa6e03870795a4c799e28f40f15423af0d586d0661b89db45793754e48c17",
+        ".rdata": "d37c99c096ebedd42d42ade951fddcd004c1d732336f051331ebbc98b3488c92",
+        ".pdata": "86151b1668abf05a47673157dfac56133f6ff1099ea60d9c45b3b074c5b2bca7",
+        ".xdata": "83b80fe30fd668ac92fedcdb9897696965b270928cd7383077917f5fc182f6fa",
+        ".bss": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".idata": "fd01c7c927000725f77caeee9e261e59047ddd2cb3d3d2343a1a28d02e215106",
+        ".tls": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
+        ".rsrc": "76135b3577a04037fa1d8775d79cb7301d21eacd44227a6fdccc57622372a268",
+        ".reloc": "5c51dead8e6357e6e352604594ec2bea2cfbb65770a37c221027846272b3455b",
+        "/4": "5c3e90327d189b3afff0d1fa791a8ae3e61b01c42396781c3d1516997f1fb4e4",
+        "/19": "28641dc679c0fcf9354df81cf5a22d57284a8c59521ecee71b5f4d54c4f60f36",
+        "/31": "b4da1643ad0c379e21ee3f2ac70b8a952e3126de110dcc332003c80ada73e582",
+        "/45": "7dd3a22e4b94a3a2937143e5ec4e918278d759c06d1aaf6f4ee2096668d7c1b2",
+        "/57": "560bf0e95a3a92e3be75e168d7bc91f0a014b020a6de98e5417aae437b176b14",
+        "/70": "97596c72fe10fbf381ae1f48d0014f3876c5698125aa2e2303b1e2878d04876d",
+        "/81": "c42cd675ed158c610db97fe20f1988c67971b762c1962dc52577ce8db7dbc32c",
+        "/97": "15bd648d7d5bf2ecb09fa7034516d2eb0bfe19dd24c0446e99c0e4c0c4b70684",
+        "/113": "33fbae944c7cae99076464e254bf9653143b6eadd35029da90179133c57b7843"
+      }
+    },
+    "default": {
+      "frozen_binary_sha256": "a8db7de908ecb0a19ec95edfa0960bf74ae707fffeb284d8c95f0b6f4ee8eee5",
+      "rebuilt_binary_sha256": "80237f22969f1aec59a8291f37e6f098014db1b52116af6e729bb3581b493483",
+      "all_pe_section_contents_identical": true,
+      "section_sha256": {
+        ".text": "08881ad869acf91cd2004f4dbf764e8e83c7532587e17c36d3594c8b28a0ac0e",
+        ".data": "36ce9f8675994f9725ae52ef5ba80f87741c9d43223c6f0404ea77a1d40e8b74",
+        ".rdata": "d7c21d3b066c27cc6cb6bdd7401cf26e33e81cc3ec1eab066f4d6c172d1806f1",
+        ".pdata": "c47d275f4e28f7f0ea260065696fd4eaac7e1139f33f235af86feaf629bd68c4",
+        ".xdata": "f4f548eb64c1d11903604cc270846d44f5b74c87838df60635d82fc734a887ba",
+        ".bss": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        ".idata": "0fd853e8af6e0d9add471ca5dde518188f8760505a009537d209e04cf39a7508",
+        ".tls": "076a27c79e5ace2a3d47f9dd2e83e4ff6ea8872b3c2218f66c92b89b55f36560",
+        ".rsrc": "248e0d10a334d94a7768dee5da3132f25f3447eda6bdaf7819d134d146d82978",
+        ".reloc": "69aa34fe8546d97b59b85d467bddc8d41e59b02d6918605371af1f23c95c590a",
+        "/4": "ec199d3f89a8416e84d07269a587d25f3f6bddc15c5d928c1fcb244828267c73",
+        "/19": "9d79150fde548c7e94157c9523eacc23ce9153fde73be50acbba312fc91d9553",
+        "/31": "b4da1643ad0c379e21ee3f2ac70b8a952e3126de110dcc332003c80ada73e582",
+        "/45": "f395d72108e7893a97cb05c22e343d843a435f4ee9a0f7c5ac0e8fea170672ab",
+        "/57": "6b7334b01418ce079891b3103ef84b6f9bb2d0005c6a08c0c517a2aec6047b96",
+        "/70": "97596c72fe10fbf381ae1f48d0014f3876c5698125aa2e2303b1e2878d04876d",
+        "/81": "c42cd675ed158c610db97fe20f1988c67971b762c1962dc52577ce8db7dbc32c",
+        "/97": "80013ea8a1be93fa0135ec745362d121053e3ac54cfbbae35eb637cb90a285d4",
+        "/113": "3627c2482f1a47080423fc3e20fb6fc402345e1414fd58c07a1ad165bf68c3d5"
+      }
+    }
+  },
+  "raw_sample_replay": {
+    "gpt2_mlp_pack_windows_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": false,
+          "prefill_ratio_after_before": 0.9754066518968919,
+          "decode_ratio_after_before": 0.9927407686537716,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": true,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": false,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    },
+    "gpt2_mlp_pack_above_normal_windows_abba.json": {
+      "32": {
+        "raw_sample_replay_passed": true,
+        "gate": {
+          "quality_passed": true,
+          "timing_stability_passed": true,
+          "prefill_ratio_after_before": 0.9854059127316326,
+          "decode_ratio_after_before": 0.9851967490613153,
+          "no_slowdown_passed": true,
+          "prefill_improvement_passed": false,
+          "maximum_slowdown_ratio": 1.02,
+          "required_prefill_ratio": 0.98,
+          "accepted_native_experiment": false,
+          "automatic_selection_authorized": false,
+          "fresh_pytorch_comparison": false
+        }
+      }
+    }
+  },
+  "sha256": {
+    "engine/src/decoder.cpp": "3a4508266efccb809e781df9ab156b5c1235daa28af69c15236ee4f2eca6a964",
+    "engine/src/main_decoder.cpp": "5cee5796de055fdd1ae0978aa0d8d37ff5b2fdb263ec27060bef59200cba510d",
+    "engine/include/leaf/kernels/token_panel.h": "5b3609bad5de9723a7fca27c606cf6ba261cd7b829eeab65c35670ac5db5f556",
+    "engine/include/leaf/kernels/wide_token.h": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+    "tests/native/test_token_panel.cpp": "e0e3d48ee1329686658db64385a2cc405e610cda010e4ec84643188bff73aed1",
+    "tests/native/decoder_diagnostic.h": "af47fd22ad71150972af0e99d5c3e138588ec39c1cbf141358ce1b8889b1332d",
+    "build/mlp-panel/wide-tests.exe": "a14b17d842af85ee2eb5f53a0d103bc6fadbf8c6348f8377cd78a1baf4a5942c",
+    "build/mlp-panel/diagnostic-before.exe": "af676dd6cdf11fdaff5f62a26c55ccd9ac40b4900e981a2520ce6543a497a482",
+    "build/mlp-panel/diagnostic-after.exe": "9484202aad37f862777ac8f61fba0825e3325fa09109e794906d3bfd4fee93d5"
+  },
+  "scope": "Windows only. Final normal builds have byte-identical PE section contents to the binaries used in architecture validation and timing. Compile-time diagnostic instrumentation is absent. Failed normal-priority and stable below-target Above Normal comparisons are both retained. No PyTorch or Linux qualification."
+}

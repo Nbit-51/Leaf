@@ -93,11 +93,36 @@ __attribute__((target("avx2,fma"))) inline void tile(const float* weights, std::
 #endif
 inline void gemm_wide_tokens_f32(const float* weights, std::size_t rows, std::size_t columns,
         std::size_t stride, const WideTokenPanelsF32& input, float* output,
-        std::size_t output_stride, const float* bias = nullptr, bool use_avx2 = true) {
+        std::size_t output_stride, const float* bias = nullptr, bool use_avx2 = true,
+        bool reuse_rows = false) {
     if (!weights || !output || !rows || !columns || columns != input.columns() || !input.tokens() ||
             stride < columns || output_stride < rows) throw std::invalid_argument("invalid wide token GEMM");
     token_panel_detail::extent(rows, stride, columns);
     token_panel_detail::extent(input.tokens(), output_stride, rows);
+#if defined(__x86_64__) && defined(__GNUC__)
+    if (reuse_rows && use_avx2 && token_panel_f32_avx2_available()) {
+        // Three weight rows, reused across every 32-token panel, rather than
+        // traversing the entire weight matrix once per panel. Same microtile.
+        for (std::size_t row = 0; row < rows; row += 3) {
+            const auto row_count = std::min<std::size_t>(3, rows - row);
+            for (std::size_t p = 0; p < (input.tokens() - 1) / 32 + 1; ++p) {
+                const auto count = std::min<std::size_t>(32, input.tokens() - p * 32);
+                const auto* x = input.data() + p * columns * 32;
+                const auto* w = weights + row * stride;
+                auto* y = output + p * 32 * output_stride + row;
+                const auto* b = bias ? bias + row : nullptr;
+                switch (row_count) {
+                case 1: wide_token_detail::tile<1>(w, columns, stride, x, count, y, output_stride, b); break;
+                case 2: wide_token_detail::tile<2>(w, columns, stride, x, count, y, output_stride, b); break;
+                case 3: wide_token_detail::tile<3>(w, columns, stride, x, count, y, output_stride, b); break;
+                }
+            }
+        }
+        return;
+    }
+#else
+    (void)reuse_rows;
+#endif
     for (std::size_t p = 0; p < (input.tokens() - 1) / 32 + 1; ++p) {
         const auto count = std::min<std::size_t>(32, input.tokens() - p * 32);
         const auto* x = input.data() + p * columns * 32;

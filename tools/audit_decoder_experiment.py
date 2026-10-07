@@ -32,6 +32,8 @@ def replay(record: dict) -> dict:
         if order != ["before", "after", "after", "before"] or timing["order"] != order:
             raise ValueError("Saved comparison is not ABBA")
         for p in passes:
+            if record.get("windows_above_normal") and p["latency"].get("windows_process_priority") != "above_normal":
+                raise ValueError("Saved child priority differs from requested policy")
             validate_timing_request(p["latency"], runs=record["runs_per_pass"],
                                     threads=record["threads"], activation_bits=case["activation_bits"])
             if p["native_policy"] != record["native_policy_by_stage"][p["stage"]]:

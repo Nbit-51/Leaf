@@ -18,6 +18,31 @@
 
 namespace leaf::kernels {
 namespace token_panel_detail {
+#if LEAF_TOKEN_PANEL_AVX2
+// Transpose eight contiguous values from eight token rows without arithmetic.
+LEAF_TOKEN_PANEL_TARGET inline void pack8(const float* input, std::size_t stride, float* output) {
+    const auto a = _mm256_loadu_ps(input), b = _mm256_loadu_ps(input + stride);
+    const auto c = _mm256_loadu_ps(input + 2 * stride), d = _mm256_loadu_ps(input + 3 * stride);
+    const auto e = _mm256_loadu_ps(input + 4 * stride), f = _mm256_loadu_ps(input + 5 * stride);
+    const auto g = _mm256_loadu_ps(input + 6 * stride), h = _mm256_loadu_ps(input + 7 * stride);
+    const auto ab0 = _mm256_unpacklo_ps(a, b), ab1 = _mm256_unpackhi_ps(a, b);
+    const auto cd0 = _mm256_unpacklo_ps(c, d), cd1 = _mm256_unpackhi_ps(c, d);
+    const auto ef0 = _mm256_unpacklo_ps(e, f), ef1 = _mm256_unpackhi_ps(e, f);
+    const auto gh0 = _mm256_unpacklo_ps(g, h), gh1 = _mm256_unpackhi_ps(g, h);
+    const auto x0 = _mm256_shuffle_ps(ab0, cd0, 0x44), x1 = _mm256_shuffle_ps(ab0, cd0, 0xee);
+    const auto x2 = _mm256_shuffle_ps(ab1, cd1, 0x44), x3 = _mm256_shuffle_ps(ab1, cd1, 0xee);
+    const auto y0 = _mm256_shuffle_ps(ef0, gh0, 0x44), y1 = _mm256_shuffle_ps(ef0, gh0, 0xee);
+    const auto y2 = _mm256_shuffle_ps(ef1, gh1, 0x44), y3 = _mm256_shuffle_ps(ef1, gh1, 0xee);
+    _mm256_storeu_ps(output, _mm256_permute2f128_ps(x0, y0, 0x20));
+    _mm256_storeu_ps(output + 16, _mm256_permute2f128_ps(x1, y1, 0x20));
+    _mm256_storeu_ps(output + 32, _mm256_permute2f128_ps(x2, y2, 0x20));
+    _mm256_storeu_ps(output + 48, _mm256_permute2f128_ps(x3, y3, 0x20));
+    _mm256_storeu_ps(output + 64, _mm256_permute2f128_ps(x0, y0, 0x31));
+    _mm256_storeu_ps(output + 80, _mm256_permute2f128_ps(x1, y1, 0x31));
+    _mm256_storeu_ps(output + 96, _mm256_permute2f128_ps(x2, y2, 0x31));
+    _mm256_storeu_ps(output + 112, _mm256_permute2f128_ps(x3, y3, 0x31));
+}
+#endif
 inline void extent(std::size_t rows, std::size_t stride, std::size_t width) {
     const auto limit = std::numeric_limits<std::size_t>::max() / sizeof(float);
     if (width > limit || (rows > 1 && stride > (limit - width) / (rows - 1)))
@@ -31,7 +56,7 @@ inline void extent(std::size_t rows, std::size_t stride, std::size_t width) {
 class TokenPanelsF32 {
 public:
     void pack(const float* input, std::size_t tokens, std::size_t columns,
-              std::size_t input_token_stride) {
+              std::size_t input_token_stride, bool vector_pack = false) {
         if (!input || !tokens || !columns || input_token_stride < columns)
             throw std::invalid_argument("token-panel packing requires a nonempty valid input matrix");
         token_panel_detail::extent(tokens, input_token_stride, columns);
@@ -41,6 +66,11 @@ public:
             panels * 16 * columns > values_.max_size())
             throw std::overflow_error("token-panel packing workspace overflows address space");
         values_.resize(panels * 16 * columns);
+#if LEAF_TOKEN_PANEL_AVX2
+        vector_pack = vector_pack && __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+#else
+        (void)vector_pack;
+#endif
         tokens_ = tokens; columns_ = columns; panels_ = panels;
         for (std::size_t panel = 0; panel < panels; ++panel) {
             const auto first = panel * 16, count = std::min<std::size_t>(16, tokens - first);
@@ -52,6 +82,13 @@ public:
                 const auto end = std::min(columns, column + 8);
                 for (std::size_t lane_block = 0; lane_block < count; lane_block += 8) {
                     const auto lane_end = std::min(count, lane_block + 8);
+#if LEAF_TOKEN_PANEL_AVX2
+                    if (vector_pack && end - column == 8 && lane_end - lane_block == 8) {
+                        token_panel_detail::pack8(input + (first + lane_block) * input_token_stride + column,
+                                                 input_token_stride, destination + column * 16 + lane_block);
+                        continue;
+                    }
+#endif
                     for (std::size_t lane = lane_block; lane < lane_end; ++lane)
                         for (std::size_t col = column; col < end; ++col)
                             destination[col * 16 + lane] = input[(first + lane) * input_token_stride + col];
