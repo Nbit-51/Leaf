@@ -117,6 +117,11 @@ target_include_directories(leaf_token_panel_tests PRIVATE include)
 if(NOT MSVC AND LEAF_ENABLE_AVX2)
   target_compile_options(leaf_token_panel_tests PRIVATE -mno-avx2 -mno-fma)
 endif()
+# The portable references are compared bit-exactly. AArch64 Clang otherwise
+# contracts some scalar loops to fmadd while vectorizing others unfused.
+if(NOT MSVC)
+  target_compile_options(leaf_token_panel_tests PRIVATE -ffp-contract=off)
+endif()
 add_test(NAME leaf_token_panel_tests COMMAND leaf_token_panel_tests)
 
 add_executable(leaf_gelu_tests ../tests/native/test_gelu.cpp)
