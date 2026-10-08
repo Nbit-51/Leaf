@@ -200,3 +200,57 @@ threshold. Evidence, exact hashes and scope are in
 `docs/windows-attention-softmax.md`. README and Mermaid now reflect the path.
 Next delivery steps: commit/push the current branch, inspect CI, create/review
 the PR and merge to main under the user's earlier instructions.
+
+## TinyLlama follow-up — resumed after usage interruption, 2026-10-08
+
+GPT-2 delivery is committed and pushed as `0d28693`; PR #2 is open and all
+Windows/Linux/macOS checks passed. Merge was held for the user's requested
+second-model validation. Do not repeat the completed GPT-2 acceptance runs.
+
+The cached model is TinyLlama-1.1B-Chat-v1.0. Its original source snapshot is
+`C:/Users/navaneeth/Documents/Vs code projketcs/Imporved_Hydra/Hydra_Engine/TinyLlama-1.1B-Chat-v1.0-git`;
+the frozen validation artifacts are in `build/tinyllama_windows_fair`.
+The installed executable is `build/attn-softmax/installed/leaf/bin/leaf_decoder.exe`.
+
+`build/attn-softmax/tinyllama-quality.json` completed successfully before the
+interruption. Both FP32 and smoothed W8A8 pass their existing quality gates
+over 1,016 scored targets and chunked-cache parity. FP32 generation matches
+PyTorch exactly. W8A8 has 95.0787% next-token agreement, perplexity ratio
+1.0123987, and different generated tokens; it is a separate quality tradeoff.
+
+On resume, no benchmark processes were running and fresh timing had not begun.
+The declared timing run is `build/attn-softmax/tinyllama-framework.json`:
+31 measured iterations plus ten warmups per pass; CPU 2, one thread, Above
+Normal priority; shipped defaults; Leaf FP32, Leaf W8A8, eager, SDPA, then
+reverse order. Preserve every sample and the unchanged stability gates.
+The harness checkpoints each completed pass. Do not overwrite partial records.
+
+After timing, profile the shipped default of GPT-2 FP32, TinyLlama FP32 and
+TinyLlama W8A8 separately, without overlapping performance measurements.
+`tools/profile_decoder.py --default-only --activation-bits {32,8}` now supports
+that diagnostic workload. Update results/README, push on `diag/core-scaling`,
+and merge PR #2 only after final-revision CI succeeds.
+
+### Completed resumed tests — do not repeat
+
+All eight TinyLlama passes completed and are preserved in
+`benchmark/results/tinyllama_current_pytorch_windows.json`. Pooled medians
+(prefill/decode): Leaf FP32 1944.3069/225.5490 ms; W8A8 1381.9081/92.70555 ms;
+PyTorch eager 1800.6946/213.2119 ms; SDPA 1881.60295/243.57595 ms.
+Leaf FP32 and eager pass stability. W8A8 fails individual and pooled spread;
+SDPA fails pooled decode. This is not a new qualified TinyLlama speedup.
+All trained quality checks pass, with W8A8's non-identical generation retained.
+
+Two separate post-timing profiles per configuration are complete. TinyLlama
+SiLU/gating consumes 25% of FP32 prefill and 39% of W8A8 prefill; W8A8 attention
+adds 10%. Next kernel experiment: vector SiLU/gating, then separately consider
+vector attention dispatch for quantized artifacts. Do not rerun the previous
+GPT-2 packing experiments without evidence from the relevant projection sizes.
+If timing spread persists, measure per-sample CPU/wall time and fault deltas;
+these wall-only samples do not establish the cause.
+
+Evidence, exact hashes, all failed gates and reproduction commands are linked
+from `docs/windows-tinyllama-current.md`. Focused regression suite: 251 passed.
+No runtime kernel changed in this second-model follow-up. The accepted Windows
+default stays enabled; no automatic precision profile was promoted. Only Git
+delivery and final-revision CI remain after this checkpoint.

@@ -3,6 +3,8 @@
 This measures an explicit core budget, not a single-core kernel improvement.
 Retain all samples and check within-pass, pooled and between-pass stability.
 No automatic engine selection or default change follows from this experiment.
+Optional smoothed W8A8 is reported separately from FP32 and requires its own
+artifact/source provenance; timing alone does not establish quantized quality.
 """
 from __future__ import annotations
 
@@ -34,6 +36,16 @@ def validate_cores(cores, topology):
     return selected
 
 
+def validate_smoothed_provenance(provenance, baseline, artifact_sha256):
+    request = provenance.get("request", {})
+    if (provenance.get("artifact_sha256") != artifact_sha256 or
+            request.get("weight_bits") != 8 or request.get("activation_bits") != 8 or
+            not request.get("calibration_sha256") or
+            any(request.get(key) != baseline.get(key) for key in
+                ("source_weight_sha256", "model_config_sha256"))):
+        raise ValueError("Smoothed W8A8 artifact/source provenance differs")
+
+
 def child(args):
     import psutil
     from tools.decoder_validation import run_native
@@ -49,13 +61,18 @@ def child(args):
         raise RuntimeError("Timed child must have Above Normal priority")
     data = json.loads((args.workdir / "tokens.json").read_text())
     args.threads = len(args.cores)
-    if args.child == "leaf":
+    if args.child in ("leaf", "leaf-w8a8"):
+        quantized = args.child == "leaf-w8a8"
+        artifact = "decoder-8-smooth.leaf" if quantized else "decoder-32.leaf"
+        activation_bits = 8 if quantized else 32
         if not args.default_kernels:
             os.environ["LEAF_EXPERIMENTAL_FLOAT_TILES"] = "1"
-        _, metrics = run_native(args.executable, args.workdir / "decoder-32.leaf",
+        _, metrics = run_native(args.executable, args.workdir / artifact,
                                 [data["benchmark_ids"]], mode="bench", threads=args.threads,
-                                runs=args.runs, warmup=args.warmup, windows_above_normal=True)
-        validate_timing_request(metrics, runs=args.runs, threads=args.threads, activation_bits=32)
+                                runs=args.runs, warmup=args.warmup, windows_above_normal=True,
+                                activation_bits=activation_bits)
+        validate_timing_request(metrics, runs=args.runs, threads=args.threads, activation_bits=activation_bits)
+        metrics.update(artifact=artifact, requested_weight_bits=8 if quantized else 32)
         # The native bench protocol constructs prefix=ids[:-1], resets its
         # session each iteration and returns last-token logits in both phases.
         metrics["latency_workload"] = dict(LATENCY_WORKLOAD)
@@ -83,7 +100,9 @@ def main():
     parser.add_argument("--counts", type=int, nargs="+", default=[1, 2, 4])
     parser.add_argument("--runs", type=int, default=31)
     parser.add_argument("--warmup", type=int, default=10)
-    parser.add_argument("--child", choices=["leaf", "eager", "sdpa"])
+    parser.add_argument("--child", choices=["leaf", "leaf-w8a8", "eager", "sdpa"])
+    parser.add_argument("--include-smoothed-w8a8", action="store_true",
+                        help="also time the existing calibrated W8A8 artifact; report quality separately")
     parser.add_argument("--default-kernels", action="store_true",
                         help="measure the shipped default without experimental environment flags")
     args = parser.parse_args()
@@ -107,6 +126,8 @@ def main():
              args.workdir / "decoder-32.provenance.json", args.workdir / "pytorch.json",
              args.model / "config.json", Path(__file__), ROOT / "tools/validate_decoder.py"]
     files += sorted(args.model.glob("*.safetensors"))
+    if args.include_smoothed_w8a8:
+        files += [args.workdir / "decoder-8-smooth.leaf", args.workdir / "decoder-8-smooth.provenance.json"]
     hashes = {str(path): digest(path) for path in files}
     baseline = json.loads((args.workdir / "pytorch.json").read_text())
     provenance = json.loads((args.workdir / "decoder-32.provenance.json").read_text())
@@ -118,11 +139,17 @@ def main():
             baseline["quality_cache_sha256"]["tokens.json"] != digest(args.workdir / "tokens.json") or
             provenance["request"]["weight_bits"] != 32):
         raise ValueError("Artifact/token provenance differs")
-    cases = [(count, engine) for count in args.counts for engine in ("leaf", "eager", "sdpa")]
+    engines = ["leaf", "eager", "sdpa"]
+    if args.include_smoothed_w8a8:
+        validate_smoothed_provenance(json.loads((args.workdir / "decoder-8-smooth.provenance.json").read_text()),
+                                    baseline, hashes[str(args.workdir / "decoder-8-smooth.leaf")])
+        engines.insert(1, "leaf-w8a8")
+    cases = [(count, engine) for count in args.counts for engine in engines]
     record = dict(format="leaf-core-scaling-v1", measured_at_utc=utc_now(), platform=platform.platform(),
                   cpu=platform.processor(), topology=selected, hashes=hashes, runs=args.runs, warmup=args.warmup,
                   passes=[], automatic_selection_authorized=False, quality_validated=False,
                   native_default_kernels=args.default_kernels,
+                  include_smoothed_w8a8=args.include_smoothed_w8a8,
                   scope=__doc__, complete=False)
     write_record(args.output, record)
     child_dir = args.output.parent / (args.output.stem + "-passes")
@@ -149,7 +176,7 @@ def main():
     if any(digest(Path(path)) != value for path, value in hashes.items()):
         raise ValueError("Benchmark inputs changed during execution")
     record["summary"] = {str(count): {engine: stage_summary([item["metrics"] for item in record["passes"]
-        if item["threads"] == count and item["engine"] == engine]) for engine in ("leaf", "eager", "sdpa")}
+        if item["threads"] == count and item["engine"] == engine]) for engine in engines}
         for count in args.counts}
     record["complete"] = True
     write_record(args.output, record)

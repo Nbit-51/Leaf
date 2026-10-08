@@ -33,6 +33,14 @@ checks. These are warmed, one-thread measurements on one host; complete-command
 latency and broader hardware remain separate work. Earlier failed comparisons
 are preserved. MLP vector-pack and 96-row worker experiments remain unpromoted.
 
+**Second-model check (TinyLlama 1.1B):** the same installed runtime passes FP32
+and calibrated W8A8 quality checks. Fresh medians are 1,944/226 ms for Leaf FP32,
+1,382/93 ms for W8A8, and 1,801/213 ms for PyTorch eager (prefill/decode).
+FP32 remains slower; W8A8 is faster by median but fails timing stability, so
+this run does not qualify a new stable TinyLlama speedup. Profiles identify
+SiLU/gating as 25% of FP32 and 39% of W8A8 prefill, making vector SiLU the next
+target. See the [full comparison, failures and next experiment](docs/windows-tinyllama-current.md).
+
 Two preparation routes share that purpose:
 
 - ONNX graphs become validated Leaf IR, optimized graph artifacts, and native
@@ -1408,6 +1416,30 @@ the 4.85% prefill reduction on this workload with all individual, pooled and
 between-pass stability checks passing. Decode clears non-regression; its
 1.62% reduction does not qualify a separate >=2% improvement claim.
 
+### 7.16 Current-runtime TinyLlama and hot-path follow-up (2026-10-08)
+
+The [TinyLlama report](docs/windows-tinyllama-current.md) links fresh installed
+runtime quality, matched forward/reverse timing and separate phase profiles.
+
+| Runtime | Prefill median | Decode median | All stability checks |
+|---|---:|---:|---|
+| Leaf FP32 | 1,944.31 ms | 225.55 ms | Pass |
+| Leaf calibrated W8A8 | 1,381.91 ms | 92.71 ms | Fail |
+| PyTorch eager FP32 | 1,800.69 ms | 213.21 ms | Pass |
+| PyTorch SDPA FP32 | 1,881.60 ms | 243.58 ms | Fail |
+
+All samples are preserved. FP32 quality matches the frozen reference; W8A8
+passes its separate 95% agreement / 1.02 perplexity-ratio gates, with 95.0787%
+agreement and ratio 1.01239873. Quantized generation is not identical. Its
+smaller artifact is 1.104 GB versus FP32's 4.400 GB, from quantization.
+The failed timing gate leaves automatic precision selection unchanged.
+
+Post-timing profiles show TinyLlama SiLU/gating at 24.8–25.0% of FP32 prefill
+and 38.8–39.1% of W8A8 prefill; W8A8 attention adds about 10%. GPT-2 activation
+is already about 1%, and its remaining prefill is about 93% linear work.
+These diagnostics prioritize vector SiLU/gating and then quantized-path vector
+attention; neither is implemented or claimed as an improvement by this result.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package
@@ -1992,6 +2024,8 @@ Implemented and checked:
 Current CPU-decoder release priorities:
 
 - [x] Qualify a Windows GPT-2 FP32 prefill improvement against fresh, order-balanced PyTorch measurements: 4.85% less time than SDPA; decode non-regression passes separately.
+- [x] Revalidate current-runtime TinyLlama FP32/W8A8 quality and matched latency; preserve the failed stability result and record both models' remaining hot paths.
+- [ ] Implement and validate vector SiLU/gating, then separately evaluate vector attention for quantized artifacts using the measured TinyLlama bottlenecks.
 - [ ] Qualify complete-command latency separately from warmed native forwards; installed first/cached smoke is already verified.
 - [ ] Requalify changed runtime binaries and further device/model configurations against matched PyTorch/native workloads before promotion.
 - [ ] Measure native GEMM/GEMV bottlenecks, per-core frequency behavior, and CNN packing before proposing another default kernel change.
@@ -2002,7 +2036,8 @@ Current CPU-decoder release priorities:
 Future coverage and performance work (not prerequisites for the current release):
 
 - [ ] Improve CNN whole-model latency without weakening quality gates.
-- [ ] Run full trained Qwen and further independently trained architecture families when compatible weights are available.
+- [ ] Evaluate compatible small Qwen, Mistral, Granite and Gemma-family checkpoints, checking required operators and memory before selecting each workload; these are coverage goals, not current support claims.
+- [ ] Validate embedding workloads separately with their required pooling, normalization and retrieval-quality metrics before claiming embedding-model support.
 - [ ] Add scaled RoPE, sliding-window attention, Q/K normalization, and multiple-EOS/sampling policies with reference tests.
 - [ ] Extend plan/operators for encoder-decoder models, MoE routing, and additional model domains.
 - [ ] Expand graph layouts, dynamic shapes, batching, and dataset preprocessing adapters.
@@ -2016,3 +2051,6 @@ Future coverage and performance work (not prerequisites for the current release)
 Training, GPU deployment, and unstructured sparsity are outside the present
 scope. General-purpose CPU execution is the direction; verified operator
 coverage and measured device-specific results define what can be claimed today.
+Current compact decoder weights come from quantization. Graph constant folding
+and removal of unused graph nodes do not constitute trained-model weight pruning;
+structured pruning remains future work.
