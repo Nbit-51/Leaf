@@ -219,7 +219,10 @@ def write_export_provenance(artifact: Path, request: dict) -> None:
         raise
 
 
-def measure_pytorch_latency(model, benchmark_ids: list[int], args) -> dict:
+def measure_pytorch_latency(model, benchmark_ids: list[int], args,
+                            implementations=("eager", "sdpa")) -> dict:
+    if not implementations or any(name not in ("eager", "sdpa") for name in implementations):
+        raise ValueError("Select eager and/or sdpa attention for latency")
     try:
         parameter = inspect.signature(model.forward).parameters.get("logits_to_keep")
     except (AttributeError, TypeError, ValueError) as error:
@@ -242,7 +245,7 @@ def measure_pytorch_latency(model, benchmark_ids: list[int], args) -> dict:
             raise ValueError("PyTorch latency must return last-token logits [1, 1, vocabulary]")
 
     benchmarks = {}
-    for implementation in ("eager", "sdpa"):
+    for implementation in implementations:
         model.set_attn_implementation(implementation)
         prefix = torch.tensor([benchmark_ids[:-1]])
         final = torch.tensor([[benchmark_ids[-1]]])

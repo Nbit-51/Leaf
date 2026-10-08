@@ -1,0 +1,281 @@
+diff --git a/engine/include/leaf/kernels/attention_vector.h b/engine/include/leaf/kernels/attention_vector.h
+index 719b64c..07ffe1f 100644
+--- a/engine/include/leaf/kernels/attention_vector.h
++++ b/engine/include/leaf/kernels/attention_vector.h
+@@ -12,12 +12,66 @@
+ namespace leaf::kernels {
+ #if defined(__x86_64__) && defined(__GNUC__)
+ namespace attention_vector_detail {
+-__attribute__((target("avx2,no-fma"))) inline void attend(
++#define LEAF_ATTENTION_TARGET __attribute__((target("avx2,no-fma")))
++// Sum eight lanes left to right, then the scalar tail: the established order.
++LEAF_ATTENTION_TARGET inline float finish_dot(__m256 sum, const float* x, const float* w,
++                                              std::size_t from, std::size_t dim) {
++    alignas(32) float lanes[8];
++    _mm256_store_ps(lanes, sum);
++    float dot = 0;
++    for (float lane : lanes) dot += lane;
++    for (std::size_t d = from; d < dim; ++d) dot += x[d] * w[d];
++    return dot;
++}
++
++// Four keys share each query load. Every key keeps its own accumulator, chunk
++// order and horizontal sum, so each score is bit-identical to one-key code.
++LEAF_ATTENTION_TARGET inline void dot4(const float* x, const float* w0, const float* w1,
++        const float* w2, const float* w3, std::size_t dim, float* out) {
++    auto s0 = _mm256_setzero_ps(), s1 = s0, s2 = s0, s3 = s0;
++    std::size_t d = 0;
++    for (; dim - d >= 8; d += 8) {
++        const auto q = _mm256_loadu_ps(x + d);
++        s0 = _mm256_add_ps(s0, _mm256_mul_ps(q, _mm256_loadu_ps(w0 + d)));
++        s1 = _mm256_add_ps(s1, _mm256_mul_ps(q, _mm256_loadu_ps(w1 + d)));
++        s2 = _mm256_add_ps(s2, _mm256_mul_ps(q, _mm256_loadu_ps(w2 + d)));
++        s3 = _mm256_add_ps(s3, _mm256_mul_ps(q, _mm256_loadu_ps(w3 + d)));
++    }
++    out[0] = finish_dot(s0, x, w0, d, dim); out[1] = finish_dot(s1, x, w1, d, dim);
++    out[2] = finish_dot(s2, x, w2, d, dim); out[3] = finish_dot(s3, x, w3, d, dim);
++}
++
++LEAF_ATTENTION_TARGET inline float dot1(const float* x, const float* w, std::size_t dim) {
++    auto sum = _mm256_setzero_ps();
++    std::size_t d = 0;
++    for (; dim - d >= 8; d += 8)
++        sum = _mm256_add_ps(sum, _mm256_mul_ps(_mm256_loadu_ps(x + d), _mm256_loadu_ps(w + d)));
++    return finish_dot(sum, x, w, d, dim);
++}
++
++// y[0:8N] += p[k] * v[k, 0:8N] for every key in increasing order, with the
++// output held in registers. Starting from +0 matches the zero-filled output.
++template <unsigned N>
++LEAF_ATTENTION_TARGET inline void weighted_values(const float* probabilities, const float* value,
++        std::size_t keys, std::size_t dim, float* y) {
++    __m256 acc[N];
++    for (unsigned j = 0; j < N; ++j) acc[j] = _mm256_setzero_ps();
++    for (std::size_t k = 0; k < keys; ++k) {
++        const auto p = _mm256_set1_ps(probabilities[k]);
++        const auto* v = value + k * dim;
++        for (unsigned j = 0; j < N; ++j)
++            acc[j] = _mm256_add_ps(acc[j], _mm256_mul_ps(p, _mm256_loadu_ps(v + 8 * j)));
++    }
++    for (unsigned j = 0; j < N; ++j) _mm256_storeu_ps(y + 8 * j, acc[j]);
++}
++
++LEAF_ATTENTION_TARGET inline void attend(
+         const float* query, const float* key, const float* value, const float* mask, float* output,
+         std::size_t batch, std::size_t heads, std::size_t kv_heads, std::size_t queries,
+         std::size_t keys, std::size_t stride, std::size_t dim, const std::size_t* shape,
+         float scale, bool valid_nonzero) {
+     std::vector<float> scores(keys);
++    std::vector<std::size_t> valid(keys);
+     for (std::size_t b = 0; b < batch; ++b) {
+         for (std::size_t h = 0; h < heads; ++h) {
+             const auto kv = h / (heads / kv_heads);
+@@ -26,52 +80,59 @@ __attribute__((target("avx2,no-fma"))) inline void attend(
+             for (std::size_t q = 0; q < queries; ++q) {
+                 const auto* x = query + ((b * heads + h) * queries + q) * dim;
+                 auto* y = output + ((b * queries + q) * heads + h) * dim;
+-                std::fill_n(y, dim, 0.0f);
+                 const auto mb = shape[0] == 1 ? 0 : b, mh = shape[1] == 1 ? 0 : h;
+                 const auto mq = shape[2] == 1 ? 0 : q;
+                 const auto* mask_row = mask + ((mb * shape[1] + mh) * shape[2] + mq) * shape[3];
+-                float maximum = -std::numeric_limits<float>::infinity();
++                std::size_t count = 0;
+                 for (std::size_t k = 0; k < keys; ++k) {
+-                    if ((mask_row[shape[3] == 1 ? 0 : k] != 0.0f) != valid_nonzero) {
++                    if ((mask_row[shape[3] == 1 ? 0 : k] != 0.0f) != valid_nonzero)
+                         scores[k] = -std::numeric_limits<float>::infinity();
+-                        continue;
+-                    }
+-                    const auto* w = key_head + k * dim;
+-                    auto sum = _mm256_setzero_ps();
+-                    std::size_t d = 0;
+-                    for (; dim - d >= 8; d += 8)
+-                        sum = _mm256_add_ps(sum, _mm256_mul_ps(_mm256_loadu_ps(x + d), _mm256_loadu_ps(w + d)));
+-                    alignas(32) float lanes[8];
+-                    _mm256_store_ps(lanes, sum);
+-                    float dot = 0;
+-                    for (float lane : lanes) dot += lane;
+-                    for (; d < dim; ++d) dot += x[d] * w[d];
+-                    scores[k] = dot * scale * scale;
+-                    maximum = std::max(maximum, scores[k]);
++                    else
++                        valid[count++] = k;
++                }
++                float dots[4];
++                std::size_t i = 0;
++                for (; count - i >= 4; i += 4) {
++                    dot4(x, key_head + valid[i] * dim, key_head + valid[i + 1] * dim,
++                         key_head + valid[i + 2] * dim, key_head + valid[i + 3] * dim, dim, dots);
++                    for (unsigned j = 0; j < 4; ++j) scores[valid[i + j]] = dots[j] * scale * scale;
+                 }
+-                if (!std::isfinite(maximum)) continue;
++                for (; i < count; ++i)
++                    scores[valid[i]] = dot1(x, key_head + valid[i] * dim, dim) * scale * scale;
++                float maximum = -std::numeric_limits<float>::infinity();
++                for (std::size_t c = 0; c < count; ++c) maximum = std::max(maximum, scores[valid[c]]);
++                if (!std::isfinite(maximum)) { std::fill_n(y, dim, 0.0f); continue; }
+                 float denominator = 0;
+                 for (std::size_t k = 0; k < keys; ++k) {
+                     scores[k] = scores[k] == -std::numeric_limits<float>::infinity()
+                         ? 0.0f : std::exp(scores[k] - maximum);
+                     denominator += scores[k];
+                 }
++                for (std::size_t k = 0; k < keys; ++k) scores[k] = scores[k] / denominator;
+                 // Preserve key order and separate multiply/add for each output
+                 // dimension. Do not skip masked values: 0 * NaN/Inf is observable.
+-                for (std::size_t k = 0; k < keys; ++k) {
+-                    const float probability = scores[k] / denominator;
+-                    const auto p = _mm256_set1_ps(probability);
+-                    const auto* v = value_head + k * dim;
+-                    std::size_t d = 0;
+-                    for (; dim - d >= 8; d += 8)
+-                        _mm256_storeu_ps(y + d, _mm256_add_ps(_mm256_loadu_ps(y + d),
+-                            _mm256_mul_ps(p, _mm256_loadu_ps(v + d))));
+-                    for (; d < dim; ++d) y[d] += probability * v[d];
++                std::size_t d = 0;
++                for (; dim - d >= 64; d += 64) weighted_values<8>(scores.data(), value_head + d, keys, dim, y + d);
++                switch ((dim - d) / 8) {
++                case 1: weighted_values<1>(scores.data(), value_head + d, keys, dim, y + d); break;
++                case 2: weighted_values<2>(scores.data(), value_head + d, keys, dim, y + d); break;
++                case 3: weighted_values<3>(scores.data(), value_head + d, keys, dim, y + d); break;
++                case 4: weighted_values<4>(scores.data(), value_head + d, keys, dim, y + d); break;
++                case 5: weighted_values<5>(scores.data(), value_head + d, keys, dim, y + d); break;
++                case 6: weighted_values<6>(scores.data(), value_head + d, keys, dim, y + d); break;
++                case 7: weighted_values<7>(scores.data(), value_head + d, keys, dim, y + d); break;
++                }
++                d += (dim - d) / 8 * 8;
++                for (; d < dim; ++d) {
++                    float sum = 0.0f;
++                    for (std::size_t k = 0; k < keys; ++k) sum += scores[k] * value_head[k * dim + d];
++                    y[d] = sum;
+                 }
+             }
+         }
+     }
+ }
++#undef LEAF_ATTENTION_TARGET
+ } // namespace attention_vector_detail
+ #endif
+ 
+diff --git a/engine/src/decoder.cpp b/engine/src/decoder.cpp
+index e1b84a0..698b014 100644
+--- a/engine/src/decoder.cpp
++++ b/engine/src/decoder.cpp
+@@ -1088,11 +1088,12 @@ struct Decoder::Impl {
+             DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Embedding, tokens);
+             hidden.resize(tokens * h);
+             const auto& embedding = weights.at("model.embed_tokens.weight");
++            // Resolve once: a per-element map lookup dominated this phase.
++            const Weight* positions = position_kind == 1 ? &weights.at("model.position_embeddings.weight") : nullptr;
+             for (std::size_t t = 0; t < tokens; ++t)
+                 for (std::size_t col = 0; col < h; ++col) {
+                     hidden[t * h + col] = embedding.value(ids[t], col) * embedding_scale;
+-                    if (position_kind == 1) hidden[t * h + col] +=
+-                        weights.at("model.position_embeddings.weight").value(position + t + position_offset, col);
++                    if (positions) hidden[t * h + col] += positions->value(position + t + position_offset, col);
+                 }
+         }
+         const auto total = position + tokens;
+diff --git a/tests/native/test_attention_vector.cpp b/tests/native/test_attention_vector.cpp
+index b1c1fbf..65757d8 100644
+--- a/tests/native/test_attention_vector.cpp
++++ b/tests/native/test_attention_vector.cpp
+@@ -4,13 +4,76 @@
+ #include <random>
+ #include <stdexcept>
+ 
++#if defined(__x86_64__) && defined(__GNUC__)
++// The previously shipped vector kernel, verbatim. The current kernel only
++// changes instruction-level parallelism and must remain bit-identical to it.
++__attribute__((target("avx2,no-fma"))) void previous_attend(
++        const float* query, const float* key, const float* value, const float* mask, float* output,
++        std::size_t batch, std::size_t heads, std::size_t kv_heads, std::size_t queries,
++        std::size_t keys, std::size_t stride, std::size_t dim, const std::size_t* shape,
++        float scale, bool valid_nonzero) {
++    std::vector<float> scores(keys);
++    for (std::size_t b = 0; b < batch; ++b)
++        for (std::size_t h = 0; h < heads; ++h) {
++            const auto kv = h / (heads / kv_heads);
++            const auto* key_head = key + (b * kv_heads + kv) * stride * dim;
++            const auto* value_head = value + (b * kv_heads + kv) * stride * dim;
++            for (std::size_t q = 0; q < queries; ++q) {
++                const auto* x = query + ((b * heads + h) * queries + q) * dim;
++                auto* y = output + ((b * queries + q) * heads + h) * dim;
++                std::fill_n(y, dim, 0.0f);
++                const auto mb = shape[0] == 1 ? 0 : b, mh = shape[1] == 1 ? 0 : h;
++                const auto mq = shape[2] == 1 ? 0 : q;
++                const auto* mask_row = mask + ((mb * shape[1] + mh) * shape[2] + mq) * shape[3];
++                float maximum = -std::numeric_limits<float>::infinity();
++                for (std::size_t k = 0; k < keys; ++k) {
++                    if ((mask_row[shape[3] == 1 ? 0 : k] != 0.0f) != valid_nonzero) {
++                        scores[k] = -std::numeric_limits<float>::infinity();
++                        continue;
++                    }
++                    const auto* w = key_head + k * dim;
++                    auto sum = _mm256_setzero_ps();
++                    std::size_t d = 0;
++                    for (; dim - d >= 8; d += 8)
++                        sum = _mm256_add_ps(sum, _mm256_mul_ps(_mm256_loadu_ps(x + d), _mm256_loadu_ps(w + d)));
++                    alignas(32) float lanes[8];
++                    _mm256_store_ps(lanes, sum);
++                    float dot = 0;
++                    for (float lane : lanes) dot += lane;
++                    for (; d < dim; ++d) dot += x[d] * w[d];
++                    scores[k] = dot * scale * scale;
++                    maximum = std::max(maximum, scores[k]);
++                }
++                if (!std::isfinite(maximum)) continue;
++                float denominator = 0;
++                for (std::size_t k = 0; k < keys; ++k) {
++                    scores[k] = scores[k] == -std::numeric_limits<float>::infinity()
++                        ? 0.0f : std::exp(scores[k] - maximum);
++                    denominator += scores[k];
++                }
++                for (std::size_t k = 0; k < keys; ++k) {
++                    const float probability = scores[k] / denominator;
++                    const auto p = _mm256_set1_ps(probability);
++                    const auto* v = value_head + k * dim;
++                    std::size_t d = 0;
++                    for (; dim - d >= 8; d += 8)
++                        _mm256_storeu_ps(y + d, _mm256_add_ps(_mm256_loadu_ps(y + d),
++                            _mm256_mul_ps(p, _mm256_loadu_ps(v + d))));
++                    for (; d < dim; ++d) y[d] += probability * v[d];
++                }
++            }
++        }
++}
++#endif
++
+ int main() {
+     try {
+         std::mt19937 random(425);
+         std::uniform_real_distribution<float> draw(-3.0f, 3.0f);
+-        for (std::size_t dim : {1, 7, 8, 15, 16, 63, 64, 65, 128}) {
++        for (std::size_t dim : {1, 7, 8, 15, 16, 24, 32, 40, 48, 56, 63, 64, 65, 72, 128, 136}) {
++          for (std::size_t keys : {1, 3, 4, 5, 19, 32}) {
+             for (std::size_t queries : {1, 5, 17}) {
+-                constexpr std::size_t batch=2, heads=4, kv=2, keys=19, stride=32;
++                constexpr std::size_t batch=2, heads=4, kv=2, stride=32;
+                 std::vector<float> q(batch*heads*queries*dim), k(batch*kv*stride*dim), v(k.size());
+                 for (auto* x : {&q, &k, &v}) for (auto& f : *x) f=draw(random);
+                 for (unsigned broadcast=0; broadcast<16; ++broadcast) {
+@@ -31,9 +94,19 @@ int main() {
+                         for (std::size_t i=0;i<old.size();++i)
+                             if (!std::isfinite(actual[i+1]) || std::abs(actual[i+1]-old[i])>3e-5f+3e-5f*std::abs(old[i]))
+                                 throw std::runtime_error("vector attention exceeds tolerance");
++#if defined(__x86_64__) && defined(__GNUC__)
++                        if (__builtin_cpu_supports("avx2")) {
++                            std::vector<float> previous(q.size());
++                            previous_attend(q.data(),k.data(),v.data(),mask.data(),previous.data(),
++                                batch,heads,kv,queries,keys,stride,dim,shape,.5f,polarity);
++                            if (std::memcmp(previous.data(),actual.data()+1,previous.size()*sizeof(float)))
++                                throw std::runtime_error("vector attention is not bit-identical to the previous kernel");
++                        }
++#endif
+                     }
+                 }
+             }
++          }
+         }
+         // Fully masked rows return zero; masked nonfinite V retains the old
+         // 0*NaN behavior when another key is valid. No masked-key pruning.

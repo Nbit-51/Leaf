@@ -1,4 +1,4 @@
-"""Compare default and packed FP32 phase costs; never authorize promotion.
+"""Inspect default phase costs or compare packed FP32; never authorize promotion.
 
 The native profiler aggregates ALL forwards, including warmup and first use.
 Reported phase means are normalized by forward calls, not operation calls.
@@ -71,16 +71,23 @@ def summarize_profile(profile: dict, forwards: int, prefill_tokens: int) -> dict
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--executable", type=Path, required=True)
-    parser.add_argument("--artifact", type=Path, required=True, help="FP32 decoder artifact")
+    parser.add_argument("--artifact", type=Path, required=True, help="decoder artifact")
     parser.add_argument("--tokens", type=Path, required=True, help="frozen tokens.json with benchmark_ids")
     parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--cpu", type=int)
     parser.add_argument("--runs", type=int, default=11)
     parser.add_argument("--warmup", type=int, default=5)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--default-only", action="store_true",
+                        help="profile two fresh runs of the shipped default policy")
+    parser.add_argument("--activation-bits", type=int, choices=(8, 32), default=32)
     args = parser.parse_args()
     if args.runs < 1 or args.warmup < 0 or args.threads < 1:
         parser.error("runs/threads must be positive and warmup nonnegative")
+    if args.activation_bits != 32 and not args.default_only:
+        parser.error("Quantized profiling requires --default-only")
+    if args.output.exists():
+        parser.error("Require a fresh output to preserve earlier diagnostics")
     ids = json.loads(args.tokens.read_text(encoding="utf-8"))["benchmark_ids"]
     if (not isinstance(ids, list) or len(ids) < 3 or
             any(type(value) is not int or not 0 <= value < 2**32 for value in ids)):
@@ -94,22 +101,29 @@ def main():
               "logits": "last_token_only", "runs": args.runs, "warmup": args.warmup,
               "profile_includes_warmup": True, "profile_includes_first_use": True,
               "automatic_selection_authorized": False, "acceptance_timing": False,
-              "order": ["default", "token_panel", "token_panel", "default"], "passes": []}
+              "activation_bits": args.activation_bits,
+              "order": (["default", "default"] if args.default_only else
+                        ["default", "token_panel", "token_panel", "default"]),
+              "complete": False, "passes": []}
+    write_record(args.output, record)
     pin_cpu(args.cpu)
     with keep_awake():
         for stage in record["order"]:
             with profile_policy(stage == "token_panel"):
                 _, measured = run_native(args.executable, args.artifact, [ids], mode="bench",
                                          threads=args.threads, runs=args.runs, warmup=args.warmup,
-                                         activation_bits=32, capture_profile=True)
+                                         activation_bits=args.activation_bits, capture_profile=True,
+                                         windows_above_normal=sys.platform == "win32")
             phases = measured["diagnostic_profile"]["timings"]
-            if any(name.startswith("linear_w") for bucket in phases.values() for name in bucket):
+            if not args.default_only and any(name.startswith("linear_w") for bucket in phases.values() for name in bucket):
                 raise ValueError("Phase comparison requires an FP32 artifact")
             summary = summarize_profile(measured["diagnostic_profile"], args.runs + args.warmup, len(ids) - 1)
             record["passes"].append({"stage": stage, "summary": summary, "raw": measured})
+            write_record(args.output, record)
             print(stage, json.dumps(summary["prefill"]), flush=True)
     if hashes != {name: digest(path) for name, path in paths.items()}:
         raise ValueError("Diagnostic inputs changed during execution")
+    record["complete"] = True
     write_record(args.output, record)
 
 

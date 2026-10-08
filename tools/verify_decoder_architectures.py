@@ -61,8 +61,15 @@ def main():
     parser.add_argument("--executable", type=Path, default=Path("build/leaf_decoder.exe"))
     parser.add_argument("--before-executable", type=Path,
                         help="optional frozen binary for exact paired native regression; no timing comparison")
+    parser.add_argument("--conservative-executable", type=Path,
+                        help="release audit: exact quantized/scalar parity and optimized FP32 dispatch")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    if args.before_executable and args.conservative_executable:
+        parser.error("Choose a full paired regression or a conservative release audit")
+    conservative_hash = digest(args.conservative_executable) if args.conservative_executable else None
+    if args.conservative_executable and any(native_policy().values()):
+        parser.error("Release audit requires the default native policy")
     before_hash = None
     if args.before_executable is not None:
         if not args.executable.is_file() or not args.before_executable.is_file():
@@ -89,8 +96,17 @@ def main():
             paired_checks = {}
 
             def native(artifact, requests, label, **options):
-                return paired_native(args.executable, args.before_executable, artifact, requests,
-                                     paired_checks, label, **options)
+                before = args.before_executable
+                quantized = label.startswith(("8/", "4/", "8-smooth/"))
+                if args.conservative_executable and (quantized or options.get("scalar")):
+                    before = args.conservative_executable
+                actual, metrics = paired_native(args.executable, before, artifact, requests,
+                                                paired_checks, label, **options)
+                if args.conservative_executable:
+                    expected_dispatch = not quantized and not options.get("scalar", False) and metrics["avx2"]
+                    if metrics.get("optimized_fp32_active") is not expected_dispatch:
+                        raise AssertionError(f"{label}: release FP32 dispatch differs")
+                return actual, metrics
 
             for bits in (32, 8, 4):
                 artifact = root / f"{config.model_type}-{bits}.leaf"
@@ -184,6 +200,8 @@ def main():
                             "greedy_generation_passed": True, "cases": cases})
             if args.before_executable is not None:
                 results[-1]["paired_bit_exact_regression"] = {"passed": True, "checks": paired_checks}
+            if args.conservative_executable:
+                results[-1]["release_dispatch_and_unchanged_paths"] = {"passed": True, "checks": paired_checks}
             print(config.model_type + " passed", flush=True)
     record = {"benchmark": "native-decoder-cross-architecture-parity",
               "measured_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -198,6 +216,10 @@ def main():
         record.update(before_executable_sha256=before_hash, paired_bit_exact_regression_passed=True,
                       paired_scope="Identical artifacts and requests under default kernel policy; no latency qualification")
     if args.output:
+        if args.conservative_executable:
+            if digest(args.conservative_executable) != conservative_hash:
+                raise AssertionError("Conservative executable changed during validation")
+            record.update(conservative_executable_sha256=conservative_hash, release_dispatch_verified=True)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(record, indent=2))

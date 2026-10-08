@@ -1,0 +1,168 @@
+{
+  "before": "build\\fp32-release\\default\\leaf_decoder.exe",
+  "after": "build\\attn-softmax\\candidate\\leaf_decoder.exe",
+  "artifact": "build\\gpt2_prefill_followup\\decoder-32.leaf",
+  "sequences": 8,
+  "scored_targets": 1016,
+  "sha256": {
+    "before": "f5a5b39b6fa92aa4895f3330ce592c84645044c61a7f1b687b712a6ba5c500a8",
+    "after": "f7ac7b7da74f07dab5116507b9335f6e47477a1f013fa7e34aa6ef2269a089d9",
+    "artifact": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8",
+    "tokens": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6"
+  },
+  "results": [
+    {
+      "mode": "verify",
+      "threads": 1,
+      "chunk": 1,
+      "logits_sha256_before": "5b3423e2535f215ddc7e256968bac29ab10ab3e00514fab2c8363ddc88f6db97",
+      "logits_sha256_after": "5b3423e2535f215ddc7e256968bac29ab10ab3e00514fab2c8363ddc88f6db97",
+      "logits_identical": true,
+      "generated_tokens_identical": true,
+      "optimized_fp32_active": [
+        true,
+        true
+      ]
+    },
+    {
+      "mode": "chunked",
+      "threads": 1,
+      "chunk": 7,
+      "logits_sha256_before": "c2913c556722b0a33c7a5a35d7f5602948a8226e49e0a508962830560dbb82c3",
+      "logits_sha256_after": "c2913c556722b0a33c7a5a35d7f5602948a8226e49e0a508962830560dbb82c3",
+      "logits_identical": true,
+      "generated_tokens_identical": true,
+      "optimized_fp32_active": [
+        true,
+        true
+      ]
+    },
+    {
+      "mode": "generate",
+      "threads": 1,
+      "chunk": 1,
+      "logits_sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logits_sha256_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logits_identical": true,
+      "generated_tokens_identical": true,
+      "optimized_fp32_active": [
+        true,
+        true
+      ],
+      "generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "reference_generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "reference_tokens_match": true
+    },
+    {
+      "mode": "verify",
+      "threads": 2,
+      "chunk": 1,
+      "logits_sha256_before": "5b3423e2535f215ddc7e256968bac29ab10ab3e00514fab2c8363ddc88f6db97",
+      "logits_sha256_after": "5b3423e2535f215ddc7e256968bac29ab10ab3e00514fab2c8363ddc88f6db97",
+      "logits_identical": true,
+      "generated_tokens_identical": true,
+      "optimized_fp32_active": [
+        true,
+        true
+      ]
+    },
+    {
+      "mode": "chunked",
+      "threads": 2,
+      "chunk": 7,
+      "logits_sha256_before": "c2913c556722b0a33c7a5a35d7f5602948a8226e49e0a508962830560dbb82c3",
+      "logits_sha256_after": "c2913c556722b0a33c7a5a35d7f5602948a8226e49e0a508962830560dbb82c3",
+      "logits_identical": true,
+      "generated_tokens_identical": true,
+      "optimized_fp32_active": [
+        true,
+        true
+      ]
+    },
+    {
+      "mode": "generate",
+      "threads": 2,
+      "chunk": 1,
+      "logits_sha256_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logits_sha256_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logits_identical": true,
+      "generated_tokens_identical": true,
+      "optimized_fp32_active": [
+        true,
+        true
+      ],
+      "generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "reference_generated_tokens": [
+        198,
+        198,
+        464,
+        1708,
+        318,
+        257,
+        1351,
+        286,
+        262,
+        749,
+        2219,
+        10135,
+        326,
+        460,
+        307,
+        925
+      ],
+      "reference_tokens_match": true
+    }
+  ],
+  "passed": true
+}

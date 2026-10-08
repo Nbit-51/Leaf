@@ -11,6 +11,7 @@ import pytest
 from tools import decoder_validation
 from tools.benchmark_token_panels import summarize
 from tools.profile_decoder import profile_policy, summarize_profile
+from tools import profile_decoder
 
 
 def profile():
@@ -46,6 +47,45 @@ def test_profile_policy_restores_parent_after_exception(monkeypatch):
             assert "LEAF_EXPERIMENTAL_FLOAT_GEMV" not in os.environ
             raise RuntimeError()
     assert dict(os.environ) == before
+
+
+def test_default_quantized_profile_records_both_passes_without_experimental_policy(monkeypatch, tmp_path):
+    from contextlib import nullcontext
+    artifact = tmp_path / "model.leaf"
+    artifact.write_bytes(b"artifact")
+    executable = tmp_path / "native"
+    executable.write_bytes(b"binary")
+    tokens = tmp_path / "tokens.json"
+    tokens.write_text(json.dumps({"benchmark_ids": list(range(64))}))
+    output = tmp_path / "profile.json"
+    monkeypatch.setattr(profile_decoder.sys, "argv", ["profile_decoder",
+        "--executable", str(executable), "--artifact", str(artifact),
+        "--tokens", str(tokens), "--output", str(output), "--default-only",
+        "--activation-bits", "8", "--runs", "3", "--warmup", "1"])
+    monkeypatch.setattr(profile_decoder, "pin_cpu", lambda _: None)
+    monkeypatch.setattr(profile_decoder, "keep_awake", nullcontext)
+    calls = []
+    def native(*args, **kwargs):
+        assert kwargs["activation_bits"] == 8
+        assert kwargs["capture_profile"] is True
+        assert os.environ["LEAF_DECODER_PROFILE"] == "1"
+        assert not any(k.startswith("LEAF_EXPERIMENTAL_") for k in os.environ)
+        checkpoint = json.loads(output.read_text())
+        assert checkpoint["complete"] is False
+        assert len(checkpoint["passes"]) == len(calls)
+        calls.append(kwargs)
+        data = profile()
+        for bucket in data["timings"].values():
+            bucket["linear_w8a8"] = bucket.pop("linear_fp32")
+        return None, {"diagnostic_profile": data}
+    monkeypatch.setattr(profile_decoder, "run_native", native)
+    profile_decoder.main()
+    result = json.loads(output.read_text())
+    assert result["complete"] is True
+    assert result["acceptance_timing"] is False
+    assert result["order"] == ["default", "default"]
+    assert len(calls) == 2
+    assert result["passes"][0]["summary"]["prefill"]["linear_w8a8"]["percent_of_forward"] == 80
 
 
 @pytest.mark.parametrize("stderr,valid", [

@@ -1,0 +1,64 @@
+diff --git a/engine/src/decoder.cpp b/engine/src/decoder.cpp
+index 6043f33..7b5e463 100644
+--- a/engine/src/decoder.cpp
++++ b/engine/src/decoder.cpp
+@@ -243,10 +243,14 @@ public:
+         { std::lock_guard<std::mutex> lock(mutex_); stop_ = true; }
+         ready_.notify_all(); for (auto& worker : workers_) worker.join();
+     }
+-    void run(std::size_t count, std::function<void(std::size_t, std::size_t)> task) {
++    void run(std::size_t count, std::function<void(std::size_t, std::size_t)> task,
++             std::size_t grain = 32) {
+         if (threads_ == 1) { task(0, count); return; }
+         { std::lock_guard<std::mutex> lock(mutex_);
+-          task_ = std::move(task); count_ = count; next_ = 0; pending_ = threads_ - 1; ++epoch_; }
++          task_ = std::move(task); count_ = count;
++          // Keep enough tasks for every worker on small projections.
++          grain_ = count / grain >= threads_ ? grain : 32;
++          next_ = 0; pending_ = threads_ - 1; ++epoch_; }
+         ready_.notify_all(); drain();
+         std::unique_lock<std::mutex> lock(mutex_);
+         finished_.wait(lock, [&] { return pending_ == 0; });
+@@ -254,9 +258,9 @@ public:
+ private:
+     void drain() {
+         for (;;) {
+-            const std::size_t first = next_.fetch_add(32, std::memory_order_relaxed);
++            const std::size_t first = next_.fetch_add(grain_, std::memory_order_relaxed);
+             if (first >= count_) return;
+-            task_(first, std::min(first + 32, count_));
++            task_(first, first + std::min(grain_, count_ - first));
+         }
+     }
+     unsigned threads_;
+@@ -264,7 +268,7 @@ private:
+     std::mutex mutex_;
+     std::condition_variable ready_, finished_;
+     bool stop_ = false;
+-    std::size_t epoch_ = 0, count_ = 0;
++    std::size_t epoch_ = 0, count_ = 0, grain_ = 32;
+     unsigned pending_ = 0;
+     std::atomic<std::size_t> next_{0};
+     std::function<void(std::size_t, std::size_t)> task_;
+@@ -934,6 +938,12 @@ struct Decoder::Impl {
+         }
+         output.resize(tokens * weight.rows);
+         used_vnni = used_vnni || vnni_integer;
++        std::size_t row_grain = 32;
++#ifdef LEAF_EXPERIMENTAL_ROW_REUSE
++        // A 96-row MLP task contains sixteen complete 6-row microtiles.
++        // Keep fine-grained GEMV scheduling.
++        if (packed_float && mlp_projection) row_grain = 96;
++#endif
+         workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
+             if (packed_float) {
+ #ifdef LEAF_EXPERIMENTAL_ROW_REUSE
+@@ -1007,7 +1017,7 @@ struct Decoder::Impl {
+                         output[(token + t) * weight.rows + row] = result[t] + (bias ? bias->value(0, row) : 0);
+                 }
+             }
+-        });
++        }, row_grain);
+     }
+     void prepare_rotary_tables(std::size_t tokens, std::size_t position) {
+         if (position_kind != 0) return;

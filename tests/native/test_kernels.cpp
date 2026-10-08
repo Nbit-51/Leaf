@@ -304,6 +304,24 @@ void test_dynamic_kv_cache() {
   cache.reset();
   require(cache.length() == 0 && cache.capacity() >= total,
           "KVCache reset must clear state without discarding capacity");
+  const auto capacity = cache.capacity();
+  const auto* retained_keys = cache.keys_data();
+  cache.append(next_keys.data(), next_values.data(), 1);
+  require(cache.length() == 1 && cache.capacity() == capacity && cache.keys_data() == retained_keys,
+          "KVCache reset/reuse unexpectedly reallocates storage");
+  cache.attend(query.data(), &mask, actual.data(), query_heads, 1, mask_shape, 0.5f);
+  for (std::size_t head = 0; head < query_heads; ++head) {
+    for (std::size_t col = 0; col < dim; ++col) {
+      const auto expected_value = next_values[(head / (query_heads / kv_heads)) * dim + col];
+      require(std::abs(actual[head * dim + col] - expected_value) < 1e-6f,
+              "KVCache reset exposed previous-request tokens");
+    }
+  }
+  leaf::runtime::KVCache independent(1, kv_heads, dim);
+  independent.append(prefix_keys.data(), prefix_values.data(), prefix);
+  independent.reset();
+  require(cache.length() == 1 && cache.keys_data() == retained_keys,
+          "Independent KV session modified an existing session");
 }
 
 }  // namespace

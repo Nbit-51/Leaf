@@ -1,19 +1,20 @@
 #include "leaf/runtime/decoder.h"
+#include "leaf/runtime/decoder_config.h"
 #include "leaf/runtime/kv_cache.h"
 #include "leaf/kernels/token_panel.h"
 #ifdef LEAF_DIAGNOSTIC_TIMING
 #include "../../tests/native/decoder_diagnostic.h"
 #endif
-#if defined(LEAF_EXPERIMENTAL_GEMV_PAIR) || defined(LEAF_TEST_GEMV)
+#if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_GEMV_PAIR) || defined(LEAF_TEST_GEMV)
 #include "leaf/kernels/gemv_pair.h"
 #endif
-#ifdef LEAF_EXPERIMENTAL_ROW_REUSE
+#if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ROW_REUSE)
 #include "leaf/kernels/row_reuse.h"
 #endif
-#ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
+#if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ATTENTION_AVX2)
 #include "leaf/kernels/attention_vector.h"
 #endif
-#ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
+#if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_VECTOR_GELU)
 #include "leaf/kernels/gelu.h"
 #endif
 
@@ -731,7 +732,8 @@ struct Decoder::Impl {
     unsigned norm_kind, activation, position_kind, gated, parallel, rotary_dim, position_offset, final_norm;
     float embedding_scale;
     bool avx = false;
-    bool experimental_float_tiles = false;
+    bool float_tiles = false, optimized_fp32 = false;
+    bool vector_gelu = false, vector_attention = false, paired_gemv = false;
     bool vnni = false, used_vnni = false;
     Dot dot = dot_scalar;
     QuantDot quant_dot = quant_dot_scalar;
@@ -754,7 +756,7 @@ struct Decoder::Impl {
         // Unqualified experiments are explicit opt-ins, never default kernels.
         const char* tiles = std::getenv("LEAF_EXPERIMENTAL_FLOAT_TILES");
         const char* gemv = std::getenv("LEAF_EXPERIMENTAL_FLOAT_GEMV");
-        experimental_float_tiles = avx && tiles && tiles[0];
+        float_tiles = avx && tiles && tiles[0];
         if (avx && gemv && gemv[0]) dot = dot_specialized_avx;
 #if LEAF_DECODER_VNNI
         const char* disabled = std::getenv("LEAF_DISABLE_VNNI");
@@ -847,6 +849,23 @@ struct Decoder::Impl {
             for (std::size_t i = 0; i < rotary_dim / 2; ++i)
                 rotary_frequencies[i] = 1.0f / std::pow(theta, static_cast<float>(2 * i) / rotary_dim);
         }
+        // Qualification is scoped to FP32 artifacts, not architecture names.
+        // Quantized/mixed artifacts keep their previously validated dispatch.
+        optimized_fp32 = LEAF_OPTIMIZED_FP32 && avx && activation_precision == 32 &&
+            std::all_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 32; });
+        if (optimized_fp32) {
+            float_tiles = true;
+            vector_gelu = vector_attention = paired_gemv = true;
+        }
+#ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
+        vector_gelu = avx;
+#endif
+#ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
+        vector_attention = avx;
+#endif
+#ifdef LEAF_EXPERIMENTAL_GEMV_PAIR
+        paired_gemv = avx;
+#endif
     }
     ~Impl() { profile.emit(); }
     void normalize(const std::vector<float>& input, const std::string& name, std::vector<float>& output) {
@@ -918,7 +937,7 @@ struct Decoder::Impl {
                         quant_input[t * weight.cols + col] = static_cast<std::int16_t>(std::max(-127L, std::min(127L, std::lrint(values[col] / quant_scales[t]))));
             }
         }
-        const bool packed_float = experimental_float_tiles && weight.bits == 32 && tokens >= 8 &&
+        const bool packed_float = float_tiles && weight.bits == 32 && tokens >= 8 &&
                                   (!bias || bias->bits == 32);
         bool vector_pack = false;
 #ifdef LEAF_EXPERIMENTAL_MLP_PACK
@@ -936,7 +955,7 @@ struct Decoder::Impl {
         used_vnni = used_vnni || vnni_integer;
         workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
             if (packed_float) {
-#ifdef LEAF_EXPERIMENTAL_ROW_REUSE
+#if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ROW_REUSE)
                 leaf::kernels::gemm_token_panels_f32_row_reuse(
 #else
                 leaf::kernels::gemm_token_panels_f32(
@@ -948,8 +967,8 @@ struct Decoder::Impl {
                 return;
             }
             std::size_t row = first;
-#if LEAF_DECODER_AVX && defined(LEAF_EXPERIMENTAL_GEMV_PAIR)
-            if (avx && weight.bits == 32 && tokens == 1 && weight.cols >= 8 && weight.cols % 8 == 0) {
+#if LEAF_DECODER_AVX && (LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_GEMV_PAIR))
+            if (paired_gemv && weight.bits == 32 && tokens == 1 && weight.cols >= 8 && weight.cols % 8 == 0) {
                 for (; last - row >= 2; row += 2) {
                     leaf::kernels::gemv_pair_f32(reinterpret_cast<const float*>(weight.data) + row * weight.cols,
                                                 input, weight.cols, output.data() + row);
@@ -1069,11 +1088,12 @@ struct Decoder::Impl {
             DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Embedding, tokens);
             hidden.resize(tokens * h);
             const auto& embedding = weights.at("model.embed_tokens.weight");
+            // Resolve once: a per-element map lookup dominated this phase.
+            const Weight* positions = position_kind == 1 ? &weights.at("model.position_embeddings.weight") : nullptr;
             for (std::size_t t = 0; t < tokens; ++t)
                 for (std::size_t col = 0; col < h; ++col) {
                     hidden[t * h + col] = embedding.value(ids[t], col) * embedding_scale;
-                    if (position_kind == 1) hidden[t * h + col] +=
-                        weights.at("model.position_embeddings.weight").value(position + t + position_offset, col);
+                    if (positions) hidden[t * h + col] += positions->value(position + t + position_offset, col);
                 }
         }
         const auto total = position + tokens;
@@ -1103,8 +1123,8 @@ struct Decoder::Impl {
             {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Attention, tokens);
                 attention.resize(tokens * h);
-#ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
-                if (avx && tokens > 1) {
+#if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ATTENTION_AVX2)
+                if (vector_attention && tokens > 1) {
                     const auto& cache = caches[layer];
                     leaf::kernels::attention_f32_gqa_strided_vector(q_heads.data(), cache.keys_data(),
                         cache.values_data(), mask.data(), attention.data(), 1, heads, kv_heads, tokens,
@@ -1128,8 +1148,8 @@ struct Decoder::Impl {
                 for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= activate(gate[j]);
             } else {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
-#ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
-                if (avx && tokens >= 8 && activation == 2)
+#if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_VECTOR_GELU)
+                if (vector_gelu && tokens >= 8 && activation == 2)
                     leaf::kernels::gelu_new_inplace(up.data(), up.size());
                 else
 #endif
@@ -1162,6 +1182,7 @@ std::uint32_t Decoder::eos_token() const { return static_cast<std::uint32_t>(imp
 std::size_t Decoder::cache_tokens() const { return impl_->caches[0].length(); }
 std::uint64_t Decoder::weight_bytes() const { return impl_->mapping.size; }
 bool Decoder::uses_avx2() const { return impl_->avx; }
+bool Decoder::uses_optimized_fp32() const { return impl_->optimized_fp32; }
 bool Decoder::uses_vnni() const { return impl_->used_vnni; }
 unsigned Decoder::activation_bits() const { return impl_->activation_precision; }
 // Test-only access to the actual decoder dot kernels; absent from normal builds.

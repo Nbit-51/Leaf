@@ -58,11 +58,12 @@ class LastTokenModel:
         return self.forward(*args, **kwargs)
 
 
-def test_pytorch_latency_requests_last_token_logits_and_prefill_kv_cache(fake_torch):
+@pytest.mark.parametrize("implementations", [("eager", "sdpa"), ("sdpa",)])
+def test_pytorch_latency_requests_last_token_logits_and_prefill_kv_cache(fake_torch, implementations):
     model, args = LastTokenModel(), SimpleNamespace(warmup=1, runs=5)
-    measured = validation.measure_pytorch_latency(model, [1, 2, 3, 4], args)
-    assert set(measured) == {"eager", "sdpa"}
-    assert len(model.calls) == 24
+    measured = validation.measure_pytorch_latency(model, [1, 2, 3, 4], args, implementations)
+    assert set(measured) == set(implementations)
+    assert len(model.calls) == 12 * len(implementations)
     for implementation, timing in measured.items():
         assert validation.latency_workload_matches(timing)
         assert timing["prefill_samples_ms"] == pytest.approx([1] * 5)

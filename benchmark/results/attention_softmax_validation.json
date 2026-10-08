@@ -1,0 +1,63 @@
+{
+  "format": "leaf-attention-softmax-validation-v1",
+  "recorded_at_utc": "2026-10-08T01:57:26.030661+00:00",
+  "native_increment_qualified": true,
+  "earlier_short_run_stable": false,
+  "python_tests": {
+    "passed": 831,
+    "skipped": 0,
+    "warnings": 4
+  },
+  "trained_identity_passed": true,
+  "installed_identity_passed": true,
+  "architecture_cases": 8,
+  "framework_comparison": {
+    "all_runtimes_stable": true,
+    "automatic_precision_selection_authorized": false,
+    "scope": "Installed Windows wheel, GPT-2 FP32, 63-token prefill, one cached decode, last-token logits, CPU 2, one thread; warmed latency only.",
+    "prefill": {
+      "leaf_ms": 144.30734999999999,
+      "fastest_pytorch": "sdpa",
+      "pytorch_ms": 151.66304999991098,
+      "ratio": 0.9514997225763605,
+      "two_percent_faster": true,
+      "within_two_percent": true
+    },
+    "decode": {
+      "leaf_ms": 28.1102,
+      "fastest_pytorch": "sdpa",
+      "pytorch_ms": 28.573350000044684,
+      "ratio": 0.983790840064467,
+      "two_percent_faster": false,
+      "within_two_percent": true
+    },
+    "qualified_prefill_win": true
+  },
+  "hashes": {
+    "benchmark\\results\\attention_softmax_architectures.json": "0640702d24a9aeda6fea11cd924a5d943c83a75bca811aab1cdafc6887bf54d0",
+    "benchmark\\results\\attention_softmax_confirmation_windows.json": "bd7dd6df34fabf08bf9be4dfb49cbbc7e26ac914f9d5bb4b75aedcffec2cef8f",
+    "benchmark\\results\\attention_softmax_identity.json": "d4793370f07488517922733d39a1f372254b3da73021e326387c067700460f8b",
+    "benchmark\\results\\attention_softmax_initial_windows.json": "6385e5489aa828644fdc171ed7e32b783164413804b619da8cdffdbf2e82bd53",
+    "benchmark\\results\\attention_softmax_installed_identity.json": "4234cb9853e0e3878d2ff4709896743d3b2010d3ef851d285d26b8900335c620",
+    "benchmark\\results\\attention_softmax_package.json": "58f79e8dfcdf44a3fbb4467fcd2f3176c26f852b0135ec785dae45fbb6f5bfa2",
+    "benchmark\\results\\attention_softmax_pytorch_windows.json": "8528ddf5d89b1279bb2f931a41ef1912c864a945a23c605184f54ee68e0c9920",
+    "engine/src/decoder.cpp": "55c2d9f150ea0dfe13bb769f1035887ab3b3114b990cb3be02ba427c5c8e333f",
+    "engine/include/leaf/kernels/attention_vector.h": "8f7659e7d679192e0e0d531ff8aaecd7e2eeac453abc969ec08fc71f65966b93",
+    "tests/native/test_attention_vector.cpp": "70f63583b9870fe03635a6cbe8452886c05e4f215a837da5deac078b296dce9b",
+    ".github/workflows/cpu-validation.yml": "5b04848532d34ba08432b31a1537ac6ea18858fed364c9b949c678275c19a58f",
+    "tools/benchmark_default_abba.py": "ef40714925132a2f375f876526f845791c5aceaf198784afa1ca77e8f6320b48",
+    "tools/verify_bit_identical.py": "9548f58b9fd801564774d05a4e13fcc8eb3a7f8a74db495eca7fc2324268a179",
+    "build/attn-softmax/pytest.log": "f4d1fd07aef5a7ffc9eadf9cf3466e635840720195b212c84898af80565f2d19",
+    "build/attn-softmax/attention-tests.log": "ff2112c976b8ea6f0abcbfc0861e85762946e3d0573c807ff70c149869a94d0d",
+    "build/attn-softmax/wheels/leaf_cpu-0.2.0-py3-none-win_amd64.whl": "c7033d280c4fc6f626715d55c5f8876814bedb9b9d5f10bce28c6cf229c3a17f"
+  },
+  "git_source_sha256": {
+    "engine/src/decoder.cpp": "d27e79803b46769360bc7a3d68e6fba814789b0f31f7d7110090d4566e95cb55",
+    "engine/include/leaf/kernels/attention_vector.h": "8f7659e7d679192e0e0d531ff8aaecd7e2eeac453abc969ec08fc71f65966b93",
+    "tests/native/test_attention_vector.cpp": "70f63583b9870fe03635a6cbe8452886c05e4f215a837da5deac078b296dce9b",
+    ".github/workflows/cpu-validation.yml": "5b04848532d34ba08432b31a1537ac6ea18858fed364c9b949c678275c19a58f",
+    "tools/benchmark_default_abba.py": "ef40714925132a2f375f876526f845791c5aceaf198784afa1ca77e8f6320b48",
+    "tools/verify_bit_identical.py": "9548f58b9fd801564774d05a4e13fcc8eb3a7f8a74db495eca7fc2324268a179"
+  },
+  "source_hash_note": "hashes preserve Windows validation bytes; git_source_sha256 hashes canonical staged source bytes after line-ending normalization. Runtime edits since measurement are comments only."
+}

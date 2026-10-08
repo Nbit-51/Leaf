@@ -1,0 +1,173 @@
+{
+  "format": "leaf-cached-trained-quality-v1",
+  "measured_at_utc": "2026-10-08T02:10:22.268977+00:00",
+  "hashes": {
+    "build\\attn-softmax\\installed\\leaf\\bin\\leaf_decoder.exe": "32c39974b228edd9f363080ba2e3b011db04e33c6bab10bbea4fbacf40ec6ca0",
+    "build\\tinyllama_windows_fair\\pytorch.json": "ecaf73cda87c1a998213490f640ceec834338554a19086a727db306492f401ad",
+    "build\\tinyllama_windows_fair\\reference.npy": "2ddde87d143287c6689e54bfde0a5f9bf8bac38c00a6fcc3311c73ea1699d183",
+    "build\\tinyllama_windows_fair\\tokens.json": "537a2ed92d0dbe9b77ceb462e3ee09fe41d0bc29a7d638e7a1bc2cfdf4c327f5",
+    "C:\\Users\\navaneeth\\Documents\\Vs code projketcs\\Imporved_Hydra\\Hydra_Engine\\TinyLlama-1.1B-Chat-v1.0-git\\config.json": "2add6e2d3f7cfc555e8cfee8dbaa12e9f9b057b2a4d70e9a999aeb32b8d02873",
+    "C:\\Users\\navaneeth\\leaf\\tools\\verify_cached_decoder.py": "da5c930bac271fda5e0a414c761cce5f4cc52eb228b64779fcab3a81b6136a26",
+    "C:\\Users\\navaneeth\\Documents\\Vs code projketcs\\Imporved_Hydra\\Hydra_Engine\\TinyLlama-1.1B-Chat-v1.0-git\\model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933",
+    "build\\tinyllama_windows_fair\\decoder-32.leaf": "71b98b53ce204393478990887c7beab7074e34bffc76e5a00c4f9183631e060a",
+    "build\\tinyllama_windows_fair\\decoder-32.provenance.json": "e90e5a474bbc4f4f8f56794927b4d05d740007a77886faa8130632c6b27be94e",
+    "build\\tinyllama_windows_fair\\decoder-8-smooth.leaf": "6a831e4a655f4fa00ccf82ad1bf317492aeaa76c85950a56ec464a7f3611ffc5",
+    "build\\tinyllama_windows_fair\\decoder-8-smooth.provenance.json": "00b25bf49d9329f16a75bfc520e192f17ff9e83d7e8e1e0e6def5d203a3a5ecc"
+  },
+  "model": "TinyLlama-1.1B-Chat-v1.0-git",
+  "threads": 1,
+  "cpu": 2,
+  "cases": {
+    "fp32": {
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 0.00046825408935546875,
+        "relative_logit_rmse": 2.1011421722505474e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 13.697432983832877,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 0.9999998867458613
+      },
+      "passed": true,
+      "chunked_matches_full": true,
+      "fp32_reference_allclose": true,
+      "generation_matches_pytorch": true,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        304,
+        9801,
+        393,
+        278
+      ],
+      "reference_generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        304,
+        9801,
+        393,
+        278
+      ],
+      "execution": {
+        "avx2": true,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4183932928,
+        "load_ms": 0.7308,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "artifact_bytes": 4400212544
+    },
+    "w8a8": {
+      "quality": {
+        "evaluated_tokens": 1016,
+        "max_abs_logit_error": 10.342117309570312,
+        "relative_logit_rmse": 0.04785344749689102,
+        "next_token_agreement": 0.9507874015748031,
+        "perplexity": 13.867265275513816,
+        "pytorch_perplexity": 13.697434535124028,
+        "perplexity_ratio": 1.012398726196084
+      },
+      "passed": true,
+      "chunked_matches_full": true,
+      "fp32_reference_allclose": false,
+      "generation_matches_pytorch": false,
+      "generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6511,
+        363,
+        16232,
+        322,
+        18378
+      ],
+      "reference_generated_tokens": [
+        29907,
+        598,
+        1319,
+        20039,
+        13750,
+        746,
+        5994,
+        5281,
+        7047,
+        1363,
+        372,
+        6911,
+        304,
+        9801,
+        393,
+        278
+      ],
+      "execution": {
+        "avx2": true,
+        "optimized_fp32_active": false,
+        "vnni": true,
+        "activation_bits": 8,
+        "threads": 1,
+        "artifact_bytes": 1103777152,
+        "peak_rss_bytes": 1085964288,
+        "load_ms": 1086.6499,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      },
+      "artifact_bytes": 1103777152
+    }
+  },
+  "complete": true,
+  "automatic_selection_authorized": false,
+  "thresholds": {
+    "32": {
+      "min_next_token_agreement": 0.999,
+      "max_perplexity_ratio": 1.001
+    },
+    "8": {
+      "min_next_token_agreement": 0.95,
+      "max_perplexity_ratio": 1.02
+    },
+    "4": {
+      "min_next_token_agreement": 0.9,
+      "max_perplexity_ratio": 1.05
+    }
+  },
+  "passed": true
+}
