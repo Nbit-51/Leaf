@@ -18,11 +18,20 @@ prefill latency and 9.3% lower decode latency** than the conservative build;
 all twenty passes meet the existing stability limits. The installed wheel uses
 this path without research flags. See the [release evidence and remaining work](docs/windows-fp32-release.md).
 
-These gains are relative to the previous Leaf default, not a general claim of
-superiority over PyTorch. A fresh installed-wheel comparison observed faster
-runs but failed Leaf's repeatability gate; the remaining work is reliable
-framework-relative speed and complete-command latency. The separate MLP vector-pack and
-96-row worker experiments remain unpromoted.
+**Attention/softmax follow-up:** a further qualified Windows comparison reduces
+GPT-2 prefill from **161.16 to 145.49 ms (9.72%)** against the previous optimized
+Leaf default. All twelve confirmation passes are stable; decode does not
+regress. **This optimization is accepted and enabled by default in Windows
+FP32 builds.** The earlier failed short run remains recorded. See the
+[implementation, validation and framework comparison](docs/windows-attention-softmax.md).
+
+The latest fresh installed-wheel comparison qualifies **4.85% lower prefill
+time than PyTorch SDPA** on this Windows GPT-2 FP32 workload: 144.31 versus
+151.66 ms. Decode is 28.11 versus 28.57 ms, within the non-regression gate but
+below the 2% improvement threshold. All three runtimes pass the stability
+checks. These are warmed, one-thread measurements on one host; complete-command
+latency and broader hardware remain separate work. Earlier failed comparisons
+are preserved. MLP vector-pack and 96-row worker experiments remain unpromoted.
 
 Two preparation routes share that purpose:
 
@@ -342,7 +351,7 @@ flowchart TB
       direction LR
       DEC --> RUNTIME["Native C++ decoder"]
       RUNTIME --> CACHE["Per-session dynamic KV cache<br/>Grow, append, reset and reuse"]
-      CACHE --> KERNEL["Windows FP32 default<br/>Tiled GEMM, SIMD and paired GEMV<br/>CPU feature checks and scalar fallback"]
+      CACHE --> KERNEL["Windows FP32 default<br/>Tiled GEMM and paired GEMV<br/>Vector GELU, attention and softmax<br/>CPU feature checks and scalar fallback"]
       GRAPH --> EXEC["C++ graph executor<br/>Reusable buffers or planned arena"]
       KERNEL --> OUTPUT["Generated tokens and logits"]
       EXEC --> RESULTS["Graph outputs"]
@@ -504,6 +513,12 @@ GEMV for eligible single-token projections. Dispatch checks AVX2/FMA support
 and retains scalar and shape-tail fallbacks. Quantized/mixed artifacts keep
 their previous execution paths. Dynamic KV capacity grows geometrically;
 reset clears the logical length while retaining storage for reuse.
+
+Prefill attention shares query loads across four keys, retains weighted-value
+accumulators in registers, and evaluates ordinary softmax exponentials four
+at a time with double-precision intermediates. Extreme/exceptional arguments
+retain scalar libm handling. Learned position embeddings resolve their tensor
+once per forward rather than once per element.
 
 Packing and weight-sum preprocessing add startup cost. Warmed prefill/decode
 tables exclude constructor/export/tokenization time, so CLI first-token and
@@ -1373,6 +1388,26 @@ uses distinct physical P-cores; the [96-row experiment](benchmark/results/gpt2_m
 failed qualification and was not integrated. These outcomes do not disable the
 independently qualified Windows release stack.
 
+### 7.15 Attention/softmax follow-up (2026-10-08)
+
+The [attention/softmax report](docs/windows-attention-softmax.md) records the
+next accepted Windows FP32 increment: 161.1558 → 145.4869 ms prefill and
+28.64235 → 28.48115 ms decode. Six balanced pairs, 101 samples per pass and
+ten warmups qualify the incremental comparison; all twelve passes and pooled
+phases are stable. The initial 31-sample run's failed decode spread remains
+visible alongside the confirmation.
+
+Trained GPT-2 outputs match the previous default exactly at one and two
+threads. Eight reduced architecture cases, 831 Python tests and a newly
+installed wheel pass validation. The report separates this native improvement
+from the fresh comparison with PyTorch and preserves exact binary identities.
+
+The fresh installed-wheel comparison measures Leaf/PyTorch SDPA at
+144.30735/151.66305 ms prefill and 28.11020/28.57335 ms decode. It qualifies
+the 4.85% prefill reduction on this workload with all individual, pooled and
+between-pass stability checks passing. Decode clears non-regression; its
+1.62% reduction does not qualify a separate >=2% improvement claim.
+
 ## 8. Package and portability checks
 
 ### 8.1 Installed lightweight package
@@ -1956,7 +1991,7 @@ Implemented and checked:
 
 Current CPU-decoder release priorities:
 
-- [ ] Close the remaining GPT-2 prefill gap against fresh, order-balanced PyTorch measurements; keep decode separate.
+- [x] Qualify a Windows GPT-2 FP32 prefill improvement against fresh, order-balanced PyTorch measurements: 4.85% less time than SDPA; decode non-regression passes separately.
 - [ ] Qualify complete-command latency separately from warmed native forwards; installed first/cached smoke is already verified.
 - [ ] Requalify changed runtime binaries and further device/model configurations against matched PyTorch/native workloads before promotion.
 - [ ] Measure native GEMM/GEMV bottlenecks, per-core frequency behavior, and CNN packing before proposing another default kernel change.

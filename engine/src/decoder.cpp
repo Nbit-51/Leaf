@@ -1088,11 +1088,12 @@ struct Decoder::Impl {
             DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Embedding, tokens);
             hidden.resize(tokens * h);
             const auto& embedding = weights.at("model.embed_tokens.weight");
+            // Resolve once: a per-element map lookup dominated this phase.
+            const Weight* positions = position_kind == 1 ? &weights.at("model.position_embeddings.weight") : nullptr;
             for (std::size_t t = 0; t < tokens; ++t)
                 for (std::size_t col = 0; col < h; ++col) {
                     hidden[t * h + col] = embedding.value(ids[t], col) * embedding_scale;
-                    if (position_kind == 1) hidden[t * h + col] +=
-                        weights.at("model.position_embeddings.weight").value(position + t + position_offset, col);
+                    if (positions) hidden[t * h + col] += positions->value(position + t + position_offset, col);
                 }
         }
         const auto total = position + tokens;

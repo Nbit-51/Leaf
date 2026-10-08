@@ -110,8 +110,10 @@ to one decoder session. It supports virtual GQA repetition. Dynamic allocation
 does not mean paged attention, cross-request prefix caching or a serving
 scheduler; those are separate future features.
 
-Next work after this checkpoint: resolve the remaining framework-comparison
-variability and qualify complete-command latency, followed by a narrowly
-measured remaining bottleneck.
+The [attention/softmax follow-up](windows-attention-softmax.md) now records a
+further 9.72% native prefill reduction and a fresh stable installed-wheel
+comparison: 4.85% lower prefill time than PyTorch SDPA on the tested Windows
+GPT-2 workload. The earlier failed framework record above remains unchanged.
+Complete-command latency and broader device/model qualification remain open.
 Do not restart the rejected 96-row experiment or use unrelated roadmap features
 as prerequisites for this release.
