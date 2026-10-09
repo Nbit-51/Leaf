@@ -254,3 +254,17 @@ from `docs/windows-tinyllama-current.md`. Focused regression suite: 251 passed.
 No runtime kernel changed in this second-model follow-up. The accepted Windows
 default stays enabled; no automatic precision profile was promoted. Only Git
 delivery and final-revision CI remain after this checkpoint.
+
+## Delivery and working arrangement — 2026-10-09
+
+PR #2 merged to main at `f08746f` after all six Windows/Linux/macOS checks
+passed. The README cleanup and organic Leaf logo follow on a separate
+documentation branch; the detailed README is preserved as
+`docs/project-reference.md` with a documentation index in `docs/README.md`.
+
+For future work, the user prefers to run long benchmarks/tests locally.
+Focus assistant effort on implementation, architecture, documentation and
+interpreting results. Provide copy-paste commands with a fresh named output
+file, the relevant environment assumptions, and exactly which outputs to share.
+Reuse completed evidence. Take over execution if the user asks or cannot run it.
+Do not start another long benchmark merely to fill a waiting interval.
