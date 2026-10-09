@@ -2,6 +2,9 @@
 #include "leaf/runtime/decoder_config.h"
 #include "leaf/runtime/kv_cache.h"
 #include "leaf/kernels/token_panel.h"
+#ifdef LEAF_EXPERIMENTAL_SILU_GATE
+#include "leaf/kernels/silu_gate.h"
+#endif
 #ifdef LEAF_DIAGNOSTIC_TIMING
 #include "../../tests/native/decoder_diagnostic.h"
 #endif
@@ -734,6 +737,7 @@ struct Decoder::Impl {
     bool avx = false;
     bool float_tiles = false, optimized_fp32 = false;
     bool vector_gelu = false, vector_attention = false, paired_gemv = false;
+    std::size_t vector_silu_gate_calls = 0;
     bool vnni = false, used_vnni = false;
     Dot dot = dot_scalar;
     QuantDot quant_dot = quant_dot_scalar;
@@ -1145,6 +1149,14 @@ struct Decoder::Impl {
             if (gated) {
                 linear(normalized.data(), tokens, prefix + "mlp.gate_proj", gate, true);
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
+#ifdef LEAF_EXPERIMENTAL_SILU_GATE
+                // Isolate the prefill activation change; weight precision does
+                // not change the FP32 up/gate buffers. Decode stays unchanged.
+                if (avx && tokens >= 8 && activation == 0) {
+                    leaf::kernels::silu_gate_inplace(up.data(), gate.data(), gate.size());
+                    ++vector_silu_gate_calls;
+                } else
+#endif
                 for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= activate(gate[j]);
             } else {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
@@ -1183,6 +1195,7 @@ std::size_t Decoder::cache_tokens() const { return impl_->caches[0].length(); }
 std::uint64_t Decoder::weight_bytes() const { return impl_->mapping.size; }
 bool Decoder::uses_avx2() const { return impl_->avx; }
 bool Decoder::uses_optimized_fp32() const { return impl_->optimized_fp32; }
+std::size_t Decoder::silu_gate_vector_calls() const { return impl_->vector_silu_gate_calls; }
 bool Decoder::uses_vnni() const { return impl_->used_vnni; }
 unsigned Decoder::activation_bits() const { return impl_->activation_precision; }
 // Test-only access to the actual decoder dot kernels; absent from normal builds.

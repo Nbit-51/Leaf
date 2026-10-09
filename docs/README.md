@@ -32,6 +32,7 @@ should not be combined into a universal speedup claim.
 
 | Investigation | Report |
 |---|---|
+| Current vector SiLU/gating candidate and staged commands (validation pending) | [SiLU experiment](silu-gate-experiment.md) |
 | Windows scheduling/timing variability | [Timing diagnosis](windows-timing-diagnosis.md) |
 | Original prefill profile and GEMM shapes | [Prefill investigation](prefill-investigation.md) |
 | GELU methodology and activation follow-up | [Audit](gelu-benchmark-audit.md), [GEMM/activation](gemm-activation-followup.md) |

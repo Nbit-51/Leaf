@@ -268,3 +268,118 @@ interpreting results. Provide copy-paste commands with a fresh named output
 file, the relevant environment assumptions, and exactly which outputs to share.
 Reuse completed evidence. Take over execution if the user asks or cannot run it.
 Do not start another long benchmark merely to fill a waiting interval.
+
+## SiLU/gating implementation — 2026-10-09
+
+Documentation/logo PR #3 merged as `8260fc7`; the completed diagnostic and
+Codex branches were removed after merging. Current local work continues on main.
+
+The next candidate is implemented under `LEAF_EXPERIMENTAL_SILU_GATE`, off by
+default: vectorize the existing gated-SiLU loop for AVX2/FMA prefill of at least
+eight tokens, across FP32 and quantized weights. Single-token decode and other
+activations retain their existing dispatch. Added primitive tests, dispatch
+metrics, trained quality checks with tokenwise cache parity, quality-bound
+FP32/W8A8 AB/BA timing, packaging/CI wiring and a staged PowerShell runner.
+
+The user subsequently authorized assistant execution this turn. Build passed
+in `build/silu-gate/20261009-063233`: 195 focused Python tests; 4,907,400 native
+comparisons with maximum observed difference zero ULP and AVX2 exercised.
+The initial Quality stage failed on sandbox temporary-directory permissions
+before model evaluation. Its log is preserved as `quality-sandbox-failure.log`;
+the same stage was restarted outside the sandbox without changing sources or
+executables. Quality then passed all eight reduced configurations and trained
+TinyLlama FP32/W8A8 checks across 1,016 scored targets, including chunk16 and
+tokenwise cache parity. Next-token agreement and perplexity ratio match the
+previous release. FP32 AB/BA timing is running with output `timing-32.json`;
+do not start another timing process concurrently. W8A8 timing and diagnostic
+phase attribution remain after this run.
+Use [the runbook](silu-gate-experiment.md) and `scripts/test_silu_gate.ps1`.
+Do not repeat Build or enable the default before reviewing actual results.
+
+### Usage-limit handoff during FP32 timing
+
+User reports only 10% usage remaining and asks to hurry. Do not start W8A8
+timing, profiling or another long experiment this turn. The existing six-pair
+FP32 run saves each completed pass and writes its final gate automatically to
+`build/silu-gate/20261009-063233/timing-32.json`, with transcript `timing32.log`.
+It is still running at this checkpoint (exec session 43919). Read its record
+before starting or repeating anything; `complete: false` is not acceptance.
+
+First two complete pairs, all individual passes stable:
+- AB: baseline 1956.3019/227.6221 ms, candidate 1400.3824/224.8902 ms.
+- BA: candidate 1403.4545/223.4061 ms, baseline 1920.7667/224.7545 ms.
+
+These suggest roughly 27-28% lower prefill, with unchanged decode. Full pooled
+and per-pass gates remain pending; no fresh PyTorch comparison has been run.
+Next turn, inspect the final gate, then do separate phase attribution and W8A8
+timing as warranted. Do not rebuild the matching binaries or repeat the passed
+195 tests, primitive checks or trained quality unless sources change.
+
+## Continued SiLU diagnosis — 2026-10-09
+
+The old FP32 process is gone. Its record contains 11/12 passes, with candidate
+pair 3 failing prefill/decode spread, candidate pair 4 at 3064/388 ms, and
+baseline pair 5 narrowly failing prefill spread. Do not describe it as still
+running or accepted. Preserved verbatim under
+`benchmark/results/silu-gate/timing-32-interrupted.json`.
+
+All four phase profiles completed (two fresh processes per build/precision).
+SiLU/gating drops from 463–539 ms to 20.70 ms in FP32 and from 543–545 ms to
+20.37–20.74 ms in W8A8: about 96% lower activation cost in these profiles.
+Candidate linear costs now occupy about 96%/80% of FP32/W8A8 prefill.
+Quality, architecture checks, four profiles and build manifest are copied to
+`benchmark/results/silu-gate/`; production executables are unchanged.
+
+User confirmed plugged in/no heavy work. An instrumented diagnostic exposed
+a harness bug: its validator rejected diagnostic builds. Fixed only the
+diagnostic tool to validate samples separately, preserve the instrumentation
+marker, and checkpoint each completed pass. Acceptance tools still reject
+instrumented builds. Focused diagnostics/comparison tests: 140 passed.
+
+Four diagnostic passes then completed; the first failed decode spread at
+1.309. One decode was 303.0158 ms wall vs 203.125 ms thread CPU time. Available
+memory was 1.65–1.73 GB, with some system-wide paging; this does not attribute
+faults to Leaf. Sanitized record: `environment-summary.json` in the evidence
+directory. Raw process telemetry stays under ignored build/.
+
+Added per-sample process page-fault deltas to diagnostic builds only (includes
+soft and hard faults; not a hard-fault counter). Counter schema version 2;
+diagnostic contract tests now 16 passed. New diagnostic binary lives under
+`build/silu-gate/20261009-063233/diagnostic-faults/`. Four short monitored passes
+are running, output `diagnostic-environment-faults.json` (exec session 82031).
+Wait for completion; no concurrent benchmark. W8A8 acceptance and fresh
+PyTorch comparison have not been started. Keep the kernel opt-in until the
+remaining performance decision is supported by evidence.
+
+### Completed diagnostic follow-up
+
+The page-fault diagnostic is complete; no test/benchmark remains running.
+All four short passes stable, with zero process faults across all 44 measured
+prefills and 44 decodes. Maximum observed wall-minus-thread-CPU gaps still
+reached about 225/61 ms. Thus faults do not explain those particular gaps;
+the earlier 3-second acceptance pass is not explained by this later run.
+Windows thread CPU-time accounting is coarse; do not label an exact scheduler
+or thermal cause without additional evidence. Public aggregate telemetry is
+`benchmark/results/silu-gate/environment-faults-summary.json`; raw process
+inventories stay local in the ignored build directory.
+
+Hand the long W8A8 acceptance run to the user's terminal per their preference:
+`./scripts/test_silu_gate.ps1 -Stage Timing8 -RunDirectory build/silu-gate/20261009-063233`.
+It uses existing validated binaries and quality, no rebuild. Preserve the
+original FP32 failure. Kernel remains opt-in; no new default or Git push yet.
+
+## W8A8 acceptance completed by user — 2026-10-09
+
+`Timing8` completed all six AB/BA pairs and passed every gate. Verified the
+saved record and all input hashes. Evidence copied without alteration to
+`benchmark/results/silu-gate/timing-8.json`. Pooled prefill: baseline
+1320.3094 ms, candidate 819.3776 ms (37.9405% lower; 1.61136×). Decode:
+88.1954 → 88.3723 ms (+0.2006%, passing non-regression). All 12 individual
+passes and pooled phase stability checks pass. 186 samples/build/phase.
+
+Do not rerun this acceptance or completed correctness checks without a
+relevant source/workload change. This is a qualified incremental W8A8 win,
+not yet a fresh PyTorch comparison or FP32 acceptance. README and experiment
+report now record it. Default remains unchanged. Next: choose the qualified
+release configuration, obtain its fresh framework comparison, then integrate
+and validate the release; preserve the interrupted FP32 failure throughout.

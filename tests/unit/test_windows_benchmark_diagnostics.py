@@ -2,7 +2,8 @@ import struct
 
 import pytest
 
-from tools.diagnose_windows_benchmark import parse_cpu_sets
+from tools.diagnose_windows_benchmark import parse_cpu_sets, validate_diagnostic_request
+from tools.benchmark_decoder_comparison import validate_timing_request
 from tools.summarize_windows_diagnostics import distribution, summarize
 
 
@@ -26,6 +27,41 @@ def test_cpu_sets_reject_malformed_sizes(data):
 def test_missing_telemetry_is_not_reported_as_zero():
     assert distribution([None, None]) == {"count": 0}
     assert distribution([None, 2, 4]) == {"count": 2, "minimum": 2, "median": 3, "maximum": 4}
+
+
+def instrumented_metrics():
+    return dict(threads=1, activation_bits=32, diagnostic_timing_build=True,
+                prefill_samples_ms=[100.0] * 5, decode_samples_ms=[20.0] * 5,
+                thread_cpu_prefill_ms=[93.75] * 5, thread_cpu_decode_ms=[15.625] * 5,
+                thread_cycles_prefill=[1000] * 5, thread_cycles_decode=[200] * 5)
+
+
+def test_instrumented_samples_are_diagnostics_only_and_keep_their_marker():
+    metrics = instrumented_metrics()
+    validate_diagnostic_request(metrics, 5)
+    assert metrics['diagnostic_timing_build'] is True
+    with pytest.raises(ValueError, match='cannot qualify performance'):
+        validate_timing_request(metrics, runs=5, threads=1, activation_bits=32)
+
+
+def test_page_fault_counter_version_requires_matching_samples():
+    metrics = instrumented_metrics()
+    metrics.update(diagnostic_counter_version=2, process_page_faults_prefill=[0] * 5,
+                   process_page_faults_decode=[0] * 5)
+    validate_diagnostic_request(metrics, 5)
+    metrics['process_page_faults_decode'] = [0] * 4
+    with pytest.raises(ValueError, match='process_page_faults_decode'):
+        validate_diagnostic_request(metrics, 5)
+
+
+@pytest.mark.parametrize('key,value', [('threads', 2), ('threads', True), ('activation_bits', 8),
+    ('prefill_samples_ms', [100] * 4), ('thread_cpu_decode_ms', None),
+    ('thread_cycles_prefill', [float('nan')] * 5), ('thread_cpu_prefill_ms', [-1] * 5)])
+def test_diagnostic_requests_still_reject_mismatched_or_invalid_samples(key, value):
+    metrics = instrumented_metrics()
+    metrics[key] = value
+    with pytest.raises(ValueError):
+        validate_diagnostic_request(metrics, 5)
 
 
 def test_published_summary_omits_process_names_and_pids():

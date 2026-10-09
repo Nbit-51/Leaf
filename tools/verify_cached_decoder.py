@@ -22,11 +22,20 @@ from tools.decoder_validation import quality, run_native
 from tools.validate_decoder import GATES, digest, utc_now, write_record
 
 
+def require_silu_execution(metrics):
+    calls = metrics.get("vector_silu_gate_calls")
+    if (metrics.get("experimental_silu_gate_build") is not True or
+            type(calls) is not int or calls <= 0):
+        raise ValueError("SiLU candidate did not execute its vector gating path")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("executable", "model", "workdir", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--cpu", type=int, default=2)
+    parser.add_argument("--require-silu-gate", action="store_true",
+                        help="require actual candidate dispatch and also check tokenwise cache parity")
     args = parser.parse_args()
     if args.output.exists():
         parser.error("Require a fresh output")
@@ -52,6 +61,7 @@ def main():
     reference = np.load(args.workdir / "reference.npy", mmap_mode="r", allow_pickle=False)
     record = dict(format="leaf-cached-trained-quality-v1", measured_at_utc=utc_now(), hashes=hashes,
                   model=args.model.name, threads=1, cpu=args.cpu, cases={}, complete=False,
+                  required_silu_gate=args.require_silu_gate,
                   automatic_selection_authorized=False, thresholds=GATES)
     write_record(args.output, record)
     with keep_awake():
@@ -66,12 +76,25 @@ def main():
                 validate_smoothed_provenance(provenance, baseline, hashes[str(artifact)])
             print(name, "full held-out logits", flush=True)
             actual, execution = run_native(args.executable, artifact, tokens["sequences"], activation_bits=bits)
+            if args.require_silu_gate:
+                require_silu_execution(execution)
             actual = actual.reshape(reference.shape)
             measured = quality(actual, reference, tokens["sequences"])
             close = bool(np.allclose(actual, reference, atol=2e-3, rtol=2e-3))
             prefix = tokens["sequences"][0]
-            cached, _ = run_native(args.executable, artifact, [prefix], mode="chunked", chunk=16, activation_bits=bits)
+            cached, cached_execution = run_native(args.executable, artifact, [prefix], mode="chunked", chunk=16, activation_bits=bits)
+            if args.require_silu_gate:
+                require_silu_execution(cached_execution)
             cache_parity = bool(np.allclose(cached.reshape(len(prefix), -1), actual[:len(prefix)], atol=2e-3, rtol=2e-3))
+            tokenwise_parity = None
+            if args.require_silu_gate:
+                tokenwise, tokenwise_execution = run_native(args.executable, artifact, [prefix],
+                    mode="chunked", chunk=1, activation_bits=bits)
+                if tokenwise_execution.get("vector_silu_gate_calls") != 0:
+                    raise ValueError("SiLU candidate unexpectedly changed single-token dispatch")
+                tokenwise_parity = bool(np.allclose(tokenwise.reshape(len(prefix), -1),
+                    actual[:len(prefix)], atol=2e-3, rtol=2e-3))
+                del tokenwise
             del cached, actual
             _, generated = run_native(args.executable, artifact, [tokens["generation_ids"]], mode="generate",
                                       generate=len(tokens["generated_tokens"]), activation_bits=bits)
@@ -79,8 +102,10 @@ def main():
             gate = GATES[str(bits)]
             passed = bool(measured["next_token_agreement"] >= gate["min_next_token_agreement"] and
                           measured["perplexity_ratio"] <= gate["max_perplexity_ratio"] and cache_parity and
+                          (not args.require_silu_gate or tokenwise_parity) and
                           (bits != 32 or (close and exact_generation)))
             record["cases"][name] = dict(quality=measured, passed=passed, chunked_matches_full=cache_parity,
+                tokenwise_matches_full=tokenwise_parity,
                 fp32_reference_allclose=close, generation_matches_pytorch=exact_generation,
                 generated_tokens=generated["generated_tokens"], reference_generated_tokens=tokens["generated_tokens"],
                 execution=execution, artifact_bytes=artifact.stat().st_size)

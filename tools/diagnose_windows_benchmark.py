@@ -26,7 +26,26 @@ sys.path.insert(0, str(ROOT))
 from leaf.power import keep_awake, set_child_high_qos
 from tools.decoder_validation import benchmark_stability
 from tools.validate_decoder import digest, native_policy, utc_now, write_record
-from tools.benchmark_decoder_comparison import validate_timing_request
+
+
+def validate_diagnostic_request(metrics: dict, runs: int) -> None:
+    """Validate diagnostic samples without qualifying them as performance evidence."""
+    if not isinstance(metrics, dict):
+        raise ValueError("Diagnostic metrics must be an object")
+    for name, expected in (("threads", 1), ("activation_bits", 32)):
+        if type(metrics.get(name)) is not int or metrics[name] != expected:
+            raise ValueError(f"Diagnostic {name} differs from requested workload")
+    names = ["prefill_samples_ms", "decode_samples_ms"]
+    if metrics.get("diagnostic_timing_build"):
+        names += ["thread_cpu_prefill_ms", "thread_cpu_decode_ms",
+                  "thread_cycles_prefill", "thread_cycles_decode"]
+        if metrics.get("diagnostic_counter_version") == 2:
+            names += ["process_page_faults_prefill", "process_page_faults_decode"]
+    for name in names:
+        values = metrics.get(name)
+        if (not isinstance(values, list) or len(values) != runs or
+                any(type(v) not in (int, float) or not math.isfinite(v) or v < 0 for v in values)):
+            raise ValueError(f"Diagnostic {name} must contain {runs} finite nonnegative samples")
 
 
 def parse_cpu_sets(data: bytes) -> list[dict]:
@@ -231,18 +250,21 @@ def main():
                         child.communicate()
                         raise
                 metrics = json.loads((root / "metrics.json").read_text())
-                validate_timing_request(metrics, runs=args.runs, threads=1, activation_bits=32)
                 item = {"index": index, "high_qos": high_qos, "child_pid": child.pid, "qos": qos,
                         "elapsed_seconds": time.perf_counter() - start, "latency": metrics,
-                        "stability": benchmark_stability(metrics), "telemetry": samples}
+                        "stability": benchmark_stability(metrics), "telemetry": samples,
+                        "request_validated": False}
                 record["passes"].append(item)
+                validate_diagnostic_request(metrics, args.runs)
+                item["request_validated"] = True
+                write_record(args.output, dict(record, complete=False))
                 print(json.dumps({"prefill": metrics["prefill_p50_ms"], "decode": metrics["decode_p50_ms"],
                                   "stable": item["stability"]["passed"]}), flush=True)
     finally:
         counters.close()
         me.cpu_affinity(original_affinity)
         # Preserve partial diagnostics on failure, without converting failure to success.
-        record["complete"] = len(record["passes"]) == 4
+        record["complete"] = len(record["passes"]) == 4 and all(p["request_validated"] for p in record["passes"])
         record["inputs_unchanged"] = all(digest(Path(p)) == h for p, h in inputs.items())
         write_record(args.output, record)
     if not record["inputs_unchanged"]:

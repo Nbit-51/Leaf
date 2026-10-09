@@ -166,9 +166,12 @@ people without GPU access. Windows is the current performance-validation focus;
 portable correctness CI runs on Windows, Linux and macOS. CI success does not
 establish equivalent performance across those systems.
 
-The next measured target is **vector SiLU/gating**: it accounts for about 25%
-of TinyLlama FP32 prefill and 39% of W8A8 prefill. Quantized-path vector attention
-is a separate follow-up. Neither is claimed as an implemented improvement yet.
+The [opt-in vector SiLU/gating candidate](docs/silu-gate-experiment.md) passes
+correctness and stable TinyLlama W8A8 acceptance: **37.94% lower prefill time
+than the previous Leaf W8A8 path** (1320.31 → 819.38 ms), with decode passing
+non-regression. FP32 timing qualification, a fresh PyTorch comparison and
+release integration remain pending. Quantized-path vector attention is a
+separate follow-up.
 
 Further work includes broader quality datasets, complete-command latency,
 independent CPU/Linux evaluation, and compatible small Qwen, Mistral, Granite

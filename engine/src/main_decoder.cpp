@@ -164,6 +164,10 @@ int main(int argc, char** argv) {
 #ifdef LEAF_EXPERIMENTAL_ATTENTION_AVX2
                 << ",\"experimental_attention_avx2_build\":true"
 #endif
+#ifdef LEAF_EXPERIMENTAL_SILU_GATE
+                << ",\"experimental_silu_gate_build\":true"
+#endif
+                << ",\"vector_silu_gate_calls\":" << decoder.silu_gate_vector_calls()
                 << ",\"optimized_fp32_active\":" << (decoder.uses_optimized_fp32() ? "true" : "false")
                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")
                 << ",\"activation_bits\":" << decoder.activation_bits()

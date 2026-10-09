@@ -29,11 +29,13 @@ jobs:
       - name: Configure portable build
         run: cmake -S engine -B build/ci -DCMAKE_BUILD_TYPE=Release -DLEAF_ENABLE_AVX2=OFF
       - name: Build native decoder and primitive tests
-        run: cmake --build build/ci --config Release --target leaf_decoder leaf_token_panel_tests leaf_attention_vector_tests
-      - name: Token-panel and attention primitive correctness
-        run: ctest --test-dir build/ci -C Release --output-on-failure -R '^leaf_(token_panel|attention_vector)_tests$'
+        run: cmake --build build/ci --config Release --target leaf_decoder leaf_token_panel_tests leaf_attention_vector_tests leaf_silu_gate_tests
+      - name: Token-panel, attention and SiLU primitive correctness
+        run: ctest --test-dir build/ci -C Release --output-on-failure -R '^leaf_(token_panel|attention_vector|silu_gate)_tests$'
       - name: Python decoder, CLI and dataset tests
-        run: python -m pytest tests/unit/test_decoder_plan.py tests/unit/test_generation_policy.py tests/unit/test_decoder_precision_policy.py tests/unit/test_decoder_export_provenance.py tests/unit/test_decoder_latency_phases.py tests/unit/test_decoder_comparison.py tests/unit/test_core_scaling.py tests/unit/test_prefill_diagnostics.py tests/unit/test_datasets.py tests/unit/test_cli.py tests/unit/test_tokenizer_parity.py tests/unit/test_decoder_quality.py tests/unit/test_affinity.py tests/unit/test_power.py tests/unit/test_packaging.py tests/unit/test_package_runtime.py tests/unit/test_benchmark_cli.py -q
+        run: python -m pytest tests/unit/test_decoder_plan.py tests/unit/test_generation_policy.py tests/unit/test_decoder_precision_policy.py tests/unit/test_decoder_export_provenance.py tests/unit/test_decoder_latency_phases.py tests/unit/test_decoder_comparison.py tests/unit/test_core_scaling.py tests/unit/test_prefill_diagnostics.py tests/unit/test_datasets.py tests/unit/test_cli.py tests/unit/test_tokenizer_parity.py tests/unit/test_decoder_quality.py tests/unit/test_silu_gate_experiment.py tests/unit/test_affinity.py tests/unit/test_power.py tests/unit/test_packaging.py tests/unit/test_package_runtime.py tests/unit/test_benchmark_cli.py -q
+      - name: Diagnostic telemetry contracts
+        run: python -m pytest tests/unit/test_windows_benchmark_diagnostics.py -q
       - name: Full reduced-model architecture validation
         shell: bash
         run: |
