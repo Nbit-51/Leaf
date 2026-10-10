@@ -17,6 +17,35 @@ def test_scaled_rope_is_rejected_instead_of_dropped():
         make_plan({"model_type": "llama", "rope_parameters": {"rope_type": "linear", "factor": 2}})
 
 
+def test_dense_mistral_plan_preserves_gqa_and_rope():
+    source = dict(model_type="mistral", hidden_size=64, intermediate_size=128,
+                  num_attention_heads=4, num_key_value_heads=2, num_hidden_layers=2,
+                  vocab_size=128, sliding_window=None, rope_theta=1000000.0,
+                  rms_norm_eps=1e-5)
+    plan = make_plan(source)
+    validate_plan(plan)
+    assert plan["config"]["kv_heads"] == 2
+    assert plan["config"]["theta"] == 1000000.0
+    assert plan["config"]["epsilon"] == 1e-5
+    assert plan["config"]["gated"] == 1
+    assert plan["config"]["activation"] == 0
+    assert not any(name.endswith(".bias") for name in plan["tensors"])
+
+
+def test_mistral_sliding_window_cannot_be_silently_dropped():
+    with pytest.raises(ValueError, match="Sliding-window"):
+        make_plan(dict(model_type="mistral", hidden_size=64, intermediate_size=128,
+                       num_attention_heads=4, num_hidden_layers=2, vocab_size=128,
+                       sliding_window=8))
+
+
+@pytest.mark.parametrize("kind", ["gemma", "gemma2", "gemma3_text", "ministral3"])
+def test_unimplemented_model_families_cannot_reuse_llama_semantics(kind):
+    with pytest.raises(ValueError, match="No import adapter"):
+        make_plan(dict(model_type=kind, hidden_size=64, intermediate_size=128,
+                       num_attention_heads=4, num_hidden_layers=2, vocab_size=128))
+
+
 def test_tensor_layout_transform_preserves_interleaved_qkv():
     array = np.arange(2 * 3 * 4 * 8).reshape(24, 8)
     actual = transform_array(array, [{"reshape": [2, 3, 4, 8]},

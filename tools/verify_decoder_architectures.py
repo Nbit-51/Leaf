@@ -12,7 +12,7 @@ import tempfile
 import numpy as np
 import torch
 from transformers import (AutoModelForCausalLM, GPT2Config, GPTNeoXConfig,
-                          LlamaConfig, OPTConfig, Qwen2Config)
+                          LlamaConfig, MistralConfig, OPTConfig, Qwen2Config)
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -41,7 +41,9 @@ def configurations():
             OPTConfig(vocab_size=128, hidden_size=64, word_embed_proj_dim=64, ffn_dim=128,
                       num_hidden_layers=2, num_attention_heads=4, max_position_embeddings=128,
                       bos_token_id=1, eos_token_id=2, enable_bias=False),
-            LlamaConfig(**common, num_key_value_heads=2, hidden_act="relu")]
+            LlamaConfig(**common, num_key_value_heads=2, hidden_act="relu"),
+            MistralConfig(**common, num_key_value_heads=2, sliding_window=None,
+                          rope_theta=1000000.0, rms_norm_eps=1e-5)]
 
 
 def paired_native(executable, before_executable, artifact, sequences, checks, label, **options):
@@ -108,7 +110,7 @@ def main():
                 if args.expect_w8a8_silu:
                     eligible = bool(sys.platform == "win32" and metrics["avx2"] and
                         not options.get("scalar", False) and options.get("activation_bits", 32) == 8 and
-                        label.startswith(("8/", "8-smooth/")) and config.model_type in ("llama", "qwen2") and
+                        label.startswith(("8/", "8-smooth/")) and config.model_type in ("llama", "qwen2", "mistral") and
                         getattr(config, "hidden_act", None) == "silu")
                     chunk = options.get("chunk") if options.get("mode") == "chunked" else None
                     used = eligible and any(min(len(ids), chunk or len(ids)) >= 8 for ids in requests)
@@ -213,6 +215,7 @@ def main():
             results.append({"architecture": config.model_type, "random_weights": True,
                             "hidden_act": getattr(config, "hidden_act", None),
                             "hidden_size": getattr(config, "hidden_size", None),
+                            "sliding_window": getattr(config, "sliding_window", None),
                             "attention_bias": getattr(config, "attention_bias", None),
                             "enable_bias": getattr(config, "enable_bias", None),
                             "tie_word_embeddings": config.tie_word_embeddings,
@@ -227,6 +230,7 @@ def main():
               "measured_at_utc": datetime.now(timezone.utc).isoformat(),
               "platform": platform.platform(), "machine": platform.machine(), "cpu": platform.processor(),
               "torch": torch.__version__, "threads": 1, "native_executable_sha256": digest(args.executable),
+              "validation_script_sha256": digest(Path(__file__)),
               "native_policy": native_policy(),
               "w8a8_silu_dispatch_audited": args.expect_w8a8_silu,
               "scope": "Complete reduced-size random-weight models; trained quality is evaluated separately.",

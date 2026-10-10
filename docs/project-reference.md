@@ -295,15 +295,45 @@ Built-in adapter boundaries are:
 | OPT | Pre-norm LayerNorm, learned position offset, ordinary FFN | Post-norm or unequal embedding/hidden projection variants rejected |
 | Custom plan | Supported components above with explicit tensor mappings | A new mapping does not implement a missing operator |
 
-Eight reduced-model cases across five architecture families test complete
+Ten reduced-model cases across six architecture families test complete
 forward passes, scalar/vector execution, two-thread FP32 execution, chunked KV
 cache, generation, and precision candidates. The extra variants exercise an odd
-GPT-2 head width, bias-free/tied GPT-NeoX, and bias-free OPT. Their weights are
-random; trained model quality is checked separately.
+GPT-2 head width, bias-free/tied GPT-NeoX, bias-free OPT, gated ReLU and dense
+Mistral GQA with no sliding window. The October 10 Mistral case passed with
+maximum FP32 logit error 1.79e-7 against PyTorch. These are random-weight
+correctness tests, not trained-model quality or latency qualification; INT4
+agreement is reported without claiming it passes trained-model quality gates.
+[Full architecture record](../benchmark/results/decoder_architectures_mistral_20261010.json).
 
-Encoder-decoder models, mixture-of-experts routing, sliding-window attention,
-scaled RoPE, Q/K normalization, arbitrary dynamic graph shapes, multiple EOS
-terminators, and general sampling policies are not implemented. Existing
+**`google/embeddinggemma-300m`** now runs in a separate native FP32 embedding
+runtime, exposed through `leaf embed`. Bidirectional local/full attention,
+Q/K normalization, Gemma block norms, pooling, trained dense projections and
+L2 normalization pass saved-reference checks: maximum absolute output error
+4.77e-7 across one thread, two threads and scalar execution. The installed wheel
+also passes offline JSONL inference without PyTorch or a compiler. See
+[usage, implementation and retained evidence](embedding.md).
+
+The reference includes five short inputs and a 669-token input crossing the
+local attention window; reduced tests exercise boundary lengths and independent
+head geometry. This establishes numerical correctness, not retrieval-dataset
+quality or comparative speed. Browser-download revision is unknown; files are
+identified by SHA256. Embedding evaluation has no autoregressive decode phase.
+Trained Mistral selection remains pending memory/semantic checks; the reduced
+decoder test is not evidence for Ministral 3.
+
+After model correctness, compare CPU-only llama.cpp/Ollama and supported
+ONNX Runtime/OpenVINO paths with frozen model revisions, precision, tokenization,
+thread affinity and workloads. Separate engine-forward from HTTP/CLI latency
+and disable reused-prefix caches for cold-prefix measurements. Retain quantized
+quality differences. vLLM's official Intel/AMD CPU route currently requires
+[Linux](https://docs.vllm.ai/en/stable/getting_started/installation/cpu/), so it
+belongs in the later same-host Linux comparison, not a Windows-versus-WSL ranking.
+
+In the causal decoder, encoder-decoder models, mixture-of-experts routing,
+sliding-window attention, scaled RoPE, Q/K normalization, multiple EOS
+terminators, and general sampling policies are not implemented. The embedding
+runtime's bidirectional local attention and Q/K norms do not extend decoder
+compatibility. Arbitrary dynamic graph shapes remain unsupported. Existing
 generation uses a single scalar EOS or no-stop sentinel. Source
 `generation_config.json` termination settings must match the supported plan;
 multiple, malformed, or mismatched EOS settings are rejected. Greedy generation
@@ -2043,8 +2073,9 @@ Future coverage and performance work (not prerequisites for the current release)
 
 - [ ] Improve CNN whole-model latency without weakening quality gates.
 - [ ] Evaluate compatible small Qwen, Mistral, Granite and Gemma-family checkpoints, checking required operators and memory before selecting each workload; these are coverage goals, not current support claims.
-- [ ] Validate embedding workloads separately with their required pooling, normalization and retrieval-quality metrics before claiming embedding-model support.
-- [ ] Add scaled RoPE, sliding-window attention, Q/K normalization, and multiple-EOS/sampling policies with reference tests.
+- [x] Implement native FP32 EmbeddingGemma attention, normalization, pooling and output projections; validate trained vectors and the installed CLI.
+- [ ] Qualify embedding retrieval-dataset quality, latency and memory against matched CPU competitors.
+- [ ] Add causal decoder scaled RoPE, sliding-window attention, Q/K normalization, and multiple-EOS/sampling policies with reference tests.
 - [ ] Extend plan/operators for encoder-decoder models, MoE routing, and additional model domains.
 - [ ] Expand graph layouts, dynamic shapes, batching, and dataset preprocessing adapters.
 - [ ] Harden native artifacts against malformed/non-finite payloads and support Windows Unicode artifact paths.

@@ -22,7 +22,7 @@ leaf = "leaf.cli:main"
 include = ["leaf*", "tools*"]
 
 [tool.setuptools.data-files]
-"share/leaf/engine/src" = ["engine/src/decoder.cpp", "engine/src/main_decoder.cpp", "engine/src/kv_cache.cpp"]
+"share/leaf/engine/src" = ["engine/src/decoder.cpp", "engine/src/main_decoder.cpp", "engine/src/kv_cache.cpp", "engine/src/embedding.cpp", "engine/src/main_embed.cpp"]
 "share/leaf/engine/src/kernels" = ["engine/src/kernels/transformer.cpp"]
-"share/leaf/engine/include/leaf/runtime" = ["engine/include/leaf/runtime/decoder.h", "engine/include/leaf/runtime/kv_cache.h", "engine/include/leaf/runtime/decoder_config.h"]
+"share/leaf/engine/include/leaf/runtime" = ["engine/include/leaf/runtime/decoder.h", "engine/include/leaf/runtime/kv_cache.h", "engine/include/leaf/runtime/decoder_config.h", "engine/include/leaf/runtime/embedding.h", "engine/include/leaf/runtime/host_support.h"]
 "share/leaf/engine/include/leaf/kernels" = ["engine/include/leaf/kernels/transformer.h", "engine/include/leaf/kernels/token_panel.h", "engine/include/leaf/kernels/gelu.h", "engine/include/leaf/kernels/attention_vector.h", "engine/include/leaf/kernels/row_reuse.h", "engine/include/leaf/kernels/gemv_pair.h", "engine/include/leaf/kernels/silu_gate.h"]

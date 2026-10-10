@@ -1,0 +1,88 @@
+{
+  "format": "leaf-embedding-architecture-v1",
+  "native_executable_sha256": "1a70305883379d8ef25f24ca0168a76908c3a7ca7881600f68ce1b75c58baaae",
+  "validation_script_sha256": "96926762bffa5bb10d5ea175e3a7aeb6a93337cd7e4062e9293e52a445dcedd1",
+  "torch": "2.12.0+cpu",
+  "lengths": [
+    1,
+    7,
+    8,
+    9,
+    16,
+    17,
+    33,
+    64,
+    1,
+    64
+  ],
+  "checks": [
+    {
+      "threads": 1,
+      "scalar": false,
+      "parity": {
+        "max_abs_error": 6.891787052154541e-08,
+        "min_cosine": 0.9999999999998677,
+        "max_norm_error": 5.960464477539063e-08,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      },
+      "execution": {
+        "sequences": 10,
+        "dimensions": 768,
+        "avx2": true,
+        "threads": 1
+      }
+    },
+    {
+      "threads": 2,
+      "scalar": false,
+      "parity": {
+        "max_abs_error": 6.891787052154541e-08,
+        "min_cosine": 0.9999999999998677,
+        "max_norm_error": 5.960464477539063e-08,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      },
+      "execution": {
+        "sequences": 10,
+        "dimensions": 768,
+        "avx2": true,
+        "threads": 2
+      }
+    },
+    {
+      "threads": 1,
+      "scalar": true,
+      "parity": {
+        "max_abs_error": 6.332993507385254e-08,
+        "min_cosine": 0.9999999999999012,
+        "max_norm_error": 5.960464477539063e-08,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      },
+      "execution": {
+        "sequences": 10,
+        "dimensions": 768,
+        "avx2": false,
+        "threads": 1
+      }
+    }
+  ],
+  "rejected": [
+    "empty",
+    "overlength",
+    "bad_token",
+    "magic",
+    "truncated",
+    "bad_version"
+  ],
+  "passed": true,
+  "trained_quality": false,
+  "timing_qualified": false
+}

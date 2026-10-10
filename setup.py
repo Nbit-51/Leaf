@@ -29,6 +29,15 @@ class NativeBuild(build_py):
         if os.name == "nt":
             command.extend(["-static", "-static-libgcc", "-static-libstdc++", "-lpsapi"])
         subprocess.run(command, check=True)
+        embed_output = output.with_name("leaf_embed.exe" if os.name == "nt" else "leaf_embed")
+        embed_command = [compiler, "-std=c++17", "-O3", "-DNDEBUG", "-ffp-contract=off", "-pthread",
+                         "-I", str(root / "engine/include")]
+        embed_command.extend(str(root / "engine" / name) for name in
+                             ("src/embedding.cpp", "src/main_embed.cpp", "src/kernels/transformer.cpp"))
+        embed_command.extend(["-o", str(embed_output)])
+        if os.name == "nt":
+            embed_command.extend(["-static", "-static-libgcc", "-static-libstdc++"])
+        subprocess.run(embed_command, check=True)
 
 
 class PlatformDistribution(Distribution):

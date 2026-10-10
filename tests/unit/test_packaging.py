@@ -38,6 +38,12 @@ def test_wheel_build_bundles_portable_native_runtime(setup_module, monkeypatch, 
     build.build_lib = str(tmp_path / "package")
     build.run()
     command, options = captured[0]
+    assert len(captured) == 2
+    embed_command, embed_options = captured[1]
+    assert embed_options == {"check": True}
+    assert Path(embed_command[embed_command.index("-o") + 1]).name == ("leaf_embed.exe" if target == "nt" else "leaf_embed")
+    assert {Path(value).name for value in embed_command if value.endswith(".cpp")} == {"embedding.cpp", "main_embed.cpp", "transformer.cpp"}
+    assert "-ffp-contract=off" in embed_command
     output = tmp_path / "package" / "leaf" / "bin" / filename
     assert command[0] == "test-cxx"
     assert command[command.index("-o") + 1] == str(output)
@@ -63,6 +69,8 @@ def test_token_panel_header_is_included_in_packaged_native_sources():
         tomllib = pytest.importorskip("tomli")
     config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert "engine/include/leaf/runtime/decoder_config.h" in config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/runtime"]
+    for name in ("host_support.h", "embedding.h"):
+        assert "engine/include/leaf/runtime/" + name in config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/runtime"]
     headers = config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/kernels"]
     source = "engine/include/leaf/kernels/token_panel.h"
     assert source in headers

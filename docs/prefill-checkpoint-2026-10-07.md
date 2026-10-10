@@ -416,3 +416,106 @@ the shipped SiLU default and frozen baseline, profile the specific path, then
 apply the same quality and incremental acceptance gates. Avoid reopening old
 GPT-2 GEMM packing hypotheses without new evidence. CPU-runtime competitor
 comparisons and Linux performance remain separate outstanding work.
+
+## Family expansion started — 2026-10-10
+
+User chose the original `google/embeddinggemma-300m` and will download the
+complete gated snapshot, then supply its local path. No Gemma/Mistral trained
+weights were found locally. Do not claim their trained-model quality or timings.
+
+Added a real MistralConfig case (dense GQA, no sliding window, theta 1e6,
+epsilon 1e-5) to the architecture suite and W8A8 dispatch audit. All ten reduced
+cases passed against the installed SiLU release binary. Mistral FP32 maximum
+logit error 1.788e-7, agreement 100%; cache, generation, scalar/threaded and
+precision paths passed their architecture checks. Thirty adapter tests passed,
+including explicit rejection of unsupported Gemma/Ministral3 and sliding-window
+semantics. No runtime kernel changed. Public evidence is
+`benchmark/results/decoder_architectures_mistral_20261010.json`.
+
+The sandboxed architecture run stalled before producing results and was stopped;
+the completed run is `build/model-families-20261010-retry.log`. No test is left
+running. Next: inspect the supplied EmbeddingGemma snapshot's exact config and
+Sentence Transformers modules, build its FP32 reference embedding checks, then
+implement missing native semantics before measuring Leaf latency. Gemma 3 needs
+independent attention head geometry, Q/K normalization, layer-specific local/full
+attention and RoPE, additional norms and embedding scaling; the embedding path
+also needs correct bidirectional masks, pooling/projection and normalization.
+Confirm all of these against the actual snapshot before implementation.
+
+Model-family changes are local pending this next phase. Benchmark other engines
+after model correctness; keep CPU/precision/workloads comparable and treat vLLM's
+Linux CPU route as a separate later evaluation. User can run downloads/tests;
+never request or record their access token in the chat.
+
+## EmbeddingGemma snapshot and reference ready — 2026-10-10
+
+User supplied browser downloads in `C:/Users/navaneeth/Downloads`. Copied only
+identified model files into `build/models/embeddinggemma-300m`, restoring the
+module folders without moving or modifying Downloads. The main weights were
+`model (3).safetensors`; dense weights (4)/(5) map to 2_Dense/3_Dense according
+to their shapes. Config (1)/(2)/(3) map to pooling and both dense layers. Twelve
+copied files were hash-verified; mapping is in the ignored download-manifest.json.
+Do not confuse other similarly named safetensors in Downloads with this model.
+
+Optional `config_sentence_transformers.json` and `sentence_bert_config.json`
+were absent. Reference uses explicit documented retrieval prefixes, includes
+prompt tokens in pooling and explicitly sets maximum length 2048. Remote access
+and remote code are disabled. No generated metadata is passed off as downloaded.
+Sentence Transformers 6.1.0 is installed only in `build/embedding-reference-deps`;
+validation uses existing Torch/Transformers dependencies. Model revision is
+unknown, so files are bound by SHA256 rather than an invented upstream commit.
+
+New tool `tools/verify_embeddinggemma_reference.py` passed with all 314 expected
+backbone tensors and correct FP32 shapes. Five 768D embeddings are finite/unit
+norm; padded versus individual max error 1.099e-7; independent NumPy pooling plus
+two dense projections versus Sentence Transformers max error 5.96e-8. A 669-token
+input crosses the original configured 512-token local window and produces a
+finite unit vector. Both toy retrieval queries rank the intended document first;
+these hand-written examples are not a retrieval-quality dataset or qualification.
+Seven numerical helper tests passed. No native Leaf execution or timing was done.
+
+Final record and saved inputs/vectors: `build/embeddinggemma/reference-20261010-final/`.
+Public summary: `benchmark/results/embeddinggemma_reference_20261010.json`.
+To reproduce, set PYTHONPATH to the local dependency directory, set HF_HUB_OFFLINE
+and TRANSFORMERS_OFFLINE to 1, and run the tool with --model pointing to the
+assembled snapshot and --output pointing to a fresh directory. No test is running.
+
+Actual config: hidden 768 = 3 heads * head_dim 256, KV heads 1, 24 layers,
+intermediate 1152, vocabulary 262144, GELU-tanh gated FFN, bidirectional attention,
+five sliding layers then one full layer repeatedly, local/global RoPE 1e4/1e6.
+Next implement native Gemma norm/attention/FFN semantics and embedding output
+pooling + 768→3072→768 identity projections + L2 normalization; validate against
+the frozen reference before latency or quantization. Do not reuse causal decode
+semantics or claim support merely because the external reference runs. In this
+snapshot head geometry already fits Leaf, though broader Gemma geometries do not.
+
+## Native embedding implementation complete — 2026-10-10
+
+Supersedes the reference-only checkpoint above. `leaf embed` now prepares local
+FP32 EmbeddingGemma snapshots and executes JSONL/text inference with a bundled
+C++ encoder. Gemma attention/norm/FFN, mean pooling, both trained projections and
+L2 output are implemented. Shared mapping/reader/worker helpers were extracted
+from the decoder without changing decoder arithmetic.
+
+Final installed binary: `build/embeddinggemma/release/installed/leaf/bin/leaf_embed.exe`.
+SHA256: `1a70305883379d8ef25f24ca0168a76908c3a7ca7881600f68ce1b75c58baaae`.
+Wheel: `build/embeddinggemma/release/wheels/leaf_cpu-0.2.0-py3-none-win_amd64.whl`.
+The frozen reference remains `build/embeddinggemma/reference-20261010-final`;
+do not regenerate it just to resume. Final artifact is under
+`build/embeddinggemma/release/package-check/cache/embeddings/`.
+
+Trained parity passed at one/two threads and forced scalar: max absolute error
+4.7684e-7, minimum cosine 0.999999999994. Seven requests include five short
+inputs, 669 tokens and a repeated short input. Reduced architecture checks cover
+ten sequences, independent head geometry, nonzero norm weights, window boundaries
+and six rejected malformed requests/artifacts. Installed CLI passed first
+preparation and cached reuse offline, without a compiler or heavy framework
+imports. 901 Python tests passed; 42 targeted tests passed after final formatting
+and output-path guards. Ten paired reduced decoder cases are bit-identical to
+the previous shipped binary. Public records live in `benchmark/results/embeddinggemma`.
+
+No embedding speed or retrieval-dataset claim is qualified. Single CLI metrics
+include preparation/load/output overhead and are diagnostic only. Next work is
+the retrieval dataset plus fair CPU timing procedure in `docs/embedding.md`, then
+additional trained models. Do not repeat completed native correctness checks or
+the GPT-2/SiLU experiments unless implementation changes require them.

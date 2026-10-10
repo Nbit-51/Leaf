@@ -17,8 +17,8 @@ memory use without requiring a GPU.
 
 ## Why Leaf?
 
-- **Lightweight execution.** Native prefill, cached decode and greedy generation;
-  PyTorch and Transformers stay outside the deployed generation loop.
+- **Lightweight execution.** Native generation and document embeddings;
+  PyTorch and Transformers stay outside deployed inference.
 - **Measured CPU optimizations.** Tiled linear operations, SIMD kernels and
   reusable buffers, with portable fallbacks and explicit correctness checks.
 - **Smaller artifacts when quality permits.** FP32, INT8/INT4 and calibrated
@@ -34,7 +34,8 @@ speed; these results do not establish a win for every model or CPU.
 ## Quick start
 
 Requires **Python 3.10+**. Installing from source also requires a **C++17 compiler**.
-A platform wheel with a bundled decoder does not require a compiler for inference.
+A platform wheel bundles the native decoder and embedding runtime; inference
+does not require a compiler.
 
 ```sh
 git clone https://github.com/Nbit-51/Leaf.git
@@ -54,6 +55,18 @@ leaf run ./models/decoder --offline --prompt "Explain CPU inference." --max-toke
 
 Chat templates are applied when supplied by the tokenizer configuration; use
 `--raw` for an unformatted prompt. Generation is currently greedy.
+
+For a complete local **EmbeddingGemma 300M FP32** snapshot, including its pooling
+and dense module folders, embed a JSONL collection with one `text` field per row:
+
+```sh
+leaf embed ./models/embeddinggemma-300m --dataset ./data/documents.jsonl --task document --output documents.npy
+leaf embed ./models/embeddinggemma-300m --text "How does CPU inference work?" --task query --output query.npy
+```
+
+Outputs are normalized 768-dimensional vectors in input order. The model is
+loaded once per invocation. See [embedding usage and validation](docs/embedding.md)
+for snapshot layout, limits and measured numerical accuracy.
 
 To evaluate precision candidates, install the validation tools and use separate
 calibration and held-out text:
@@ -77,6 +90,7 @@ native-loader limitation.
 | Area | Current capabilities |
 |---|---|
 | Decoder execution | Full native prefill, single-token decode, chunked evaluation and greedy generation |
+| Embedding execution | FP32 EmbeddingGemma: bidirectional local/full attention, Q/K normalization, mean pooling, dense projections and L2-normalized output |
 | CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
 | Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
 | Precision | FP32, weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
@@ -84,24 +98,32 @@ native-loader limitation.
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
 Complete trained evaluations cover **GPT-2, TinyLlama-1.1B and ResNet-20**.
-Reduced-model tests also exercise multiple decoder architecture families.
+**EmbeddingGemma 300M** additionally passes trained-reference numerical checks;
+retrieval-dataset quality and speed comparisons remain unqualified.
+Reduced-model tests exercise six decoder architecture families.
 
 Import adapters cover supported configurations from Llama/Qwen2, GPT-2,
 GPT-NeoX, OPT and dense Mistral-style blocks. Compatibility depends on operators
-and tensor layouts—not just a model-family name. Scaled RoPE, sliding-window
-attention, Q/K normalization, MoE, encoder-decoder models and general sampling
-are not implemented. Unsupported configurations fail explicitly.
+and tensor layouts—not just a model-family name. The causal decoder does not
+yet implement scaled RoPE, sliding-window attention or Q/K normalization;
+the separate embedding runtime implements the latter two for its supported
+bidirectional configuration. MoE, encoder-decoder models and general sampling
+remain unsupported. Unsupported configurations fail explicitly.
 
 [Detailed compatibility and operator boundaries](docs/project-reference.md#3-coverage-and-explicit-boundaries)
 
 ## How it works
 
-Models enter through either a decoder snapshot or an ONNX graph. Preparation
+Models enter through a decoder/embedding snapshot or an ONNX graph. Preparation
 validates their semantics and produces a versioned native artifact.
 
 ```mermaid
 flowchart TB
     S["Safetensors snapshot"] --> P["Validated decoder plan"]
+    S --> B["Validated bidirectional embedding plan"]
+    B --> N["C++ encoder · local/full attention and Q/K norms"]
+    N --> V["Mean pooling · dense projections · L2 normalization"]
+    V --> F["Document/query vectors"]
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
     P --> D["Native decoder artifact"]
     G --> A["Native graph artifact"]
@@ -116,7 +138,8 @@ The validated FP32 kernel stack and W8A8 vector SiLU gating are enabled by defau
 on supported Windows CPUs. FP32 SiLU remains experimental.
 Other operating systems retain their existing defaults pending performance
 qualification. The CLI uses a lightweight Python/tokenizer launcher; the native
-decoder owns the generation loop. Decoder and graph artifacts are distinct formats.
+decoder owns the generation loop. Decoder, embedding and graph artifacts use
+distinct formats.
 
 Quantization and new kernels are evaluated against the work they actually replace:
 
@@ -179,9 +202,15 @@ ONNX Runtime and OpenVINO remain outstanding.
 
 Further work includes broader quality datasets, complete-command latency,
 independent CPU/Linux evaluation, and compatible small Qwen, Mistral, Granite
-and Gemma-family workloads. Embedding models require their own operator and
-task-quality validation. Structured pruning remains future work; training and
-GPU deployment are outside the current scope.
+and Gemma-family workloads. The [embedding validation plan](docs/embedding.md)
+starts with retrieval quality and matched CPU comparisons before expanding
+toward 10–15 trained models. Structured pruning remains future work; training
+and GPU deployment are outside the current scope.
+
+**Dataset acceleration means faster model inference over a collection:**
+embedding documents for search, classifying images, or scoring examples. Measure
+documents/images per second, peak memory and total job time at matched quality.
+Leaf does not currently claim faster dataset loading, augmentation or training.
 
 ## Development and contributing
 

@@ -390,6 +390,16 @@ def optimize(args):
 def main():
     parser = argparse.ArgumentParser(prog="leaf", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    embedder = commands.add_parser("embed", help="embed local text or a JSONL collection using native FP32 execution")
+    embedder.add_argument("model", help="complete local EmbeddingGemma snapshot")
+    inputs = embedder.add_mutually_exclusive_group(required=True)
+    inputs.add_argument("--text")
+    inputs.add_argument("--dataset", type=Path, help="JSONL documents, encoded in file order")
+    embedder.add_argument("--text-column", default="text")
+    embedder.add_argument("--task", choices=("query", "document", "raw"), default="document")
+    embedder.add_argument("--threads", type=int, default=1)
+    embedder.add_argument("--output", type=Path, required=True, help="new .npy output matrix")
+    embedder.add_argument("--metrics", type=Path)
     runner = commands.add_parser("run", help="prepare cached weights and generate with native CPU execution")
     runner.add_argument("model", help="local snapshot, Hugging Face repository ID, or registered alias")
     runner.add_argument("--prompt")
@@ -425,7 +435,12 @@ def main():
     alias.add_argument("name"); alias.add_argument("model")
     args = parser.parse_args()
     try:
-        if args.command == "run":
+        if args.command == "embed":
+            if not 1 <= args.threads <= 64:
+                parser.error("threads must be 1..64")
+            from leaf.embedding import run as embed
+            embed(args)
+        elif args.command == "run":
             if args.max_tokens < 1 or not 1 <= args.threads <= 64:
                 parser.error("max-tokens must be positive and threads must be 1..64")
             run(args)

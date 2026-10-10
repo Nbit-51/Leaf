@@ -1,0 +1,71 @@
+{
+  "format": "leaf-embeddinggemma-reference-v1",
+  "measured_at_utc": "2026-10-10T03:07:37.793333+00:00",
+  "model": "google/embeddinggemma-300m",
+  "revision": "unknown; browser downloads bound by file hashes",
+  "snapshot_sha256": {
+    "config.json": "8f863f76e2d9c710cc833dc92efa898c9adfd41031c786507cc6b0e49c2e3e68",
+    "modules.json": "5b5649645fb756dad1a8e2efe7872d3bb32bc00b93c95f276dd17f474eedccdc",
+    "model.safetensors": "cbf5a78393b6a033e0b8a63a57549964f7ed5c6fbeb4ba0694214f36123f2fd2",
+    "tokenizer.json": "6852f8d561078cc0cebe70ca03c5bfdd0d60a45f9d2e0e1e4cc05b68e9ec329e",
+    "tokenizer_config.json": "9076840490613047bc9115963ee96b7702018b0d26ba644240bf856efda93118",
+    "special_tokens_map.json": "2f7b0adf4fb469770bb1490e3e35df87b1dc578246c5e7e6fc76ecf33213a397",
+    "1_Pooling/config.json": "35bbd47d7fdf1e378db6130bcc668b09d1aa67a7bbf7c8f89a9c71f4cc8ebcc6",
+    "2_Dense/config.json": "0661e5e0b67b8f8408ab31ab5d073a78972fc1dc24a49992a64796557e4f9e53",
+    "2_Dense/model.safetensors": "c327f2acb00149676ade24a75e11eb6ebbd367f9ee050267ba56829d2979f702",
+    "3_Dense/config.json": "8c4575c49353d63fb907878856ba94384635c3b2711fd5b7439e7f71888c66fc",
+    "3_Dense/model.safetensors": "ffb6cc5162e11e2ce6bc2367e121ee3bbbc4e82e1ee26826bd7573d4948d81b8",
+    "added_tokens.json": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946"
+  },
+  "script_sha256": "52f9aeef2fe81d0147d5a3096446165d4dc3cc09b3ef915ea4598938583d3dd0",
+  "torch": "2.12.0+cpu",
+  "transformers": "5.14.1",
+  "sentence_transformers": "6.1.0",
+  "dtype": "float32",
+  "threads": 1,
+  "attention": "eager",
+  "device": "cpu",
+  "local_files_only": true,
+  "backbone_tensor_count": 314,
+  "backbone_tensor_inventory_verified": true,
+  "scope": "Reference pipeline smoke checks only; no native Leaf execution, latency gate or retrieval-quality qualification.",
+  "native_leaf_validated": false,
+  "quality_qualified": false,
+  "timing_qualified": false,
+  "complete": true,
+  "passed": true,
+  "vectors_shape": [
+    5,
+    768
+  ],
+  "short_token_lengths": [
+    18,
+    18,
+    23,
+    25,
+    17
+  ],
+  "long_token_length": 669,
+  "padded_vs_individual_max_abs": 1.0989606380462646e-07,
+  "independent_pool_projection_max_abs": 5.960464477539063e-08,
+  "toy_retrieval_scores": [
+    [
+      0.6005076169967651,
+      -0.0136833805590868,
+      -0.0160712618380785
+    ],
+    [
+      -0.039260007441043854,
+      0.725787878036499,
+      0.02296621724963188
+    ]
+  ],
+  "toy_retrieval_top_document": [
+    0,
+    1
+  ],
+  "fixture_sha256": {
+    "reference.npz": "7e8fb923ecf9068e43517a13b93fc774f0a11d09bb66c0e3c622387c161d2cb2",
+    "texts.json": "8f87391d16e255bdb687c3519926b87d0c3802b133ba627c5358347f1344029f"
+  }
+}

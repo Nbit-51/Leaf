@@ -8,6 +8,7 @@ architecture, current results and scope. Use this index for details and evidence
 | Topic | Reference |
 |---|---|
 | Installation, local/Hub models, quantization and cache controls | [Usage](project-reference.md#2-install-and-run-with-one-command) |
+| Native document embeddings, JSONL inference and numerical validation | [Embeddings](embedding.md) |
 | Supported decoder configurations and graph operators | [Compatibility](project-reference.md#3-coverage-and-explicit-boundaries) |
 | Architecture and implementation pipeline | [Architecture](project-reference.md#4-architecture) |
 | Building, tests and trained-model reproduction | [Validation guide](project-reference.md#6-reproduce-validation-and-benchmarks) |

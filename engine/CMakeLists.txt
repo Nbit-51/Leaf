@@ -83,6 +83,12 @@ target_link_libraries(leaf_dataset PRIVATE leaf_core)
 
 # Portable executable with runtime-dispatched decoder vector kernels.
 find_package(Threads REQUIRED)
+add_executable(leaf_embed src/embedding.cpp src/main_embed.cpp src/kernels/transformer.cpp)
+target_include_directories(leaf_embed PRIVATE include)
+target_link_libraries(leaf_embed PRIVATE Threads::Threads)
+if(NOT MSVC)
+  target_compile_options(leaf_embed PRIVATE -ffp-contract=off)
+endif()
 add_executable(leaf_decoder src/decoder.cpp src/main_decoder.cpp
   src/kv_cache.cpp src/kernels/transformer.cpp)
 target_include_directories(leaf_decoder PRIVATE include)

@@ -1,0 +1,84 @@
+{
+  "format": "leaf-trained-embedding-parity-v1",
+  "measured_at_utc": "2026-10-10T03:31:21.309690+00:00",
+  "model": "google/embeddinggemma-300m",
+  "hashes": {
+    "build\\embeddinggemma\\release\\installed\\leaf\\bin\\leaf_embed.exe": "1a70305883379d8ef25f24ca0168a76908c3a7ca7881600f68ce1b75c58baaae",
+    "C:\\Users\\navaneeth\\leaf\\build\\embeddinggemma\\release\\package-check\\cache\\embeddings\\91c791686f4eb3096ba800ecd4e48af8a59a4eb2e03a4ebb24f6b5d7808b0ce8\\model.leaf": "ffb8125e612b09063e8da665758ba638efb1dffb94510e2c4e12efb7cce56cd1",
+    "build\\embeddinggemma\\reference-20261010-final\\reference.json": "621482b5053f6efbb50440ffefdab19b4b6cb08b0448c1712134bc957c461a84",
+    "C:\\Users\\navaneeth\\leaf\\tools\\verify_embedding_native.py": "97c57e033dd00d772a480f86a0d9c9bd3dee39e2a1d2a0429f9554c8e23a72ac",
+    "C:\\Users\\navaneeth\\leaf\\tools\\embedding_validation.py": "cc6f8282882d995cb87d826566f923d821fb5ff7e024d9921cf385bd722fef42"
+  },
+  "lengths": [
+    18,
+    18,
+    23,
+    25,
+    17,
+    669,
+    18
+  ],
+  "checks": [
+    {
+      "threads": 1,
+      "scalar": false,
+      "metrics": {
+        "sequences": 7,
+        "dimensions": 768,
+        "avx2": true,
+        "threads": 1
+      },
+      "parity": {
+        "max_abs_error": 4.76837158203125e-07,
+        "min_cosine": 0.9999999999942268,
+        "max_norm_error": 5.960464477539063e-08,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      }
+    },
+    {
+      "threads": 2,
+      "scalar": false,
+      "metrics": {
+        "sequences": 7,
+        "dimensions": 768,
+        "avx2": true,
+        "threads": 2
+      },
+      "parity": {
+        "max_abs_error": 4.76837158203125e-07,
+        "min_cosine": 0.9999999999942268,
+        "max_norm_error": 5.960464477539063e-08,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      }
+    },
+    {
+      "threads": 1,
+      "scalar": true,
+      "metrics": {
+        "sequences": 7,
+        "dimensions": 768,
+        "avx2": false,
+        "threads": 1
+      },
+      "parity": {
+        "max_abs_error": 3.7997961044311523e-07,
+        "min_cosine": 0.999999999994425,
+        "max_norm_error": 0.0,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      }
+    }
+  ],
+  "complete": true,
+  "timing_qualified": false,
+  "retrieval_quality_qualified": false,
+  "passed": true
+}
