@@ -1,0 +1,196 @@
+{
+  "benchmark": "installed-package-offline-runtime-smoke",
+  "measured_at_utc": "2026-10-09T13:06:26.387396+00:00",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "threads": 1,
+  "pinned_cpu": 2,
+  "model": "gpt2",
+  "model_config_sha256": "0daed7749b4f02b8f76240d5444551d7b08712dab4d0adb8239c56ba823bb7b4",
+  "source_weight_sha256": {
+    "model.safetensors": "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707"
+  },
+  "reference_record_sha256": "b6a3f755ea891921d2f03bd8f5027fee06dcd39c61444da766b09da2228828e0",
+  "package_check": {
+    "module": "leaf\\cli.py",
+    "bundled_runtime_selected": true,
+    "native_executable_sha256": "e6b247c6597db56082557a657b295d530ff0a165239bbb3e53f0f7f2f34fe711",
+    "artifact_preexisting": false,
+    "runtime_environment_policy": {
+      "LEAF_DISABLE_VNNI": null,
+      "LEAF_DECODER_PROFILE": null,
+      "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+      "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+    },
+    "profile_native_binary_mismatch": true,
+    "automatic_weight_bits": 32,
+    "automatic_activation_bits": 32,
+    "heavy_model_libraries_loaded": []
+  },
+  "compiler_path_available": false,
+  "runtime_path_scope": "Windows System32 only",
+  "fresh_artifact_cache": true,
+  "operating_system_file_cache_flushed": false,
+  "timing_scope": "One observation per stage, not a speed gate. External timers include Python startup; CLI timers do not.",
+  "runs": [
+    {
+      "external_wall_ms": 2845.0385000001006,
+      "external_first_stdout_byte_ms": 2303.2634999999573,
+      "external_first_visible_text_ms": 2356.7967999997563,
+      "stdout": "\r\n\r\nThe following is a list of the most common mistakes that can be made\r\n",
+      "preparation_message_seen": true,
+      "package_check": {
+        "module": "leaf\\cli.py",
+        "bundled_runtime_selected": true,
+        "native_executable_sha256": "e6b247c6597db56082557a657b295d530ff0a165239bbb3e53f0f7f2f34fe711",
+        "artifact_preexisting": false,
+        "runtime_environment_policy": {
+          "LEAF_DISABLE_VNNI": null,
+          "LEAF_DECODER_PROFILE": null,
+          "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+          "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+        },
+        "export_module": "tools\\export_decoder.py",
+        "heavy_model_libraries_loaded": []
+      },
+      "stage": "first_preparation",
+      "generated_tokens_match_pytorch": true,
+      "cli_metrics": {
+        "avx2": true,
+        "vector_silu_gate_calls": 0,
+        "vector_silu_gate_enabled": false,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 503009280,
+        "load_ms": 11.6716,
+        "prefill_p50_ms": 239.4464,
+        "decode_p50_ms": 29.8358,
+        "prefill_samples_ms": [
+          239.4464
+        ],
+        "decode_samples_ms": [
+          25.8445,
+          27.4524,
+          28.4921,
+          29.8358,
+          29.539,
+          31.6153,
+          30.0995,
+          30.5515,
+          29.4418,
+          32.2848,
+          31.2453,
+          31.0359,
+          30.5494,
+          29.7429,
+          28.1522
+        ],
+        "generated_tokens": [
+          198,
+          198,
+          464,
+          1708,
+          318,
+          257,
+          1351,
+          286,
+          262,
+          749,
+          2219,
+          10135,
+          326,
+          460,
+          307,
+          925
+        ],
+        "weight_bits": 32,
+        "time_to_first_token_ms": 2122.391200000038,
+        "end_to_end_ms": 2629.360599999927
+      }
+    },
+    {
+      "external_wall_ms": 1403.8792000001195,
+      "external_first_stdout_byte_ms": 805.0505000001067,
+      "external_first_visible_text_ms": 883.62589999997,
+      "stdout": "\r\n\r\nThe following is a list of the most common mistakes that can be made\r\n",
+      "preparation_message_seen": false,
+      "package_check": {
+        "module": "leaf\\cli.py",
+        "bundled_runtime_selected": true,
+        "native_executable_sha256": "e6b247c6597db56082557a657b295d530ff0a165239bbb3e53f0f7f2f34fe711",
+        "artifact_preexisting": true,
+        "runtime_environment_policy": {
+          "LEAF_DISABLE_VNNI": null,
+          "LEAF_DECODER_PROFILE": null,
+          "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+          "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+        },
+        "export_module": null,
+        "heavy_model_libraries_loaded": []
+      },
+      "stage": "cached_repeat",
+      "generated_tokens_match_pytorch": true,
+      "cli_metrics": {
+        "avx2": true,
+        "vector_silu_gate_calls": 0,
+        "vector_silu_gate_enabled": false,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 497777600,
+        "peak_rss_bytes": 503013376,
+        "load_ms": 0.4185,
+        "prefill_p50_ms": 240.6005,
+        "decode_p50_ms": 32.9211,
+        "prefill_samples_ms": [
+          240.6005
+        ],
+        "decode_samples_ms": [
+          38.4148,
+          39.6269,
+          34.6333,
+          36.9861,
+          32.7538,
+          33.5944,
+          33.3753,
+          29.8002,
+          29.74,
+          30.4583,
+          36.4028,
+          32.9211,
+          32.7143,
+          30.8677,
+          28.3537
+        ],
+        "generated_tokens": [
+          198,
+          198,
+          464,
+          1708,
+          318,
+          257,
+          1351,
+          286,
+          262,
+          749,
+          2219,
+          10135,
+          326,
+          460,
+          307,
+          925
+        ],
+        "weight_bits": 32,
+        "time_to_first_token_ms": 616.3020000003598,
+        "end_to_end_ms": 1182.2932000000037
+      }
+    }
+  ],
+  "passed": true,
+  "wheel": "leaf_cpu-0.2.0-py3-none-win_amd64.whl",
+  "wheel_sha256": "881c7294616c7a09aa3fb4cec7a18380e9d1ff2201fd0a3a80e31563b672151a"
+}

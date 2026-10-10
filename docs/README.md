@@ -21,6 +21,8 @@ architecture, current results and scope. Use this index for details and evidence
   correctness, installed wheel and conservative-build comparison.
 - [Attention/softmax follow-up](windows-attention-softmax.md): accepted GPT-2
   prefill improvement, fresh PyTorch comparison and retained failed attempts.
+- [W8A8 vector SiLU release](silu-gate-experiment.md): stable TinyLlama improvement,
+  fresh PyTorch comparison, default dispatch and installed-wheel validation.
 - [Current TinyLlama evaluation](windows-tinyllama-current.md): FP32/W8A8 quality,
   all timing results, stability failures and the next measured hot paths.
 - [Raw benchmark records](../benchmark/results): full samples, gates and hashes.
@@ -32,7 +34,7 @@ should not be combined into a universal speedup claim.
 
 | Investigation | Report |
 |---|---|
-| Current vector SiLU/gating candidate and staged commands (validation pending) | [SiLU experiment](silu-gate-experiment.md) |
+| Vector SiLU/gating implementation, retained failures and staged reproduction | [SiLU report](silu-gate-experiment.md) |
 | Windows scheduling/timing variability | [Timing diagnosis](windows-timing-diagnosis.md) |
 | Original prefill profile and GEMM shapes | [Prefill investigation](prefill-investigation.md) |
 | GELU methodology and activation follow-up | [Audit](gelu-benchmark-audit.md), [GEMM/activation](gemm-activation-followup.md) |

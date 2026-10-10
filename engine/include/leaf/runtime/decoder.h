@@ -27,6 +27,7 @@ public:
     std::uint64_t weight_bytes() const;
     bool uses_avx2() const;
     bool uses_optimized_fp32() const;
+    bool uses_vector_silu_gate() const;
     std::size_t silu_gate_vector_calls() const;
     bool uses_vnni() const;
     unsigned activation_bits() const;

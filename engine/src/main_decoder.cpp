@@ -168,6 +168,7 @@ int main(int argc, char** argv) {
                 << ",\"experimental_silu_gate_build\":true"
 #endif
                 << ",\"vector_silu_gate_calls\":" << decoder.silu_gate_vector_calls()
+                << ",\"vector_silu_gate_enabled\":" << (decoder.uses_vector_silu_gate() ? "true" : "false")
                 << ",\"optimized_fp32_active\":" << (decoder.uses_optimized_fp32() ? "true" : "false")
                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")
                 << ",\"activation_bits\":" << decoder.activation_bits()

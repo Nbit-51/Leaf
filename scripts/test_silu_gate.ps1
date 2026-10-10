@@ -50,7 +50,7 @@ try {
     try {
         if ($Stage -eq 'Build') {
             $source = Source-Hashes
-            & ./scripts/build_decoder.ps1 -Compiler $Compiler -BuildDirectory (Join-Path $run 'baseline')
+            & ./scripts/build_decoder.ps1 -Compiler $Compiler -BuildDirectory (Join-Path $run 'baseline') -ConservativeSiluGate
             & ./scripts/build_decoder.ps1 -Compiler $Compiler -BuildDirectory (Join-Path $run 'candidate') -ExperimentalSiluGate
             $test = Join-Path $run 'silu_gate_tests.exe'
             Invoke-Checked $Compiler @('-std=c++17','-O3','-ffp-contract=off','-I','engine/include',

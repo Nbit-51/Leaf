@@ -2,7 +2,7 @@
 #include "leaf/runtime/decoder_config.h"
 #include "leaf/runtime/kv_cache.h"
 #include "leaf/kernels/token_panel.h"
-#ifdef LEAF_EXPERIMENTAL_SILU_GATE
+#if LEAF_OPTIMIZED_SILU_W8A8 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
 #include "leaf/kernels/silu_gate.h"
 #endif
 #ifdef LEAF_DIAGNOSTIC_TIMING
@@ -737,6 +737,7 @@ struct Decoder::Impl {
     bool avx = false;
     bool float_tiles = false, optimized_fp32 = false;
     bool vector_gelu = false, vector_attention = false, paired_gemv = false;
+    bool vector_silu_gate = false;
     std::size_t vector_silu_gate_calls = 0;
     bool vnni = false, used_vnni = false;
     Dot dot = dot_scalar;
@@ -861,6 +862,16 @@ struct Decoder::Impl {
             float_tiles = true;
             vector_gelu = vector_attention = paired_gemv = true;
         }
+#if LEAF_OPTIMIZED_SILU_W8A8
+        // Permit FP32-protected tensors within W8A8, but not INT4 or all-FP32
+        // artifacts. Activation buffers remain FP32 regardless of weight bits.
+        vector_silu_gate = avx && gated && activation == 0 && activation_precision == 8 &&
+            std::any_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 8; }) &&
+            std::none_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 4; });
+#endif
+#ifdef LEAF_EXPERIMENTAL_SILU_GATE
+        vector_silu_gate = avx && gated && activation == 0;
+#endif
 #ifdef LEAF_EXPERIMENTAL_VECTOR_GELU
         vector_gelu = avx;
 #endif
@@ -1149,10 +1160,10 @@ struct Decoder::Impl {
             if (gated) {
                 linear(normalized.data(), tokens, prefix + "mlp.gate_proj", gate, true);
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
-#ifdef LEAF_EXPERIMENTAL_SILU_GATE
+#if LEAF_OPTIMIZED_SILU_W8A8 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
                 // Isolate the prefill activation change; weight precision does
                 // not change the FP32 up/gate buffers. Decode stays unchanged.
-                if (avx && tokens >= 8 && activation == 0) {
+                if (vector_silu_gate && tokens >= 8) {
                     leaf::kernels::silu_gate_inplace(up.data(), gate.data(), gate.size());
                     ++vector_silu_gate_calls;
                 } else
@@ -1195,6 +1206,7 @@ std::size_t Decoder::cache_tokens() const { return impl_->caches[0].length(); }
 std::uint64_t Decoder::weight_bytes() const { return impl_->mapping.size; }
 bool Decoder::uses_avx2() const { return impl_->avx; }
 bool Decoder::uses_optimized_fp32() const { return impl_->optimized_fp32; }
+bool Decoder::uses_vector_silu_gate() const { return impl_->vector_silu_gate; }
 std::size_t Decoder::silu_gate_vector_calls() const { return impl_->vector_silu_gate_calls; }
 bool Decoder::uses_vnni() const { return impl_->used_vnni; }
 unsigned Decoder::activation_bits() const { return impl_->activation_precision; }

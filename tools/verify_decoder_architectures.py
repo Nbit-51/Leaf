@@ -40,7 +40,8 @@ def configurations():
             GPTNeoXConfig(**common, rotary_pct=0.5, attention_bias=False, tie_word_embeddings=True),
             OPTConfig(vocab_size=128, hidden_size=64, word_embed_proj_dim=64, ffn_dim=128,
                       num_hidden_layers=2, num_attention_heads=4, max_position_embeddings=128,
-                      bos_token_id=1, eos_token_id=2, enable_bias=False)]
+                      bos_token_id=1, eos_token_id=2, enable_bias=False),
+            LlamaConfig(**common, num_key_value_heads=2, hidden_act="relu")]
 
 
 def paired_native(executable, before_executable, artifact, sequences, checks, label, **options):
@@ -64,6 +65,8 @@ def main():
     parser.add_argument("--conservative-executable", type=Path,
                         help="release audit: exact quantized/scalar parity and optimized FP32 dispatch")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--expect-w8a8-silu", action="store_true",
+                        help="audit Windows W8A8-only SiLU default and excluded dispatch paths")
     args = parser.parse_args()
     if args.before_executable and args.conservative_executable:
         parser.error("Choose a full paired regression or a conservative release audit")
@@ -102,6 +105,18 @@ def main():
                     before = args.conservative_executable
                 actual, metrics = paired_native(args.executable, before, artifact, requests,
                                                 paired_checks, label, **options)
+                if args.expect_w8a8_silu:
+                    eligible = bool(sys.platform == "win32" and metrics["avx2"] and
+                        not options.get("scalar", False) and options.get("activation_bits", 32) == 8 and
+                        label.startswith(("8/", "8-smooth/")) and config.model_type in ("llama", "qwen2") and
+                        getattr(config, "hidden_act", None) == "silu")
+                    chunk = options.get("chunk") if options.get("mode") == "chunked" else None
+                    used = eligible and any(min(len(ids), chunk or len(ids)) >= 8 for ids in requests)
+                    if (metrics.get("experimental_silu_gate_build") or
+                            metrics.get("vector_silu_gate_enabled") is not eligible or
+                            type(metrics.get("vector_silu_gate_calls")) is not int or
+                            (metrics["vector_silu_gate_calls"] > 0) != used):
+                        raise AssertionError(f"{label}: W8A8-only SiLU release dispatch differs")
                 if args.conservative_executable:
                     expected_dispatch = not quantized and not options.get("scalar", False) and metrics["avx2"]
                     if metrics.get("optimized_fp32_active") is not expected_dispatch:
@@ -161,12 +176,16 @@ def main():
                     vector, _ = native(artifact, sequences, f"{bits}/verify-a8", activation_bits=8)
                     scalar, _ = native(artifact, sequences, f"{bits}/verify-a8-scalar", activation_bits=8, scalar=True)
                     np.testing.assert_allclose(vector, scalar, atol=5e-5, rtol=5e-4)
-                if args.before_executable is not None:
+                if args.before_executable is not None or args.expect_w8a8_silu:
                     # Multiple requests force reset after a populated KV cache;
                     # repeating the first prefix also exercises table reuse.
                     reset_requests = [sequences[0], sequences[1], sequences[0]]
                     native(artifact, reset_requests, f"{bits}/greedy-reset-a32", mode="generate", generate=4)
                     if bits != 32:
+                        if args.expect_w8a8_silu:
+                            threaded, _ = native(artifact, sequences, f"{bits}/verify-a8-threads2",
+                                                 activation_bits=8, threads=2)
+                            np.testing.assert_allclose(threaded, vector, atol=5e-5, rtol=5e-4)
                         native(artifact, sequences, f"{bits}/chunk3-a32", mode="chunked", chunk=3)
                         native(artifact, sequences, f"{bits}/chunk3-a8", mode="chunked", chunk=3, activation_bits=8)
                         native(artifact, reset_requests, f"{bits}/greedy-reset-a8", mode="generate", generate=4,
@@ -187,11 +206,12 @@ def main():
             if measured_smooth["relative_logit_rmse"] > 0.05:
                 raise AssertionError("Smoothed random-weight logits diverge")
             cases["8-smooth"] = measured_smooth
-            if args.before_executable is not None:
+            if args.before_executable is not None or args.expect_w8a8_silu:
                 native(smoothed, sequences, "8-smooth/chunk3-a8", mode="chunked", chunk=3, activation_bits=8)
                 native(smoothed, [sequences[0], sequences[1], sequences[0]], "8-smooth/greedy-reset-a8",
                        mode="generate", generate=4, activation_bits=8)
             results.append({"architecture": config.model_type, "random_weights": True,
+                            "hidden_act": getattr(config, "hidden_act", None),
                             "hidden_size": getattr(config, "hidden_size", None),
                             "attention_bias": getattr(config, "attention_bias", None),
                             "enable_bias": getattr(config, "enable_bias", None),
@@ -208,6 +228,7 @@ def main():
               "platform": platform.platform(), "machine": platform.machine(), "cpu": platform.processor(),
               "torch": torch.__version__, "threads": 1, "native_executable_sha256": digest(args.executable),
               "native_policy": native_policy(),
+              "w8a8_silu_dispatch_audited": args.expect_w8a8_silu,
               "scope": "Complete reduced-size random-weight models; trained quality is evaluated separately.",
               "results": results}
     if args.before_executable is not None:

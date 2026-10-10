@@ -383,3 +383,36 @@ not yet a fresh PyTorch comparison or FP32 acceptance. README and experiment
 report now record it. Default remains unchanged. Next: choose the qualified
 release configuration, obtain its fresh framework comparison, then integrate
 and validate the release; preserve the interrupted FP32 failure throughout.
+
+## SiLU release complete locally — 2026-10-10
+
+The interrupted chat did not interrupt the release pipeline: all stages finished
+on October 9. Saved results and 21 input hashes were checked on resumption.
+Do not rerun completed acceptance or correctness checks just to resume work.
+
+- Fresh matched candidate comparison, one thread/CPU 2, 63-token prefill and one
+  cached decode: Leaf W8A8 861.59695/91.46975 ms; PyTorch SDPA FP32
+  1767.87970/211.42825 ms; eager FP32 1804.02280/212.68855 ms. All stability
+  checks pass. W8A8 versus SDPA is 2.052×/2.311×, with the existing 95.08%
+  agreement, +1.24% perplexity and non-identical-generation tradeoff.
+- Windows default enables vector SiLU for eligible W8A8 prefills only. FP32
+  SiLU stays experimental; its failed/incomplete incremental record is retained.
+- 870 Python tests, nine reduced architecture cases, ten trained TinyLlama exact
+  native parity checks and installed-package offline checks passed. Installed
+  W8A8 matches the accepted candidate; FP32 matches the old baseline.
+- All 14 packaged native source files match the workspace. The installed wheel
+  was not separately timed or published to PyPI. Exact parity is correctness
+  evidence, not a new latency measurement.
+
+Local run: `build/silu-gate/release-20261009`. Public records:
+`benchmark/results/silu-gate/{pytorch-comparison,release-validation,release-parity,release-architectures,release-package}.json`.
+Experimental source/evidence checkpoint: `5e5246f`. Release implementation,
+README and Mermaid updates are ready for Git delivery on main; verify Git/CI
+state rather than assuming publication from this checkpoint.
+
+Next performance experiment: separately investigate quantized-path attention
+(about 16% of measured W8A8 prefill); linear work remains about 80%. Preserve
+the shipped SiLU default and frozen baseline, profile the specific path, then
+apply the same quality and incremental acceptance gates. Avoid reopening old
+GPT-2 GEMM packing hypotheses without new evidence. CPU-runtime competitor
+comparisons and Linux performance remain separate outstanding work.

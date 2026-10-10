@@ -27,9 +27,9 @@ memory use without requiring a GPU.
 - **Local, reusable preparation.** Import supported snapshots once, cache native
   artifacts, and run offline with your own prompts and datasets.
 
-Leaf is an early-stage inference engine. It has a qualified GPT-2 FP32 prefill
-win over PyTorch on the tested Windows workload, but it does not outperform
-PyTorch for every model. Current measurements and limitations are below.
+Leaf is an early-stage inference engine with measured GPT-2 FP32 and TinyLlama
+W8A8 wins on the tested Windows workloads. W8A8 trades some output quality for
+speed; these results do not establish a win for every model or CPU.
 
 ## Quick start
 
@@ -77,7 +77,7 @@ native-loader limitation.
 | Area | Current capabilities |
 |---|---|
 | Decoder execution | Full native prefill, single-token decode, chunked evaluation and greedy generation |
-| CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
+| CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
 | Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
 | Precision | FP32, weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
 | Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
@@ -107,13 +107,14 @@ flowchart TB
     G --> A["Native graph artifact"]
     D --> R["C++ decoder · reusable buffers and session KV cache"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
-    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax · quantized kernels"]
+    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax<br/>W8A8 SiLU gating · quantized kernels"]
     K --> T["Tokens and logits"]
     E --> U["Graph outputs"]
 ```
 
-The validated FP32 kernel stack is enabled by default on supported Windows
-CPUs. Other operating systems retain their existing defaults pending performance
+The validated FP32 kernel stack and W8A8 vector SiLU gating are enabled by default
+on supported Windows CPUs. FP32 SiLU remains experimental.
+Other operating systems retain their existing defaults pending performance
 qualification. The CLI uses a lightweight Python/tokenizer launcher; the native
 decoder owns the generation loop. Decoder and graph artifacts are distinct formats.
 
@@ -131,19 +132,21 @@ flowchart LR
 
 ## Measured performance
 
-Latest installed-runtime measurements on one Windows host, one pinned P-core,
+Measurements on one Windows host, one pinned P-core,
 batch one, **63-token prefill + one cached decode token**, with last-token logits.
 These are warmed native-forward timings, not model loading or complete-command
-latency. The runtime and source hashes are recorded in the linked reports.
+latency. GPT-2 was measured through the installed runtime; TinyLlama uses the
+accepted SiLU candidate. The new installed wheel passes exact output parity
+against that W8A8 candidate but has not been separately timed. Runtime and source
+hashes are recorded in the linked reports.
 
 | Model / runtime | Prefill | Decode | Result |
 |---|---:|---:|---|
 | GPT-2 · Leaf FP32 | **144.31 ms** | 28.11 ms | Stable; **4.85% lower prefill time** than SDPA |
 | GPT-2 · PyTorch SDPA FP32 | 151.66 ms | 28.57 ms | Stable reference |
-| TinyLlama 1.1B · Leaf FP32 | 1,944.31 ms | 225.55 ms | Stable; slower than PyTorch eager |
-| TinyLlama 1.1B · Leaf W8A8 | 1,381.91 ms | 92.71 ms | Faster medians, **stability failed** |
-| TinyLlama 1.1B · PyTorch eager FP32 | 1,800.69 ms | 213.21 ms | Stable reference |
-| TinyLlama 1.1B · PyTorch SDPA FP32 | 1,881.60 ms | 243.58 ms | Pooled decode stability failed |
+| TinyLlama 1.1B · Leaf SiLU W8A8 candidate | **861.60 ms** | **91.47 ms** | Stable; **2.05× prefill / 2.31× decode speedup** over SDPA FP32 |
+| TinyLlama 1.1B · PyTorch eager FP32 | 1,804.02 ms | 212.69 ms | Stable reference |
+| TinyLlama 1.1B · PyTorch SDPA FP32 | 1,767.88 ms | 211.43 ms | Stable reference |
 
 GPT-2 decode passes non-regression; its 1.62% reduction falls below the separate
 2% improvement threshold. GPT-2 uses 101 measured samples per pass; TinyLlama
@@ -156,7 +159,8 @@ higher held-out perplexity**, and non-identical generated text. Its artifact is
 quantization, not a measured PyTorch process-memory comparison or model pruning.
 
 - [GPT-2 release, quality and performance evidence](docs/windows-attention-softmax.md)
-- [TinyLlama comparison, quality limits and current hot paths](docs/windows-tinyllama-current.md)
+- [TinyLlama SiLU release, fresh comparison and quality limits](docs/silu-gate-experiment.md)
+- [Earlier TinyLlama evaluation and retained failures](docs/windows-tinyllama-current.md)
 - [Complete benchmark history and retained failures](docs/project-reference.md#7-current-trained-model-and-dataset-results)
 
 ## Scope and next steps
@@ -166,12 +170,12 @@ people without GPU access. Windows is the current performance-validation focus;
 portable correctness CI runs on Windows, Linux and macOS. CI success does not
 establish equivalent performance across those systems.
 
-The [opt-in vector SiLU/gating candidate](docs/silu-gate-experiment.md) passes
-correctness and stable TinyLlama W8A8 acceptance: **37.94% lower prefill time
-than the previous Leaf W8A8 path** (1320.31 → 819.38 ms), with decode passing
-non-regression. FP32 timing qualification, a fresh PyTorch comparison and
-release integration remain pending. Quantized-path vector attention is a
-separate follow-up.
+The [Windows W8A8 SiLU release](docs/silu-gate-experiment.md) passes correctness,
+stable incremental acceptance and installed-package checks: **37.94% lower
+prefill time than the previous Leaf W8A8 path** (1320.31 → 819.38 ms), with decode
+passing non-regression. FP32 SiLU qualification remains open. Quantized-path
+vector attention is the next separate experiment; comparisons with llama.cpp,
+ONNX Runtime and OpenVINO remain outstanding.
 
 Further work includes broader quality datasets, complete-command latency,
 independent CPU/Linux evaluation, and compatible small Qwen, Mistral, Granite
@@ -196,8 +200,9 @@ ctest --test-dir build/cmake -C Release --output-on-failure
 
 Windows also provides `./scripts/verify_all.ps1` for the repository gate.
 Trained-model runs require local model/data assets and are separate from the
-automated suite. The accepted kernel release passed 831 Python tests and native
-checks; the latest benchmark/profiling follow-up passed 251 focused tests.
+automated suite. The SiLU release passed **870 Python tests**, nine reduced
+architecture cases, ten trained-model parity checks, and installed-wheel offline
+checks. Detailed evidence is linked above.
 
 [Build and validation guide](docs/project-reference.md#6-reproduce-validation-and-benchmarks) ·
 [Architecture and artifact reference](docs/project-reference.md#4-architecture) ·

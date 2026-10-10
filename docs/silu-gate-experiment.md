@@ -1,9 +1,47 @@
-# Vector SiLU/gating candidate
+# Windows W8A8 vector SiLU/gating release
 
-Status: built; primitive, focused Python and model-quality tests pass.
-**W8A8 passed incremental whole-model acceptance; FP32 remains unqualified.**
-The default decoder does not yet enable this candidate. A fresh PyTorch
-comparison and release integration remain separate steps.
+Status: integrated into the Windows W8A8 default after stable incremental
+acceptance, a fresh PyTorch comparison and installed-wheel correctness checks.
+**FP32 SiLU remains experimental; its incremental timing remains unqualified.**
+
+## Release integration verified — 2026-10-10
+
+The default path requires Windows, AVX2/FMA, a SiLU-gated FFN, eight-bit
+activations, at least one INT8 tensor, no INT4 tensors, and at least eight tokens
+in the forward call. FP32-protected tensors are permitted within W8A8. Forced
+scalar execution, single-token decode, other activations and other operating
+systems retain their previous paths. This does not authorize automatic W8A8
+precision selection; that still requires a matching validation profile.
+
+`LEAF_OPTIMIZED_SILU_W8A8` controls this policy. Use `-ConservativeSiluGate` in
+the PowerShell builder or `LEAF_CONSERVATIVE_SILU_GATE=ON` in CMake to disable it.
+`LEAF_EXPERIMENTAL_SILU_GATE` retains the broader opt-in precision coverage.
+
+Release checks completed on October 9 and their saved records were verified
+on October 10, without repeating completed benchmarks:
+
+- **870 Python tests passed**, with four existing ONNX deprecation warnings.
+- **Nine reduced architecture cases passed**, including gated ReLU, scalar and
+  INT4 exclusions, threading, chunked cache, reset and generation checks.
+- **Ten trained TinyLlama parity checks passed**: full held-out logits, chunk16,
+  tokenwise cache, generation and forced scalar at each precision. Installed W8A8
+  outputs exactly match the accepted candidate; installed FP32 outputs exactly
+  match the previous baseline. This is not exact W8A8 parity with FP32 PyTorch.
+- The locally built wheel selected its bundled decoder with no compiler on
+  PATH; offline GPT-2 first preparation and cached reuse matched reference tokens.
+  No heavy model frameworks were imported, and a stale precision profile fell
+  back to FP32.
+
+Installed decoder SHA256:
+`e6b247c6597db56082557a657b295d530ff0a165239bbb3e53f0f7f2f34fe711`.
+This is a local wheel validation, not a PyPI publication. The installed wheel
+was not separately latency-benchmarked: the timings below belong to experimental
+decoder `cdf897c563a53295ae208a1c7fa69886d5e686b32c10e9914dbf6001dee0f15d`.
+
+Evidence: [release summary](../benchmark/results/silu-gate/release-validation.json),
+[trained parity](../benchmark/results/silu-gate/release-parity.json),
+[architecture audit](../benchmark/results/silu-gate/release-architectures.json),
+and [installed package](../benchmark/results/silu-gate/release-package.json).
 
 ## Accepted W8A8 incremental result — 2026-10-09
 
@@ -28,6 +66,39 @@ It is not a fresh PyTorch comparison, a decode speedup, or FP32 acceptance.
 The existing W8A8 quality tradeoff remains: 95.0787% next-token agreement,
 perplexity ratio 1.0123987 and non-identical generation versus FP32 PyTorch.
 Full samples and provenance: [W8A8 acceptance record](../benchmark/results/silu-gate/timing-8.json).
+
+## Fresh PyTorch comparison — 2026-10-09
+
+The accepted experimental executable was measured against fresh PyTorch eager
+and SDPA FP32 processes, in forward and reverse order. Same cached model
+snapshot and tokens, CPU 2, one thread, 31 samples and ten warmups per pass;
+63-token prefill plus one cached decode token, last-token logits only.
+Each median below pools 62 samples. All four runtimes pass individual, pooled
+and between-pass stability checks.
+
+| Runtime | Prefill | Decode | Stability |
+|---|---:|---:|---|
+| Leaf SiLU W8A8 candidate | **861.59695 ms** | **91.46975 ms** | Pass |
+| Leaf experimental FP32 candidate | 1428.40295 ms | 226.55550 ms | Pass |
+| PyTorch eager FP32 | 1804.02280 ms | 212.68855 ms | Pass |
+| PyTorch SDPA FP32 | 1767.87970 ms | 211.42825 ms | Pass |
+
+Against the faster PyTorch baseline (SDPA in both phases), W8A8 has **51.26%
+lower prefill time (2.052× speedup)** and **56.74% lower decode time (2.311×)**.
+This compares calibrated W8A8 with FP32, with the quality tradeoff stated above;
+it is not an equal-precision claim or a comparison with llama.cpp/OpenVINO.
+It does not measure model loading or complete-command latency.
+
+The experimental FP32 prefill is faster, but its decode is slower than both
+PyTorch baselines, and the earlier native incremental run remains failed and
+incomplete. FP32 SiLU is therefore not part of the default release integration.
+The timing record identifies the experimental binary; timings must not be
+silently relabeled as measurements of the separately built installed wheel.
+
+[Full framework comparison](../benchmark/results/silu-gate/pytorch-comparison.json).
+Its generic harness records `quality_validated: false`; trained quality is
+established separately by the linked quality record for the same binary and
+artifacts. Release parity binds the integrated kernel to that tested path.
 
 ## Build and correctness
 
@@ -108,10 +179,9 @@ counter includes both soft and hard faults. Its schema/guard tests passed
 Sanitized telemetry: [CPU-time diagnostic](../benchmark/results/silu-gate/environment-summary.json)
 and [page-fault diagnostic](../benchmark/results/silu-gate/environment-faults-summary.json).
 Raw process inventories remain local under `build/silu-gate/20261009-063233/`.
-No benchmark process remains running. W8A8 uninstrumented acceptance is now
-complete; next are a deliberate FP32 timing decision, fresh PyTorch comparison
-and release integration of the qualified configuration. Do not
-reinterpret the interrupted run as a passing result or repeat correctness.
+W8A8 acceptance, the fresh comparison and release integration are complete.
+FP32 SiLU remains experimental. Do not reinterpret the interrupted FP32 run as
+a passing result or repeat completed correctness checks merely to resume work.
 
 Evidence: [quality](../benchmark/results/silu-gate/quality.json),
 [reduced architectures](../benchmark/results/silu-gate/architectures.json),
@@ -133,7 +203,7 @@ float addition, division and multiplication. Groups with extreme or nonfinite
 inputs use the original scalar expression. There is no approximate reciprocal
 or global fast-math change.
 
-`LEAF_EXPERIMENTAL_SILU_GATE` enables the candidate at build time. Runtime
+`LEAF_EXPERIMENTAL_SILU_GATE` enables the broader candidate at build time. Runtime
 dispatch requires the existing AVX2/FMA capability check, SiLU activation and
 at least eight tokens. Single-token decode, non-gated FFNs, other activations
 and forced-scalar execution retain their existing paths. The implementation
@@ -143,7 +213,7 @@ The native metrics identify the candidate build and count calls to the vector
 gating function. Quality and timing checks require these markers, not just
 the compiler flag. The experiment cannot qualify automatic precision selection.
 
-## Run stages separately
+## Reproduce the original experiment in separate stages
 
 Use PowerShell from the repository with the existing development environment,
 GNU C++ compiler and cached TinyLlama artifacts. Each stage preserves a log and
@@ -158,7 +228,7 @@ $run = "build/silu-gate/$(Get-Date -Format yyyyMMdd-HHmmss)"
 .\scripts\test_silu_gate.ps1 -Stage Build -RunDirectory $run
 ```
 
-This builds default and candidate decoders from the same source, runs the native
+This builds conservative-SiLU and candidate decoders from the same source, runs the native
 SiLU test, and runs focused Python checks for quality binding, experimental
 selection policy and packaging. Native tests cover dense/random inputs, extreme
 values, signed zero, NaNs/infinities, tails, unaligned buffers, in-place aliasing,
@@ -206,7 +276,7 @@ Run one command, share the result, then run the other precision separately:
 Each uses six alternating AB/BA pairs, 31 samples and ten warmups per process,
 one thread pinned to logical CPU 2, Above Normal priority, and the same frozen
 63-token prefill plus one-token decode workload. These runs can take many minutes.
-Default and candidate processes run serially. No outliers are discarded.
+Conservative and candidate processes run serially. No outliers are discarded.
 
 The existing incremental gate requires pooled candidate/baseline prefill
 ratio <= 0.98, decode ratio <= 1.02, and individual plus pooled p90/p10 spread
@@ -221,9 +291,8 @@ Use a separate diagnostic profile to confirm activation cost changed; do not
 mix profiling with acceptance timing. If the candidate qualifies, run a fresh
 matched PyTorch comparison before claiming a framework speedup. FP32 and W8A8
 need separate conclusions, and W8A8 retains its documented quality tradeoff.
-Then decide whether to enable the validated configuration, run release checks,
-and update the README's results and Mermaid kernel path. The README diagram
-continues to show shipped defaults while this candidate is opt-in.
+For Windows W8A8, these steps and release checks are now complete; the README
+and Mermaid diagram show the integrated default. FP32 remains opt-in.
 
 Do not restart GPT-2 GEMM/packing experiments or widen this change to quantized
 attention without evidence. That follow-up remains a separate experiment.
