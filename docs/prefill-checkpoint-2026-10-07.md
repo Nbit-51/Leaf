@@ -660,3 +660,38 @@ remaining attention/projection work and improve shared operator contracts; keep
 FP32 task quality central, optional quantization explicit, and models ahead of
 secondary dataset features. README/diagram now describe enabled GELU/RoPE reuse;
 detailed evidence remains in docs/results. Leave the user's root PNG untouched.
+
+## Completed input/core CPU diagnostic — 2026-10-11
+
+User authorized quiet diagnostics and comparison on another physical core.
+Implemented opt-in LEAF_EMBED_DIAGNOSTICS in the existing benchmark adapter,
+reusing tests/native/decoder_diagnostic.h counters. Production runtime unchanged.
+Build script -Diagnostics writes distinct binaries. Runner:
+tools/diagnose_embedding_inputs.py; 13 harness tests passed, CI includes six
+new counter-contract tests. Local completed output:
+build/competitors/input-diagnostic-20261011/diagnostic.json. Public copy:
+benchmark/results/embeddinggemma/input-cpu-diagnostic-20261011.json.
+
+Eight passes, CPUs2/4 verified distinct physical P-cores, one thread, six frozen
+inputs, two warmups/seven samples, forward/reverse input/engine/core order.
+All output parity checks pass (Leaf3.43e-7, llama6.79e-5 max absolute error).
+The CPU2 reverse Leaf Document1 sample reproduces a stall: wall224.445ms,
+threadCPU78.125ms, cycles192610254, pagefaults0. Same pass cycle median189319456.
+This is evidence of delay not proportional to calling-thread execution, not
+proof of a specific scheduler/thermal cause. Thread CPU accounting is coarse.
+
+Long pooled wall/CPU medians: CPU2 Leaf2712.195/2562.5ms versus
+llama2505.02/2375ms; CPU4 Leaf2820.12/2554.69 versus llama2660.295/2398.435.
+Leaf's long calls have zero faults; all271 Leaf faults occur in one short call.
+llama has54 total faults. Mixed hard/soft process counter, no hard-fault claim.
+Three Leaf input/pass spreads fail1.25. All samples retained; diagnostics do not
+qualify speed wins. No acceptance rerun or new trained model is needed merely to
+recover this work. No local test remains running.
+
+Next concrete shared-kernel candidate: avoid full16-lane GEMM work for <=8-token
+tails; benchmark16/17,24/25,32/33 shapes, test bias/strides/row tails and preserve
+increasing-K arithmetic. Do not claim a gain before measuring. CPU2 stays the
+existing baseline; CPU4 is diagnostic, not evidence of multicore scaling.
+Scheduler tracing can identify the residual off-thread wait if needed, without
+blocking a separate measured compute optimization. User wants general-purpose
+operator reuse, FP32 quality, and no new per-model native inference loops.

@@ -37,7 +37,7 @@ jobs:
       - name: Diagnostic telemetry contracts
         run: python -m pytest tests/unit/test_windows_benchmark_diagnostics.py tests/unit/test_silu_release.py -q
       - name: Embedding import and numerical contracts
-        run: python -m pytest tests/unit/test_embedding_export.py tests/unit/test_embedding_reference.py tests/unit/test_embedding_cli.py tests/unit/test_embedding_comparison.py -q
+        run: python -m pytest tests/unit/test_embedding_export.py tests/unit/test_embedding_reference.py tests/unit/test_embedding_cli.py tests/unit/test_embedding_comparison.py tests/unit/test_embedding_diagnostics.py -q
       - name: Reduced bidirectional embedding validation
         shell: bash
         run: |

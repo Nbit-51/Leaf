@@ -196,6 +196,63 @@ every architecture will work or run faster than every competing engine.
 
 ## Reproduce the CPU-engine comparison
 
+### Input and core diagnostics (2026-10-11)
+
+The [completed diagnostic record](../benchmark/results/embeddinggemma/input-cpu-diagnostic-20261011.json)
+contains eight instrumented passes: six frozen inputs, two warmups and seven
+measurements per input, one thread, physical P-cores at logical CPUs 2 and 4.
+Input, engine and core order were reversed for the second half. All passes
+preserve reference parity (Leaf max error 3.43e-7; llama.cpp 6.79e-5).
+No release kernel changed in this diagnostic.
+
+Pooled medians for the 669-token input (14 samples per engine/core):
+
+| Logical CPU | Leaf wall / thread CPU | llama.cpp wall / thread CPU |
+|---|---:|---:|
+| 2 | 2712.20 / 2562.50 ms | 2505.02 / 2375.00 ms |
+| 4 | 2820.12 / 2554.69 ms | 2660.30 / 2398.44 ms |
+
+These instrumented observations are not acceptance benchmarks. They show a
+remaining calling-thread compute gap as well as time not accounted for by that
+thread's CPU counter. CPU4 added wall time to both engines without a comparable
+increase in thread CPU time; this does not establish a universal best core.
+
+The clearest short-input stall was Leaf Document1 in the reverse CPU2 pass:
+**224.445ms wall, 78.125ms thread CPU, 192.61 million cycles, zero page faults**.
+Its pass medians were 94.56ms wall, 78.125ms CPU and 189.32 million cycles.
+This reproduces delay without a proportional increase in arithmetic execution
+or measured page faults. Scheduling/waiting is a plausible explanation; these
+counters cannot identify preemption, a waiting cause, clock changes or thermals.
+GetThreadTimes is coarse (observed 15.625ms increments), so short-sample wall/CPU
+differences are approximate and must not be treated as exact descheduling time.
+Cycles are not converted into elapsed time or clock frequency.
+
+Leaf had zero faults in all measured long-input calls; its 271 recorded faults
+were confined to one short-input call. llama.cpp recorded 54 faults in total.
+These process counters combine soft and hard faults. They do not support blaming
+all variation on paging. The two 18-token queries had similar median cycles
+within each pass (within about 1.3% for Leaf); their wall-time differences do not
+establish a content-dependent kernel problem. Three Leaf input/pass spreads
+still exceeded 1.25. All raw samples remain available.
+
+Next implementation experiment: measure a smaller GEMM tail tile. The shared
+FP32 token-panel kernel currently computes 16 lanes even for a partially filled
+last panel. Compare lengths 16/17, 24/25 and 32/33, preserve increasing-K FP32
+accumulation and verify parity before whole-model acceptance. This is a
+shape-based candidate for both decoder and encoder, not a measured improvement
+yet. Reuse CPU2 as the established baseline, retain CPU4 as a diagnostic, and
+reserve scheduler tracing for attributing remaining stalls rather than repeatedly
+rerunning unchanged acceptance benchmarks.
+
+Reproduce with `scripts/build_embedding_comparison.ps1 -Diagnostics` and
+`tools/diagnose_embedding_inputs.py`; pass the same artifact/reference paths as
+below and a fresh output directory. Diagnostic executables have separate names
+and never overwrite the saved acceptance binaries. Thirteen diagnostic and
+comparison harness tests passed. No system power plan or process priority was
+changed; a scoped keep-awake request was restored when the run completed.
+
+### Uninstrumented comparison
+
 The first comparator is llama.cpp b11540, source commit
 `1e6f04a75e91da4bb66b5248f3fd4bdeff169d41`, using the official Windows x64
 CPU release. Both adapters compile from `benchmark/embedding_runtime_benchmark.cpp`.

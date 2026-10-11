@@ -8,6 +8,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#ifdef LEAF_EMBED_DIAGNOSTICS
+#include "../tests/native/decoder_diagnostic.h"
+#endif
 #ifdef LEAF_COMPARE_LLAMA
 #include "llama.h"
 #include "ggml-backend.h"
@@ -82,14 +85,24 @@ int main(int argc, char** argv) {
         std::ofstream output(argv[3], std::ios::binary);
         if (!output) throw std::runtime_error("Cannot open output");
         std::cout << "{\"samples_ms\":[";
+#ifdef LEAF_EMBED_DIAGNOSTICS
+        std::vector<leaf::diagnostics::Samples> diagnostics(sequences.size());
+#endif
         for (std::size_t index = 0; index < sequences.size(); ++index) {
             if (index) std::cout << ',';
             std::cout << '[';
             std::vector<float> result;
             for (int i = -warmups; i < runs; ++i) {
+#ifdef LEAF_EMBED_DIAGNOSTICS
+                const auto before = leaf::diagnostics::stamp();
+#endif
                 const auto begin = std::chrono::steady_clock::now();
                 result = encode(sequences[index]);
                 const auto end = std::chrono::steady_clock::now();
+#ifdef LEAF_EMBED_DIAGNOSTICS
+                const auto after = leaf::diagnostics::stamp();
+                if (i >= 0) diagnostics[index].add(before, after);
+#endif
                 if (i >= 0) {
                     if (i) std::cout << ',';
                     std::cout << std::chrono::duration<double, std::milli>(end - begin).count();
@@ -100,7 +113,26 @@ int main(int argc, char** argv) {
         }
         output.close();
         if (!output) throw std::runtime_error("Embedding write failed");
-        std::cout << "]}" << std::endl;
+        std::cout << ']';
+#ifdef LEAF_EMBED_DIAGNOSTICS
+        std::cout << ",\"diagnostic_timing_build\":true,\"thread_cpu_ms\":[";
+        for (std::size_t i = 0; i < diagnostics.size(); ++i) {
+            if (i) std::cout << ',';
+            leaf::diagnostics::values(std::cout, diagnostics[i].cpu_ms);
+        }
+        std::cout << "],\"thread_cycles\":[";
+        for (std::size_t i = 0; i < diagnostics.size(); ++i) {
+            if (i) std::cout << ',';
+            leaf::diagnostics::values(std::cout, diagnostics[i].cycles);
+        }
+        std::cout << "],\"process_page_faults\":[";
+        for (std::size_t i = 0; i < diagnostics.size(); ++i) {
+            if (i) std::cout << ',';
+            leaf::diagnostics::values(std::cout, diagnostics[i].page_faults);
+        }
+        std::cout << ']';
+#endif
+        std::cout << '}' << std::endl;
 #ifdef LEAF_COMPARE_LLAMA
         llama_batch_free(batch); llama_free(ctx); llama_model_free(model); llama_backend_free();
 #endif
