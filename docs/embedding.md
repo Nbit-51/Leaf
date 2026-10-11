@@ -2,7 +2,8 @@
 
 Leaf runs the original `google/embeddinggemma-300m` FP32 snapshot through its
 native C++ encoder. This is implemented inference with numerical reference
-validation. Retrieval-dataset quality and comparative speed are not yet qualified.
+validation. Retrieval-dataset quality remains unqualified; the first CPU-engine
+comparison is described below.
 
 ## Usage
 
@@ -96,6 +97,148 @@ CMake exposes target `leaf_embed`. The reference directory is produced separatel
 by `tools/verify_embeddinggemma_reference.py` with Sentence Transformers installed;
 it contains hash-bound token IDs and FP32 vectors. Reduced checks run in portable
 CI on all three operating systems; CI is not a performance benchmark.
+
+## First llama.cpp baseline — October 10, 2026
+
+The original Leaf embedding implementation (`10a59b7`) and llama.cpp both passed
+numerical parity. Six alternating pairs completed, with 66 measured samples per
+engine/input. Observed pooled medians were:
+
+| Fixture | Tokens | Leaf FP32 | llama.cpp FP32 |
+|---|---:|---:|---:|
+| Query1 | 18 | 93.53 ms | 70.77 ms |
+| Query2 | 18 | 93.15 ms | 70.39 ms |
+| Document1 | 23 | 99.07 ms | 83.58 ms |
+| Document2 | 25 | 104.39 ms | 89.33 ms |
+| Document3 | 17 | 92.40 ms | 68.32 ms |
+| Long input | 669 | 3067.86 ms | 2594.69 ms |
+
+**No stable speed ratio is qualified.** Every input failed the combined
+per-pass/pooled stability requirement. Both engines had unstable passes; Leaf's
+last pass additionally shifted to about twice the earlier latency on several
+inputs. The cause was not recorded, so it cannot be attributed to the kernel,
+power policy or another application. All measurements, including that pass,
+remain in the [baseline record](../benchmark/results/embeddinggemma/llama-baseline-20261010.json).
+The observed medians and paired ratios favor llama.cpp throughout; this is not
+evidence of a Leaf speed advantage.
+
+Sampled peak process RSS across measured passes was 437.61–437.66 MiB for Leaf
+and 1156.14–1157.00 MiB for llama.cpp. This includes initialization and mapped
+weight residency under these adapters; it is not private memory, a server's
+total memory budget, or a general memory-reduction guarantee. Output parity
+errors were at most 4.77e-7 for Leaf and 6.79e-5 for llama.cpp. See
+[source/conversion/runtime provenance](../benchmark/results/embeddinggemma/llama-provenance-20261010.json).
+
+A separate [diagnostic profile](../benchmark/results/embeddinggemma/profile-20261010.json)
+of original Leaf measured 3090.86ms for the long input: MLP linear1095.30ms,
+attention930.96ms, attention linear629.06ms, GELU/gating254.45ms and
+RoPE-table construction105.41ms. Norms and other work account for the remainder.
+The first optimization targets scalar GELU and repeated RoPE construction;
+the larger attention and projection costs require separate experiments.
+
+## GELU and RoPE optimization
+
+The encoder now reuses Leaf's existing AVX2/FMA GELU kernel before gate
+multiplication, with scalar fallback. It builds one local and one global RoPE
+table per input and shares them across layers. These changes apply by operation
+and shape, with no checkpoint-name dispatch or altered weights.
+
+Trained-reference error is at most **3.43e-7** on the vector path. One/two-thread
+and forced-scalar checks pass, together with the reduced geometry, attention
+boundary and malformed-input cases. Six alternating before/after pairs retained
+66 samples per input and binary:
+
+| Fixture | Previous Leaf median | Optimized median | Median paired time reduction | Full speed gate |
+|---|---:|---:|---:|---|
+| Query1, 18 tokens | 102.46 ms | 90.62 ms | 11.82% | Unstable passes |
+| Query2, 18 tokens | 97.59 ms | 88.92 ms | **10.32%** | **Passed** |
+| Document1, 23 tokens | 101.89 ms | 92.78 ms | 13.51% | Unstable passes |
+| Document2, 25 tokens | 109.40 ms | 89.79 ms | 15.55% | Unstable passes/pool |
+| Document3, 17 tokens | 100.93 ms | 89.38 ms | 12.03% | Unstable passes |
+| Long input, 669 tokens | 3159.59 ms | 3049.73 ms | 6.59% | Unstable pass |
+
+Paired ratios compare each candidate pass with its corresponding baseline pass;
+they differ from the ratio of pooled medians. The implementation is enabled
+with a **performance claim limited to Query2**. This is not an all-input timing
+acceptance or a qualified win over another engine. Other medians are encouraging
+observations, not stable speedups; no samples were dropped or gates relaxed.
+
+- [Before/after samples and gates](../benchmark/results/embeddinggemma/gelu-rope-ab-20261010.json)
+- [Trained output parity](../benchmark/results/embeddinggemma/gelu-rope-parity-20261010.json)
+- [Reduced architecture checks](../benchmark/results/embeddinggemma/gelu-rope-architectures-20261010.json)
+
+A fresh [candidate/llama.cpp diagnostic](../benchmark/results/embeddinggemma/gelu-rope-llama-diagnostic-20261010.json)
+retained two alternating pairs with five samples per input/pass. The long-input
+pooled medians were 2799.64ms for Leaf and 2646.75ms for llama.cpp (paired ratio
+1.0605). This smaller diagnostic does **not** qualify a speed claim; it locates
+the remaining gap without repeating a full acceptance run. All output checks
+passed. The short fixtures likewise establish no qualified competitor win.
+
+The Windows wheel also passed an [offline installed-package check](../benchmark/results/embeddinggemma/gelu-rope-package-20261011.json):
+first export and cached reuse both matched saved vectors, with maximum absolute
+error 2.39e-7. It selected the bundled native executable with no compiler on PATH
+and no heavy framework imports. These are packaging/correctness checks, not
+latency qualification. The focused Python suite passed 49 tests.
+
+Before another timing campaign, diagnose input length and execution time:
+compare different texts at the same token count, then a small set of lengths
+around actual kernel/window boundaries. Record wall time and thread CPU time
+per sample, alongside available page-fault/context-switch telemetry. Equal-length
+queries receiving different stability outcomes does not establish content as
+the cause; fixed input order and host scheduling remain confounders. Use the
+results to target shared attention/projection kernels, retaining all samples.
+
+Further work should share operator contracts between decoder and encoder plans,
+especially normalization and position/attention policies. Decoder plans already
+keep model identities in import adapters. Generality should mean adding compatible
+checkpoints through plans with little new native code; it does not mean promising
+every architecture will work or run faster than every competing engine.
+
+## Reproduce the CPU-engine comparison
+
+The first comparator is llama.cpp b11540, source commit
+`1e6f04a75e91da4bb66b5248f3fd4bdeff169d41`, using the official Windows x64
+CPU release. Both adapters compile from `benchmark/embedding_runtime_benchmark.cpp`.
+The comparison uses original FP32 weights, including both trained dense output
+layers. It does not substitute Ollama's BF16 default for an FP32 baseline.
+
+llama.cpp conversion additionally needs the original `tokenizer.model`; the
+JSON tokenizer alone did not work with this pinned converter. Preserve the
+snapshot and use the unmodified upstream converter. Its dependencies were
+isolated from Leaf: Transformers4.57.6, tokenizers0.22.2 and Hub0.36.0.
+
+```powershell
+# Place the pinned source in $llama/source and the official CPU DLLs in $llama/bin.
+$llama = 'build/competitors/llama-b11540'
+$env:PYTHONPATH = (Resolve-Path build/competitors/conversion-deps).Path
+$env:HF_HUB_OFFLINE = '1'
+python "$llama/source/convert_hf_to_gguf.py" build/models/embeddinggemma-300m --outfile "$llama/embeddinggemma-f32-complete.gguf" --outtype f32 --sentence-transformers-dense-modules
+Remove-Item Env:PYTHONPATH
+./scripts/build_embedding_comparison.ps1
+python tools/benchmark_embedding_competitor.py --leaf-executable build/competitors/leaf-embedding-benchmark.exe --llama-executable "$llama/bin/llama-embedding-benchmark.exe" --leaf-artifact PATH_TO_PREPARED_MODEL.leaf --gguf "$llama/embeddinggemma-f32-complete.gguf" --reference build/embeddinggemma/reference-20261010-final --output build/competitors/fresh-comparison --cpu 2
+```
+
+Select a physical P-core appropriate to your machine; logical CPU2 was used on
+this host. Timing covers token IDs to normalized vectors, including per-request
+reset, pooling, both projections, normalization and output copy. Loading,
+tokenization, file I/O and HTTP are excluded from both sides. Each model remains
+loaded within its pass. There is no reused prefix cache. Both engines use one
+thread pinned to the same CPU; llama.cpp GPU offload is disabled and K/V storage
+is requested as FP32. Its automatic attention kernel is retained. FP32 weights
+do not imply identical intermediate arithmetic across engines.
+
+Both adapters must pass saved-vector parity before six alternating pairs of
+processes run. Each input gets three warmups and eleven measured samples per
+pass. The predeclared stability check is p90/p10 ≤1.25 in every pass and pooled
+samples. A Leaf win additionally requires median paired Leaf/llama.cpp ≤0.98.
+This experiment's gates are explicit and separate from earlier decoder gates.
+All samples remain in the report. Sampled process peak RSS includes model loading
+and is not a measure of private allocations or total application memory.
+
+These six numerical fixtures establish a small, reproducible engine baseline;
+they do not establish retrieval-dataset throughput or general model leadership.
+llama.cpp is the first comparator; Ollama service overhead and other engines
+still need their own measured runs.
 
 ## Next acceptance work
 

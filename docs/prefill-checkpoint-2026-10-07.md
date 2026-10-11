@@ -519,3 +519,144 @@ include preparation/load/output overhead and are diagnostic only. Next work is
 the retrieval dataset plus fair CPU timing procedure in `docs/embedding.md`, then
 additional trained models. Do not repeat completed native correctness checks or
 the GPT-2/SiLU experiments unless implementation changes require them.
+
+## Competitor benchmark preparation — 2026-10-10
+
+Native implementation shipped on main at `10a59b7`; portable CI run 38040532405
+passed Windows, Linux and macOS. User then prioritized real inference-engine
+comparisons. Local benchmark work is intentionally separate from that release.
+
+Downloaded official llama.cpp b11540 CPU-only Windows binaries and source commit
+`1e6f04a75e91da4bb66b5248f3fd4bdeff169d41` into ignored
+`build/competitors/llama-b11540`. Download SHA256 was checked against GitHub:
+`85cae1b982145d1b315e56e7343524b301a11f0fdf2c7c9dd973c26daba4b3b5`.
+No Ollama installation was found. Its published EmbeddingGemma default is BF16,
+so first compare identical source FP32 weights through llama.cpp; BF16/QAT
+comparisons must be labeled separately. vLLM Intel/AMD CPU requires the planned
+Linux phase. TensorRT is an NVIDIA GPU comparison, outside current CPU ranking.
+
+`benchmark/embedding_runtime_benchmark.cpp` builds both Leaf and llama.cpp adapters.
+`tools/benchmark_embedding_competitor.py` prepares identical frozen token IDs,
+checks both outputs against reference before timing, pins CPU 2, and schedules
+six alternating pairs with three warmups and eleven samples per input/pass.
+The scope is warm native token IDs to normalized embedding, including reset,
+pooling, both projections, normalization and output copy, excluding load,
+tokenization, file I/O and HTTP. Six fixture inputs are not a dataset benchmark.
+Records retain all samples, per-process sampled peak RSS, paired ratios and
+p90/p10 stability with a 1.25 limit. These gates differ from existing decoder
+benchmarks and must not be conflated. Seven summary-contract tests passed.
+Both adapters compile; competitor execution has not yet been validated.
+
+**Blocked conversion:** the supplied snapshot lacks `tokenizer.model`.
+Upstream conversion falls back to unsupported BPE detection with tokenizer.json.
+It also encounters an out-of-vocabulary image-only token at ID262144; this is
+not a valid text-model input. An attempted metadata-only exclusion did not fix
+BPE detection and was removed. No workaround/model edit was shipped. Official
+download was rejected as gated. User needs to download the original
+`google/embeddinggemma-300m/tokenizer.model` through their authenticated browser.
+Inspect/copy that file into the local snapshot, then use unmodified upstream
+conversion with its SentencePiece path. Do not alter the frozen reference or
+pretend the failed conversions produced timings.
+
+Converter dependencies are isolated under `build/competitors/conversion-deps`:
+Transformers4.57.6, tokenizers0.22.2, huggingface-hub0.36.0. Leaf's global packages
+were not downgraded. Set PYTHONPATH to that directory for conversion only:
+
+```powershell
+$env:PYTHONPATH = (Resolve-Path build/competitors/conversion-deps).Path
+$env:HF_HUB_OFFLINE = '1'
+python build/competitors/llama-b11540/source/convert_hf_to_gguf.py build/models/embeddinggemma-300m --outfile build/competitors/llama-b11540/embeddinggemma-f32-complete.gguf --outtype f32 --sentence-transformers-dense-modules
+Remove-Item Env:PYTHONPATH
+```
+
+Benchmark adapter paths: `build/competitors/leaf-embedding-benchmark.exe` and
+`build/competitors/llama-b11540/bin/llama-embedding-benchmark.exe`. The latter
+links the official CPU DLLs, with K/V storage explicitly FP32 and GPU offload
+disabled. Before acceptance timing, verify model metadata, conversion provenance,
+output parity and CPU backend logs. Retain failures if comparison cannot qualify.
+Benchmark source/harness changes remain local until competitor preflight passes.
+
+## Competitor results and measured optimization — 2026-10-10
+
+The supplied `tokenizer.model` SHA256 is
+`1299c11d7cf632ef3b4e11937501358ada021bbdf7c47638d13c0ee982f2e79c`.
+Unmodified upstream conversion succeeded with 316 FP32 tensors and both dense
+heads. SentencePiece IDs match all five frozen short inputs. Comparison finished
+all twelve passes at `build/competitors/embedding-comparison-20261010/comparison.json`.
+Both engines pass parity: Leaf4.77e-7, llama.cpp6.79e-5 max absolute error.
+Observed medians favor llama.cpp on every fixture; no stable speed claim was
+qualified. The final Leaf pass shifted to roughly twice its earlier time for
+several inputs. Preserve it; cause was not measured. Public baseline/provenance
+records are in `benchmark/results/embeddinggemma/llama-*-20261010.json`.
+
+User requested a concrete optimization. Diagnostic instrumentation at
+`build/competitors/profile_embedding.py` produced a separate profiling executable,
+leaving the original benchmark binary intact. Warm median for 669 tokens:
+total3090.86ms, attention930.96ms, attention-linear629.06ms, MLP-linear1095.30ms,
+GELU/gate254.45ms, RoPE-table105.41ms. Public `profile-20261010.json` retains
+all diagnostic samples and source hash. These are profile observations, not
+acceptance numbers.
+
+Candidate change in `engine/src/embedding.cpp`: existing runtime-dispatched
+vector GELU followed by gating; local/global RoPE tables computed once per input
+and shared across layers. Candidate builds are under
+`build/competitors/embedding-candidate`. Trained parity (one/two threads/scalar)
+and reduced architecture/rejection checks pass; maximum trained error3.43e-7.
+User confirmed plugged in/no heavy work before the timing run.
+
+Acceptance run: `build/competitors/embedding-candidate/acceptance/comparison.json`,
+six alternating pairs, three warmups and eleven samples per input/pass, candidate
+versus preserved `build/competitors/leaf-embedding-benchmark.exe` on CPU2. The
+runner uses `--reference-engine leaf_before`; comparator argument names are still
+`--llama-executable` and `--gguf`, but this mode records the correct engine name.
+Read `complete` and saved passes before resuming; do not restart completed work.
+The old llama.cpp comparison is not a fresh candidate comparison. No optimization
+speed claim until this acceptance record is complete and its gates inspected.
+
+User clarified the broader priority: stop treating every added model as a fresh
+engine implementation. Audit confirms `tools/decoder_plan.py` already confines
+model names to import adapters; native execution uses dimensions/block semantics.
+The remaining issue is uneven shared-operator coverage: the embedding path has
+Q/K normalization and local attention while decoder plans still reject them.
+After the current measured candidate, prioritize shared normalization, position
+and attention contracts with explicit decoder/encoder policies, shape-based
+kernel dispatch and early capability reporting. Keep task-specific KV/generation
+versus pooling workflows separate where needed. A useful next acceptance milestone
+is supporting a compatible additional checkpoint through an adapter/plan with no
+model-name branch or new model-specific loop in C++. Do not promise universal
+model support or universal speedups; maintain a fixed cross-family regression
+matrix and hold out new checkpoints to check generalization.
+
+## Recovered completion and release checkpoint — 2026-10-11
+
+The runs above finished before the session interruption. Do not restart them.
+Public `benchmark/results/embeddinggemma/gelu-rope-ab-20261010.json` contains all
+six alternating pairs (66 samples per input/binary). All six candidate medians
+are lower, but only Query2 (18 tokens) passes every stability and improvement
+gate: median paired time reduction 10.32%, pooled medians 97.59ms -> 88.92ms.
+The other five inputs remain timing-unqualified. The implementation is enabled
+with this narrow claim; it is not an all-input acceptance or competitor win.
+
+Fresh candidate/llama.cpp diagnostic is complete in
+`gelu-rope-llama-diagnostic-20261010.json`: two pairs, five samples per input/pass,
+all output checks pass. Long-input pooled medians 2799.64ms vs 2646.75ms; paired
+Leaf/llama ratio 1.0605. Too few rounds/samples for a qualified speed claim.
+
+Trained one/two-thread and scalar parity plus reduced architecture/rejection
+checks pass. Focused Python validation passed 49 tests with a fresh --basetemp.
+The wheel built and installed successfully; offline first-export and cache-reuse
+checks passed without a compiler or heavy framework imports. Public record:
+`gelu-rope-package-20261011.json`. Local wheel:
+`build/competitors/embedding-candidate/wheels/leaf_cpu-0.2.0-py3-none-win_amd64.whl`,
+SHA256 `7807af99372e3747593c9992a0036701a3aaa4f0b67be584e8608a155df3695e`.
+The package test is not a speed benchmark. No need to rebuild or rerun it solely
+to recover this session.
+
+Next: instrument per-sample wall/CPU time before requesting another quiet timing
+window. Use same-length different-text inputs and a small boundary-length sweep
+with balanced input order to separate content, shape and scheduling effects.
+Do not infer faults, throttling or input dependence from wall time alone. Profile
+remaining attention/projection work and improve shared operator contracts; keep
+FP32 task quality central, optional quantization explicit, and models ahead of
+secondary dataset features. README/diagram now describe enabled GELU/RoPE reuse;
+detailed evidence remains in docs/results. Leave the user's root PNG untouched.

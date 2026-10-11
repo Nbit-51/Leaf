@@ -98,8 +98,10 @@ native-loader limitation.
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
 Complete trained evaluations cover **GPT-2, TinyLlama-1.1B and ResNet-20**.
-**EmbeddingGemma 300M** additionally passes trained-reference numerical checks;
-retrieval-dataset quality and speed comparisons remain unqualified.
+**EmbeddingGemma 300M** passes trained-reference numerical checks and has a
+qualified local before/after gain on one short input. The other measured inputs
+remain timing-unqualified, and llama.cpp had lower observed baseline medians.
+See the [full embedding results and limits](docs/embedding.md).
 Reduced-model tests exercise six decoder architecture families.
 
 Import adapters cover supported configurations from Llama/Qwen2, GPT-2,
@@ -121,7 +123,7 @@ validates their semantics and produces a versioned native artifact.
 flowchart TB
     S["Safetensors snapshot"] --> P["Validated decoder plan"]
     S --> B["Validated bidirectional embedding plan"]
-    B --> N["C++ encoder · local/full attention and Q/K norms"]
+    B --> N["C++ encoder · local/full attention and Q/K norms<br/>Shared RoPE tables · vector GELU gating"]
     N --> V["Mean pooling · dense projections · L2 normalization"]
     V --> F["Document/query vectors"]
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]

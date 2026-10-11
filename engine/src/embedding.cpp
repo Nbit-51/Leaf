@@ -2,6 +2,7 @@
 #include "leaf/runtime/host_support.h"
 #include "leaf/kernels/row_reuse.h"
 #include "leaf/kernels/attention_vector.h"
+#include "leaf/kernels/gelu.h"
 #include <cmath>
 #include <unordered_map>
 
@@ -37,7 +38,7 @@ struct EmbeddingEncoder::Impl {
     std::vector<unsigned> local;
     kernels::TokenPanelsF32 panels;
     std::vector<float> hidden, normalized, q, k, v, qh, kh, vh, attention, projected, gate, up;
-    std::vector<float> local_mask, global_mask, cosine, sine;
+    std::vector<float> local_mask, global_mask, local_cosine, local_sine, global_cosine, global_sine;
 
     Impl(const std::string &path, unsigned threads, bool scalar)
         : mapping(path), workers(threads), avx(!scalar && kernels::token_panel_f32_avx2_available()) {
@@ -139,13 +140,27 @@ struct EmbeddingEncoder::Impl {
         y.resize(x.size());
         norm(x.data(), y.data(), tokens, width, weights.at(name).data, epsilon);
     }
+    void rotary_table(std::size_t tokens, float theta, std::vector<float> &cosine,
+                      std::vector<float> &sine) {
+        cosine.resize(tokens * dim / 2);
+        sine.resize(tokens * dim / 2);
+        for (std::size_t j = 0; j < dim / 2; ++j) {
+            const float frequency =
+                1.0f / std::pow(theta, static_cast<float>(2 * j) / static_cast<float>(dim));
+            for (std::size_t t = 0; t < tokens; ++t) {
+                const float angle = static_cast<float>(t) * frequency;
+                cosine[t * (dim / 2) + j] = std::cos(angle);
+                sine[t * (dim / 2) + j] = std::sin(angle);
+            }
+        }
+    }
     void reorder(const std::vector<float> &x, std::vector<float> &y, std::size_t tokens, std::size_t nheads,
-                 bool rotate) {
+                 const float *cosine = nullptr, const float *sine = nullptr) {
         y.resize(x.size());
         for (std::size_t t = 0; t < tokens; ++t)
             for (std::size_t head = 0; head < nheads; ++head) {
                 const auto from = (t * nheads + head) * dim, to = (head * tokens + t) * dim;
-                if (!rotate) {
+                if (!cosine) {
                     std::copy_n(x.data() + from, dim, y.data() + to);
                     continue;
                 }
@@ -172,8 +187,10 @@ struct EmbeddingEncoder::Impl {
         for (std::size_t t = 0; t < tokens; ++t)
             for (std::size_t s = 0; s < tokens; ++s)
                 local_mask[t * tokens + s] = (t > s ? t - s : s - t) <= radius ? 1.0f : 0.0f;
-        cosine.resize(tokens * dim / 2);
-        sine.resize(tokens * dim / 2);
+        // Position indices restart for each document. Layers share two RoPE bases,
+        // so calculate each table once per request, without retaining document state.
+        rotary_table(tokens, local_theta, local_cosine, local_sine);
+        rotary_table(tokens, global_theta, global_cosine, global_sine);
         for (std::size_t i = 0; i < layers; ++i) {
             const auto p = "layers." + std::to_string(i) + ".";
             normalize(hidden, normalized, tokens, h, p + "input_layernorm.weight");
@@ -184,19 +201,11 @@ struct EmbeddingEncoder::Impl {
                  epsilon);
             norm(k.data(), k.data(), tokens * kv, dim, weights.at(p + "self_attn.k_norm.weight").data,
                  epsilon);
-            const float theta = local[i] ? local_theta : global_theta;
-            for (std::size_t j = 0; j < dim / 2; ++j) {
-                const float frequency =
-                    1.0f / std::pow(theta, static_cast<float>(2 * j) / static_cast<float>(dim));
-                for (std::size_t t = 0; t < tokens; ++t) {
-                    float angle = static_cast<float>(t) * frequency;
-                    cosine[t * (dim / 2) + j] = std::cos(angle);
-                    sine[t * (dim / 2) + j] = std::sin(angle);
-                }
-            }
-            reorder(q, qh, tokens, heads, true);
-            reorder(k, kh, tokens, kv, true);
-            reorder(v, vh, tokens, kv, false);
+            const auto &cosine = local[i] ? local_cosine : global_cosine;
+            const auto &sine = local[i] ? local_sine : global_sine;
+            reorder(q, qh, tokens, heads, cosine.data(), sine.data());
+            reorder(k, kh, tokens, kv, cosine.data(), sine.data());
+            reorder(v, vh, tokens, kv);
             attention.resize(tokens * heads * dim);
             const std::size_t mask_shape[] = {1, 1, tokens, tokens};
             // Existing attention API squares its scale; preserve model score scaling.
@@ -211,11 +220,9 @@ struct EmbeddingEncoder::Impl {
             normalize(hidden, normalized, tokens, h, p + "pre_feedforward_layernorm.weight");
             linear(normalized, tokens, p + "mlp.gate_proj.weight", gate);
             linear(normalized, tokens, p + "mlp.up_proj.weight", up);
-            for (std::size_t j = 0; j < gate.size(); ++j) {
-                const float x = gate[j];
-                gate[j] = (0.5f * x * (1.0f + std::tanh(0.7978845608028654f * (x + 0.044715f * x * x * x)))) *
-                          up[j];
-            }
+            kernels::gelu_new_inplace(gate.data(), gate.size(), avx);
+            for (std::size_t j = 0; j < gate.size(); ++j)
+                gate[j] *= up[j];
             linear(gate, tokens, p + "mlp.down_proj.weight", projected);
             normalize(projected, projected, tokens, h, p + "post_feedforward_layernorm.weight");
             for (std::size_t j = 0; j < hidden.size(); ++j)
