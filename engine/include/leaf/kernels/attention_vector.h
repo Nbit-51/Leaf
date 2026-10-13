@@ -2,6 +2,7 @@
 #include "leaf/kernels/transformer.h"
 #include <algorithm>
 #include <cmath>
+#include <cfenv>
 #include <limits>
 #include <vector>
 
@@ -102,6 +103,7 @@ LEAF_ATTENTION_TARGET inline void weighted_values(const float* probabilities, co
     for (unsigned j = 0; j < N; ++j) _mm256_storeu_ps(y + 8 * j, acc[j]);
 }
 
+template <bool TrimFiniteValues = true>
 LEAF_ATTENTION_TARGET inline void attend(
         const float* query, const float* key, const float* value, const float* mask, float* output,
         std::size_t batch, std::size_t heads, std::size_t kv_heads, std::size_t queries,
@@ -109,11 +111,13 @@ LEAF_ATTENTION_TARGET inline void attend(
         float scale, bool valid_nonzero) {
     std::vector<float> scores(keys);
     std::vector<std::size_t> valid(keys);
+    const bool trim_allowed = TrimFiniteValues && std::fegetround() == FE_TONEAREST;
     for (std::size_t b = 0; b < batch; ++b) {
         for (std::size_t h = 0; h < heads; ++h) {
             const auto kv = h / (heads / kv_heads);
             const auto* key_head = key + (b * kv_heads + kv) * stride * dim;
             const auto* value_head = value + (b * kv_heads + kv) * stride * dim;
+            bool values_checked = false, values_finite = false;
             for (std::size_t q = 0; q < queries; ++q) {
                 const auto* x = query + ((b * heads + h) * queries + q) * dim;
                 auto* y = output + ((b * queries + q) * heads + h) * dim;
@@ -143,23 +147,37 @@ LEAF_ATTENTION_TARGET inline void attend(
                 float denominator = 0;
                 for (std::size_t k = 0; k < keys; ++k) denominator += scores[k];
                 for (std::size_t k = 0; k < keys; ++k) scores[k] = scores[k] / denominator;
-                // Preserve key order and separate multiply/add for each output
-                // dimension. Do not skip masked values: 0 * NaN/Inf is observable.
+                // Finite values and a finite softmax permit omitting leading/
+                // trailing masked zeros. Retain interior holes and key order.
+                // Nonfinite values keep the full path: 0 * NaN/Inf is observable.
+                std::size_t first = 0, last = keys;
+                if (trim_allowed && count && (valid[0] != 0 || valid[count - 1] + 1 != keys)
+                    && std::isfinite(denominator) && denominator > 0) {
+                    if (!values_checked) {
+                        values_finite = std::all_of(value_head, value_head + keys * dim,
+                                                   [](float v) { return std::isfinite(v); });
+                        values_checked = true;
+                    }
+                    if (values_finite) { first = valid[0]; last = valid[count - 1] + 1; }
+                }
+                const auto* active_scores = scores.data() + first;
+                const auto* active_values = value_head + first * dim;
+                const auto active_keys = last - first;
                 std::size_t d = 0;
-                for (; dim - d >= 64; d += 64) weighted_values<8>(scores.data(), value_head + d, keys, dim, y + d);
+                for (; dim - d >= 64; d += 64) weighted_values<8>(active_scores, active_values + d, active_keys, dim, y + d);
                 switch ((dim - d) / 8) {
-                case 1: weighted_values<1>(scores.data(), value_head + d, keys, dim, y + d); break;
-                case 2: weighted_values<2>(scores.data(), value_head + d, keys, dim, y + d); break;
-                case 3: weighted_values<3>(scores.data(), value_head + d, keys, dim, y + d); break;
-                case 4: weighted_values<4>(scores.data(), value_head + d, keys, dim, y + d); break;
-                case 5: weighted_values<5>(scores.data(), value_head + d, keys, dim, y + d); break;
-                case 6: weighted_values<6>(scores.data(), value_head + d, keys, dim, y + d); break;
-                case 7: weighted_values<7>(scores.data(), value_head + d, keys, dim, y + d); break;
+                case 1: weighted_values<1>(active_scores, active_values + d, active_keys, dim, y + d); break;
+                case 2: weighted_values<2>(active_scores, active_values + d, active_keys, dim, y + d); break;
+                case 3: weighted_values<3>(active_scores, active_values + d, active_keys, dim, y + d); break;
+                case 4: weighted_values<4>(active_scores, active_values + d, active_keys, dim, y + d); break;
+                case 5: weighted_values<5>(active_scores, active_values + d, active_keys, dim, y + d); break;
+                case 6: weighted_values<6>(active_scores, active_values + d, active_keys, dim, y + d); break;
+                case 7: weighted_values<7>(active_scores, active_values + d, active_keys, dim, y + d); break;
                 }
                 d += (dim - d) / 8 * 8;
                 for (; d < dim; ++d) {
                     float sum = 0.0f;
-                    for (std::size_t k = 0; k < keys; ++k) sum += scores[k] * value_head[k * dim + d];
+                    for (std::size_t k = first; k < last; ++k) sum += scores[k] * value_head[k * dim + d];
                     y[d] = sum;
                 }
             }

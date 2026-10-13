@@ -390,8 +390,9 @@ def optimize(args):
 def main():
     parser = argparse.ArgumentParser(prog="leaf", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    embedder = commands.add_parser("embed", help="embed local text or a JSONL collection using native FP32 execution")
-    embedder.add_argument("model", help="complete local EmbeddingGemma snapshot")
+    embedder = commands.add_parser("embed", help="download/cache a supported embedding model and encode text with native FP32 execution")
+    embedder.add_argument("model", help="Hugging Face model ID, local snapshot, or registered alias")
+    embedder.add_argument("--offline", action="store_true", help="use only downloaded model files")
     inputs = embedder.add_mutually_exclusive_group(required=True)
     inputs.add_argument("--text")
     inputs.add_argument("--dataset", type=Path, help="JSONL documents, encoded in file order")

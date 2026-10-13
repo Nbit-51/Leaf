@@ -695,3 +695,104 @@ existing baseline; CPU4 is diagnostic, not evidence of multicore scaling.
 Scheduler tracing can identify the residual off-thread wait if needed, without
 blocking a separate measured compute optimization. User wants general-purpose
 operator reuse, FP32 quality, and no new per-model native inference loops.
+
+## Active shared GEMM tail experiment — 2026-10-11
+
+User explicitly asked to implement and measure the shared-kernel experiment now.
+User also reports that after a usage-limit interruption they may close Codex and
+run other applications. This is a possible timing confounder, not proof of the
+cause of any spike. Preserve samples, record interruption/activity when known,
+and never silently discard them or infer that a quiet period continued.
+
+Candidate in engine/include/leaf/kernels/row_reuse.h uses an eight-lane final
+tile for 1–8 live tokens while keeping the 16-lane packed stride and increasing-K
+FMA order. Currently a local experiment, NOT yet qualified for release. Build:
+`./scripts/build_gemm_tail_experiment.ps1`. It builds/test kernels and produces
+candidate embedding binaries in build/gemm-tail-20261011. Existing baseline:
+build/competitors/embedding-candidate/benchmark.exe (shipped GELU/RoPE version).
+Do not overwrite that preserved baseline. Microbenchmark:
+`python tools/benchmark_gemm_tail.py`; it retains each completed shape in
+micro.jsonl and supports --inspect after interruption. Tests cover partial/full
+panels, rows1–6, bias and padded strides. Micro covers four projection shapes,
+nine lengths, rotating8 weight matrices,21 paired samples with packing included.
+Next read the saved results; run trained parity before a whole-model paired gate.
+Do not rerun completed stages merely because the conversation was interrupted.
+
+## Recovery and attention-span experiment — 2026-10-12
+
+The tail experiment completed all12 passes after the interruption. No input
+qualified: all six failed full stability. Long paired ratio0.99977; pooled
+medians4404.61/5979.75ms are confounded by a regime shift, NOT a speed win.
+Baseline long times rose from2.7s to6.0s starting round3; candidate also rose.
+User's post-limit activity is a possible cause, not a measured attribution.
+Keep original record build/gemm-tail-20261011/acceptance/comparison.json intact.
+Tail correctness is complete: native matrices bit-exact, trained1/2/scalar pass,
+reduced embedding pass,10 reduced decoder configurations bit-exact against saved
+installed binary. Records parity-host.json, architectures.json, decoder-regression.json.
+
+User confirmed quiet/plugged-in for a fresh diagnostic. New reusable tool
+tools/profile_embedding_operations.py generates instrumented copies only.
+Profile: build/gemm-tail-20261011/profile-20261012/profile.json. Long2770.26ms:
+MLP GEMM1013.09, projection GEMM576.148, packs52.54, attention1016.734
+(values483.666, scores356.073, softmax162.542), GELU24.205, norms51.383.
+Timers overlap; profile adds per-query timers/extra maximum reduction. Parity
+passes; this is not acceptance timing. Short18-token GEMM~73–75ms of80–84ms.
+
+Next candidate implemented in shared attention_vector.h: skip masked prefix/
+suffix value products only after a finite-value check, finite positive softmax
+denominator and round-to-nearest check. Interior holes and key order retained;
+NaN/Inf and other rounding modes use old full path. No model-ID dispatch.
+Template attend<false> preserves untrimmed comparator. Native tests passed,
+including bit equality, mask broadcasting, NaN/Inf, signed zero and rounding.
+Paired attention micro: build/attention-span-20261012/micro.json, all12 cases
+stable.669 local ratio0.8445; causal gains10.8–30.5%; full controls~1% or less.
+These are kernel-only results. Build/model correctness and whole-model acceptance
+still required before release. Candidate combines local tail+attention changes;
+whole-model baseline must be shipped GELU/RoPE binary:
+build/competitors/embedding-candidate/benchmark.exe, NOT the older scalar-GELU
+baseline and NOT the tail candidate. Do not overwrite any frozen binary.
+Optional DevRelay research was unavailable without MLH sign-in; no login or
+external posting was initiated, and no community evidence was used.
+
+Attention-span model correctness is now complete: trained1/2/scalar parity,
+reduced encoder cases, and ten reduced decoder configurations bit-exact against
+the saved installed release. Logs/JSON under build/attention-span-20261012.
+Rebuild helper scripts/build_attention_span_experiment.ps1 added; native
+microbenchmark runner tools/benchmark_attention_span.py preserves raw samples.
+Combined candidate acceptance is running at
+build/attention-span-20261012/acceptance/comparison.json, CPU2, six alternating
+pairs,3warmups/11runs. Check complete/passes before doing anything after a limit
+interruption. First long pair2543.13vs2687.74ms (~5.38%), both stable; NOT a
+completed qualification yet. Do not report the kernel15.55% gain as model gain.
+
+## Completed comparison and usability priority — 2026-10-13
+
+The above combined acceptance is COMPLETE. All six full-model gates failed.
+Long paired ratio0.93528145 (6.47% observed reduction); candidate round4
+p90/p10=1.305495 fails even though pooled spreads pass. Do not rerun merely
+because the session was interrupted or represent this as a qualified model win.
+User explicitly authorized enabling attention with ONLY the stable15.55% kernel
+claim. Narrow GEMM tail is now defaultfalse; its build helper uses an include
+overlay to enable it for future experiments. Attention-only final builds live
+under build/attention-span-20261012/release. Frozen candidates remain untouched.
+
+Final llama-release-diagnostic/comparison.json is COMPLETE: two pairs/five
+samples, parity passes, no input timing-qualified. Leaf long pass medians
+5676.79→2306.31ms; llama5544.53→5349.79ms. User reported light Twitter browsing;
+record as possible interference, not a proven cause or permission to drop data.
+No benchmark remains running. No further optimization/timing campaign planned.
+
+User priority is straightforward download/import/run. `leaf run` already accepts
+Hub IDs; the gap was local-only `leaf embed`. Added embedding Hub ID/alias
+resolution, metadata-before-weights validation, revision pinning, --offline,
+and actionable gated/missing-cache errors. Decoder resolution remains unchanged.
+171 focused Python tests pass (pytest-model-workflow-20261013-host).
+Final wheel SHA256319ee0ec4f3dbc8f09c31b592bfd020f6e3425d3b6038e6e6225f941e67918b3.
+Installed package-check passes local first/cached and Hub-ID offline lookup using
+a synthetic local Hub cache, maxerror2.384e-7. No compiler/heavy frameworks.
+This does NOT claim a fresh online download was tested. Final installed decoder
+regression passes all10 cases bit-exact. Preserve reports under release/.
+Final installed encoder release/parity.json is complete:1/2/scalar all pass,
+maxerror3.80e-7 across variants. No model correctness job remains running.
+Next prioritize supported-model onboarding and clear capability boundaries;
+do not begin another optimization experiment before addressing product flow.

@@ -56,15 +56,17 @@ leaf run ./models/decoder --offline --prompt "Explain CPU inference." --max-toke
 Chat templates are applied when supplied by the tokenizer configuration; use
 `--raw` for an unformatted prompt. Generation is currently greedy.
 
-For a complete local **EmbeddingGemma 300M FP32** snapshot, including its pooling
-and dense module folders, embed a JSONL collection with one `text` field per row:
+For **EmbeddingGemma 300M FP32**, supply its model ID. Leaf downloads the
+tokenizer, weights and projection layers together; no manual file assembly:
 
 ```sh
-leaf embed ./models/embeddinggemma-300m --dataset ./data/documents.jsonl --task document --output documents.npy
-leaf embed ./models/embeddinggemma-300m --text "How does CPU inference work?" --task query --output query.npy
+leaf embed google/embeddinggemma-300m --text "How does CPU inference work?" --task query --output query.npy
+leaf embed google/embeddinggemma-300m --offline --dataset ./data/documents.jsonl --task document --output documents.npy
 ```
 
-Outputs are normalized 768-dimensional vectors in input order. The model is
+Gemma requires accepting its model access terms and signing in to Hugging Face
+once (`hf auth login`). Complete local folders work too. Outputs are normalized
+768-dimensional vectors in input order. The model is
 loaded once per invocation. See [embedding usage and validation](docs/embedding.md)
 for snapshot layout, limits and measured numerical accuracy.
 
@@ -121,9 +123,10 @@ validates their semantics and produces a versioned native artifact.
 
 ```mermaid
 flowchart TB
-    S["Safetensors snapshot"] --> P["Validated decoder plan"]
+    H["Model ID · automatic download and cache"] --> S["Safetensors snapshot"]
+    S --> P["Validated decoder plan"]
     S --> B["Validated bidirectional embedding plan"]
-    B --> N["C++ encoder · local/full attention and Q/K norms<br/>Shared RoPE tables · vector GELU gating"]
+    B --> N["C++ encoder · local/full attention and Q/K norms<br/>Finite masked-span attention · shared RoPE · vector GELU"]
     N --> V["Mean pooling · dense projections · L2 normalization"]
     V --> F["Document/query vectors"]
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
@@ -143,6 +146,10 @@ qualification. The CLI uses a lightweight Python/tokenizer launcher; the native
 decoder owns the generation loop. Decoder, embedding and graph artifacts use
 distinct formats.
 
+Finite masked-span attention is enabled with a **15.55% kernel-level reduction**
+on the tested 669-token local-attention case. Whole-model timing did not pass
+stability; this is not a model-speed or llama.cpp win. [Evidence](docs/embedding.md#finite-masked-span-attention-and-product-workflow--october-13-2026).
+
 Quantization and new kernels are evaluated against the work they actually replace:
 
 ```mermaid
@@ -154,6 +161,10 @@ flowchart LR
     V -- "Yes" --> I["Qualify tested<br/>configuration"]
     V -- "No" --> H["Keep current<br/>default"]
 ```
+
+A kernel may also be released after exact-output checks and stable isolated
+timing, with an explicitly kernel-only claim. Failed model gates stay recorded;
+this exception does not enable automatic quantization.
 
 ## Measured performance
 

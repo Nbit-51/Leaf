@@ -95,6 +95,67 @@ def documents(text, dataset, column):
                 yield row[column]
 
 
+def resolve_model(model, cache, offline=False):
+    """Resolve a local snapshot, registered alias or supported Hub model."""
+    local = Path(model)
+    if local.is_dir():
+        return local.resolve()
+    aliases = cache / "aliases.json"
+    if aliases.is_file():
+        model = json.loads(aliases.read_text(encoding="utf-8")).get(model, model)
+        if Path(model).is_dir():
+            return Path(model).resolve()
+    if Path(model).is_absolute() or model.startswith((".", "~")) or "\\" in model:
+        raise ValueError(f"Model folder does not exist: {model}")
+
+    from huggingface_hub import snapshot_download
+    from huggingface_hub.utils import (
+        GatedRepoError, LocalEntryNotFoundError, RepositoryNotFoundError, HfHubHTTPError,
+    )
+    from tools.verify_embeddinggemma_reference import inspect_metadata
+    from tools.export_embedding import embedding_config
+
+    print(f"Preparing {model} from {'the local cache' if offline else 'Hugging Face'}...",
+          file=sys.stderr)
+    try:
+        metadata = Path(snapshot_download(
+            model, cache_dir=cache / "hub", local_files_only=offline,
+            allow_patterns=["config.json", "modules.json", "1_Pooling/config.json",
+                            "2_Dense/config.json", "3_Dense/config.json"],
+        ))
+        try:
+            embedding_config(inspect_metadata(metadata))
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            raise ValueError(
+                "This model's embedding configuration is not supported by Leaf. "
+                "The supported pipeline is original EmbeddingGemma 300M. "
+                f"Details: {error}"
+            ) from error
+        # Hub snapshots live at snapshots/<commit>. Fetch the same revision so
+        # configuration and weights cannot come from different main revisions.
+        snapshot = Path(snapshot_download(
+            model, revision=metadata.name, cache_dir=cache / "hub", local_files_only=offline,
+            allow_patterns=["*.json", "model.safetensors", "tokenizer.model",
+                            "2_Dense/model.safetensors", "3_Dense/model.safetensors"],
+        ))
+    except GatedRepoError as error:
+        raise ValueError(
+            f"Access to {model} requires accepting its terms at "
+            f"https://huggingface.co/{model}, then signing in with `hf auth login`. "
+            "Rerun the same Leaf command afterwards."
+        ) from error
+    except LocalEntryNotFoundError as error:
+        raise ValueError(
+            f"Model {model} is not fully available in the cache. "
+            "Run once online without --offline, or use a complete local model folder."
+        ) from error
+    except RepositoryNotFoundError as error:
+        raise ValueError(f"Cannot access model {model}. Check the model ID and your Hugging Face login.") from error
+    except HfHubHTTPError as error:
+        raise ValueError(f"Could not download {model}. Check your connection and retry the same command.") from error
+    return snapshot
+
+
 def run(args):
     from tokenizers import Tokenizer
     from leaf.cli import cache_root
@@ -112,11 +173,16 @@ def run(args):
         raise ValueError(
             "Metrics require a new path distinct from the embedding output"
         )
-    snapshot = Path(args.model)
-    if not snapshot.is_dir():
-        raise ValueError("Embedding currently requires a complete local snapshot")
-    config, hashes = inspect_snapshot(snapshot)
     cache = cache_root()
+    snapshot = resolve_model(args.model, cache, getattr(args, "offline", False))
+    try:
+        config, hashes = inspect_snapshot(snapshot)
+    except FileNotFoundError as error:
+        raise ValueError(
+            "The model folder/cache is incomplete. Use the model ID "
+            "(for example google/embeddinggemma-300m) online so Leaf downloads "
+            "its supporting files automatically."
+        ) from error
     runtime = executable(cache)
     key = hashlib.sha256(
         json.dumps(hashes, sort_keys=True).encode() + b"leaf-embedding-v1"

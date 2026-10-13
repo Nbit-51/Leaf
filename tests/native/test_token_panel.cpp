@@ -226,8 +226,8 @@ void check_invalid() {
 
 int main() {
     try {
-        for (std::size_t tokens : {1, 6, 7, 8, 12, 15, 16, 17, 29, 31, 32, 33, 127})
-            for (std::size_t rows : {1, 2, 5, 6, 7, 11, 12, 13, 16, 17, 31, 32})
+        for (std::size_t tokens : {1, 6, 7, 8, 9, 12, 15, 16, 17, 18, 24, 25, 29, 31, 32, 33, 127})
+            for (std::size_t rows : {1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 16, 17, 31, 32})
                 for (std::size_t columns : {1, 7, 8, 15, 30, 64, 257})
                     for (bool bias : {false, true}) check_matrix(tokens, rows, columns, bias);
         check_matrix(29, 13, 2048, true);

@@ -27,19 +27,19 @@ def digest(path):
     return checksum.hexdigest()
 
 
-def inspect_snapshot(root):
-    """Require the exact supported reference pipeline; never guess missing heads."""
+def inspect_metadata(root):
+    """Validate the supported pipeline before downloading or hashing weights."""
     root = Path(root)
     read = lambda name: json.loads((root / name).read_text(encoding="utf-8"))
+    config = read("config.json")
+    if (config.get("model_type") != "gemma3_text" or
+            config.get("use_bidirectional_attention") is not True):
+        raise ValueError("Require the bidirectional Gemma 3 text backbone")
     modules = read("modules.json")
     expected = [(i, path, "sentence_transformers.models." + kind)
                 for i, (path, kind) in enumerate(MODULES)]
     if [(m.get("idx"), m.get("path"), m.get("type")) for m in modules] != expected:
         raise ValueError("Unsupported embedding module pipeline")
-    config = read("config.json")
-    if (config.get("model_type") != "gemma3_text" or
-            config.get("use_bidirectional_attention") is not True):
-        raise ValueError("Require the bidirectional Gemma 3 text backbone")
     pooling = read("1_Pooling/config.json")
     if (pooling.get("pooling_mode_mean_tokens") is not True or
             pooling.get("include_prompt") is not True or
@@ -57,6 +57,13 @@ def inspect_snapshot(root):
         width = dense["out_features"]
     if width != 768:
         raise ValueError("Require the original 768-dimensional embedding output")
+    return config
+
+
+def inspect_snapshot(root):
+    """Require the exact supported reference pipeline; never guess missing heads."""
+    root = Path(root)
+    config = inspect_metadata(root)
     files = ["config.json", "modules.json", "model.safetensors", "tokenizer.json",
              "tokenizer_config.json", "special_tokens_map.json", "1_Pooling/config.json",
              "2_Dense/config.json", "2_Dense/model.safetensors",

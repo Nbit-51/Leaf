@@ -5,9 +5,82 @@ native C++ encoder. This is implemented inference with numerical reference
 validation. Retrieval-dataset quality remains unqualified; the first CPU-engine
 comparison is described below.
 
+## Finite masked-span attention and product workflow — October 13, 2026
+
+The shared vector attention kernel now omits leading/trailing masked value
+products when values are finite and rounding is nearest. It retains key order,
+interior mask holes and the previous path for NaN/Inf or other rounding modes.
+Native comparisons with the previous kernel are bit-exact. The independent
+[attention microbenchmark](../benchmark/results/embeddinggemma/attention-span-micro-20261012.json)
+has 12 stable cases; the 669-token, radius-256 case takes **15.55% less time**.
+This is a kernel result, not a whole-model speedup.
+
+The [combined tail-plus-attention model experiment](../benchmark/results/embeddinggemma/attention-span-combined-ab-20261012.json)
+completed six alternating pairs (three warmups, eleven samples per pass). Its
+long-input paired reduction was 6.47%, but one candidate pass had p90/p10 of
+1.3055, failing stability. All six input qualifications failed. No samples were
+removed. The maintainer explicitly accepted enabling attention with only the
+verified kernel claim. The separate GEMM narrow-tail experiment remains disabled
+by default; its [earlier model gate](../benchmark/results/embeddinggemma/tail-ab-20261011.json)
+also failed. The [tail microbenchmark](../benchmark/results/embeddinggemma/tail-micro-20261011.json)
+uses vector packing, whereas the encoder uses its existing packing policy;
+isolated gains must not be treated as model gains.
+
+The final attention-only [llama.cpp diagnostic](../benchmark/results/embeddinggemma/attention-span-llama-diagnostic-20261012.json)
+passed numerical parity but qualified no timing wins. It used just two
+alternating pairs and five samples per pass. Leaf's long-input pass medians were
+5676.79 and 2306.31 ms; llama.cpp's were 5544.53 and 5349.79 ms. This large
+variation prevents a reliable performance conclusion. The user reported light
+Twitter browsing during the run; that is a possible confounder, not a measured
+cause or a reason to discard samples. These are repeated embedding calls, not
+successive generated tokens. Normal desktop activity is allowed while doing
+functional checks; performance acceptance needs a separate controlled run.
+
+The [operation profile](../benchmark/results/embeddinggemma/operation-profile-20261012.json)
+of the earlier tail candidate measured about 2770 ms for the long input: MLP
+GEMM 1013 ms, other projection GEMM 576 ms, attention 1017 ms, and packing 53 ms.
+Attention children include values 484 ms, scores 356 ms and softmax 163 ms.
+Parent/child timers overlap and profiling adds overhead, including an extra
+maximum reduction; these numbers explain where work goes, not release speed.
+
+The product workflow now accepts a Hub model ID for `leaf embed`, downloads its
+supporting files automatically, validates metadata before weights, pins the
+weight download to the inspected revision, and supports offline cached reuse.
+The download contracts and existing CLI regressions pass **171 tests**. An
+[installed-wheel check](../benchmark/results/embeddinggemma/attention-span-package-20261013.json)
+passes first local preparation, local reuse and a real Hub offline-cache lookup
+by model ID, all without a compiler or heavy framework imports. Maximum error
+over its five reference embeddings is 2.39e-7. The offline Hub cache was built
+from the existing local snapshot using a synthetic revision; online transport
+and access errors were tested with mocks, not a new live gated download.
+
+The final bundled decoder passes [ten bit-exact architecture regressions](../benchmark/results/embeddinggemma/attention-span-decoder-20261013.json).
+The [installed encoder](../benchmark/results/embeddinggemma/attention-span-release-parity-20261013.json)
+also passes short, long and repeated-input reference checks at one thread, two
+threads and forced scalar execution (maximum error 3.80e-7 across variants).
+The next product step is a small supported-model onboarding matrix: public
+decoder, gated embedder, cached offline run and explicit unsupported-model error.
+Broader model coverage should extend shared operators and import validation,
+with correctness evidence before making performance claims.
+
 ## Usage
 
-Keep the complete local snapshot layout, including `config.json`,
+Supply a model ID and Leaf obtains the supporting files automatically:
+
+```sh
+leaf embed google/embeddinggemma-300m --text "Find documents about CPU inference" --task query --output query.npy
+leaf embed google/embeddinggemma-300m --offline --dataset ./data/documents.jsonl --output documents.npy
+```
+
+For gated Gemma access, accept the model's terms on Hugging Face and sign in once
+with `hf auth login`. Leaf reports this step when access is denied. The first
+online run checks configuration and module support before downloading weights,
+then fetches weights and tokenizer files at the same snapshot revision.
+Subsequent offline runs need no network. Both commands also accept registered
+aliases. Unsupported configurations fail before a large weight download; this
+does not add support for arbitrary embedding architectures.
+
+An existing local snapshot is also supported. Keep its layout, including `config.json`,
 `model.safetensors`, tokenizer files, `modules.json`, and the original module
 folders `1_Pooling`, `2_Dense`, `3_Dense`. Each dense folder needs its own
 `config.json` and `model.safetensors`. Leaf validates module semantics and tensor
@@ -32,7 +105,7 @@ uses NumPy and `tokenizers`; inference needs neither PyTorch nor Transformers.
 Platform wheels bundle `leaf_embed`; source installs need a C++17 compiler.
 `LEAF_CACHE_DIR` chooses the cache and `LEAF_EMBED_BIN` can select a test binary.
 
-Current limits: local FP32 snapshot only, 768 output dimensions, at most 2048
+Current limits: supported FP32 snapshot only, 768 output dimensions, at most 2048
 tokens per document including prefix/special tokens, and one million documents
 per invocation. Overlong text is rejected rather than silently truncated; split
 documents explicitly. Quantized embeddings, model-server APIs, parallel document

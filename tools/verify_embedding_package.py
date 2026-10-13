@@ -46,6 +46,20 @@ def main():
     environment["PATH"] = (
         str(Path(os.environ["SystemRoot"]) / "System32") if os.name == "nt" else ""
     )
+    # Exercise the real Hub offline resolver without network access or another
+    # download. This is a synthetic cache revision, not upstream provenance.
+    model_id = "google/embeddinggemma-300m"
+    revision = digest(args.model / "config.json")[:40]
+    hub = args.output / "cache/hub/models--google--embeddinggemma-300m"
+    snapshot = hub / "snapshots" / revision
+    for source in args.model.rglob("*"):
+        if source.is_file():
+            target = snapshot / source.relative_to(args.model)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            # Read-only fixture links avoid copying another gigabyte of weights.
+            os.link(source, target)
+    (hub / "refs").mkdir(parents=True)
+    (hub / "refs/main").write_text(revision)
     child = """
 import json, pathlib, shutil, sys
 sys.path.insert(0, sys.argv[1])
@@ -61,14 +75,15 @@ assert not any(name in sys.modules for name in ('torch','transformers','sentence
 raise SystemExit(status)
 """
     checks = []
-    for phase in ("first", "cached"):
+    for phase in ("first", "cached", "hub-offline"):
         output, metrics = (
             args.output / (phase + ".npy"),
             args.output / (phase + ".json"),
         )
         command = [
             "embed",
-            str(args.model.resolve()),
+            model_id if phase == "hub-offline" else str(args.model.resolve()),
+            "--offline",
             "--dataset",
             str(dataset.resolve()),
             "--task",
@@ -108,6 +123,8 @@ raise SystemExit(status)
         compiler_path_available=False,
         heavy_frameworks_imported=False,
         offline=True,
+        hub_offline_model_id_verified=True,
+        hub_cache_fixture="local snapshot hardlinks; synthetic revision, not a live download",
         timing_qualified=False,
         reference_record_sha256=digest(args.reference / "reference.json"),
     )

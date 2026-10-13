@@ -128,6 +128,12 @@ int main() {
                                 throw std::runtime_error("vector attention exceeds tolerance");
 #if defined(__x86_64__) && defined(__GNUC__)
                         if (__builtin_cpu_supports("avx2")) {
+                            std::vector<float> untrimmed(q.size());
+                            leaf::kernels::attention_vector_detail::attend<false>(
+                                q.data(), k.data(), v.data(), mask.data(), untrimmed.data(),
+                                batch, heads, kv, queries, keys, stride, dim, shape, .5f, polarity);
+                            if (std::memcmp(untrimmed.data(), actual.data()+1, untrimmed.size()*sizeof(float)))
+                                throw std::runtime_error("finite attention trimming changed output bits");
                             std::vector<float> previous(q.size());
                             previous_attend(q.data(),k.data(),v.data(),mask.data(),previous.data(),
                                 batch,heads,kv,queries,keys,stride,dim,shape,.5f,polarity);
@@ -142,7 +148,7 @@ int main() {
           }
         }
         // Fully masked rows return zero; masked nonfinite V retains the old
-        // 0*NaN behavior when another key is valid. No masked-key pruning.
+        // 0*NaN behavior when another key is valid, even with finite trimming.
         float q[8]={}, k[16]={}, v[16]={}, mask[2]={0,0}, y[8];
         const std::size_t shape[4]={1,1,1,2};
         leaf::kernels::attention_f32_gqa_strided_vector(q,k,v,mask,y,1,1,1,1,2,2,8,shape,1);
@@ -150,6 +156,22 @@ int main() {
         mask[0]=1; v[8]=std::numeric_limits<float>::quiet_NaN();
         leaf::kernels::attention_f32_gqa_strided_vector(q,k,v,mask,y,1,1,1,1,2,2,8,shape,1);
         if(!std::isnan(y[0])) throw std::runtime_error("masked nonfinite value behavior changed");
+#if defined(__x86_64__) && defined(__GNUC__)
+        if (__builtin_cpu_supports("avx2")) {
+            for (float special : {-0.0f, std::numeric_limits<float>::denorm_min(), INFINITY, -INFINITY, NAN}) {
+                for (int rounding : {FE_TONEAREST, FE_DOWNWARD, FE_UPWARD, FE_TOWARDZERO}) {
+                    const int saved_rounding = std::fegetround();
+                    std::fesetround(rounding);
+                    v[8] = special;
+                    float before[8];
+                    leaf::kernels::attention_vector_detail::attend<false>(q,k,v,mask,before,1,1,1,1,2,2,8,shape,1,true);
+                    leaf::kernels::attention_vector_detail::attend<true>(q,k,v,mask,y,1,1,1,1,2,2,8,shape,1,true);
+                    std::fesetround(saved_rounding);
+                    if (std::memcmp(before, y, sizeof(y))) throw std::runtime_error("span special-value/rounding fallback changed");
+                }
+            }
+        }
+#endif
         std::cout << "Attention vector correctness passed: GQA, broadcast masks, polarity, tails, guards and scalar fallback\n";
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }

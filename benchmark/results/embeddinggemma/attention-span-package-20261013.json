@@ -1,0 +1,144 @@
+{
+  "format": "leaf-installed-embedding-smoke-v1",
+  "passed": true,
+  "checks": [
+    {
+      "phase": "first",
+      "parity": {
+        "max_abs_error": 2.384185791015625e-07,
+        "min_cosine": 0.9999999999985933,
+        "max_norm_error": 5.960464477539063e-08,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      },
+      "metrics": {
+        "documents": 5,
+        "tokens": 101,
+        "dimensions": 768,
+        "threads": 1,
+        "task": "raw",
+        "precision": "FP32",
+        "avx2": true,
+        "preparation_ms": 7637.303299999985,
+        "tokenization_ms": 1017.9073000000471,
+        "native_process_ms": 856.4592999999832,
+        "output_write_ms": 14.971999999943364,
+        "end_to_end_ms": 9526.641899999959,
+        "timing_scope": "One CLI observation; native process includes startup and artifact loading, not a speed qualification.",
+        "source_sha256": {
+          "config.json": "8f863f76e2d9c710cc833dc92efa898c9adfd41031c786507cc6b0e49c2e3e68",
+          "modules.json": "5b5649645fb756dad1a8e2efe7872d3bb32bc00b93c95f276dd17f474eedccdc",
+          "model.safetensors": "cbf5a78393b6a033e0b8a63a57549964f7ed5c6fbeb4ba0694214f36123f2fd2",
+          "tokenizer.json": "6852f8d561078cc0cebe70ca03c5bfdd0d60a45f9d2e0e1e4cc05b68e9ec329e",
+          "tokenizer_config.json": "9076840490613047bc9115963ee96b7702018b0d26ba644240bf856efda93118",
+          "special_tokens_map.json": "2f7b0adf4fb469770bb1490e3e35df87b1dc578246c5e7e6fc76ecf33213a397",
+          "1_Pooling/config.json": "35bbd47d7fdf1e378db6130bcc668b09d1aa67a7bbf7c8f89a9c71f4cc8ebcc6",
+          "2_Dense/config.json": "0661e5e0b67b8f8408ab31ab5d073a78972fc1dc24a49992a64796557e4f9e53",
+          "2_Dense/model.safetensors": "c327f2acb00149676ade24a75e11eb6ebbd367f9ee050267ba56829d2979f702",
+          "3_Dense/config.json": "8c4575c49353d63fb907878856ba94384635c3b2711fd5b7439e7f71888c66fc",
+          "3_Dense/model.safetensors": "ffb6cc5162e11e2ce6bc2367e121ee3bbbc4e82e1ee26826bd7573d4948d81b8",
+          "added_tokens.json": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946"
+        },
+        "native_sha256": "f227d063cd3c22e00ac836952d3f354b68565aa65332a86ff4edf5648c3f48de",
+        "artifact_sha256": "ffb8125e612b09063e8da665758ba638efb1dffb94510e2c4e12efb7cce56cd1"
+      }
+    },
+    {
+      "phase": "cached",
+      "parity": {
+        "max_abs_error": 2.384185791015625e-07,
+        "min_cosine": 0.9999999999985933,
+        "max_norm_error": 5.960464477539063e-08,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      },
+      "metrics": {
+        "documents": 5,
+        "tokens": 101,
+        "dimensions": 768,
+        "threads": 1,
+        "task": "raw",
+        "precision": "FP32",
+        "avx2": true,
+        "preparation_ms": 2892.7439000000277,
+        "tokenization_ms": 983.5903000000599,
+        "native_process_ms": 636.5801999999121,
+        "output_write_ms": 5.634999999983847,
+        "end_to_end_ms": 4518.5493999999835,
+        "timing_scope": "One CLI observation; native process includes startup and artifact loading, not a speed qualification.",
+        "source_sha256": {
+          "config.json": "8f863f76e2d9c710cc833dc92efa898c9adfd41031c786507cc6b0e49c2e3e68",
+          "modules.json": "5b5649645fb756dad1a8e2efe7872d3bb32bc00b93c95f276dd17f474eedccdc",
+          "model.safetensors": "cbf5a78393b6a033e0b8a63a57549964f7ed5c6fbeb4ba0694214f36123f2fd2",
+          "tokenizer.json": "6852f8d561078cc0cebe70ca03c5bfdd0d60a45f9d2e0e1e4cc05b68e9ec329e",
+          "tokenizer_config.json": "9076840490613047bc9115963ee96b7702018b0d26ba644240bf856efda93118",
+          "special_tokens_map.json": "2f7b0adf4fb469770bb1490e3e35df87b1dc578246c5e7e6fc76ecf33213a397",
+          "1_Pooling/config.json": "35bbd47d7fdf1e378db6130bcc668b09d1aa67a7bbf7c8f89a9c71f4cc8ebcc6",
+          "2_Dense/config.json": "0661e5e0b67b8f8408ab31ab5d073a78972fc1dc24a49992a64796557e4f9e53",
+          "2_Dense/model.safetensors": "c327f2acb00149676ade24a75e11eb6ebbd367f9ee050267ba56829d2979f702",
+          "3_Dense/config.json": "8c4575c49353d63fb907878856ba94384635c3b2711fd5b7439e7f71888c66fc",
+          "3_Dense/model.safetensors": "ffb6cc5162e11e2ce6bc2367e121ee3bbbc4e82e1ee26826bd7573d4948d81b8",
+          "added_tokens.json": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946"
+        },
+        "native_sha256": "f227d063cd3c22e00ac836952d3f354b68565aa65332a86ff4edf5648c3f48de",
+        "artifact_sha256": "ffb8125e612b09063e8da665758ba638efb1dffb94510e2c4e12efb7cce56cd1"
+      }
+    },
+    {
+      "phase": "hub-offline",
+      "parity": {
+        "max_abs_error": 2.384185791015625e-07,
+        "min_cosine": 0.9999999999985933,
+        "max_norm_error": 5.960464477539063e-08,
+        "max_abs_limit": 0.0002,
+        "min_cosine_limit": 0.99999,
+        "max_norm_error_limit": 1e-05,
+        "passed": true
+      },
+      "metrics": {
+        "documents": 5,
+        "tokens": 101,
+        "dimensions": 768,
+        "threads": 1,
+        "task": "raw",
+        "precision": "FP32",
+        "avx2": true,
+        "preparation_ms": 3515.8237999999074,
+        "tokenization_ms": 991.5430000000924,
+        "native_process_ms": 674.0161999999827,
+        "output_write_ms": 5.067599999961203,
+        "end_to_end_ms": 5186.450599999944,
+        "timing_scope": "One CLI observation; native process includes startup and artifact loading, not a speed qualification.",
+        "source_sha256": {
+          "config.json": "8f863f76e2d9c710cc833dc92efa898c9adfd41031c786507cc6b0e49c2e3e68",
+          "modules.json": "5b5649645fb756dad1a8e2efe7872d3bb32bc00b93c95f276dd17f474eedccdc",
+          "model.safetensors": "cbf5a78393b6a033e0b8a63a57549964f7ed5c6fbeb4ba0694214f36123f2fd2",
+          "tokenizer.json": "6852f8d561078cc0cebe70ca03c5bfdd0d60a45f9d2e0e1e4cc05b68e9ec329e",
+          "tokenizer_config.json": "9076840490613047bc9115963ee96b7702018b0d26ba644240bf856efda93118",
+          "special_tokens_map.json": "2f7b0adf4fb469770bb1490e3e35df87b1dc578246c5e7e6fc76ecf33213a397",
+          "1_Pooling/config.json": "35bbd47d7fdf1e378db6130bcc668b09d1aa67a7bbf7c8f89a9c71f4cc8ebcc6",
+          "2_Dense/config.json": "0661e5e0b67b8f8408ab31ab5d073a78972fc1dc24a49992a64796557e4f9e53",
+          "2_Dense/model.safetensors": "c327f2acb00149676ade24a75e11eb6ebbd367f9ee050267ba56829d2979f702",
+          "3_Dense/config.json": "8c4575c49353d63fb907878856ba94384635c3b2711fd5b7439e7f71888c66fc",
+          "3_Dense/model.safetensors": "ffb6cc5162e11e2ce6bc2367e121ee3bbbc4e82e1ee26826bd7573d4948d81b8",
+          "added_tokens.json": "50b2f405ba56a26d4913fd772089992252d7f942123cc0a034d96424221ba946"
+        },
+        "native_sha256": "f227d063cd3c22e00ac836952d3f354b68565aa65332a86ff4edf5648c3f48de",
+        "artifact_sha256": "ffb8125e612b09063e8da665758ba638efb1dffb94510e2c4e12efb7cce56cd1"
+      }
+    }
+  ],
+  "native_executable_sha256": "f227d063cd3c22e00ac836952d3f354b68565aa65332a86ff4edf5648c3f48de",
+  "bundled_runtime_selected": true,
+  "compiler_path_available": false,
+  "heavy_frameworks_imported": false,
+  "offline": true,
+  "hub_offline_model_id_verified": true,
+  "hub_cache_fixture": "local snapshot hardlinks; synthetic revision, not a live download",
+  "timing_qualified": false,
+  "reference_record_sha256": "621482b5053f6efbb50440ffefdab19b4b6cb08b0448c1712134bc957c461a84"
+}

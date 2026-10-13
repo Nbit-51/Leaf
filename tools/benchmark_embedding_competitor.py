@@ -224,4 +224,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    from leaf.power import keep_awake
+    with keep_awake():
+        main()
