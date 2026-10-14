@@ -36,7 +36,7 @@ def summarize(rows: list[dict]) -> dict:
             raise ValueError("Invalid quality measurements")
     native_loss = sum(math.log(row["perplexity"]) * row["evaluated_tokens"] for row in rows) / total
     reference_loss = sum(math.log(row["pytorch_perplexity"]) * row["evaluated_tokens"] for row in rows) / total
-    return dict(evaluated_tokens=total, perplexity=math.exp(native_loss),
+    result = dict(evaluated_tokens=total, perplexity=math.exp(native_loss),
                 pytorch_perplexity=math.exp(reference_loss),
                 perplexity_ratio=math.exp(native_loss - reference_loss),
                 next_token_agreement=sum(row["next_token_agreement"] * row["evaluated_tokens"] for row in rows) / total,
@@ -44,6 +44,15 @@ def summarize(rows: list[dict]) -> dict:
                 pytorch_next_token_accuracy=sum(row["pytorch_correct_targets"] for row in rows) / total,
                 max_abs_logit_error=max(row["max_abs_logit_error"] for row in rows),
                 all_logits_close=all(row["logits_allclose"] for row in rows))
+    if all("diagnostics" in row for row in rows):
+        result["diagnostics"] = dict(
+            logit_tolerance_violations=sum(row["diagnostics"]["logit_tolerance_violations"] for row in rows),
+            max_probability_error=max(row["diagnostics"]["max_probability_error"] for row in rows),
+            max_total_variation=max(row["diagnostics"]["max_total_variation"] for row in rows),
+            max_kl_reference_to_leaf=max(row["diagnostics"]["max_kl_reference_to_leaf"] for row in rows),
+            mean_kl_reference_to_leaf=sum(row["diagnostics"]["mean_kl_reference_to_leaf"] * row["evaluated_tokens"]
+                                         for row in rows) / total)
+    return result
 
 
 def generation_comparison(expected: list[int], actual: list[int]) -> dict:
@@ -55,6 +64,71 @@ def generation_comparison(expected: list[int], actual: list[int]) -> dict:
     return dict(exact_match=expected == actual, matching_prefix_tokens=prefix,
                 first_mismatch_index=None if expected == actual else prefix,
                 reference_tokens=expected, leaf_tokens=actual)
+
+
+def logit_diagnostics(actual: np.ndarray, expected: np.ndarray,
+                      sequences: list[list[int]]) -> dict:
+    """Explain fidelity failures without changing acceptance gates.
+
+    Elementwise checks include every logit. Distribution and argmax diagnostics
+    include only rows with a next-token target, matching the likelihood metric.
+    Process a few rows at a time to bound the float64 probability workspace.
+    """
+    if (actual.ndim != 2 or actual.shape != expected.shape or actual.shape[1] < 2
+            or actual.shape[0] != sum(map(len, sequences))
+            or not np.isfinite(actual).all() or not np.isfinite(expected).all()):
+        raise ValueError("Invalid diagnostic logits")
+    scored = np.ones(actual.shape[0], dtype=bool)
+    offset = 0
+    for row in sequences:
+        if len(row) < 2:
+            raise ValueError("Diagnostics require a next-token target per sequence")
+        offset += len(row)
+        scored[offset - 1] = False
+    count = int(scored.sum())
+    if count == 0:
+        raise ValueError("No scored diagnostic targets")
+    violations, worst_ratio, worst = 0, -1.0, None
+    kl_sum, max_kl, max_tv, max_probability_error = 0.0, 0.0, 0.0, 0.0
+    disagreements = []
+    for start in range(0, len(actual), 8):
+        a = actual[start:start + 8].astype(np.float64)
+        e = expected[start:start + 8].astype(np.float64)
+        ratio = np.abs(a - e) / (2e-4 + 2e-4 * np.abs(e))
+        violations += int(np.sum(ratio > 1))
+        index = np.unravel_index(int(ratio.argmax()), ratio.shape)
+        if float(ratio[index]) > worst_ratio:
+            worst_ratio = float(ratio[index])
+            worst = dict(row=start + int(index[0]), token=int(index[1]),
+                         reference=float(e[index]), leaf=float(a[index]))
+        valid = scored[start:start + len(a)]
+        positions = np.flatnonzero(valid)
+        a, e = a[valid], e[valid]
+        if not len(a):
+            continue
+        predicted, reference = a.argmax(-1), e.argmax(-1)
+        for local in np.flatnonzero(predicted != reference):
+            top_two = np.partition(e[local], -2)[-2:]
+            disagreements.append(dict(row=start + int(positions[local]),
+                                      reference_token=int(reference[local]), leaf_token=int(predicted[local]),
+                                      reference_top2_margin=float(top_two[1] - top_two[0])))
+        # Log-softmax avoids log(0) for underflowed probabilities.
+        a -= a.max(-1, keepdims=True)
+        e -= e.max(-1, keepdims=True)
+        a -= np.log(np.exp(a).sum(-1, keepdims=True))
+        e -= np.log(np.exp(e).sum(-1, keepdims=True))
+        pa, pe = np.exp(a), np.exp(e)
+        kl = np.maximum(0.0, (pe * (e - a)).sum(-1))
+        difference = np.abs(pa - pe)
+        kl_sum += float(kl.sum())
+        max_kl = max(max_kl, float(kl.max()))
+        max_tv = max(max_tv, float(0.5 * difference.sum(-1).max()))
+        max_probability_error = max(max_probability_error, float(difference.max()))
+    return dict(logit_count=int(actual.size), logit_tolerance_violations=violations,
+                max_logit_tolerance_ratio=worst_ratio, worst_logit=worst,
+                scored_rows=count, mean_kl_reference_to_leaf=kl_sum / count,
+                max_kl_reference_to_leaf=max_kl, max_total_variation=max_tv,
+                max_probability_error=max_probability_error, argmax_disagreements=disagreements)
 
 
 def evaluate(args):
@@ -120,7 +194,8 @@ def evaluate(args):
                 targets = np.asarray(row[1:])
                 measured.update(index=index, logits_allclose=bool(np.allclose(actual, expected, atol=2e-4, rtol=2e-4)),
                                 leaf_correct_targets=int(np.sum(actual[:-1].argmax(-1) == targets)),
-                                pytorch_correct_targets=int(np.sum(expected[:-1].argmax(-1) == targets)))
+                                pytorch_correct_targets=int(np.sum(expected[:-1].argmax(-1) == targets)),
+                                diagnostics=logit_diagnostics(actual, expected, [row]))
                 record["blocks"].append(measured)
                 record["summary"] = summarize(record["blocks"])
                 write_record(report, record)

@@ -916,3 +916,30 @@ no need to repeat the full corpus or performance measurements for a CLI order fi
 All three local CI Python suites pass:823main,44diagnostic,50embedding tests.
 The first full local run had5sandbox temporary-directory permission failures;
 the main suite passed outside sandbox. HostedCI must pass before merging PR4.
+
+### Pythia numerical diagnosis and llama.cpp baseline — 2026-10-14
+
+Saved inputs were traced without altering normal-build arithmetic. First material
+70M amplification: layer index3 attention. SDPA itself fails2e-4atol/rtol against
+eager on block29 (81violations vsLeaf101); 160M block31 Leaf has1violation,
+float64 diagnostic also1 against eager. Direct-scale candidate remains unshipped.
+New leaf.evaluate diagnostics explain violation counts, KL/TV/probability error
+and argmax margins without changing gates.370focusedPython tests pass, native
+attention passes, real1blockCLI smoke passes, all6scalar/vector comparisons of
+fresh normal binary vsinstalled baseline byte-identical. Root user PNG untouched.
+
+User requested timing before pushing. Matched Pythia70 FP32 baseline complete:
+llama.cppb11540, same sourcecheckpoint, all76GGUF parameters verified exact after
+upstreamQKV permutation.1threadCPU2,63/127prefill plus1teacher-forced cachedtoken,
+6alternating rounds x11samples +3warmups. Pooled medians Leaf56.59395/112.8407ms
+prefill vsllama43.156/77.2813; decodeLeaf10.58845/11.16005 vs10.9867/11.4503.
+Allphasequalification fails due some per-pass/pool stability failures. llama
+numerical preflight fails (61/63,120/127argmaxmatches vsLeafall); initial stopped
+run retained, explicitdiagnostictiming run completed. No equal-quality speedclaim.
+llama CPU GELU uses tanh approximation; Leaf/reference exacterf. Not proven solecause.
+Next concrete prefill candidate: skip unused final-layer FFN rows forlast-logit
+requests, preserving all K/V and full-logit modes. llama already selects final
+outputrows beforelastFFN; Leafdoesnot. Do not rerun benchmarking now; user wants
+checkpoint afterpush and willresume whenusage replenishes. See
+ docs/pythia-runtime-comparison.md and docs/pythia-numerics-handoff.md.
+Localruns build/pythia-llama-20261014 and build/pythia-diagnostics-20261014.

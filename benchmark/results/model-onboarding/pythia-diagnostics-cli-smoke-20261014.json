@@ -1,0 +1,237 @@
+{
+  "format": "leaf-output-quality-v1",
+  "complete": true,
+  "passed": true,
+  "model": "build/manual-model-cache/hub/models--EleutherAI--pythia-70m/snapshots/a39f36b100fe8a5377810d56c3f4789b9c53ac42",
+  "measured_at_utc": "2026-10-14T12:36:19.727792+00:00",
+  "precision": "FP32",
+  "timing_qualified": false,
+  "scope": "Deterministic corpus prefix in independent fixed-length blocks; raw greedy prompts. Measures model likelihood and runtime fidelity, not factual/chat task accuracy or speed.",
+  "requested_blocks": 1,
+  "sequence_length": 16,
+  "threads": 1,
+  "dataset_source": "Synthetic CLI smoke input; no corpus qualification",
+  "dataset_sha256": "b54eb90d353d5c289596e2504a34b0222e2972060ff48a610994767a71b3dd85",
+  "text_column": "text",
+  "torch": "2.12.0+cpu",
+  "transformers": "5.14.1",
+  "evaluator_sha256": "381b8437ac2aa874cf01b0b285b2a7041d515d2a057eefc2bf1dd52dd9415637",
+  "gates": {
+    "min_next_token_agreement": 0.999,
+    "max_perplexity_ratio": 1.001,
+    "logit_atol": 0.0002,
+    "logit_rtol": 0.0002,
+    "exact_generation_required": true
+  },
+  "blocks": [
+    {
+      "evaluated_tokens": 15,
+      "max_abs_logit_error": 0.005859375,
+      "relative_logit_rmse": 6.018677254360227e-07,
+      "next_token_agreement": 1.0,
+      "perplexity": 413.5568443645026,
+      "pytorch_perplexity": 413.61983308668664,
+      "perplexity_ratio": 0.9998477134867687,
+      "index": 0,
+      "logits_allclose": true,
+      "leaf_correct_targets": 2,
+      "pytorch_correct_targets": 2,
+      "diagnostics": {
+        "logit_count": 804864,
+        "logit_tolerance_violations": 0,
+        "max_logit_tolerance_ratio": 0.05102536289731886,
+        "worst_logit": {
+          "row": 2,
+          "token": 236,
+          "reference": 369.8135986328125,
+          "leaf": 369.8173828125
+        },
+        "scored_rows": 15,
+        "mean_kl_reference_to_leaf": 1.2764692395223096e-07,
+        "max_kl_reference_to_leaf": 4.338901438427221e-07,
+        "max_total_variation": 0.0003603671295001519,
+        "max_probability_error": 0.00018201767896264265,
+        "argmax_disagreements": []
+      }
+    }
+  ],
+  "generations": [
+    {
+      "prompt": "The purpose of a computer is",
+      "input_ids": [
+        510,
+        4096,
+        273,
+        247,
+        4382,
+        310
+      ],
+      "exact_match": true,
+      "matching_prefix_tokens": 1,
+      "first_mismatch_index": null,
+      "reference_tokens": [
+        281
+      ],
+      "leaf_tokens": [
+        281
+      ],
+      "reference_text": " to",
+      "leaf_text": " to"
+    },
+    {
+      "prompt": "Once upon a time, a small robot found",
+      "input_ids": [
+        10758,
+        2220,
+        247,
+        673,
+        13,
+        247,
+        1355,
+        15688,
+        1119
+      ],
+      "exact_match": true,
+      "matching_prefix_tokens": 1,
+      "first_mismatch_index": null,
+      "reference_tokens": [
+        253
+      ],
+      "leaf_tokens": [
+        253
+      ],
+      "reference_text": " the",
+      "leaf_text": " the"
+    },
+    {
+      "prompt": "Question: What is the capital of France?\nAnswer:",
+      "input_ids": [
+        23433,
+        27,
+        1737,
+        310,
+        253,
+        5347,
+        273,
+        6181,
+        32,
+        187,
+        32869,
+        27
+      ],
+      "exact_match": true,
+      "matching_prefix_tokens": 1,
+      "first_mismatch_index": null,
+      "reference_tokens": [
+        187
+      ],
+      "leaf_tokens": [
+        187
+      ],
+      "reference_text": "\n",
+      "leaf_text": "\n"
+    },
+    {
+      "prompt": "Two plus two equals",
+      "input_ids": [
+        7910,
+        5043,
+        767,
+        18207
+      ],
+      "exact_match": true,
+      "matching_prefix_tokens": 1,
+      "first_mismatch_index": null,
+      "reference_tokens": [
+        253
+      ],
+      "leaf_tokens": [
+        253
+      ],
+      "reference_text": " the",
+      "leaf_text": " the"
+    },
+    {
+      "prompt": "def add(a, b):\n    return",
+      "input_ids": [
+        1545,
+        823,
+        9,
+        66,
+        13,
+        270,
+        2262,
+        187,
+        50274,
+        2309
+      ],
+      "exact_match": true,
+      "matching_prefix_tokens": 1,
+      "first_mismatch_index": null,
+      "reference_tokens": [
+        247
+      ],
+      "leaf_tokens": [
+        247
+      ],
+      "reference_text": " a",
+      "leaf_text": " a"
+    },
+    {
+      "prompt": "Hello! Caf\u00e9, na\u00efve, and Unicode text:",
+      "input_ids": [
+        12092,
+        2,
+        42107,
+        860,
+        13,
+        36060,
+        13,
+        285,
+        39879,
+        2505,
+        27
+      ],
+      "exact_match": true,
+      "matching_prefix_tokens": 1,
+      "first_mismatch_index": null,
+      "reference_tokens": [
+        187
+      ],
+      "leaf_tokens": [
+        187
+      ],
+      "reference_text": "\n",
+      "leaf_text": "\n"
+    }
+  ],
+  "snapshot": "C:\\Users\\navaneeth\\leaf\\build\\manual-model-cache\\hub\\models--EleutherAI--pythia-70m\\snapshots\\a39f36b100fe8a5377810d56c3f4789b9c53ac42",
+  "artifact_sha256": "164d7c29a66cbca954c283f248838f9471bf5627d2cd0a1948d048a93134034b",
+  "executable_sha256": "06890e9b5f93a3283a88c714dc49b2b2aa2e2d9c27b5285b852609e50c13d047",
+  "source_sha256": {
+    "config.json": "002050231a9b1ec3ac77aa6b9b3bbdc4d923f4068a7dd33b8da72a9bd6ad9a43",
+    "model.safetensors": "ebfa4e2f18696ebd83716a0d39fe2c025f2ff8483f72a83ca59c475692fc9d15",
+    "special_tokens_map.json": "6f50ab5a5a509a1c309d6171f339b196a900dc9c99ad0408ff23bb615fdae7ad",
+    "tokenizer.json": "c24618a1b3e6a38167beff1c72cffd126c3a66254347304b50547d12c5f25624",
+    "tokenizer_config.json": "70e38394e494931c6f773ba41e19460dd4436526b852207367f04341b4066d3f"
+  },
+  "tokens_sha256": "13ac4c2f1e4c7c7433572485e7f6d1f5e916410d00bddef3fd23e717f388da04",
+  "summary": {
+    "evaluated_tokens": 15,
+    "perplexity": 413.5568443645026,
+    "pytorch_perplexity": 413.61983308668664,
+    "perplexity_ratio": 0.9998477134867687,
+    "next_token_agreement": 1.0,
+    "leaf_next_token_accuracy": 0.13333333333333333,
+    "pytorch_next_token_accuracy": 0.13333333333333333,
+    "max_abs_logit_error": 0.005859375,
+    "all_logits_close": true,
+    "diagnostics": {
+      "logit_tolerance_violations": 0,
+      "max_probability_error": 0.00018201767896264265,
+      "max_total_variation": 0.0003603671295001519,
+      "max_kl_reference_to_leaf": 4.338901438427221e-07,
+      "mean_kl_reference_to_leaf": 1.2764692395223096e-07
+    }
+  }
+}

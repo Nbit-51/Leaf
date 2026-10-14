@@ -1,0 +1,62 @@
+{
+  "complete": true,
+  "runtime_sha256": "06890e9b5f93a3283a88c714dc49b2b2aa2e2d9c27b5285b852609e50c13d047",
+  "baseline_sha256": "eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9",
+  "scope": "Correctness regression and diagnostic output; no timing qualification",
+  "checks": [
+    {
+      "model": "pythia70",
+      "block": 10,
+      "scalar": false,
+      "bit_exact": true
+    },
+    {
+      "model": "pythia70",
+      "block": 10,
+      "scalar": true,
+      "bit_exact": true
+    },
+    {
+      "model": "pythia70",
+      "block": 29,
+      "scalar": false,
+      "bit_exact": true
+    },
+    {
+      "model": "pythia70",
+      "block": 29,
+      "scalar": true,
+      "bit_exact": true
+    },
+    {
+      "model": "pythia160",
+      "block": 31,
+      "scalar": false,
+      "bit_exact": true
+    },
+    {
+      "model": "pythia160",
+      "block": 31,
+      "scalar": true,
+      "bit_exact": true
+    }
+  ],
+  "retained_failure_diagnostics": {
+    "logit_count": 6438912,
+    "logit_tolerance_violations": 101,
+    "max_logit_tolerance_ratio": 6.716791734084944,
+    "worst_logit": {
+      "row": 50,
+      "token": 237,
+      "reference": 0.5554304122924805,
+      "leaf": 0.5575199127197266
+    },
+    "scored_rows": 127,
+    "mean_kl_reference_to_leaf": 2.641058212272553e-07,
+    "max_kl_reference_to_leaf": 3.2471675334167774e-06,
+    "max_total_variation": 0.0008563805866166383,
+    "max_probability_error": 0.0007399093056046496,
+    "argmax_disagreements": []
+  },
+  "normal_build_ignores_trace_env": true
+}

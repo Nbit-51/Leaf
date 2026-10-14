@@ -59,7 +59,10 @@ pretraining; this test does not claim training-set decontamination.
 
 - Native and reference perplexity, pooled through token-weighted log losses.
 - Next-token accuracy against the dataset for each runtime, and their agreement.
-- Logit tolerances and observed errors.
+- Logit tolerances, violation counts and the worst offending coordinate.
+- Probability error, total variation and reference-to-Leaf KL divergence on
+  scored rows, plus reference top-two margins at any argmax disagreements.
+  These are explanatory diagnostics; they do not replace the acceptance gates.
 - Six fixed raw-prompt greedy continuations, their actual text/tokens and first
   divergence. These include prose, a factual question, arithmetic, code and Unicode;
   matching an answer does **not** establish that the answer is correct.
@@ -105,9 +108,13 @@ Leaf 0.5575199); scalar execution also fails. The old and new runtimes produce
 bit-identical outputs on that block and on block 11, which contains the single
 top-token disagreement. There the reference top-two margin is 0.00012207.
 This establishes a pre-existing numerical discrepancy on the checked blocks;
-it does not identify the first divergent operator. The next numerical investigation
-should trace layer outputs on these saved inputs, without rerunning speed gates or
-relaxing the tolerance to manufacture a pass.
+it did not identify the first divergent operator. The October 14 trace now
+localizes the first material amplification to layer index 3 attention. PyTorch
+SDPA also fails the existing elementwise tolerance against eager on the same
+70M input. A direct-scale candidate helps some checks but still fails 70M;
+neither the default arithmetic nor the gate has changed. See the
+[numerical findings and next steps](pythia-numerics-handoff.md) before repeating
+tests. These are correctness diagnostics, not new performance results.
 
 Evidence:
 [70M quality](../benchmark/results/model-onboarding/pythia70-quality-20261013.json),

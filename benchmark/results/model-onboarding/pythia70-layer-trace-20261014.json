@@ -1,0 +1,741 @@
+{
+  "complete": true,
+  "block": 29,
+  "quality_record_sha256": "0b0a501a8d48aa9846189af3b942b11c9becfdb71c1f67737c155093706376f7",
+  "executable_sha256": "96bd3fd501785a204ba861b46a513b6299b25507bbc1309cf5b78e4181553b48",
+  "baseline_sha256": "eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9",
+  "torch": "2.12.0+cpu",
+  "transformers": "5.14.1",
+  "tensors": {
+    "embedding": {
+      "size": 65536,
+      "max_abs_error": 0.0,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.0,
+      "worst_flat_index": 0,
+      "reference_at_worst": 0.0211181640625,
+      "native_at_worst": 0.0211181640625
+    },
+    "model.layers.0.input_norm": {
+      "size": 65536,
+      "max_abs_error": 2.86102294921875e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.002399485550298016,
+      "worst_flat_index": 16137,
+      "reference_at_worst": -0.4904356002807617,
+      "native_at_worst": -0.4904348850250244
+    },
+    "model.layers.0.q": {
+      "size": 65536,
+      "max_abs_error": 5.7220458984375e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.007620606800781921,
+      "worst_flat_index": 8880,
+      "reference_at_worst": 0.01679617166519165,
+      "native_at_worst": 0.01679462194442749
+    },
+    "model.layers.0.k": {
+      "size": 65536,
+      "max_abs_error": 6.67572021484375e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.014679988549079924,
+      "worst_flat_index": 36670,
+      "reference_at_worst": 0.12672355771064758,
+      "native_at_worst": 0.12672686576843262
+    },
+    "model.layers.0.v": {
+      "size": 65536,
+      "max_abs_error": 3.0994415283203125e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.00507607830936292,
+      "worst_flat_index": 8194,
+      "reference_at_worst": 2.052988290786743,
+      "native_at_worst": 2.052985191345215
+    },
+    "model.layers.0.q_rotary": {
+      "size": 65536,
+      "max_abs_error": 6.67572021484375e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.010904580774482583,
+      "worst_flat_index": 61120,
+      "reference_at_worst": -0.09320378303527832,
+      "native_at_worst": -0.09320616722106934
+    },
+    "model.layers.0.k_rotary": {
+      "size": 65536,
+      "max_abs_error": 6.67572021484375e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.014679988549079924,
+      "worst_flat_index": 37374,
+      "reference_at_worst": 0.12672355771064758,
+      "native_at_worst": 0.12672686576843262
+    },
+    "model.layers.0.attention": {
+      "size": 65536,
+      "max_abs_error": 7.212162017822266e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.028720962359475043,
+      "worst_flat_index": 59485,
+      "reference_at_worst": 0.07137419283390045,
+      "native_at_worst": 0.07138034701347351
+    },
+    "model.layers.0.attn_projected": {
+      "size": 65536,
+      "max_abs_error": 3.814697265625e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.015035964064830369,
+      "worst_flat_index": 54685,
+      "reference_at_worst": 0.025720849633216858,
+      "native_at_worst": 0.025723934173583984
+    },
+    "model.layers.0.post_norm": {
+      "size": 65536,
+      "max_abs_error": 7.62939453125e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.001673962016328763,
+      "worst_flat_index": 24998,
+      "reference_at_worst": -2.56069278717041,
+      "native_at_worst": -2.5606915950775146
+    },
+    "model.layers.0.up": {
+      "size": 262144,
+      "max_abs_error": 5.7220458984375e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.006587508848931295,
+      "worst_flat_index": 161280,
+      "reference_at_worst": -2.4382898807525635,
+      "native_at_worst": -2.4382944107055664
+    },
+    "model.layers.0.activation": {
+      "size": 262144,
+      "max_abs_error": 2.9802322387695312e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.00600104783513504,
+      "worst_flat_index": 146380,
+      "reference_at_worst": 1.2844457626342773,
+      "native_at_worst": 1.284448504447937
+    },
+    "model.layers.0.down": {
+      "size": 65536,
+      "max_abs_error": 3.509223461151123e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.016096746490740096,
+      "worst_flat_index": 23708,
+      "reference_at_worst": -0.09004122763872147,
+      "native_at_worst": -0.09004473686218262
+    },
+    "model.layers.0.hidden": {
+      "size": 65536,
+      "max_abs_error": 4.291534423828125e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.014870046629945883,
+      "worst_flat_index": 44510,
+      "reference_at_worst": 0.18246906995773315,
+      "native_at_worst": 0.1824655532836914
+    },
+    "model.layers.1.input_norm": {
+      "size": 65536,
+      "max_abs_error": 1.3947486877441406e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.05077208061512849,
+      "worst_flat_index": 44510,
+      "reference_at_worst": 0.3735390305519104,
+      "native_at_worst": 0.37352508306503296
+    },
+    "model.layers.1.q": {
+      "size": 65536,
+      "max_abs_error": 1.1205673217773438e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.0344093014115088,
+      "worst_flat_index": 44487,
+      "reference_at_worst": -0.2905074656009674,
+      "native_at_worst": -0.29051634669303894
+    },
+    "model.layers.1.k": {
+      "size": 65536,
+      "max_abs_error": 1.049041748046875e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.020294792997694117,
+      "worst_flat_index": 19387,
+      "reference_at_worst": 0.8209044933319092,
+      "native_at_worst": 0.8209118843078613
+    },
+    "model.layers.1.v": {
+      "size": 65536,
+      "max_abs_error": 8.165836334228516e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.03601144524213828,
+      "worst_flat_index": 34898,
+      "reference_at_worst": -0.08309425413608551,
+      "native_at_worst": -0.08310205489397049
+    },
+    "model.layers.1.q_rotary": {
+      "size": 65536,
+      "max_abs_error": 1.1205673217773438e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.03586268850573441,
+      "worst_flat_index": 62855,
+      "reference_at_worst": -0.24028532207012177,
+      "native_at_worst": -0.2402942180633545
+    },
+    "model.layers.1.k_rotary": {
+      "size": 65536,
+      "max_abs_error": 1.049041748046875e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.020294792997694117,
+      "worst_flat_index": 51579,
+      "reference_at_worst": 0.8209044933319092,
+      "native_at_worst": 0.8209118843078613
+    },
+    "model.layers.1.attention": {
+      "size": 65536,
+      "max_abs_error": 1.0281801223754883e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.0353825817026886,
+      "worst_flat_index": 52945,
+      "reference_at_worst": 0.4529467225074768,
+      "native_at_worst": 0.45293644070625305
+    },
+    "model.layers.1.attn_projected": {
+      "size": 65536,
+      "max_abs_error": 3.993511199951172e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.014858048581143528,
+      "worst_flat_index": 17309,
+      "reference_at_worst": -0.12826433777809143,
+      "native_at_worst": -0.12826098501682281
+    },
+    "model.layers.1.post_norm": {
+      "size": 65536,
+      "max_abs_error": 1.9073486328125e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.03720784301105978,
+      "worst_flat_index": 44510,
+      "reference_at_worst": 0.4817923307418823,
+      "native_at_worst": 0.4817813038825989
+    },
+    "model.layers.1.up": {
+      "size": 262144,
+      "max_abs_error": 2.9087066650390625e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.09114983164214793,
+      "worst_flat_index": 141294,
+      "reference_at_worst": 0.12310659885406494,
+      "native_at_worst": 0.12312707304954529
+    },
+    "model.layers.1.activation": {
+      "size": 262144,
+      "max_abs_error": 1.823902130126953e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.05729690536134052,
+      "worst_flat_index": 141294,
+      "reference_at_worst": 0.06758412718772888,
+      "native_at_worst": 0.06759636104106903
+    },
+    "model.layers.1.down": {
+      "size": 65536,
+      "max_abs_error": 5.27501106262207e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.022315797779976866,
+      "worst_flat_index": 44445,
+      "reference_at_worst": -0.0650460422039032,
+      "native_at_worst": -0.06505079567432404
+    },
+    "model.layers.1.hidden": {
+      "size": 65536,
+      "max_abs_error": 8.58306884765625e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.021769095366697994,
+      "worst_flat_index": 22941,
+      "reference_at_worst": 0.10890603065490723,
+      "native_at_worst": 0.10890120267868042
+    },
+    "model.layers.2.input_norm": {
+      "size": 65536,
+      "max_abs_error": 1.430511474609375e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.04040365743516621,
+      "worst_flat_index": 64925,
+      "reference_at_worst": 0.3645867705345154,
+      "native_at_worst": 0.36459779739379883
+    },
+    "model.layers.2.q": {
+      "size": 65536,
+      "max_abs_error": 1.1563301086425781e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.05554152487170054,
+      "worst_flat_index": 55631,
+      "reference_at_worst": -0.014131128787994385,
+      "native_at_worst": -0.014142394065856934
+    },
+    "model.layers.2.k": {
+      "size": 65536,
+      "max_abs_error": 1.4781951904296875e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.03242099066364154,
+      "worst_flat_index": 13706,
+      "reference_at_worst": 0.024940595030784607,
+      "native_at_worst": 0.024947240948677063
+    },
+    "model.layers.2.v": {
+      "size": 65536,
+      "max_abs_error": 1.138448715209961e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.05140636469698447,
+      "worst_flat_index": 34973,
+      "reference_at_worst": -0.0409955158829689,
+      "native_at_worst": -0.04098481312394142
+    },
+    "model.layers.2.q_rotary": {
+      "size": 65536,
+      "max_abs_error": 1.1395663022994995e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.05488967467871336,
+      "worst_flat_index": 47887,
+      "reference_at_worst": 0.03805160894989967,
+      "native_at_worst": 0.03804021328687668
+    },
+    "model.layers.2.k_rotary": {
+      "size": 65536,
+      "max_abs_error": 1.430511474609375e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.03493290591492747,
+      "worst_flat_index": 53509,
+      "reference_at_worst": 0.10267098248004913,
+      "native_at_worst": 0.10266327857971191
+    },
+    "model.layers.2.attention": {
+      "size": 65536,
+      "max_abs_error": 9.506940841674805e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.040791051266845374,
+      "worst_flat_index": 1932,
+      "reference_at_worst": -0.16532187163829803,
+      "native_at_worst": -0.16531236469745636
+    },
+    "model.layers.2.attn_projected": {
+      "size": 65536,
+      "max_abs_error": 7.033348083496094e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.01928963177872597,
+      "worst_flat_index": 24355,
+      "reference_at_worst": 0.2475808560848236,
+      "native_at_worst": 0.247576043009758
+    },
+    "model.layers.2.post_norm": {
+      "size": 65536,
+      "max_abs_error": 1.52587890625e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.045042923500891695,
+      "worst_flat_index": 64925,
+      "reference_at_worst": 0.3629840016365051,
+      "native_at_worst": 0.36299628019332886
+    },
+    "model.layers.2.up": {
+      "size": 262144,
+      "max_abs_error": 0.000110626220703125,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.05137617649776122,
+      "worst_flat_index": 79685,
+      "reference_at_worst": -0.004989609122276306,
+      "native_at_worst": -0.004999935626983643
+    },
+    "model.layers.2.activation": {
+      "size": 262144,
+      "max_abs_error": 6.4849853515625e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.04203935104517571,
+      "worst_flat_index": 222489,
+      "reference_at_worst": 0.6163259744644165,
+      "native_at_worst": 0.6163395643234253
+    },
+    "model.layers.2.down": {
+      "size": 65536,
+      "max_abs_error": 5.7220458984375e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.017201110712493493,
+      "worst_flat_index": 35996,
+      "reference_at_worst": -0.256121426820755,
+      "native_at_worst": -0.2561171054840088
+    },
+    "model.layers.2.hidden": {
+      "size": 65536,
+      "max_abs_error": 6.103515625e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.024072716142121236,
+      "worst_flat_index": 46097,
+      "reference_at_worst": 0.05231058597564697,
+      "native_at_worst": 0.052305519580841064
+    },
+    "model.layers.3.input_norm": {
+      "size": 65536,
+      "max_abs_error": 3.147125244140625e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.09180913799514989,
+      "worst_flat_index": 46097,
+      "reference_at_worst": -0.2286553680896759,
+      "native_at_worst": -0.2286779284477234
+    },
+    "model.layers.3.q": {
+      "size": 65536,
+      "max_abs_error": 0.000762939453125,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.7506547409816025,
+      "worst_flat_index": 10083,
+      "reference_at_worst": -1.0470232963562012,
+      "native_at_worst": -1.0467159748077393
+    },
+    "model.layers.3.k": {
+      "size": 65536,
+      "max_abs_error": 1.9073486328125e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.05158322097637614,
+      "worst_flat_index": 16391,
+      "reference_at_worst": 0.06739729642868042,
+      "native_at_worst": 0.06738628447055817
+    },
+    "model.layers.3.v": {
+      "size": 65536,
+      "max_abs_error": 7.3909759521484375e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.029978022617475897,
+      "worst_flat_index": 1576,
+      "reference_at_worst": -0.13083314895629883,
+      "native_at_worst": -0.13082636892795563
+    },
+    "model.layers.3.q_rotary": {
+      "size": 65536,
+      "max_abs_error": 0.000762939453125,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.7506547409816025,
+      "worst_flat_index": 42211,
+      "reference_at_worst": -1.0470232963562012,
+      "native_at_worst": -1.0467159748077393
+    },
+    "model.layers.3.k_rotary": {
+      "size": 65536,
+      "max_abs_error": 1.9073486328125e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.052700901609447764,
+      "worst_flat_index": 2055,
+      "reference_at_worst": 0.04546681046485901,
+      "native_at_worst": 0.04545579105615616
+    },
+    "model.layers.3.attention": {
+      "size": 65536,
+      "max_abs_error": 0.0020758509635925293,
+      "tolerance_violations": 1750,
+      "max_tolerance_ratio": 6.067993305013824,
+      "worst_flat_index": 20388,
+      "reference_at_worst": 0.7104921340942383,
+      "native_at_worst": 0.7125679850578308
+    },
+    "model.layers.3.attn_projected": {
+      "size": 65536,
+      "max_abs_error": 0.0012447834014892578,
+      "tolerance_violations": 687,
+      "max_tolerance_ratio": 3.5651067043913462,
+      "worst_flat_index": 46494,
+      "reference_at_worst": 0.12802384793758392,
+      "native_at_worst": 0.12882815301418304
+    },
+    "model.layers.3.post_norm": {
+      "size": 65536,
+      "max_abs_error": 1.71661376953125e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.04827081007602535,
+      "worst_flat_index": 23828,
+      "reference_at_worst": 0.012533426284790039,
+      "native_at_worst": 0.012523651123046875
+    },
+    "model.layers.3.up": {
+      "size": 262144,
+      "max_abs_error": 1.430511474609375e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.03910863596899467,
+      "worst_flat_index": 220312,
+      "reference_at_worst": 0.03256341814994812,
+      "native_at_worst": 0.032571494579315186
+    },
+    "model.layers.3.activation": {
+      "size": 262144,
+      "max_abs_error": 1.2576580047607422e-05,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.03625628152964804,
+      "worst_flat_index": 165897,
+      "reference_at_worst": 0.7344001531600952,
+      "native_at_worst": 0.7344127297401428
+    },
+    "model.layers.3.down": {
+      "size": 65536,
+      "max_abs_error": 7.748603820800781e-06,
+      "tolerance_violations": 0,
+      "max_tolerance_ratio": 0.02928528317727669,
+      "worst_flat_index": 53404,
+      "reference_at_worst": 0.08380284905433655,
+      "native_at_worst": 0.08379650115966797
+    },
+    "model.layers.3.hidden": {
+      "size": 65536,
+      "max_abs_error": 0.0012443065643310547,
+      "tolerance_violations": 515,
+      "max_tolerance_ratio": 2.708462242680017,
+      "worst_flat_index": 53614,
+      "reference_at_worst": -0.390886127948761,
+      "native_at_worst": -0.39013269543647766
+    },
+    "model.layers.4.input_norm": {
+      "size": 65536,
+      "max_abs_error": 0.0065479278564453125,
+      "tolerance_violations": 4353,
+      "max_tolerance_ratio": 21.53362135059928,
+      "worst_flat_index": 14618,
+      "reference_at_worst": -0.021689295768737793,
+      "native_at_worst": -0.017289161682128906
+    },
+    "model.layers.4.q": {
+      "size": 65536,
+      "max_abs_error": 0.3988494873046875,
+      "tolerance_violations": 10867,
+      "max_tolerance_ratio": 371.2145005065743,
+      "worst_flat_index": 12437,
+      "reference_at_worst": -0.0316619873046875,
+      "native_at_worst": 0.04493159055709839
+    },
+    "model.layers.4.k": {
+      "size": 65536,
+      "max_abs_error": 0.0025720596313476562,
+      "tolerance_violations": 263,
+      "max_tolerance_ratio": 5.37926136843611,
+      "worst_flat_index": 14723,
+      "reference_at_worst": 0.05837702751159668,
+      "native_at_worst": 0.057238370180130005
+    },
+    "model.layers.4.v": {
+      "size": 65536,
+      "max_abs_error": 0.0005929470062255859,
+      "tolerance_violations": 70,
+      "max_tolerance_ratio": 2.0736206184730026,
+      "worst_flat_index": 13882,
+      "reference_at_worst": 0.029295235872268677,
+      "native_at_worst": 0.028868362307548523
+    },
+    "model.layers.4.q_rotary": {
+      "size": 65536,
+      "max_abs_error": 0.3988494873046875,
+      "tolerance_violations": 10859,
+      "max_tolerance_ratio": 371.2145005065743,
+      "worst_flat_index": 17941,
+      "reference_at_worst": -0.0316619873046875,
+      "native_at_worst": 0.04493159055709839
+    },
+    "model.layers.4.k_rotary": {
+      "size": 65536,
+      "max_abs_error": 0.0025854110717773438,
+      "tolerance_violations": 254,
+      "max_tolerance_ratio": 3.874026997762623,
+      "worst_flat_index": 23054,
+      "reference_at_worst": -0.017610669136047363,
+      "native_at_worst": -0.01839911937713623
+    },
+    "model.layers.4.attention": {
+      "size": 65536,
+      "max_abs_error": 0.01297450065612793,
+      "tolerance_violations": 10679,
+      "max_tolerance_ratio": 43.80384283557257,
+      "worst_flat_index": 52675,
+      "reference_at_worst": -0.48097744584083557,
+      "native_at_worst": -0.46800294518470764
+    },
+    "model.layers.4.attn_projected": {
+      "size": 65536,
+      "max_abs_error": 0.001923978328704834,
+      "tolerance_violations": 8527,
+      "max_tolerance_ratio": 8.23000024400106,
+      "worst_flat_index": 64861,
+      "reference_at_worst": 0.16888108849525452,
+      "native_at_worst": 0.16695711016654968
+    },
+    "model.layers.4.post_norm": {
+      "size": 65536,
+      "max_abs_error": 0.00211334228515625,
+      "tolerance_violations": 2820,
+      "max_tolerance_ratio": 5.7541037682262335,
+      "worst_flat_index": 20160,
+      "reference_at_worst": -0.08869224786758423,
+      "native_at_worst": -0.08994513750076294
+    },
+    "model.layers.4.up": {
+      "size": 262144,
+      "max_abs_error": 0.004028797149658203,
+      "tolerance_violations": 927,
+      "max_tolerance_ratio": 7.13442388718529,
+      "worst_flat_index": 146383,
+      "reference_at_worst": 0.41901421546936035,
+      "native_at_worst": 0.41698944568634033
+    },
+    "model.layers.4.activation": {
+      "size": 262144,
+      "max_abs_error": 0.004028797149658203,
+      "tolerance_violations": 267,
+      "max_tolerance_ratio": 6.457092190830496,
+      "worst_flat_index": 146383,
+      "reference_at_worst": 0.27755382657051086,
+      "native_at_worst": 0.27590397000312805
+    },
+    "model.layers.4.down": {
+      "size": 65536,
+      "max_abs_error": 0.002135038375854492,
+      "tolerance_violations": 565,
+      "max_tolerance_ratio": 4.560654496878931,
+      "worst_flat_index": 45874,
+      "reference_at_worst": 0.8627045750617981,
+      "native_at_worst": 0.8610055446624756
+    },
+    "model.layers.4.hidden": {
+      "size": 65536,
+      "max_abs_error": 0.0022368431091308594,
+      "tolerance_violations": 6679,
+      "max_tolerance_ratio": 7.537998122098427,
+      "worst_flat_index": 64861,
+      "reference_at_worst": -0.3144179582595825,
+      "native_at_worst": -0.31639957427978516
+    },
+    "model.layers.5.input_norm": {
+      "size": 65536,
+      "max_abs_error": 0.06884002685546875,
+      "tolerance_violations": 15302,
+      "max_tolerance_ratio": 26.592306593795392,
+      "worst_flat_index": 63427,
+      "reference_at_worst": -1.7480311393737793,
+      "native_at_worst": -1.7334158420562744
+    },
+    "model.layers.5.q": {
+      "size": 65536,
+      "max_abs_error": 0.22674560546875,
+      "tolerance_violations": 11931,
+      "max_tolerance_ratio": 418.9555187356615,
+      "worst_flat_index": 60950,
+      "reference_at_worst": 0.34685516357421875,
+      "native_at_worst": 0.45970964431762695
+    },
+    "model.layers.5.k": {
+      "size": 65536,
+      "max_abs_error": 0.007746696472167969,
+      "tolerance_violations": 1191,
+      "max_tolerance_ratio": 19.557913217199157,
+      "worst_flat_index": 48783,
+      "reference_at_worst": -0.10271215438842773,
+      "native_at_worst": -0.10702550411224365
+    },
+    "model.layers.5.v": {
+      "size": 65536,
+      "max_abs_error": 0.0024360716342926025,
+      "tolerance_violations": 6835,
+      "max_tolerance_ratio": 11.280363364657807,
+      "worst_flat_index": 64764,
+      "reference_at_worst": -0.027438625693321228,
+      "native_at_worst": -0.02975660189986229
+    },
+    "model.layers.5.q_rotary": {
+      "size": 65536,
+      "max_abs_error": 0.22674560546875,
+      "tolerance_violations": 11870,
+      "max_tolerance_ratio": 418.9555187356615,
+      "worst_flat_index": 7638,
+      "reference_at_worst": 0.34685516357421875,
+      "native_at_worst": 0.45970964431762695
+    },
+    "model.layers.5.k_rotary": {
+      "size": 65536,
+      "max_abs_error": 0.0075969696044921875,
+      "tolerance_violations": 1295,
+      "max_tolerance_ratio": 21.269108299544204,
+      "worst_flat_index": 22479,
+      "reference_at_worst": -0.012373879551887512,
+      "native_at_worst": -0.016680337488651276
+    },
+    "model.layers.5.attention": {
+      "size": 65536,
+      "max_abs_error": 0.015180826187133789,
+      "tolerance_violations": 16095,
+      "max_tolerance_ratio": 51.42598600987221,
+      "worst_flat_index": 38603,
+      "reference_at_worst": 0.007100199814885855,
+      "native_at_worst": 0.017458423972129822
+    },
+    "model.layers.5.attn_projected": {
+      "size": 65536,
+      "max_abs_error": 0.0022295713424682617,
+      "tolerance_violations": 5349,
+      "max_tolerance_ratio": 5.358194422234381,
+      "worst_flat_index": 38463,
+      "reference_at_worst": -1.0097761154174805,
+      "native_at_worst": -1.0119298696517944
+    },
+    "model.layers.5.post_norm": {
+      "size": 65536,
+      "max_abs_error": 0.004460811614990234,
+      "tolerance_violations": 15063,
+      "max_tolerance_ratio": 12.587704146577531,
+      "worst_flat_index": 64920,
+      "reference_at_worst": 0.23218026757240295,
+      "native_at_worst": 0.22907820343971252
+    },
+    "model.layers.5.up": {
+      "size": 262144,
+      "max_abs_error": 0.0066297054290771484,
+      "tolerance_violations": 17742,
+      "max_tolerance_ratio": 18.723888388387838,
+      "worst_flat_index": 41932,
+      "reference_at_worst": -0.02768009901046753,
+      "native_at_worst": -0.0315285325050354
+    },
+    "model.layers.5.activation": {
+      "size": 262144,
+      "max_abs_error": 0.004281044006347656,
+      "tolerance_violations": 5044,
+      "max_tolerance_ratio": 11.032732397399473,
+      "worst_flat_index": 176880,
+      "reference_at_worst": 0.6185163259506226,
+      "native_at_worst": 0.6220876574516296
+    },
+    "model.layers.5.down": {
+      "size": 65536,
+      "max_abs_error": 0.002084970474243164,
+      "tolerance_violations": 803,
+      "max_tolerance_ratio": 7.735880220498185,
+      "worst_flat_index": 64668,
+      "reference_at_worst": -0.08924532681703568,
+      "native_at_worst": -0.09093058109283447
+    },
+    "model.layers.5.hidden": {
+      "size": 65536,
+      "max_abs_error": 0.002399444580078125,
+      "tolerance_violations": 2477,
+      "max_tolerance_ratio": 8.863613347884094,
+      "worst_flat_index": 28960,
+      "reference_at_worst": 0.05237317085266113,
+      "native_at_worst": 0.05050760507583618
+    },
+    "final_norm": {
+      "size": 65536,
+      "max_abs_error": 0.00904083251953125,
+      "tolerance_violations": 1498,
+      "max_tolerance_ratio": 11.10189686563694,
+      "worst_flat_index": 37453,
+      "reference_at_worst": -0.06209677457809448,
+      "native_at_worst": -0.06445503234863281
+    },
+    "logits": {
+      "size": 6438912,
+      "max_abs_error": 0.0134735107421875,
+      "tolerance_violations": 101,
+      "max_tolerance_ratio": 6.716791734084944,
+      "worst_flat_index": 2515437,
+      "reference_at_worst": 0.5554304122924805,
+      "native_at_worst": 0.5575199127197266
+    }
+  },
+  "instrumentation_bit_exact": true
+}

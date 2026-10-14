@@ -1,0 +1,256 @@
+{
+  "format": "leaf-llama-decoder-baseline-v1",
+  "complete": false,
+  "model": "EleutherAI/pythia-70m",
+  "measured_at_utc": "2026-10-14T12:40:52.605474+00:00",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "cpu_affinity": [
+    2
+  ],
+  "threads": 1,
+  "weight_precision": "FP32",
+  "kv_precision": "FP32",
+  "gpu_layers": 0,
+  "lengths": [
+    63,
+    127
+  ],
+  "native_policy": {
+    "LEAF_DISABLE_VNNI": false,
+    "LEAF_EXPERIMENTAL_FLOAT_TILES": false,
+    "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+  },
+  "hashes": {
+    "build\\output-quality-20261013\\pythia70\\quality.json": "0b0a501a8d48aa9846189af3b942b11c9becfdb71c1f67737c155093706376f7",
+    "build\\output-quality-20261013\\pythia70\\tokens.json": "aaf287e61c87d812dd7a68355260e93e79a69b5510be6b7b420daf10f0f7b1e3",
+    "build\\pythia-diagnostics-20261014\\leaf_decoder.exe": "06890e9b5f93a3283a88c714dc49b2b2aa2e2d9c27b5285b852609e50c13d047",
+    "build\\manual-model-cache\\models\\0ba2eff1d3343234ba895c0d\\decoder-32.leaf": "164d7c29a66cbca954c283f248838f9471bf5627d2cd0a1948d048a93134034b",
+    "build\\competitors\\llama-b11540\\bin\\llama-decoder-benchmark.exe": "c4974ac2e7614113c76b0bc6a60da993b69c16511653d28389beb566096ac9cd",
+    "build\\pythia-llama-20261014\\pythia70-f32.gguf": "9122d200e251b32c0cfb627e7c85c038781255e24b37bb30752ead0cda6e075f",
+    "C:\\Users\\navaneeth\\leaf\\tools\\benchmark_decoder_competitor.py": "415b79a4f400f4c4643b2ed511628bbc2d9ef559cb222741eacfb179f600f037",
+    "benchmark\\llama_decoder_benchmark.cpp": "0e04e5df9b3f640de5b338c866077548a409e37d3ecd52c0405eaba3b3b73202",
+    "build\\competitors\\llama-b11540\\bin\\ggml-base.dll": "f1a65515dbcc64a0175c103f62fe12ee46189eefe4d4efb7592d3611a927f2fc",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-alderlake.dll": "fe8a7e27d969703c5e041b320a261c090f7852e2348c490df942ffbf68ca4152",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-cannonlake.dll": "4b1cb6aa7a593f472d4376c024998659e6db686af789078b0f1755340bdb2dca",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-cascadelake.dll": "b90b24d91ba748e9c1d9e0bc6941a23c7ce9647952c1709c46fda3a78aaaecb0",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-cooperlake.dll": "8e201eb8c0a918d817b3cc94b4f5686e92966d6c1111286eed4837980dc7b5fe",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-haswell.dll": "00656b6073a1b4eb049b5ed77e3f0cf57637e6fabbe656cb159542b764441f88",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-icelake.dll": "8f8e855bbdd2f8ca7ca98c298f04e147d292be33980ed407ae1f22675661efe0",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-ivybridge.dll": "007f070347b89054ac600f4bfeeedea7eaa7717ad04bc93bd30eef289aa16109",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-piledriver.dll": "0f8af0c09ed4481a75ea80b7d63ba7ff3e1f848dc2da56d22fb5e1cccaa5df68",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-sandybridge.dll": "c2f7c541429fc50453bb2dc0e9f50d34e61f5d374587a8b19cdf344f46fcb245",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-sapphirerapids.dll": "0b7eb16d307ef933ab0d6a36e989960a063d136c6d712e8c9e3115b5d6e9ac7f",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-skylakex.dll": "726099f3066f51146e837e0f28a10df8c5ea5962616daaa1dd2165962203e07d",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-sse42.dll": "f2b8bd34b84504717d39b3c383abf7c477e117b458c158776fe9b79f3740d958",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-x64.dll": "da40610a6ed1a18ea170e52e4fc1af0585e8792af4cec98af21ea919d09a4150",
+    "build\\competitors\\llama-b11540\\bin\\ggml-cpu-zen4.dll": "e718fac0c7a0bd3dfd98540a3533f6bb5edfd6683876401adbbc663398621dc2",
+    "build\\competitors\\llama-b11540\\bin\\ggml-rpc.dll": "db0c4a436367e6e9be73f776a168f417c94fdb5b50e25a631aa3ed879b00c1d3",
+    "build\\competitors\\llama-b11540\\bin\\ggml.dll": "001d24ac921c0b3dc450cdbb2c54d22b75ca23f51164cd04a2b361ca3f1b5b84",
+    "build\\competitors\\llama-b11540\\bin\\libomp.dll": "a12116ba72d1d6820407cf30be23da04ce79d6bb8a71a5ee71759c5a1faa6f1c",
+    "build\\competitors\\llama-b11540\\bin\\llama-batched-bench-impl.dll": "fb042d99d7256daa3801e6cf51d1a0e64abcfd32a200c279abf4209b55534f19",
+    "build\\competitors\\llama-b11540\\bin\\llama-bench-impl.dll": "100441e227567cceef6dfb33f688de930f4682b9475a38437c928a1314ad0b88",
+    "build\\competitors\\llama-b11540\\bin\\llama-cli-impl.dll": "b2895b1ad7e984613bb6e73ae671ba98043747b92c48d34da3312e45145e7043",
+    "build\\competitors\\llama-b11540\\bin\\llama-common.dll": "eca088c260976139c4d6001544ea6c47679799f7e02a520aec242777fbc220b5",
+    "build\\competitors\\llama-b11540\\bin\\llama-completion-impl.dll": "142cc035403df7d128ebaf0d8eb7271f64ee1303bf961e64d1d667da995856aa",
+    "build\\competitors\\llama-b11540\\bin\\llama-fit-params-impl.dll": "31f7b787d2c84111016bde6a34a8fd9f3affb59460b5b7012190b2e49d6ecad9",
+    "build\\competitors\\llama-b11540\\bin\\llama-perplexity-impl.dll": "eb824d2f58ad012fa2e28f5f0a93ee58e19cd43181c2f3a275217f7eec5245f3",
+    "build\\competitors\\llama-b11540\\bin\\llama-quantize-impl.dll": "c21d2c011a53c31e1427e630389047e428e103991c5aa9b5a233d14d0df08b51",
+    "build\\competitors\\llama-b11540\\bin\\llama-server-impl.dll": "5043b93b0bc7a4c1034b478142b646ab28a91e69017ead94e0bdbb129d6b88e8",
+    "build\\competitors\\llama-b11540\\bin\\llama.dll": "9f3c2d5d36f0d46feded3a358805ba2dec0d264599714ac08ab26b1d10daa19b",
+    "build\\competitors\\llama-b11540\\bin\\mtmd.dll": "98e08174cb89d8c41b206c1978f5d83fd45d33d80b6dcf7e32a637d6463ed022"
+  },
+  "scope": "Warm prefix to last-token logits followed by one teacher-forced cached decode. Reset/load/tokenization/IO/HTTP excluded. No sustained generation measurement.",
+  "warmups": 3,
+  "runs": 11,
+  "rounds": 6,
+  "stability_p90_p10_limit": 1.25,
+  "required_leaf_over_llama": 0.98,
+  "preflight": [
+    {
+      "engine": "leaf",
+      "prefix_tokens": 63,
+      "diagnostics": {
+        "logit_count": 3219456,
+        "logit_tolerance_violations": 0,
+        "max_logit_tolerance_ratio": 0.059112002415323245,
+        "worst_logit": {
+          "row": 17,
+          "token": 126,
+          "reference": 222.28549194335938,
+          "leaf": 222.28285217285156
+        },
+        "scored_rows": 63,
+        "mean_kl_reference_to_leaf": 1.359564424400867e-07,
+        "max_kl_reference_to_leaf": 1.2192937225395384e-06,
+        "max_total_variation": 0.0006069082574454703,
+        "max_probability_error": 0.00024685300711380087,
+        "argmax_disagreements": []
+      },
+      "quality": {
+        "evaluated_tokens": 63,
+        "max_abs_logit_error": 0.00732421875,
+        "relative_logit_rmse": 9.278418247049558e-07,
+        "next_token_agreement": 1.0,
+        "perplexity": 79.1897149295276,
+        "pytorch_perplexity": 79.18636362356737,
+        "perplexity_ratio": 1.0000423217560053
+      },
+      "logits_close": true
+    },
+    {
+      "engine": "llama",
+      "prefix_tokens": 63,
+      "diagnostics": {
+        "logit_count": 3219456,
+        "logit_tolerance_violations": 531057,
+        "max_logit_tolerance_ratio": 10.108131238313206,
+        "worst_logit": {
+          "row": 42,
+          "token": 556,
+          "reference": 1067.3428955078125,
+          "leaf": 1069.502685546875
+        },
+        "scored_rows": 63,
+        "mean_kl_reference_to_leaf": 0.0038077723645016464,
+        "max_kl_reference_to_leaf": 0.042659098120827105,
+        "max_total_variation": 0.13992185293173667,
+        "max_probability_error": 0.1387590594388446,
+        "argmax_disagreements": [
+          {
+            "row": 29,
+            "reference_token": 6911,
+            "leaf_token": 275,
+            "reference_top2_margin": 0.1094970703125
+          },
+          {
+            "row": 48,
+            "reference_token": 2962,
+            "leaf_token": 7315,
+            "reference_top2_margin": 0.1287841796875
+          }
+        ]
+      },
+      "quality": {
+        "evaluated_tokens": 63,
+        "max_abs_logit_error": 2.1597900390625,
+        "relative_logit_rmse": 0.00017365769599564373,
+        "next_token_agreement": 0.9682539682539683,
+        "perplexity": 78.32690951102738,
+        "pytorch_perplexity": 79.18636362356737,
+        "perplexity_ratio": 0.9891464379318435
+      },
+      "logits_close": false
+    },
+    {
+      "engine": "leaf",
+      "prefix_tokens": 127,
+      "diagnostics": {
+        "logit_count": 6438912,
+        "logit_tolerance_violations": 0,
+        "max_logit_tolerance_ratio": 0.1035820134132566,
+        "worst_logit": {
+          "row": 103,
+          "token": 230,
+          "reference": 371.6972961425781,
+          "leaf": 371.70501708984375
+        },
+        "scored_rows": 127,
+        "mean_kl_reference_to_leaf": 1.7294780228067794e-07,
+        "max_kl_reference_to_leaf": 1.6474825515951692e-06,
+        "max_total_variation": 0.0007774188706160414,
+        "max_probability_error": 0.0007770857446779411,
+        "argmax_disagreements": []
+      },
+      "quality": {
+        "evaluated_tokens": 127,
+        "max_abs_logit_error": 0.0142822265625,
+        "relative_logit_rmse": 1.4163030073177652e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 62.47760827598971,
+        "pytorch_perplexity": 62.47457950380296,
+        "perplexity_ratio": 1.0000484800731884
+      },
+      "logits_close": true
+    },
+    {
+      "engine": "llama",
+      "prefix_tokens": 127,
+      "diagnostics": {
+        "logit_count": 6438912,
+        "logit_tolerance_violations": 1827609,
+        "max_logit_tolerance_ratio": 18.715378028356863,
+        "worst_logit": {
+          "row": 121,
+          "token": 32776,
+          "reference": 200.35650634765625,
+          "leaf": 201.11019897460938
+        },
+        "scored_rows": 127,
+        "mean_kl_reference_to_leaf": 0.0055766373741400485,
+        "max_kl_reference_to_leaf": 0.06847988322719135,
+        "max_total_variation": 0.17359111709552594,
+        "max_probability_error": 0.16769403763612495,
+        "argmax_disagreements": [
+          {
+            "row": 29,
+            "reference_token": 6911,
+            "leaf_token": 275,
+            "reference_top2_margin": 0.1094970703125
+          },
+          {
+            "row": 48,
+            "reference_token": 2962,
+            "leaf_token": 7315,
+            "reference_top2_margin": 0.1287841796875
+          },
+          {
+            "row": 74,
+            "reference_token": 2962,
+            "leaf_token": 7315,
+            "reference_top2_margin": 0.0430908203125
+          },
+          {
+            "row": 102,
+            "reference_token": 346,
+            "leaf_token": 380,
+            "reference_top2_margin": 0.0555419921875
+          },
+          {
+            "row": 116,
+            "reference_token": 285,
+            "leaf_token": 824,
+            "reference_top2_margin": 0.071533203125
+          },
+          {
+            "row": 120,
+            "reference_token": 322,
+            "leaf_token": 347,
+            "reference_top2_margin": 0.1370849609375
+          },
+          {
+            "row": 124,
+            "reference_token": 369,
+            "leaf_token": 40903,
+            "reference_top2_margin": 0.1634521484375
+          }
+        ]
+      },
+      "quality": {
+        "evaluated_tokens": 127,
+        "max_abs_logit_error": 2.86444091796875,
+        "relative_logit_rmse": 0.0002980857971124351,
+        "next_token_agreement": 0.9448818897637795,
+        "perplexity": 61.411085017685906,
+        "pytorch_perplexity": 62.47457950380296,
+        "perplexity_ratio": 0.9829771645593499
+      },
+      "logits_close": false
+    }
+  ],
+  "passes": [],
+  "overall_speed_claim": false,
+  "torch": "2.12.0+cpu",
+  "transformers": "5.14.1",
+  "error": "Gross model mismatch; see retained preflight"
+}
