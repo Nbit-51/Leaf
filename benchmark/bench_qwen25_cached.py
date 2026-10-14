@@ -2,7 +2,7 @@
 
 The benchmark never downloads implicitly. Point ``--model`` at a complete
 local snapshot, or populate the Hugging Face cache first. This is a PyTorch
-baseline for the transformer work; Leaf does not yet execute the full model.
+baseline only; it does not measure Leaf's native decoder.
 """
 
 from __future__ import annotations

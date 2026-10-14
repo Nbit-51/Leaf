@@ -723,7 +723,7 @@ Invoke-WebRequest -Uri 'https://github.com/chenyaofo/pytorch-cifar-models/releas
 Invoke-WebRequest -Uri 'https://huggingface.co/datasets/uoft-cs/cifar10/resolve/0b27149/plain_text/test-00000-of-00001.parquet' -OutFile benchmark/data/cifar10-test.parquet
 Invoke-WebRequest -Uri 'https://huggingface.co/datasets/uoft-cs/cifar10/resolve/0b27149/plain_text/train-00000-of-00001.parquet' -OutFile benchmark/data/cifar10-train.parquet
 ./scripts/build_native.ps1
-python -m benchmarks.bench_cifar10_full --samples 10000 --cpu 2 --output benchmark/results/cifar10_full_trained.json
+python -m benchmark.bench_cifar10_full --samples 10000 --cpu 2 --output benchmark/results/cifar10_full_trained.json
 ~~~
 
 The benchmark verifies the checkpoint hash and uses the published CIFAR
@@ -755,17 +755,17 @@ ResNet-18; they are still useful parity/latency regressions, not trained accurac
 baselines:
 
 ~~~powershell
-python -m benchmarks.prepare_cifar10 --samples 132
-python -m benchmarks.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1
-python -m benchmarks.bench_cifar10_resnet18 --samples 20 --warmup 5 --runs 10 --threads 1
-python -m benchmarks.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1 --leaf-infer build/leaf_infer.exe --leaf-bench build/leaf_graph_bench.exe --native-evaluation-samples 20 --output benchmark/results/cifar10_native_int8.json
+python -m benchmark.prepare_cifar10 --samples 132
+python -m benchmark.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1
+python -m benchmark.bench_cifar10_resnet18 --samples 20 --warmup 5 --runs 10 --threads 1
+python -m benchmark.bench_cifar10 --calibration-samples 32 --evaluation-samples 100 --repeats 5 --threads 1 --leaf-infer build/leaf_infer.exe --leaf-bench build/leaf_graph_bench.exe --native-evaluation-samples 20 --output benchmark/results/cifar10_native_int8.json
 ~~~
 
 The original Qwen2.5-0.5B PyTorch-only cache reference remains reproducible from
 a complete local snapshot without implicit downloads:
 
 ~~~bash
-HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m benchmarks.bench_qwen25_cached --model Qwen/Qwen2.5-0.5B --threads 1 --sequence-length 64 --warmup 1 --runs 5
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m benchmark.bench_qwen25_cached --model Qwen/Qwen2.5-0.5B --threads 1 --sequence-length 64 --warmup 1 --runs 5
 ~~~
 
 `--model` also accepts a full local snapshot directory. It compares a 64-token
@@ -1912,7 +1912,7 @@ presented as a Leaf run.
 With any complete compatible local snapshot, reproduce the two stages using:
 
 ```powershell
-python -m benchmarks.bench_qwen25_cached --model 'C:\path\to\snapshot' --benchmark-name local-decoder-pytorch-cpu-kv-cache --threads 1 --sequence-length 64 --warmup 1 --runs 3 --output benchmark/results/local_decoder_cached_cpu.json
+python -m benchmark.bench_qwen25_cached --model 'C:\path\to\snapshot' --benchmark-name local-decoder-pytorch-cpu-kv-cache --threads 1 --sequence-length 64 --warmup 1 --runs 3 --output benchmark/results/local_decoder_cached_cpu.json
 python -X utf8 tools/probe_decoder_coverage.py --config 'C:\path\to\snapshot' --output benchmark/results/local_decoder_leaf_coverage.json
 ```
 
@@ -1922,6 +1922,7 @@ python -X utf8 tools/probe_decoder_coverage.py --config 'C:\path\to\snapshot' --
 |---|---|---|
 | `leaf-decoder-plan-v1` JSON | Dimensions, supported block semantics, canonical tensor mappings/transforms | Decoder preparation |
 | `LEAFDC02` decoder `.leaf`, version 2 | 64-byte-aligned mapped FP32/INT8/INT4 payloads, scales, optional input factors, decoder semantics | `leaf_decoder` |
+| `LEAFDC03` decoder `.leaf`, version 3 | Same header layout, with a positive uniform causal-window width in the former reserved word; old readers reject it | Current `leaf_decoder` |
 | Graph `.leaf` version 2 | Nodes/attributes, 32-byte-aligned typed FP32/INT8 weights and per-channel scales | `leaf_infer` / graph C++ API |
 | Graph `.leaf` version 3 | v2 graph data plus embedded 64-byte-aligned liveness arena plan | Graph executor planned path |
 | `leaf-memory-plan-v1` JSON | Fingerprint, offsets, live intervals, alignment, unplanned tensors | Inspection and graph v3 export |
@@ -1985,8 +1986,8 @@ Leaf/
 │   └── graph_opt/              ONNX IR, folding, fusion, calibration, planner, exporter
 ├── engine/                     Native decoder/graph/session APIs and CPU kernels
 ├── benchmark/                  Synthetic workloads, baseline harness, native gates
-│   └── results/                Current and preserved historical measurements
-├── benchmarks/                 Trained decoder reference, full CIFAR and subset harnesses
+│   ├── results/                Current and preserved historical measurements
+│   └── bench_*.py              Trained decoder reference, full CIFAR and subset harnesses
 ├── tests/                      Python, graph, precision, CLI, package, and native checks
 ├── scripts/                    Portable/native builds and full verification command
 ├── .github/workflows/          Portable hosted-OS validation matrix

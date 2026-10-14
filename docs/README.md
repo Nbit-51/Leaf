@@ -7,6 +7,7 @@ architecture, current results and scope. Use this index for details and evidence
 
 | Topic | Reference |
 |---|---|
+| Model onboarding, runtime setup and quality-only evaluation | [Model and output checks](model-onboarding.md) |
 | Installation, local/Hub models, quantization and cache controls | [Usage](project-reference.md#2-install-and-run-with-one-command) |
 | Native document embeddings, JSONL inference and numerical validation | [Embeddings](embedding.md) |
 | Supported decoder configurations and graph operators | [Compatibility](project-reference.md#3-coverage-and-explicit-boundaries) |
@@ -15,6 +16,7 @@ architecture, current results and scope. Use this index for details and evidence
 | Native formats and artifact trust boundary | [Artifacts](project-reference.md#10-artifact-formats-and-trust-boundary) |
 | Buffer liveness and memory reuse | [Memory plan](project-reference.md#11-memory-plan-format-and-runtime-reuse) |
 | Repository layout | [Source map](project-reference.md#12-repository-map) |
+| Benchmark runners, datasets and retained evidence | [Benchmark directory](../benchmark/README.md) |
 
 ## Current Windows release evidence
 

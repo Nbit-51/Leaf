@@ -32,11 +32,36 @@ def test_dense_mistral_plan_preserves_gqa_and_rope():
     assert not any(name.endswith(".bias") for name in plan["tensors"])
 
 
-def test_mistral_sliding_window_cannot_be_silently_dropped():
-    with pytest.raises(ValueError, match="Sliding-window"):
+def test_mistral_sliding_window_is_preserved():
+    plan = make_plan(dict(model_type="mistral", hidden_size=64, intermediate_size=128,
+                         num_attention_heads=4, num_hidden_layers=2, vocab_size=128,
+                         sliding_window=8))
+    validate_plan(plan)
+    assert plan["config"]["sliding_window"] == 8
+    assert config_values(plan["config"])[9] == 8
+
+
+@pytest.mark.parametrize("window", [0, -1, True, 1.5, "8", 2**32])
+def test_invalid_mistral_window_is_rejected(window):
+    with pytest.raises(ValueError, match="sliding_window"):
         make_plan(dict(model_type="mistral", hidden_size=64, intermediate_size=128,
                        num_attention_heads=4, num_hidden_layers=2, vocab_size=128,
-                       sliding_window=8))
+                       sliding_window=window))
+
+
+def test_mixed_mistral_windows_require_per_layer_semantics():
+    with pytest.raises(ValueError, match="Mixed per-layer"):
+        make_plan(dict(model_type="mistral", hidden_size=16, intermediate_size=32,
+                       num_attention_heads=2, num_hidden_layers=2, vocab_size=32,
+                       sliding_window=8, layer_types=["full_attention", "sliding_attention"]))
+
+
+@pytest.mark.parametrize("window", [None, -1, True, 1.5, 2**32])
+def test_invalid_custom_plan_window_is_rejected(window):
+    plan = small_plan()
+    plan["config"]["sliding_window"] = window
+    with pytest.raises(ValueError, match="sliding_window"):
+        validate_plan(plan)
 
 
 @pytest.mark.parametrize("kind", ["gemma", "gemma2", "gemma3_text", "ministral3"])
@@ -117,7 +142,7 @@ def small_plan():
 
 def test_custom_plan_cannot_silently_discard_unknown_semantics():
     plan = small_plan()
-    plan["config"]["sliding_window"] = 8
+    plan["config"]["unknown_attention_operator"] = 8
     with pytest.raises(ValueError, match="Unsupported plan configuration"):
         validate_plan(plan)
 

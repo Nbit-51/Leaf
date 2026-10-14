@@ -605,7 +605,7 @@ struct Decoder::Impl {
     DecoderProfile profile;
     std::unordered_map<std::string, Weight> weights;
     std::vector<KVCache> caches;
-    std::size_t h, f, heads, kv_heads, layers, vocab, max_positions, eos, dim;
+    std::size_t h, f, heads, kv_heads, layers, vocab, max_positions, eos, dim, sliding_window;
     float theta, epsilon;
     unsigned norm_kind, activation, position_kind, gated, parallel, rotary_dim, position_offset, final_norm;
     float embedding_scale;
@@ -646,13 +646,16 @@ struct Decoder::Impl {
         (void)scalar;
 #endif
         Reader reader{mapping}; reader.require(8);
-        check(std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
+        const bool window_format = std::memcmp(mapping.data, "LEAFDC03", 8) == 0;
+        check(window_format || std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
         reader.position = 8;
-        check(reader.u32() == 2, "unsupported decoder artifact version");
+        check(reader.u32() == (window_format ? 3u : 2u), "unsupported decoder artifact version");
         const auto count = reader.u32(); const auto base = reader.u64();
         h = reader.u32(); f = reader.u32(); heads = reader.u32(); kv_heads = reader.u32();
         layers = reader.u32(); vocab = reader.u32(); max_positions = reader.u32(); eos = reader.u32();
-        dim = reader.u32(); check(reader.u32() == 0, "unsupported reserved configuration");
+        dim = reader.u32(); sliding_window = reader.u32();
+        check(window_format ? sliding_window > 0 : sliding_window == 0,
+              "invalid sliding-window artifact configuration");
         theta = reader.f32(); epsilon = reader.f32();
         norm_kind = reader.u32(); activation = reader.u32(); position_kind = reader.u32();
         gated = reader.u32(); parallel = reader.u32(); rotary_dim = reader.u32();
@@ -990,8 +993,11 @@ struct Decoder::Impl {
         {
             DecoderProfile::Scope scope(profile, DecoderProfile::Phase::CausalMask, tokens);
             mask.assign(tokens * total, 0.0f);
-            for (std::size_t t = 0; t < tokens; ++t)
-                std::fill_n(mask.data() + t * total, position + t + 1, 1.0f);
+            for (std::size_t t = 0; t < tokens; ++t) {
+                const auto end = position + t + 1;
+                const auto begin = sliding_window && end > sliding_window ? end - sliding_window : 0;
+                std::fill_n(mask.data() + t * total + begin, end - begin, 1.0f);
+            }
         }
         const std::size_t mask_shape[4] = {1, 1, tokens, total};
         for (std::size_t layer = 0; layer < layers; ++layer) {

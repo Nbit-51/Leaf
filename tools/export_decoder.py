@@ -130,6 +130,9 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
     validate_snapshot_generation(snapshot, plan)
     kept_fp32 = validate_fp32_tensors(plan, keep_fp32_tensors)
     values = config_values(plan["config"])
+    # Old readers must reject new semantics rather than run full attention.
+    version = 3 if plan["config"].get("sliding_window", 0) else 2
+    magic = b"LEAFDC03" if version == 3 else MAGIC
     files = sorted(snapshot.glob("*.safetensors"))
     if not files:
         raise FileNotFoundError("Snapshot has no safetensors weights")
@@ -225,7 +228,7 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
     written = set()
     try:
         with temporary.open("wb") as stream:
-            stream.write(HEADER.pack(MAGIC, 2, len(descriptors), data_base, *values))
+            stream.write(HEADER.pack(magic, version, len(descriptors), data_base, *values))
             for name, rows, cols, precision, group, start, size, scale_start, scales in descriptors:
                 encoded = name.encode("utf-8")
                 stream.write(struct.pack("<I", len(encoded)))
@@ -267,7 +270,7 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
     except BaseException:
         temporary.unlink(missing_ok=True)
         raise
-    record = {"format": "leaf-decoder-v2", "architecture": plan.get("source_architecture", "custom"),
+    record = {"format": f"leaf-decoder-v{version}", "architecture": plan.get("source_architecture", "custom"),
               "weight_bits": bits, "group_size": group_size if bits == 4 else None,
               "int8_group_size": int8_group_size if bits == 8 else None,
               "keep_fp32_tensors": sorted(kept_fp32),

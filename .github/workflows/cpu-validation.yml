@@ -35,7 +35,7 @@ jobs:
       - name: Python decoder, CLI and dataset tests
         run: python -m pytest tests/unit/test_decoder_plan.py tests/unit/test_generation_policy.py tests/unit/test_decoder_precision_policy.py tests/unit/test_decoder_export_provenance.py tests/unit/test_decoder_latency_phases.py tests/unit/test_decoder_comparison.py tests/unit/test_core_scaling.py tests/unit/test_prefill_diagnostics.py tests/unit/test_datasets.py tests/unit/test_cli.py tests/unit/test_tokenizer_parity.py tests/unit/test_decoder_quality.py tests/unit/test_silu_gate_experiment.py tests/unit/test_affinity.py tests/unit/test_power.py tests/unit/test_packaging.py tests/unit/test_package_runtime.py tests/unit/test_benchmark_cli.py -q
       - name: Diagnostic telemetry contracts
-        run: python -m pytest tests/unit/test_windows_benchmark_diagnostics.py tests/unit/test_silu_release.py -q
+        run: python -m pytest tests/unit/test_windows_benchmark_diagnostics.py tests/unit/test_silu_release.py tests/unit/test_model_inspection.py tests/unit/test_output_evaluation.py tests/unit/test_runtime_check.py -q
       - name: Embedding import and numerical contracts
         run: python -m pytest tests/unit/test_embedding_export.py tests/unit/test_embedding_reference.py tests/unit/test_embedding_cli.py tests/unit/test_embedding_download.py tests/unit/test_embedding_comparison.py tests/unit/test_embedding_diagnostics.py -q
       - name: Reduced bidirectional embedding validation
@@ -50,6 +50,12 @@ jobs:
           runtime=build/ci/leaf_decoder
           if [ "${{ runner.os }}" = "Windows" ]; then runtime=build/ci/Release/leaf_decoder.exe; fi
           python tools/verify_decoder_architectures.py --executable "$runtime" --expect-w8a8-silu --output benchmark/results/decoder-ci.json
+      - name: Causal sliding-window decoder validation
+        shell: bash
+        run: |
+          runtime=build/ci/leaf_decoder
+          if [ "${{ runner.os }}" = "Windows" ]; then runtime=build/ci/Release/leaf_decoder.exe; fi
+          python tools/verify_sliding_window_decoder.py --executable "$runtime" --output build/sliding-window-ci
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -57,3 +63,4 @@ jobs:
           path: |
             benchmark/results/decoder-ci.json
             benchmark/results/embedding-ci.json
+            build/sliding-window-ci/validation.json

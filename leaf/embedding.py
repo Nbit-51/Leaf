@@ -21,7 +21,8 @@ def executable(cache):
     if configured:
         path = Path(configured)
         if not path.is_file():
-            raise FileNotFoundError("LEAF_EMBED_BIN does not point to a file")
+            raise FileNotFoundError("LEAF_EMBED_BIN does not point to a file. Remove this optional override "
+                                    "(PowerShell: Remove-Item Env:LEAF_EMBED_BIN) and run leaf doctor.")
         return path.resolve()
     name = "leaf_embed.exe" if os.name == "nt" else "leaf_embed"
     bundled = Path(__file__).parent / "bin" / name
@@ -44,7 +45,8 @@ def executable(cache):
         return output
     compiler = os.environ.get("CXX") or shutil.which("g++") or shutil.which("clang++")
     if not compiler:
-        raise RuntimeError("Install a C++17 compiler or provide LEAF_EMBED_BIN")
+        raise RuntimeError("No bundled embedding runtime or C++17 compiler found. Install a Leaf platform "
+                           "wheel, or install GCC/Clang for a source checkout; no binary override is needed.")
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".partial")
     command = [
@@ -174,6 +176,7 @@ def run(args):
             "Metrics require a new path distinct from the embedding output"
         )
     cache = cache_root()
+    runtime = executable(cache)
     snapshot = resolve_model(args.model, cache, getattr(args, "offline", False))
     try:
         config, hashes = inspect_snapshot(snapshot)
@@ -183,7 +186,6 @@ def run(args):
             "(for example google/embeddinggemma-300m) online so Leaf downloads "
             "its supporting files automatically."
         ) from error
-    runtime = executable(cache)
     key = hashlib.sha256(
         json.dumps(hashes, sort_keys=True).encode() + b"leaf-embedding-v1"
     ).hexdigest()

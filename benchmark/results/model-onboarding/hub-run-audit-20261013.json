@@ -1,0 +1,23 @@
+{
+  "command": [
+    "run",
+    "EleutherAI/pythia-70m",
+    "--offline",
+    "--bits",
+    "32",
+    "--raw",
+    "--prompt",
+    "The purpose of a computer is",
+    "--max-tokens",
+    "16",
+    "--metrics",
+    "build/output-quality-20261013/hub-run-metrics.json"
+  ],
+  "exit_code": 0,
+  "bundled_runtime": true,
+  "no_compiler_path": true,
+  "no_binary_override": true,
+  "heavy_modules": [],
+  "native_sha256": "eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9",
+  "wheel_sha256": "1caf3c073332a4cf4d0232f6c1562b39da95a167455a67a7af369d8558ac4e43"
+}

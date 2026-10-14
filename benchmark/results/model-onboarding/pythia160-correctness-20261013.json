@@ -1,0 +1,129 @@
+{
+  "format": "leaf-hub-decoder-correctness-v1",
+  "model": "EleutherAI/pythia-160m",
+  "measured_at_utc": "2026-10-13T02:08:10.287146+00:00",
+  "complete": true,
+  "passed": true,
+  "timing_qualified": false,
+  "scope": "Correctness-only onboarding of a supported Hub decoder; never qualifies speed.\n\nUses Leaf's normal model-ID resolution/export and the existing native protocol.\nWeights are not quantized. Reference computation promotes the same source\nweights to FP32; it does not reconstruct precision absent from the checkpoint.\n",
+  "checks": [
+    {
+      "mode": "one-thread",
+      "quality": {
+        "evaluated_tokens": 237,
+        "max_abs_logit_error": 0.00933837890625,
+        "relative_logit_rmse": 1.042575718201988e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 70.47774848785764,
+        "pytorch_perplexity": 70.47875681142128,
+        "perplexity_ratio": 0.9999856932271616
+      },
+      "logits_allclose": true
+    },
+    {
+      "mode": "two-threads",
+      "quality": {
+        "evaluated_tokens": 237,
+        "max_abs_logit_error": 0.00933837890625,
+        "relative_logit_rmse": 1.042575718201988e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 70.47774848785764,
+        "pytorch_perplexity": 70.47875681142128,
+        "perplexity_ratio": 0.9999856932271616
+      },
+      "logits_allclose": true
+    },
+    {
+      "mode": "scalar",
+      "quality": {
+        "evaluated_tokens": 237,
+        "max_abs_logit_error": 0.01263427734375,
+        "relative_logit_rmse": 1.5019958254924859e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 70.47782478817471,
+        "pytorch_perplexity": 70.47875681142128,
+        "perplexity_ratio": 0.9999867758273737
+      },
+      "logits_allclose": true
+    },
+    {
+      "mode": "chunked",
+      "quality": {
+        "evaluated_tokens": 237,
+        "max_abs_logit_error": 0.016357421875,
+        "relative_logit_rmse": 1.1976837868132861e-06,
+        "next_token_agreement": 1.0,
+        "perplexity": 70.47732976643034,
+        "pytorch_perplexity": 70.47875681142128,
+        "perplexity_ratio": 0.9999797521259526
+      },
+      "logits_allclose": true
+    }
+  ],
+  "logit_tolerance": {
+    "atol": 0.0002,
+    "rtol": 0.0002
+  },
+  "quality_gate": {
+    "min_next_token_agreement": 0.999,
+    "max_perplexity_ratio": 1.001
+  },
+  "power": {
+    "plugged_in": true,
+    "battery_percent": 80
+  },
+  "snapshot": "C:\\Users\\navaneeth\\leaf\\build\\model-onboarding-20261013\\cache\\hub\\models--EleutherAI--pythia-160m\\snapshots\\50f5173d932e8e61f858120bcb800b97af589f46",
+  "artifact": "C:\\Users\\navaneeth\\leaf\\build\\model-onboarding-20261013\\cache\\models\\c0434e4c40852918478f124e\\decoder-32.leaf",
+  "source_sha256": {
+    "config.json": "76eb275107220e450d31258f792a2efcbee109d8b62ae0088260057dec06362f",
+    "model.safetensors": "29d2e457a664e41c12c735f20a36dc0956a665f614a54ce5db21a32e75965270",
+    "special_tokens_map.json": "6f50ab5a5a509a1c309d6171f339b196a900dc9c99ad0408ff23bb615fdae7ad",
+    "tokenizer.json": "c24618a1b3e6a38167beff1c72cffd126c3a66254347304b50547d12c5f25624",
+    "tokenizer_config.json": "70e38394e494931c6f773ba41e19460dd4436526b852207367f04341b4066d3f"
+  },
+  "artifact_sha256": "102fe03aef0040f960556ac3143b1777d1f456697314ddd240df64a4fa1a8f55",
+  "executable_sha256": "1f145c363d9100608aa2716ad5a2e46ac40506a9554d870db1415ea717f80ab1",
+  "dataset_sha256": "5f1bea067869d04849c0f975a2b29c4ff47d867f484f5010ea5e861eab246d91",
+  "torch": "2.12.0+cpu",
+  "transformers": "5.14.1",
+  "tokenizer_ids_equal": true,
+  "sequence_lengths": [
+    17,
+    33,
+    64,
+    127
+  ],
+  "generation_prompt": "The purpose of a computer is",
+  "generation_input_ids": [
+    510,
+    4096,
+    273,
+    247,
+    4382,
+    310
+  ],
+  "generation_exact_match": true,
+  "generated_tokens": [
+    281,
+    2085,
+    247,
+    4382,
+    342,
+    247,
+    4382,
+    2086,
+    326,
+    476,
+    320,
+    908,
+    281,
+    1347,
+    247,
+    5235
+  ],
+  "generated_text": " to provide a computer with a computer program that can be used to perform a variety",
+  "fixture_sha256": {
+    "reference.npy": "f35e201c80a00efa31f9d9b1c636ec477b71be0ac831d88b2501a7287ee9cfdb",
+    "tokens.json": "ace1a84260b876ef8279f1bcad0657581f02afe5004adfb861af49be006f3c5b"
+  }
+}

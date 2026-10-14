@@ -1,0 +1,49 @@
+{
+  "scope": "Reduced Mistral causal-window correctness, not a trained 7B evaluation or benchmark.",
+  "complete": false,
+  "passed": false,
+  "timing_qualified": false,
+  "measured_at_utc": "2026-10-13T11:15:34.477229+00:00",
+  "executable_sha256": "e7ccd71f0495b11c7cd3a683d6ec698a6c903b6cb8400e495a5638c875028c62",
+  "tolerance": {
+    "atol": 5e-05,
+    "rtol": 0.0005
+  },
+  "cases": [
+    {
+      "window": 1,
+      "lengths": [
+        1,
+        2,
+        9
+      ],
+      "checks": [
+        {
+          "mode": "prefill",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "two-threads",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "scalar",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "chunked",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        }
+      ],
+      "artifact_sha256": "143fb85535ba72a011ec14c5e89b05d5b18c73789767f67606c3eac42cdcbf4f"
+    }
+  ],
+  "source_config_sha256": "cf25cdf4719f181d1d1d371973285d9afe9afde0d0c6a6fd48de857555ce1e0d",
+  "source_window": 4096,
+  "trained_weights_loaded": false,
+  "error": "Sliding-window greedy tokens differ"
+}
