@@ -14,6 +14,7 @@ dependencies first; datasets and model weights are not part of the Python wheel.
 | `prepare_cifar10.py` | Convert an existing CIFAR Parquet file to a small offline NPZ fixture |
 | `run_baselines.py`, `workloads.py`, `datasets.py` | Shared deterministic synthetic workloads and Python graph baselines |
 | `*.cpp` | Isolated native kernel and operator benchmark programs |
+| `llama_decoder_benchmark.cpp` | Pinned llama.cpp adapter matching Leaf's last-logit prefill and one cached decode step; orchestrated by `tools/benchmark_decoder_competitor.py` |
 | `data/` | Local downloaded datasets/checkpoints; ignored by Git |
 | `results/` | Retained measurements, provenance and failures; consult the associated documentation before comparing |
 | `experiments/` | Preserved experimental patches and implementations |

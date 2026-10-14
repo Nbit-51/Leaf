@@ -2,6 +2,12 @@
 #include "leaf/runtime/host_support.h"
 #include "leaf/runtime/decoder_config.h"
 #include "leaf/runtime/kv_cache.h"
+#ifdef LEAF_DIAGNOSTIC_TRACE
+#include "../../tests/native/decoder_trace.h"
+#define LEAF_TRACE(name, values) trace.write(name, values)
+#else
+#define LEAF_TRACE(name, values) ((void)0)
+#endif
 #include "leaf/kernels/token_panel.h"
 #if LEAF_OPTIMIZED_SILU_W8A8 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
 #include "leaf/kernels/silu_gate.h"
@@ -970,6 +976,9 @@ struct Decoder::Impl {
         }
     }
     std::vector<float> forward(const std::vector<std::uint32_t>& ids, bool all_logits) {
+#ifdef LEAF_DIAGNOSTIC_TRACE
+        DecoderTrace trace;
+#endif
         check(!ids.empty(), "input tokens are empty");
         const std::size_t tokens = ids.size(), position = caches[0].length();
         check(position <= max_positions && tokens <= max_positions - position, "context length exceeds artifact limit");
@@ -989,6 +998,7 @@ struct Decoder::Impl {
                     if (positions) hidden[t * h + col] += positions->value(position + t + position_offset, col);
                 }
         }
+        LEAF_TRACE("embedding", hidden);
         const auto total = position + tokens;
         {
             DecoderProfile::Scope scope(profile, DecoderProfile::Phase::CausalMask, tokens);
@@ -1003,10 +1013,16 @@ struct Decoder::Impl {
         for (std::size_t layer = 0; layer < layers; ++layer) {
             const auto prefix = "model.layers." + std::to_string(layer) + ".";
             normalize(hidden, prefix + "input_layernorm", normalized);
+            LEAF_TRACE(prefix + "input_norm", normalized);
             linear(normalized.data(), tokens, prefix + "self_attn.q_proj", q);
             linear(normalized.data(), tokens, prefix + "self_attn.k_proj", k);
             linear(normalized.data(), tokens, prefix + "self_attn.v_proj", v);
+            LEAF_TRACE(prefix + "q", q);
+            LEAF_TRACE(prefix + "k", k);
+            LEAF_TRACE(prefix + "v", v);
             rotary(q, q_heads, heads, tokens); rotary(k, k_heads, kv_heads, tokens);
+            LEAF_TRACE(prefix + "q_rotary", q_heads);
+            LEAF_TRACE(prefix + "k_rotary", k_heads);
             v_heads.resize(v.size());
             for (std::size_t head = 0; head < kv_heads; ++head)
                 for (std::size_t t = 0; t < tokens; ++t)
@@ -1032,12 +1048,16 @@ struct Decoder::Impl {
                                       mask_shape, 1.0f / std::sqrt(std::sqrt(static_cast<float>(dim))));
             }
             linear(attention.data(), tokens, prefix + "self_attn.o_proj", attn_projected);
+            LEAF_TRACE(prefix + "attention", attention);
+            LEAF_TRACE(prefix + "attn_projected", attn_projected);
             if (!parallel) {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Residual, tokens);
                 for (std::size_t j = 0; j < hidden.size(); ++j) hidden[j] += attn_projected[j];
             }
             normalize(hidden, prefix + "post_attention_layernorm", normalized);
+            LEAF_TRACE(prefix + "post_norm", normalized);
             linear(normalized.data(), tokens, prefix + "mlp.up_proj", up, true);
+            LEAF_TRACE(prefix + "up", up);
             if (gated) {
                 linear(normalized.data(), tokens, prefix + "mlp.gate_proj", gate, true);
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
@@ -1060,16 +1080,21 @@ struct Decoder::Impl {
                 for (auto& value : up) value = activate(value);
             }
             linear(up.data(), tokens, prefix + "mlp.down_proj", projected, true);
+            LEAF_TRACE(prefix + "activation", up);
+            LEAF_TRACE(prefix + "down", projected);
             {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Residual, tokens);
                 for (std::size_t j = 0; j < hidden.size(); ++j) hidden[j] += projected[j] + (parallel ? attn_projected[j] : 0.0f);
             }
+            LEAF_TRACE(prefix + "hidden", hidden);
         }
         if (final_norm) normalize(hidden, "model.norm", normalized);
         else normalized = hidden;
+        LEAF_TRACE("final_norm", normalized);
         std::vector<float> logits;
         linear(normalized.data() + (all_logits ? 0 : (tokens - 1) * h), all_logits ? tokens : 1,
                "lm_head", logits);
+        LEAF_TRACE("logits", logits);
         return logits;
     }
 };

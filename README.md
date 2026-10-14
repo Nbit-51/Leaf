@@ -209,6 +209,7 @@ quantization, not a measured PyTorch process-memory comparison or model pruning.
 - [GPT-2 release, quality and performance evidence](docs/windows-attention-softmax.md)
 - [TinyLlama SiLU release, fresh comparison and quality limits](docs/silu-gate-experiment.md)
 - [Earlier TinyLlama evaluation and retained failures](docs/windows-tinyllama-current.md)
+- [Pythia-70M vs llama.cpp: diagnostic timings, fidelity differences and next steps](docs/pythia-runtime-comparison.md)
 - [Complete benchmark history and retained failures](docs/project-reference.md#7-current-trained-model-and-dataset-results)
 
 ## Scope and next steps

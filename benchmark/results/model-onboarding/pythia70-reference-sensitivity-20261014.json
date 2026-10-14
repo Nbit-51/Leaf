@@ -1,0 +1,276 @@
+{
+  "complete": true,
+  "scope": "Compare retained Pythia failures with alternative arithmetic; not a release gate.",
+  "model": "EleutherAI/pythia-70m",
+  "quality_record_sha256": "0b0a501a8d48aa9846189af3b942b11c9becfdb71c1f67737c155093706376f7",
+  "baseline_sha256": "eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9",
+  "candidate_sha256": "b38d95d141517bc05e969cf5d0857cb53fb45cf49fe30d826b89e58db181eac5",
+  "torch": "2.12.0+cpu",
+  "transformers": "5.14.1",
+  "checks": [
+    {
+      "block": 29,
+      "comparisons": {
+        "leaf_baseline": {
+          "vs_eager": {
+            "size": 6438912,
+            "max_abs_error": 0.0134735107421875,
+            "tolerance_violations": 101,
+            "max_tolerance_ratio": 6.716791734084944,
+            "worst_flat_index": 2515437,
+            "reference_at_worst": 0.5554304122924805,
+            "native_at_worst": 0.5575199127197266
+          },
+          "quality_vs_eager": {
+            "evaluated_tokens": 127,
+            "max_abs_logit_error": 0.0134735107421875,
+            "relative_logit_rmse": 1.8491891751182266e-06,
+            "next_token_agreement": 1.0,
+            "perplexity": 124.09461131960622,
+            "pytorch_perplexity": 124.10497393495608,
+            "perplexity_ratio": 0.9999165012084423
+          },
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.00808787736764316,
+            "tolerance_violations": 18,
+            "max_tolerance_ratio": 5.005303229930396,
+            "worst_flat_index": 2515437,
+            "reference_at_worst": 0.555962300094464,
+            "native_at_worst": 0.5575199127197266
+          }
+        },
+        "torch_sdpa": {
+          "vs_eager": {
+            "size": 6438912,
+            "max_abs_error": 0.02001953125,
+            "tolerance_violations": 81,
+            "max_tolerance_ratio": 8.320115365726398,
+            "worst_flat_index": 2515437,
+            "reference_at_worst": 0.5554304122924805,
+            "native_at_worst": 0.5528421401977539
+          },
+          "quality_vs_eager": {
+            "evaluated_tokens": 127,
+            "max_abs_logit_error": 0.02001953125,
+            "relative_logit_rmse": 1.8408295545668807e-06,
+            "next_token_agreement": 1.0,
+            "perplexity": 124.10131798984769,
+            "pytorch_perplexity": 124.10497393495608,
+            "perplexity_ratio": 0.9999705415102033
+          },
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.016602555841558342,
+            "tolerance_violations": 185,
+            "max_tolerance_ratio": 10.026463676275055,
+            "worst_flat_index": 2515437,
+            "reference_at_worst": 0.555962300094464,
+            "native_at_worst": 0.5528421401977539
+          }
+        },
+        "torch_float64": {
+          "vs_eager": {
+            "size": 6438912,
+            "max_abs_error": 0.02082896623483066,
+            "tolerance_violations": 76,
+            "max_tolerance_ratio": 2.6048680836395137,
+            "worst_flat_index": 2314228,
+            "reference_at_worst": -13.62563705444336,
+            "native_at_worst": -13.633256625476562
+          },
+          "quality_vs_eager": {
+            "evaluated_tokens": 127,
+            "max_abs_logit_error": 0.02082896623483066,
+            "relative_logit_rmse": 1.9337155508763535e-06,
+            "next_token_agreement": 1.0,
+            "perplexity": 124.0964044278914,
+            "pytorch_perplexity": 124.10497393495608,
+            "perplexity_ratio": 0.9999309495277025
+          },
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.0,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.0,
+            "worst_flat_index": 0,
+            "reference_at_worst": 1069.4076786028745,
+            "native_at_worst": 1069.4076786028745
+          }
+        },
+        "leaf_candidate": {
+          "vs_eager": {
+            "size": 6438912,
+            "max_abs_error": 0.0145263671875,
+            "tolerance_violations": 78,
+            "max_tolerance_ratio": 3.573564657474278,
+            "worst_flat_index": 2515437,
+            "reference_at_worst": 0.5554304122924805,
+            "native_at_worst": 0.5565420985221863
+          },
+          "quality_vs_eager": {
+            "evaluated_tokens": 127,
+            "max_abs_logit_error": 0.0145263671875,
+            "relative_logit_rmse": 1.8597309008328011e-06,
+            "next_token_agreement": 1.0,
+            "perplexity": 124.1017447918581,
+            "pytorch_perplexity": 124.10497393495608,
+            "perplexity_ratio": 0.9999739805505323
+          },
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.007442008646648901,
+            "tolerance_violations": 5,
+            "max_tolerance_ratio": 1.8631506293149473,
+            "worst_flat_index": 2515437,
+            "reference_at_worst": 0.555962300094464,
+            "native_at_worst": 0.5565420985221863
+          }
+        },
+        "torch_eager": {
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.02082896623483066,
+            "tolerance_violations": 76,
+            "max_tolerance_ratio": 2.603511722721134,
+            "worst_flat_index": 2314228,
+            "reference_at_worst": -13.633256625476562,
+            "native_at_worst": -13.62563705444336
+          }
+        }
+      }
+    },
+    {
+      "block": 10,
+      "comparisons": {
+        "leaf_baseline": {
+          "vs_eager": {
+            "size": 6438912,
+            "max_abs_error": 0.009765625,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.4840891133082294,
+            "worst_flat_index": 2112870,
+            "reference_at_worst": -43.01066589355469,
+            "native_at_worst": -43.006404876708984
+          },
+          "quality_vs_eager": {
+            "evaluated_tokens": 127,
+            "max_abs_logit_error": 0.009765625,
+            "relative_logit_rmse": 1.3117969501763582e-06,
+            "next_token_agreement": 0.9921259842519685,
+            "perplexity": 114.48669963570252,
+            "pytorch_perplexity": 114.4946786812172,
+            "perplexity_ratio": 0.9999303107742074
+          },
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.006455728070704936,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.2288343500333809,
+            "worst_flat_index": 2112888,
+            "reference_at_worst": -36.63939887648918,
+            "native_at_worst": -36.63767623901367
+          }
+        },
+        "torch_sdpa": {
+          "vs_eager": {
+            "size": 6438912,
+            "max_abs_error": 0.0118408203125,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.2773652932115191,
+            "worst_flat_index": 2112870,
+            "reference_at_worst": -43.01066589355469,
+            "native_at_worst": -43.00822448730469
+          },
+          "quality_vs_eager": {
+            "evaluated_tokens": 127,
+            "max_abs_logit_error": 0.0118408203125,
+            "relative_logit_rmse": 1.0157664291909896e-06,
+            "next_token_agreement": 0.984251968503937,
+            "perplexity": 114.48961717389281,
+            "pytorch_perplexity": 114.4946786812172,
+            "perplexity_ratio": 0.9999557926413465
+          },
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.009389708050321133,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.07026849068298469,
+            "worst_flat_index": 2112866,
+            "reference_at_worst": -40.08956002141635,
+            "native_at_worst": -40.09013748168945
+          }
+        },
+        "torch_float64": {
+          "vs_eager": {
+            "size": 6438912,
+            "max_abs_error": 0.011142379138846081,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.27394628329677906,
+            "worst_flat_index": 2112870,
+            "reference_at_worst": -43.01066589355469,
+            "native_at_worst": -43.008254581885296
+          },
+          "quality_vs_eager": {
+            "evaluated_tokens": 127,
+            "max_abs_logit_error": 0.011142379138846081,
+            "relative_logit_rmse": 1.1127568820024816e-06,
+            "next_token_agreement": 0.984251968503937,
+            "perplexity": 114.4937515257829,
+            "pytorch_perplexity": 114.4946786812172,
+            "perplexity_ratio": 0.9999919021962856
+          },
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.0,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.0,
+            "worst_flat_index": 0,
+            "reference_at_worst": 1059.5875447715457,
+            "native_at_worst": 1059.5875447715457
+          }
+        },
+        "leaf_candidate": {
+          "vs_eager": {
+            "size": 6438912,
+            "max_abs_error": 0.010009765625,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.47672159770729844,
+            "worst_flat_index": 2112870,
+            "reference_at_worst": -43.01066589355469,
+            "native_at_worst": -43.0064697265625
+          },
+          "quality_vs_eager": {
+            "evaluated_tokens": 127,
+            "max_abs_logit_error": 0.010009765625,
+            "relative_logit_rmse": 1.1884363857461722e-06,
+            "next_token_agreement": 0.9921259842519685,
+            "perplexity": 114.49247972001312,
+            "pytorch_perplexity": 114.4946786812172,
+            "perplexity_ratio": 0.9999807942060767
+          },
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.004866458204105584,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.2237669241717955,
+            "worst_flat_index": 2112888,
+            "reference_at_worst": -36.63939887648918,
+            "native_at_worst": -36.63771438598633
+          }
+        },
+        "torch_eager": {
+          "vs_float64": {
+            "size": 6438912,
+            "max_abs_error": 0.011142379138846081,
+            "tolerance_violations": 0,
+            "max_tolerance_ratio": 0.27396129343239967,
+            "worst_flat_index": 2112870,
+            "reference_at_worst": -43.008254581885296,
+            "native_at_worst": -43.01066589355469
+          }
+        }
+      }
+    }
+  ]
+}

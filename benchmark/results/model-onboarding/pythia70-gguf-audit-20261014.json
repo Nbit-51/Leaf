@@ -1,0 +1,605 @@
+{
+  "complete": true,
+  "llama_release": "b11540",
+  "llama_source_revision": "1e6f04a75e91da4bb66b5248f3fd4bdeff169d41",
+  "gguf_sha256": "9122d200e251b32c0cfb627e7c85c038781255e24b37bb30752ead0cda6e075f",
+  "tensor_count": 76,
+  "tensor_type": "all F32",
+  "source_sha256": {
+    "config.json": "002050231a9b1ec3ac77aa6b9b3bbdc4d923f4068a7dd33b8da72a9bd6ad9a43",
+    "model.safetensors": "ebfa4e2f18696ebd83716a0d39fe2c025f2ff8483f72a83ca59c475692fc9d15",
+    "special_tokens_map.json": "6f50ab5a5a509a1c309d6171f339b196a900dc9c99ad0408ff23bb615fdae7ad",
+    "tokenizer.json": "c24618a1b3e6a38167beff1c72cffd126c3a66254347304b50547d12c5f25624",
+    "tokenizer_config.json": "70e38394e494931c6f773ba41e19460dd4436526b852207367f04341b4066d3f"
+  },
+  "all_tensors_exact_after_upstream_qkv_permutation": true,
+  "checked": [
+    {
+      "source": "embed_out.weight",
+      "gguf": "output.weight",
+      "shape": [
+        50304,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.embed_in.weight",
+      "gguf": "token_embd.weight",
+      "shape": [
+        50304,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.final_layer_norm.bias",
+      "gguf": "output_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.final_layer_norm.weight",
+      "gguf": "output_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.attention.dense.bias",
+      "gguf": "blk.0.attn_output.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.attention.dense.weight",
+      "gguf": "blk.0.attn_output.weight",
+      "shape": [
+        512,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.attention.query_key_value.bias",
+      "gguf": "blk.0.attn_qkv.bias",
+      "shape": [
+        1536
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.attention.query_key_value.weight",
+      "gguf": "blk.0.attn_qkv.weight",
+      "shape": [
+        1536,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.input_layernorm.bias",
+      "gguf": "blk.0.attn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.input_layernorm.weight",
+      "gguf": "blk.0.attn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.mlp.dense_4h_to_h.bias",
+      "gguf": "blk.0.ffn_down.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.mlp.dense_4h_to_h.weight",
+      "gguf": "blk.0.ffn_down.weight",
+      "shape": [
+        512,
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.mlp.dense_h_to_4h.bias",
+      "gguf": "blk.0.ffn_up.bias",
+      "shape": [
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.mlp.dense_h_to_4h.weight",
+      "gguf": "blk.0.ffn_up.weight",
+      "shape": [
+        2048,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.post_attention_layernorm.bias",
+      "gguf": "blk.0.ffn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.0.post_attention_layernorm.weight",
+      "gguf": "blk.0.ffn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.attention.dense.bias",
+      "gguf": "blk.1.attn_output.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.attention.dense.weight",
+      "gguf": "blk.1.attn_output.weight",
+      "shape": [
+        512,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.attention.query_key_value.bias",
+      "gguf": "blk.1.attn_qkv.bias",
+      "shape": [
+        1536
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.attention.query_key_value.weight",
+      "gguf": "blk.1.attn_qkv.weight",
+      "shape": [
+        1536,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.input_layernorm.bias",
+      "gguf": "blk.1.attn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.input_layernorm.weight",
+      "gguf": "blk.1.attn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.mlp.dense_4h_to_h.bias",
+      "gguf": "blk.1.ffn_down.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.mlp.dense_4h_to_h.weight",
+      "gguf": "blk.1.ffn_down.weight",
+      "shape": [
+        512,
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.mlp.dense_h_to_4h.bias",
+      "gguf": "blk.1.ffn_up.bias",
+      "shape": [
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.mlp.dense_h_to_4h.weight",
+      "gguf": "blk.1.ffn_up.weight",
+      "shape": [
+        2048,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.post_attention_layernorm.bias",
+      "gguf": "blk.1.ffn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.1.post_attention_layernorm.weight",
+      "gguf": "blk.1.ffn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.attention.dense.bias",
+      "gguf": "blk.2.attn_output.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.attention.dense.weight",
+      "gguf": "blk.2.attn_output.weight",
+      "shape": [
+        512,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.attention.query_key_value.bias",
+      "gguf": "blk.2.attn_qkv.bias",
+      "shape": [
+        1536
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.attention.query_key_value.weight",
+      "gguf": "blk.2.attn_qkv.weight",
+      "shape": [
+        1536,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.input_layernorm.bias",
+      "gguf": "blk.2.attn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.input_layernorm.weight",
+      "gguf": "blk.2.attn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.mlp.dense_4h_to_h.bias",
+      "gguf": "blk.2.ffn_down.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.mlp.dense_4h_to_h.weight",
+      "gguf": "blk.2.ffn_down.weight",
+      "shape": [
+        512,
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.mlp.dense_h_to_4h.bias",
+      "gguf": "blk.2.ffn_up.bias",
+      "shape": [
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.mlp.dense_h_to_4h.weight",
+      "gguf": "blk.2.ffn_up.weight",
+      "shape": [
+        2048,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.post_attention_layernorm.bias",
+      "gguf": "blk.2.ffn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.2.post_attention_layernorm.weight",
+      "gguf": "blk.2.ffn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.attention.dense.bias",
+      "gguf": "blk.3.attn_output.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.attention.dense.weight",
+      "gguf": "blk.3.attn_output.weight",
+      "shape": [
+        512,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.attention.query_key_value.bias",
+      "gguf": "blk.3.attn_qkv.bias",
+      "shape": [
+        1536
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.attention.query_key_value.weight",
+      "gguf": "blk.3.attn_qkv.weight",
+      "shape": [
+        1536,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.input_layernorm.bias",
+      "gguf": "blk.3.attn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.input_layernorm.weight",
+      "gguf": "blk.3.attn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.mlp.dense_4h_to_h.bias",
+      "gguf": "blk.3.ffn_down.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.mlp.dense_4h_to_h.weight",
+      "gguf": "blk.3.ffn_down.weight",
+      "shape": [
+        512,
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.mlp.dense_h_to_4h.bias",
+      "gguf": "blk.3.ffn_up.bias",
+      "shape": [
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.mlp.dense_h_to_4h.weight",
+      "gguf": "blk.3.ffn_up.weight",
+      "shape": [
+        2048,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.post_attention_layernorm.bias",
+      "gguf": "blk.3.ffn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.3.post_attention_layernorm.weight",
+      "gguf": "blk.3.ffn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.attention.dense.bias",
+      "gguf": "blk.4.attn_output.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.attention.dense.weight",
+      "gguf": "blk.4.attn_output.weight",
+      "shape": [
+        512,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.attention.query_key_value.bias",
+      "gguf": "blk.4.attn_qkv.bias",
+      "shape": [
+        1536
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.attention.query_key_value.weight",
+      "gguf": "blk.4.attn_qkv.weight",
+      "shape": [
+        1536,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.input_layernorm.bias",
+      "gguf": "blk.4.attn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.input_layernorm.weight",
+      "gguf": "blk.4.attn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.mlp.dense_4h_to_h.bias",
+      "gguf": "blk.4.ffn_down.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.mlp.dense_4h_to_h.weight",
+      "gguf": "blk.4.ffn_down.weight",
+      "shape": [
+        512,
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.mlp.dense_h_to_4h.bias",
+      "gguf": "blk.4.ffn_up.bias",
+      "shape": [
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.mlp.dense_h_to_4h.weight",
+      "gguf": "blk.4.ffn_up.weight",
+      "shape": [
+        2048,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.post_attention_layernorm.bias",
+      "gguf": "blk.4.ffn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.4.post_attention_layernorm.weight",
+      "gguf": "blk.4.ffn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.attention.dense.bias",
+      "gguf": "blk.5.attn_output.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.attention.dense.weight",
+      "gguf": "blk.5.attn_output.weight",
+      "shape": [
+        512,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.attention.query_key_value.bias",
+      "gguf": "blk.5.attn_qkv.bias",
+      "shape": [
+        1536
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.attention.query_key_value.weight",
+      "gguf": "blk.5.attn_qkv.weight",
+      "shape": [
+        1536,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.input_layernorm.bias",
+      "gguf": "blk.5.attn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.input_layernorm.weight",
+      "gguf": "blk.5.attn_norm.weight",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.mlp.dense_4h_to_h.bias",
+      "gguf": "blk.5.ffn_down.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.mlp.dense_4h_to_h.weight",
+      "gguf": "blk.5.ffn_down.weight",
+      "shape": [
+        512,
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.mlp.dense_h_to_4h.bias",
+      "gguf": "blk.5.ffn_up.bias",
+      "shape": [
+        2048
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.mlp.dense_h_to_4h.weight",
+      "gguf": "blk.5.ffn_up.weight",
+      "shape": [
+        2048,
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.post_attention_layernorm.bias",
+      "gguf": "blk.5.ffn_norm.bias",
+      "shape": [
+        512
+      ]
+    },
+    {
+      "source": "gpt_neox.layers.5.post_attention_layernorm.weight",
+      "gguf": "blk.5.ffn_norm.weight",
+      "shape": [
+        512
+      ]
+    }
+  ],
+  "excluded_nonparameter_buffers": [
+    "gpt_neox.layers.0.attention.masked_bias",
+    "gpt_neox.layers.0.attention.rotary_emb.inv_freq",
+    "gpt_neox.layers.1.attention.masked_bias",
+    "gpt_neox.layers.1.attention.rotary_emb.inv_freq",
+    "gpt_neox.layers.2.attention.masked_bias",
+    "gpt_neox.layers.2.attention.rotary_emb.inv_freq",
+    "gpt_neox.layers.3.attention.masked_bias",
+    "gpt_neox.layers.3.attention.rotary_emb.inv_freq",
+    "gpt_neox.layers.4.attention.masked_bias",
+    "gpt_neox.layers.4.attention.rotary_emb.inv_freq",
+    "gpt_neox.layers.5.attention.masked_bias",
+    "gpt_neox.layers.5.attention.rotary_emb.inv_freq",
+    "gpt_neox.layers.0.attention.bias",
+    "gpt_neox.layers.1.attention.bias",
+    "gpt_neox.layers.2.attention.bias",
+    "gpt_neox.layers.3.attention.bias",
+    "gpt_neox.layers.4.attention.bias",
+    "gpt_neox.layers.5.attention.bias"
+  ],
+  "provenance_sha256": {
+    "C:\\Users\\navaneeth\\leaf\\build\\competitors\\llama-b11540\\source\\convert_hf_to_gguf.py": "c2b8d1f31a9007be75d6850aa1db47dedcaedee0eeebe00aa978eac6f2cc89ad",
+    "C:\\Users\\navaneeth\\leaf\\build\\competitors\\llama-b11540\\source\\conversion\\base.py": "87076ece00a31ddc44bdd02b950c6c1972b36b0536aa0fcdc1326ab941ad7a7e",
+    "C:\\Users\\navaneeth\\leaf\\build\\competitors\\llama-b11540\\source\\conversion\\gptneox.py": "fa7f7c4be566e883c23ca00a7cad97e6664a2363f1a9b14c1cd0daa051e255f2",
+    "C:\\Users\\navaneeth\\leaf\\build\\competitors\\llama-b11540\\source\\ggml\\src\\ggml-cpu\\vec.h": "b2e3fcedaf93862c21f8c9806b94eebb2a16908cd546bec104b65f8801215f7e",
+    "C:\\Users\\navaneeth\\leaf\\build\\competitors\\llama-b11540\\source\\src\\models\\gptneox.cpp": "39dcfa122cc135750abeec2faf4b0ab1cef271cbbedfa482c28a614a4315691b",
+    "C:\\Users\\navaneeth\\leaf\\build\\pythia-llama-20261014\\audit_gguf.py": "c17dd7e3ea4611f19cb52a905c4096666af62bfcfa98adb2ddab43552f7fbc97",
+    "C:\\Users\\navaneeth\\leaf\\build\\pythia-llama-20261014\\conversion.log": "88b84d7997efb9d1486bcca48a39b5cc10d4e693489644df7e9f61b85a6ef68f"
+  }
+}

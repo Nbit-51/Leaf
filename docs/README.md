@@ -46,6 +46,8 @@ should not be combined into a universal speedup claim.
 | MLP experiments and rejected variants | [MLP report](mlp-prefill-experiment.md), [preserved patches](../benchmark/experiments) |
 | Detailed measurements, previous defaults and older model evaluations | [Full reference and history](project-reference.md) |
 | Resume checkpoint | [Prefill checkpoint](prefill-checkpoint-2026-10-07.md) |
+| Pythia attention-score sensitivity and retained tolerance failures | [Numerical investigation](pythia-numerics-handoff.md) |
+| Matched Pythia-70M Leaf/llama.cpp baseline and next prefill experiment | [Runtime comparison](pythia-runtime-comparison.md) |
 
 Older reports preserve what was known at the time; a rejected individual
 experiment is distinct from a later qualified combined default. The current

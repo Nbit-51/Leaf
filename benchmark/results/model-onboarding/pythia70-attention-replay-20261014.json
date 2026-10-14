@@ -1,0 +1,122 @@
+{
+  "native_torch_direct": {
+    "vs_native": {
+      "max_error": 0.0020995140075683594,
+      "violations": 1964
+    },
+    "vs_reference": {
+      "max_error": 0.0029071569442749023,
+      "violations": 2029
+    },
+    "score_min": -28276.044921875,
+    "score_max": 38934.9765625
+  },
+  "native_torch_twice": {
+    "vs_native": {
+      "max_error": 0.002506256103515625,
+      "violations": 2010
+    },
+    "vs_reference": {
+      "max_error": 0.0029096603393554688,
+      "violations": 2079
+    },
+    "score_min": -28276.044921875,
+    "score_max": 38934.9765625
+  },
+  "native_lanes_direct": {
+    "vs_native": {
+      "max_error": 0.0007307529449462891,
+      "violations": 139
+    },
+    "vs_reference": {
+      "max_error": 0.001683354377746582,
+      "violations": 1645
+    },
+    "score_min": -28276.048828125,
+    "score_max": 38934.984375
+  },
+  "native_lanes_twice": {
+    "vs_native": {
+      "max_error": 1.1920928955078125e-06,
+      "violations": 0
+    },
+    "vs_reference": {
+      "max_error": 0.0020758509635925293,
+      "violations": 1750
+    },
+    "score_min": -28276.048828125,
+    "score_max": 38934.984375
+  },
+  "native_double": {
+    "vs_native": {
+      "max_error": 0.0010733040862888066,
+      "violations": 506
+    },
+    "vs_reference": {
+      "max_error": 0.001904496420122359,
+      "violations": 1373
+    },
+    "score_min": -28276.049680195687,
+    "score_max": 38934.97859799133
+  },
+  "reference_torch_direct": {
+    "vs_native": {
+      "max_error": 0.0020758509635925293,
+      "violations": 1749
+    },
+    "vs_reference": {
+      "max_error": 0.0,
+      "violations": 0
+    },
+    "score_min": -28276.001953125,
+    "score_max": 38934.96875
+  },
+  "reference_torch_twice": {
+    "vs_native": {
+      "max_error": 0.0024867653846740723,
+      "violations": 1717
+    },
+    "vs_reference": {
+      "max_error": 0.0005626678466796875,
+      "violations": 117
+    },
+    "score_min": -28276.0,
+    "score_max": 38934.96875
+  },
+  "reference_lanes_direct": {
+    "vs_native": {
+      "max_error": 0.0015694499015808105,
+      "violations": 1208
+    },
+    "vs_reference": {
+      "max_error": 0.001992464065551758,
+      "violations": 1615
+    },
+    "score_min": -28276.0,
+    "score_max": 38934.96875
+  },
+  "reference_lanes_twice": {
+    "vs_native": {
+      "max_error": 0.0015694499015808105,
+      "violations": 1354
+    },
+    "vs_reference": {
+      "max_error": 0.001992464065551758,
+      "violations": 1806
+    },
+    "score_min": -28275.998046875,
+    "score_max": 38934.96875
+  },
+  "reference_double": {
+    "vs_native": {
+      "max_error": 0.0012522869702715766,
+      "violations": 505
+    },
+    "vs_reference": {
+      "max_error": 0.0017807255880741835,
+      "violations": 1356
+    },
+    "score_min": -28275.999727059207,
+    "score_max": 38934.967737366285
+  }
+}
