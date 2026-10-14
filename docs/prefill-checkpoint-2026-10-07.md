@@ -891,3 +891,15 @@ overrides. Final installed-binary window1/8/4096 suite passes, including scalar,
 two threads, chunked cache, generation and old-reader rejection. Record retained
 as benchmark/results/model-onboarding/installed-window-20261014.json.
 No numerical tolerance was relaxed; larger Pythia quality failures remain open.
+
+Direct main push of beef14c was rejected by GitHub's new PR-only rule. Work is
+on temporary codex/model-onboarding-quality, to merge via PR after CI and delete
+afterwards. No force push or rule bypass. User additionally requested merging
+benchmark/ and benchmarks/: six Python runners now live in benchmark/, with
+updated docs and a directory guide. Legacy bench_resnet18 now guards main,
+uses portable temporary files and only downloads weights with --pretrained.
+All six moved --help entrypoints pass; prepare_cifar10 produces valid2-image
+arrays; seeded32x32ResNet18 Python-reference output parity passes. Its27second
+Python-loop timing is not a native-engine result. Logs under
+build/release-onboarding-20261014/*smoke.log and help-*.log. Historical result
+JSON and dataset locations remain unchanged. Root user image remains untracked.

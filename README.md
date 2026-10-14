@@ -259,6 +259,7 @@ architecture cases, ten trained-model parity checks, and installed-wheel offline
 checks. Detailed evidence is linked above.
 
 [Build and validation guide](docs/project-reference.md#6-reproduce-validation-and-benchmarks) ·
+[Benchmark directory guide](benchmark/README.md) ·
 [Architecture and artifact reference](docs/project-reference.md#4-architecture) ·
 [Documentation index](docs/README.md)
 

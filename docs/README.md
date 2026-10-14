@@ -16,6 +16,7 @@ architecture, current results and scope. Use this index for details and evidence
 | Native formats and artifact trust boundary | [Artifacts](project-reference.md#10-artifact-formats-and-trust-boundary) |
 | Buffer liveness and memory reuse | [Memory plan](project-reference.md#11-memory-plan-format-and-runtime-reuse) |
 | Repository layout | [Source map](project-reference.md#12-repository-map) |
+| Benchmark runners, datasets and retained evidence | [Benchmark directory](../benchmark/README.md) |
 
 ## Current Windows release evidence
 
