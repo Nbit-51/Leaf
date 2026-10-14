@@ -1,0 +1,158 @@
+{
+  "scope": "Reduced Mistral causal-window correctness, not a trained 7B evaluation or benchmark.",
+  "complete": true,
+  "passed": true,
+  "timing_qualified": false,
+  "measured_at_utc": "2026-10-13T11:17:37.814043+00:00",
+  "executable_sha256": "e7ccd71f0495b11c7cd3a683d6ec698a6c903b6cb8400e495a5638c875028c62",
+  "tolerance": {
+    "atol": 5e-05,
+    "rtol": 0.0005
+  },
+  "cases": [
+    {
+      "window": 1,
+      "lengths": [
+        1,
+        2,
+        9
+      ],
+      "checks": [
+        {
+          "mode": "prefill",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "two-threads",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "scalar",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "chunked",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        }
+      ],
+      "artifact_sha256": "143fb85535ba72a011ec14c5e89b05d5b18c73789767f67606c3eac42cdcbf4f",
+      "reference_generation": "full-prefix, use_cache=False",
+      "reference_tokens": [
+        14,
+        17,
+        11,
+        3
+      ],
+      "reference_cached_tokens": [
+        14,
+        25,
+        7,
+        3
+      ],
+      "reference_cache_agrees": false,
+      "generation_exact_match": true
+    },
+    {
+      "window": 8,
+      "lengths": [
+        7,
+        8,
+        9,
+        17,
+        33
+      ],
+      "checks": [
+        {
+          "mode": "prefill",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "two-threads",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "scalar",
+          "passed": true,
+          "max_abs_error": 4.470348358154297e-08
+        },
+        {
+          "mode": "chunked",
+          "passed": true,
+          "max_abs_error": 5.21540641784668e-08
+        }
+      ],
+      "artifact_sha256": "8fbafd3a1f4041eb005dae4ca4f65da2a5db725acfd4a287b576b9b5fc3088d7",
+      "reference_generation": "full-prefix, use_cache=False",
+      "reference_tokens": [
+        1,
+        29,
+        29,
+        29
+      ],
+      "reference_cached_tokens": [
+        1,
+        29,
+        29,
+        29
+      ],
+      "reference_cache_agrees": true,
+      "generation_exact_match": true,
+      "full_attention_negative_control_max_difference": 0.19146496057510376,
+      "invalid_artifacts_rejected": true,
+      "old_runtime_rejects_v3": true
+    },
+    {
+      "window": 4096,
+      "lengths": [
+        4097
+      ],
+      "checks": [
+        {
+          "mode": "prefill",
+          "passed": true,
+          "max_abs_error": 9.238719940185547e-07
+        },
+        {
+          "mode": "two-threads",
+          "passed": true,
+          "max_abs_error": 9.238719940185547e-07
+        },
+        {
+          "mode": "scalar",
+          "passed": true,
+          "max_abs_error": 9.5367431640625e-07
+        },
+        {
+          "mode": "chunked",
+          "passed": true,
+          "max_abs_error": 9.238719940185547e-07
+        }
+      ],
+      "artifact_sha256": "1f38cb971dff6678c05218265d5785afadefb885b34dd153c52fb5f91971e400",
+      "reference_generation": "full-prefix, use_cache=False",
+      "reference_tokens": [
+        2,
+        0,
+        31,
+        28
+      ],
+      "reference_cached_tokens": [
+        2,
+        0,
+        31,
+        28
+      ],
+      "reference_cache_agrees": true,
+      "generation_exact_match": true
+    }
+  ],
+  "source_config_sha256": "cf25cdf4719f181d1d1d371973285d9afe9afde0d0c6a6fd48de857555ce1e0d",
+  "source_window": 4096,
+  "trained_weights_loaded": false
+}

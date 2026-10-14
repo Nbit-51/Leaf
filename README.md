@@ -42,11 +42,15 @@ git clone https://github.com/Nbit-51/Leaf.git
 cd Leaf
 python -m pip install .
 leaf --help
+leaf doctor
+leaf inspect openai-community/gpt2
 leaf run openai-community/gpt2 --prompt "Local inference is" --max-tokens 32
 ```
 
 The first Hub run downloads and prepares the model; subsequent runs reuse the
-cache. To use a complete local snapshot containing configuration, safetensors
+cache. `leaf inspect MODEL_ID` fetches decoder configuration only and reports
+operator compatibility plus a lower bound on FP32 weight memory before a large
+download. It does not certify checkpoint correctness or speed. To use a complete local snapshot containing configuration, safetensors
 weights and tokenizer files:
 
 ```sh
@@ -55,6 +59,12 @@ leaf run ./models/decoder --offline --prompt "Explain CPU inference." --max-toke
 
 Chat templates are applied when supplied by the tokenizer configuration; use
 `--raw` for an unformatted prompt. Generation is currently greedy.
+
+For output checks without timing benchmarks, install `.[validation]` and run
+`leaf evaluate MODEL_ID --dataset heldout.jsonl --dataset-source "name/test split" --output build/quality-run`.
+It records perplexity, next-token agreement and paired continuations. See
+[setup and quality evidence](docs/model-onboarding.md), including the remaining
+strict-logit failures found by the larger Pythia checks.
 
 For **EmbeddingGemma 300M FP32**, supply its model ID. Leaf downloads the
 tokenizer, weights and projection layers together; no manual file assembly:
@@ -109,9 +119,11 @@ Reduced-model tests exercise six decoder architecture families.
 Import adapters cover supported configurations from Llama/Qwen2, GPT-2,
 GPT-NeoX, OPT and dense Mistral-style blocks. Compatibility depends on operators
 and tensor layouts—not just a model-family name. The causal decoder does not
-yet implement scaled RoPE, sliding-window attention or Q/K normalization;
-the separate embedding runtime implements the latter two for its supported
-bidirectional configuration. MoE, encoder-decoder models and general sampling
+yet implement scaled RoPE or Q/K normalization. Uniform causal sliding windows
+are implemented and tested on reduced Mistral configurations, including a
+4096-token window boundary; trained Mistral 7B has not been executed here.
+The separate embedding runtime supports its bidirectional local/full attention
+and Q/K normalization. MoE, encoder-decoder models and general sampling
 remain unsupported. Unsupported configurations fail explicitly.
 
 [Detailed compatibility and operator boundaries](docs/project-reference.md#3-coverage-and-explicit-boundaries)
@@ -132,7 +144,7 @@ flowchart TB
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
     P --> D["Native decoder artifact"]
     G --> A["Native graph artifact"]
-    D --> R["C++ decoder · reusable buffers and session KV cache"]
+    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
     R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax<br/>W8A8 SiLU gating · quantized kernels"]
     K --> T["Tokens and logits"]

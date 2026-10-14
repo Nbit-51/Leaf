@@ -1,0 +1,196 @@
+{
+  "benchmark": "installed-package-offline-runtime-smoke",
+  "measured_at_utc": "2026-10-13T11:38:43.489601+00:00",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "threads": 1,
+  "pinned_cpu": null,
+  "model": "a39f36b100fe8a5377810d56c3f4789b9c53ac42",
+  "model_config_sha256": "002050231a9b1ec3ac77aa6b9b3bbdc4d923f4068a7dd33b8da72a9bd6ad9a43",
+  "source_weight_sha256": {
+    "model.safetensors": "ebfa4e2f18696ebd83716a0d39fe2c025f2ff8483f72a83ca59c475692fc9d15"
+  },
+  "reference_record_sha256": "7263d372baa2af4cf9b743b03c4ce7ead9f51dc330c14d39a06187f79a473dbb",
+  "package_check": {
+    "module": "leaf\\cli.py",
+    "bundled_runtime_selected": true,
+    "native_executable_sha256": "eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9",
+    "artifact_preexisting": false,
+    "runtime_environment_policy": {
+      "LEAF_DISABLE_VNNI": null,
+      "LEAF_DECODER_PROFILE": null,
+      "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+      "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+    },
+    "profile_native_binary_mismatch": true,
+    "automatic_weight_bits": 32,
+    "automatic_activation_bits": 32,
+    "heavy_model_libraries_loaded": []
+  },
+  "compiler_path_available": false,
+  "runtime_path_scope": "Windows System32 only",
+  "fresh_artifact_cache": true,
+  "operating_system_file_cache_flushed": false,
+  "timing_scope": "One observation per stage, not a speed gate. External timers include Python startup; CLI timers do not.",
+  "runs": [
+    {
+      "external_wall_ms": 1379.443899999842,
+      "external_first_stdout_byte_ms": 1165.6341999996584,
+      "external_first_visible_text_ms": 1165.6607999998414,
+      "stdout": " to provide a computer system that is capable of performing a computer program.\r\nThe\r\n",
+      "preparation_message_seen": true,
+      "package_check": {
+        "module": "leaf\\cli.py",
+        "bundled_runtime_selected": true,
+        "native_executable_sha256": "eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9",
+        "artifact_preexisting": false,
+        "runtime_environment_policy": {
+          "LEAF_DISABLE_VNNI": null,
+          "LEAF_DECODER_PROFILE": null,
+          "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+          "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+        },
+        "export_module": "tools\\export_decoder.py",
+        "heavy_model_libraries_loaded": []
+      },
+      "stage": "first_preparation",
+      "generated_tokens_match_pytorch": true,
+      "cli_metrics": {
+        "avx2": true,
+        "vector_silu_gate_calls": 0,
+        "vector_silu_gate_enabled": false,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 281715840,
+        "peak_rss_bytes": 184754176,
+        "load_ms": 13.1316,
+        "prefill_p50_ms": 78.9237,
+        "decode_p50_ms": 10.4174,
+        "prefill_samples_ms": [
+          78.9237
+        ],
+        "decode_samples_ms": [
+          10.0873,
+          10.1041,
+          10.9649,
+          10.6267,
+          10.1762,
+          11.623,
+          10.5239,
+          10.4174,
+          10.686,
+          10.0666,
+          11.5206,
+          9.7699,
+          9.9448,
+          10.9124,
+          10.2953
+        ],
+        "generated_tokens": [
+          281,
+          2085,
+          247,
+          4382,
+          985,
+          326,
+          310,
+          7032,
+          273,
+          9591,
+          247,
+          4382,
+          2086,
+          15,
+          187,
+          510
+        ],
+        "weight_bits": 32,
+        "time_to_first_token_ms": 1006.6510000001472,
+        "end_to_end_ms": 1191.4139999998952
+      }
+    },
+    {
+      "external_wall_ms": 739.5975999997972,
+      "external_first_stdout_byte_ms": 523.255699999936,
+      "external_first_visible_text_ms": 523.2731000000967,
+      "stdout": " to provide a computer system that is capable of performing a computer program.\r\nThe\r\n",
+      "preparation_message_seen": false,
+      "package_check": {
+        "module": "leaf\\cli.py",
+        "bundled_runtime_selected": true,
+        "native_executable_sha256": "eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9",
+        "artifact_preexisting": true,
+        "runtime_environment_policy": {
+          "LEAF_DISABLE_VNNI": null,
+          "LEAF_DECODER_PROFILE": null,
+          "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+          "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+        },
+        "export_module": null,
+        "heavy_model_libraries_loaded": []
+      },
+      "stage": "cached_repeat",
+      "generated_tokens_match_pytorch": true,
+      "cli_metrics": {
+        "avx2": true,
+        "vector_silu_gate_calls": 0,
+        "vector_silu_gate_enabled": false,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 281715840,
+        "peak_rss_bytes": 184754176,
+        "load_ms": 0.288,
+        "prefill_p50_ms": 78.5457,
+        "decode_p50_ms": 10.1521,
+        "prefill_samples_ms": [
+          78.5457
+        ],
+        "decode_samples_ms": [
+          9.8896,
+          10.1521,
+          11.9084,
+          10.881,
+          9.3547,
+          9.9029,
+          10.1196,
+          9.7846,
+          10.271,
+          10.5056,
+          10.3871,
+          10.0743,
+          10.515,
+          10.0433,
+          11.0159
+        ],
+        "generated_tokens": [
+          281,
+          2085,
+          247,
+          4382,
+          985,
+          326,
+          310,
+          7032,
+          273,
+          9591,
+          247,
+          4382,
+          2086,
+          15,
+          187,
+          510
+        ],
+        "weight_bits": 32,
+        "time_to_first_token_ms": 369.9759000000995,
+        "end_to_end_ms": 553.2292000002599
+      }
+    }
+  ],
+  "passed": true,
+  "wheel": "leaf_cpu-0.2.0-py3-none-win_amd64.whl",
+  "wheel_sha256": "1caf3c073332a4cf4d0232f6c1562b39da95a167455a67a7af369d8558ac4e43"
+}

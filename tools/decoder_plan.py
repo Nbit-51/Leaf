@@ -47,6 +47,7 @@ def validate_snapshot_generation(snapshot: Path, plan: dict) -> None:
 
 def make_plan(source: dict) -> dict:
     kind = source.get("model_type")
+    sliding_window = 0
     rope = source.get("rope_parameters") or {}
     if source.get("qk_layernorm") or source.get("use_qk_norm"):
         raise ValueError("Query/key normalization needs additional native operators")
@@ -82,7 +83,13 @@ def make_plan(source: dict) -> dict:
         norm, act, position, gated, parallel = 0, source.get("hidden_act", "silu"), 0, 1, 0
         eps, theta = source.get("rms_norm_eps", 1e-6), rope.get("rope_theta", source.get("rope_theta", 10000))
         kv, offset, final_norm = source.get("num_key_value_heads", heads), 0, 1
-        if source.get("sliding_window") and (kind == "mistral" or source.get("use_sliding_window")):
+        if kind == "mistral" and source.get("sliding_window") is not None:
+            sliding_window = source["sliding_window"]
+            if type(sliding_window) is not int or not 0 < sliding_window <= 0xffffffff:
+                raise ValueError("Mistral sliding_window must be a positive integer")
+            if source.get("layer_types") is not None and source["layer_types"] != ["sliding_attention"] * layers:
+                raise ValueError("Mixed per-layer sliding-window attention is not implemented")
+        elif source.get("sliding_window") and source.get("use_sliding_window"):
             raise ValueError("Sliding-window attention is not implemented by the current native operators")
     else:
         raise ValueError(f"No import adapter for {kind!r}. Supply --plan with block semantics and tensor mappings.")
@@ -106,6 +113,8 @@ def make_plan(source: dict) -> dict:
                   parallel_residual=parallel, rotary_dim=rotary_dim,
                   position_offset=offset, final_norm=final_norm,
                   embedding_scale=h ** 0.5 if source.get("scale_embedding", False) else 1.0)
+    if sliding_window:
+        config["sliding_window"] = sliding_window
     tensors = {}
 
     def add(name, original=None, transforms=None, input_module=None):
@@ -202,16 +211,16 @@ def make_plan(source: dict) -> dict:
 def config_values(config: dict) -> tuple:
     fields = {"hidden", "intermediate", "heads", "kv_heads", "layers", "vocab", "max_positions", "eos",
               "head_dim", "theta", "epsilon", "norm", "activation", "position", "gated", "parallel_residual",
-              "rotary_dim", "position_offset", "final_norm", "embedding_scale"}
+              "rotary_dim", "position_offset", "final_norm", "embedding_scale", "sliding_window"}
     if set(config) - fields:
         raise ValueError(f"Unsupported plan configuration fields: {sorted(set(config) - fields)}")
     h, heads, dim, kv = (int(config[k]) for k in ("hidden", "heads", "head_dim", "kv_heads"))
     if not kv or not heads or not dim or h != heads * dim or heads % kv:
         raise ValueError("Invalid decoder head geometry")
-    missing = fields - {"embedding_scale"} - set(config)
+    missing = fields - {"embedding_scale", "sliding_window"} - set(config)
     if missing:
         raise ValueError(f"Missing plan configuration fields: {sorted(missing)}")
-    for name in fields - {"theta", "epsilon", "embedding_scale"}:
+    for name in fields - {"theta", "epsilon", "embedding_scale", "sliding_window"}:
         if not isinstance(config[name], int) or not 0 <= config[name] <= 0xffffffff:
             raise ValueError(f"Plan dimension/operator {name} must be an unsigned 32-bit integer")
     if any(config[name] not in (0, 1) for name in ("gated", "parallel_residual", "final_norm")):
@@ -229,7 +238,10 @@ def config_values(config: dict) -> tuple:
     first = tuple(int(config[k]) for k in ("hidden", "intermediate", "heads", "kv_heads", "layers", "vocab", "max_positions", "eos", "head_dim"))
     if any(v <= 0 for v in first[:7]):
         raise ValueError("Decoder dimensions must be positive")
-    return (*first, 0, float(config["theta"]), float(config["epsilon"]),
+    window = config.get("sliding_window", 0)
+    if type(window) is not int or not 0 <= window <= 0xffffffff:
+        raise ValueError("Plan sliding_window must be an unsigned 32-bit integer")
+    return (*first, window, float(config["theta"]), float(config["epsilon"]),
             *(int(config[k]) for k in ("norm", "activation", "position", "gated", "parallel_residual", "rotary_dim", "position_offset", "final_norm")),
             float(config.get("embedding_scale", 1.0)))
 

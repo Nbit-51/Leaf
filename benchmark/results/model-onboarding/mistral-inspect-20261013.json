@@ -1,0 +1,14 @@
+{
+  "model": "mistralai/Mistral-7B-v0.1",
+  "task": "generation",
+  "architecture": "mistral",
+  "configuration_supported": true,
+  "weights_verified": false,
+  "timing_qualified": false,
+  "config_sha256": "cf25cdf4719f181d1d1d371973285d9afe9afde0d0c6a6fd48de857555ce1e0d",
+  "snapshot": "C:\\Users\\navaneeth\\leaf\\build\\model-onboarding-20261013\\cache\\hub\\models--mistralai--Mistral-7B-v0.1\\snapshots\\27d67f1b5f57dc0953326b2601d68371d40ea8da",
+  "scope": "Configuration check only; no weights downloaded or executed.",
+  "fp32_required_weight_bytes_lower_bound": 28966928384,
+  "fp32_required_weight_gib_lower_bound": 26.978,
+  "memory_note": "Required FP32 tensors only; excludes optional biases, KV cache, activations, source download and operating system."
+}

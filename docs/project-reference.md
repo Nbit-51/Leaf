@@ -1922,6 +1922,7 @@ python -X utf8 tools/probe_decoder_coverage.py --config 'C:\path\to\snapshot' --
 |---|---|---|
 | `leaf-decoder-plan-v1` JSON | Dimensions, supported block semantics, canonical tensor mappings/transforms | Decoder preparation |
 | `LEAFDC02` decoder `.leaf`, version 2 | 64-byte-aligned mapped FP32/INT8/INT4 payloads, scales, optional input factors, decoder semantics | `leaf_decoder` |
+| `LEAFDC03` decoder `.leaf`, version 3 | Same header layout, with a positive uniform causal-window width in the former reserved word; old readers reject it | Current `leaf_decoder` |
 | Graph `.leaf` version 2 | Nodes/attributes, 32-byte-aligned typed FP32/INT8 weights and per-channel scales | `leaf_infer` / graph C++ API |
 | Graph `.leaf` version 3 | v2 graph data plus embedded 64-byte-aligned liveness arena plan | Graph executor planned path |
 | `leaf-memory-plan-v1` JSON | Fingerprint, offsets, live intervals, alignment, unplanned tensors | Inspection and graph v3 export |

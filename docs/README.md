@@ -7,6 +7,7 @@ architecture, current results and scope. Use this index for details and evidence
 
 | Topic | Reference |
 |---|---|
+| Model onboarding, runtime setup and quality-only evaluation | [Model and output checks](model-onboarding.md) |
 | Installation, local/Hub models, quantization and cache controls | [Usage](project-reference.md#2-install-and-run-with-one-command) |
 | Native document embeddings, JSONL inference and numerical validation | [Embeddings](embedding.md) |
 | Supported decoder configurations and graph operators | [Compatibility](project-reference.md#3-coverage-and-explicit-boundaries) |

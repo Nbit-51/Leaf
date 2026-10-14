@@ -796,3 +796,98 @@ Final installed encoder release/parity.json is complete:1/2/scalar all pass,
 maxerror3.80e-7 across variants. No model correctness job remains running.
 Next prioritize supported-model onboarding and clear capability boundaries;
 do not begin another optimization experiment before addressing product flow.
+
+## Manual-testing handoff — 2026-10-13
+
+Current local changes after c8e80c4 (not committed/pushed yet): leaf inspect MODEL_ID
+configuration-only command, decoder revision-pinned downloads, tests/unit/test_model_inspection.py,
+tools/verify_hub_decoder.py correctness-only onboarding, README/CI additions.
+137 focused model-inspection/CLI tests pass. Previous c8e80c4 CI is green on all OSes
+(run38334177718). User requested manual commands before usage limit: do not start more jobs.
+
+Live Leaf Hub checks: Mistral-7B-v0.1 rejects sliding-window attention;
+Mistral-7B-Instruct-v0.2 config passes, required FP32 tensors26.978GiB (no weights downloaded).
+Laptop total15.7GiB/initialavailable5.5GiB, initially battery76%; user chose smaller FP32 model.
+Pythia160M was downloaded and generated via python -m leaf.cli run EleutherAI/pythia-160m,
+not manual browser assembly. Cache build/model-onboarding-20261013/cache.
+Use saved native binary build/attention-span-20261012/release/installed/leaf/bin/leaf_decoder.exe.
+First generation and offline cached CLI both passed. No performance qualification; user
+initially reported battery power, later telemetry showed AC restored. No timing experiment run.
+
+Correctness tool record build/model-onboarding-20261013/pythia-correctness-final/correctness.json
+is complete/passed: 17/33/64/127 token sequences from WikiText2 prefix,237 scored targets,
+one-thread/two-thread/scalar/chunk7 all100%next-token agreement and logits allclose
+atol2e-4/rtol2e-4. Maximum absolute logit error up to0.0163574, relative RMSE<=1.502e-6;
+do not describe logits as bit-exact. Perplexity ratio about0.99998.16 greedy tokens exact.
+This is limited trained-checkpoint correctness, NOT broad corpus quality or llama.cpp speed.
+First correctness attempt failed before evaluation because pyarrow was missing on sys.path;
+completed rerun used PYTHONPATH=build/python-deps. Native inference does not need PyArrow.
+Fresh evidence, logs and cached CLI output are under build/model-onboarding-20261013.
+The synthetic offline embedding cache previously verified is
+build/attention-span-20261012/release/package-check/cache; local model is
+build/models/embeddinggemma-300m, encoder same installed leaf/bin/leaf_embed.exe.
+
+User clarified comparator is llama.cpp, not a2Bmodel. Proposed product target within10%
+on matched stable phase timings, reporting absolute ms too; not a changed acceptance gate.
+Next after manual feedback: retain onboarding reports in benchmark/results, concise docs,
+commit/push valid changes. Then matched CPU llama.cpp Pythia timing when plugged in;
+larger dataset throughput/quality/memory later, individual ONNX neural-network path separately.
+No active processes remain. User-owned rootPNG untouched. DevRelay still requires MLH login;
+no login or posting initiated. No new kernels were needed for trained Pythia/GPT-NeoX.
+
+## Model onboarding, output quality and installation — 2026-10-13 follow-up
+
+Supersedes the earlier handoff's missing sliding-window support. Implemented
+uniform causal Mistral window import/shared decoder masking. Version3 LEAFDC03
+uses the former reserved config word; old binaries reject it. Unwindowed models
+remain v2. Reduced windows1/8/4096 (including4097tokens), scalar/2threads/chunking
+and generation pass; maxerror9.5367e-7. No trained7B weights. FullKV storage and
+quadratic mask remain; no memory/speed claim. Existing10decoder configurations
+and precisions are bit-identical to prior runtime. Retained failed HF5.14.1
+window1 cached-generation oracle discrepancy alongside full-prefix-oracle pass.
+Reports: benchmark/results/model-onboarding; source build: build/mistral-window-20261013.
+
+Added leaf doctor (bundled/source-cache runtime startup, no download) and
+leaf evaluate (quality only, atomically checkpointed JSON, no speed qualification).
+CLI now resolves runtime before weight downloads. Invalid explicit overrides give
+removal instructions; they are never silently ignored. Added runtime-info native
+entry points. Final wheel: build/output-quality-20261013/wheels-final/
+leaf_cpu-0.2.0-py3-none-win_amd64.whl, SHA256
+1caf3c073332a4cf4d0232f6c1562b39da95a167455a67a7af369d8558ac4e43.
+Installed decoder SHA256eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9.
+Local wheel doctor, first/cached generation and real cached HubID run pass without
+compilerPATH/binaryoverrides/heavy inference imports. This is not a public release.
+
+Larger accuracy evaluation is COMPLETE with RETAINED FAILURES, not interrupted:
+32x128tokens=4064targets/model and6rawprompts x16greedy tokens.
+Pythia70: LeafPPL100.9010263358 vsTorch100.9008276153,99.9753937%agreement,
+24.187992%next-targetaccuracy both,6/6exactgeneration; block29(zero-based)failsallclose.
+Pythia160:63.2554834774 vs63.2554651545,100%agreement,28.346457%accuracyboth,
+6/6exactgeneration; block31failsallclose. Complete=true,passed=false forboth.
+Do NOT relax2e-4atol/rtol or claim entire suitepassed. Aggregate gatespass.
+Pythia70 diagnosis: block29has101/6438912logitviolations; scalaralsofails;
+old/newruntimebit-identical onblocks10/29. Singlepredictedtokendifferenceblock10
+hasreference top2margin0.00012207. Firstdivergentlayerstillunknown.
+Source/config/weights/dataset/binary hashes in reports; tokens and logs in
+build/output-quality-20261013/{pythia70,pythia160}. Reproducer diagnostic script
+build/output-quality-20261013/diagnose_quality.py. Next: layer-output trace on
+these inputs, not another latency sweep. No new performance claim.
+
+Focused tests:190CLI/package/embedding checks,246quality/import checks (overlap;
+do not sum as unique tests). Earlier192decoder/import and22dataset/graph tests
+passed; seeded randomResNet18native parity maxerror8.6e-7 (not trainedaccuracy).
+Initialtestattempt failed because --basetemp parentdirectorymissing, thenpassed;
+initialpipbuild sandboxTemp permissions failed, escalatedbuildpassed. These are
+setup failures, not suppressed model failures. User-owned rootPNG untouched.
+
+### Final install verification — 2026-10-14
+
+Resumed after usage limit; no benchmark processes remained. GitHub had a new
+SECURITY.md commit6286ad9, incorporated by fast-forward without overlapping edits.
+Fresh venv at build/release-onboarding-20261014/venv installs the final wheel.
+Actual Scripts/leaf.exe doctor and cached Hub-ID generation pass from a different
+working directory, with PATH restricted to WindowsSystem32 and no binary/CXX
+overrides. Final installed-binary window1/8/4096 suite passes, including scalar,
+two threads, chunked cache, generation and old-reader rejection. Record retained
+as benchmark/results/model-onboarding/installed-window-20261014.json.
+No numerical tolerance was relaxed; larger Pythia quality failures remain open.

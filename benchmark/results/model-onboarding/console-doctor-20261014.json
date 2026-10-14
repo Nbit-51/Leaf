@@ -1,0 +1,24 @@
+{
+  "ready": true,
+  "cache": "C:\\Users\\navaneeth\\leaf\\build\\manual-model-cache",
+  "runtimes": {
+    "generation": {
+      "path": "C:\\Users\\navaneeth\\leaf\\build\\release-onboarding-20261014\\venv\\Lib\\site-packages\\leaf\\bin\\leaf_decoder.exe",
+      "runtime": "leaf_decoder",
+      "artifact_versions": [
+        2,
+        3
+      ],
+      "selection": "bundled"
+    },
+    "embedding": {
+      "path": "C:\\Users\\navaneeth\\leaf\\build\\release-onboarding-20261014\\venv\\Lib\\site-packages\\leaf\\bin\\leaf_embed.exe",
+      "runtime": "leaf_embed",
+      "artifact_versions": [
+        1
+      ],
+      "selection": "bundled"
+    }
+  },
+  "scope": "Runtime startup only; no model downloaded or evaluated."
+}

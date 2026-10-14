@@ -60,6 +60,10 @@ template <class T> void array(std::ostream& output, const std::vector<T>& values
 }
 
 int main(int argc, char** argv) {
+    if (argc == 2 && std::string(argv[1]) == "--runtime-info") {
+        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3]}\n";
+        return 0;
+    }
     if (argc < 6 || argc > 13) {
         std::cerr << "Usage: leaf_decoder artifact.leaf tokens.bin logits.bin metrics.json mode"
                      " [threads=1] [runs=3] [warmup=1] [generate=16] [scalar=0] [chunk=1] [activation-bits=32]\n";

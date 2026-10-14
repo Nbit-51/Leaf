@@ -1,0 +1,51 @@
+{
+  "scope": "Focused diagnosis of failed logit check; does not override the failed gate",
+  "quality_record_sha256": "0b0a501a8d48aa9846189af3b942b11c9becfdb71c1f67737c155093706376f7",
+  "current_sha256": "eec43c28e3e1e011c9303c8f80776dfd4d24d010edd96da3a738cfa8a1520db9",
+  "previous_sha256": "1f145c363d9100608aa2716ad5a2e46ac40506a9554d870db1415ea717f80ab1",
+  "checks": [
+    {
+      "block_index": 10,
+      "previous_bit_exact": true,
+      "scalar_logits_close": true,
+      "scalar_max_error": 0.013824462890625,
+      "violations": 0,
+      "logit_count": 6438912,
+      "worst_position": [
+        42,
+        102
+      ],
+      "reference_value": -43.01066589355469,
+      "leaf_value": -43.006404876708984,
+      "tolerance": 0.008802132681012154,
+      "error_over_tolerance": 0.4840891361236572,
+      "max_probability_error": 0.0007560000200603767,
+      "disagreements": [
+        {
+          "position": 5,
+          "expected": 187,
+          "actual": 15,
+          "reference_top2_margin": 0.0001220703125
+        }
+      ]
+    },
+    {
+      "block_index": 29,
+      "previous_bit_exact": true,
+      "scalar_logits_close": false,
+      "scalar_max_error": 0.013916015625,
+      "violations": 101,
+      "logit_count": 6438912,
+      "worst_position": [
+        50,
+        237
+      ],
+      "reference_value": 0.5554304122924805,
+      "leaf_value": 0.5575199127197266,
+      "tolerance": 0.00031108607072383165,
+      "error_over_tolerance": 6.716792106628418,
+      "max_probability_error": 0.0007399093056046635,
+      "disagreements": []
+    }
+  ]
+}

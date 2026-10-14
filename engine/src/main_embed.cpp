@@ -14,6 +14,10 @@ std::uint32_t read_u32(std::istream &input) {
 }
 } // namespace
 int main(int argc, char **argv) {
+    if (argc == 2 && std::strcmp(argv[1], "--runtime-info") == 0) {
+        std::cout << "{\"runtime\":\"leaf_embed\",\"artifact_versions\":[1]}\n";
+        return 0;
+    }
     try {
         if (argc < 4 || argc > 6)
             throw std::runtime_error("Usage: leaf_embed ARTIFACT REQUEST OUTPUT [THREADS] [--scalar]");

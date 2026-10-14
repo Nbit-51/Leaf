@@ -37,7 +37,10 @@ def executable(cache: Path) -> Path:
     if configured:
         candidate = Path(configured)
         if not candidate.is_file():
-            raise FileNotFoundError("LEAF_DECODER_BIN does not point to an executable")
+            raise FileNotFoundError(
+                f"LEAF_DECODER_BIN does not point to an executable: {candidate}. "
+                "Remove this optional override to use automatic runtime selection "
+                "(PowerShell: Remove-Item Env:LEAF_DECODER_BIN); then run leaf doctor.")
         return candidate.resolve()
     bundled = Path(__file__).resolve().parent / "bin" / ("leaf_decoder.exe" if os.name == "nt" else "leaf_decoder")
     if bundled.is_file():
@@ -54,7 +57,9 @@ def executable(cache: Path) -> Path:
         return destination
     compiler = os.environ.get("CXX") or shutil.which("g++") or shutil.which("clang++")
     if not compiler:
-        raise RuntimeError("Install a C++17 compiler (GCC or Clang), or set LEAF_DECODER_BIN to a supplied native binary")
+        raise RuntimeError("No bundled runtime or C++17 compiler found. Install a Leaf platform wheel "
+                           "for compiler-free inference, or install GCC/Clang to build this source checkout. "
+                           "A binary environment variable is not required.")
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".partial")
     command = [compiler, "-std=c++17", "-O3", "-DNDEBUG", "-pthread", "-I", str(engine / "include"),
@@ -67,7 +72,8 @@ def executable(cache: Path) -> Path:
     return destination
 
 
-def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | None = None) -> Path:
+def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | None = None,
+                  metadata_only: bool = False) -> Path:
     local = Path(model)
     if local.is_dir():
         return local.resolve()
@@ -81,6 +87,8 @@ def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | N
     # Check configuration/capabilities before fetching large weight shards.
     metadata = snapshot_download(model, cache_dir=cache / "hub", local_files_only=offline,
                                  allow_patterns=["config.json", "generation_config.json"])
+    if metadata_only:
+        return Path(metadata)
     if plan:
         from tools.decoder_plan import validate_plan
         imported_plan = json.loads(plan.read_text())
@@ -88,8 +96,40 @@ def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | N
     else:
         imported_plan = make_plan(json.loads((Path(metadata) / "config.json").read_text()))
     validate_snapshot_generation(Path(metadata), imported_plan)
-    return Path(snapshot_download(model, cache_dir=cache / "hub", local_files_only=offline,
+    return Path(snapshot_download(model, revision=Path(metadata).name,
+                                  cache_dir=cache / "hub", local_files_only=offline,
                                   allow_patterns=["*.json", "*.safetensors", "tokenizer.model", "merges.txt", "vocab.json"]))
+
+
+def inspect_model(args):
+    """Inspect decoder configuration without downloading weights or building kernels."""
+    import math
+    from tools.decoder_plan import make_plan, validate_plan, validate_snapshot_generation, tensor_shapes
+
+    snapshot = resolve_model(args.model, cache_root(), args.offline, metadata_only=True)
+    source = json.loads((snapshot / "config.json").read_text(encoding="utf-8"))
+    record = dict(model=args.model, task="generation", architecture=source.get("model_type"),
+                  configuration_supported=False, weights_verified=False, timing_qualified=False,
+                  config_sha256=hashlib.sha256((snapshot / "config.json").read_bytes()).hexdigest(),
+                  snapshot=str(snapshot), scope="Configuration check only; no weights downloaded or executed.")
+    try:
+        plan = make_plan(source)
+        validate_plan(plan)
+        validate_snapshot_generation(snapshot, plan)
+    except (ValueError, KeyError, TypeError) as error:
+        record["reason"] = str(error)
+    else:
+        minimum = sum(math.prod(shape) for shape in tensor_shapes(plan["config"]).values()) * 4
+        record.update(configuration_supported=True,
+                      fp32_required_weight_bytes_lower_bound=minimum,
+                      fp32_required_weight_gib_lower_bound=round(minimum / 2**30, 3),
+                      memory_note="Required FP32 tensors only; excludes optional biases, KV cache, activations, source download and operating system.")
+    rendered = json.dumps(record, indent=2) + "\n"
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        with args.output.open("x", encoding="utf-8") as stream:
+            stream.write(rendered)
+    print(rendered, end="")
 
 
 def model_directory(snapshot: Path, cache: Path, plan: Path | None = None) -> Path:
@@ -298,9 +338,9 @@ def run(args):
     pin_cpu(args.cpu)
     start = time.perf_counter()
     cache = cache_root()
+    runtime = executable(cache)  # Fail setup before downloading large weight files.
     snapshot = resolve_model(args.model, cache, args.offline, args.plan)
     validate_model_generation(snapshot, args.plan)
-    runtime = executable(cache)
     directory = model_directory(snapshot, cache, args.plan)
     bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu)
     artifact = selected or prepare(snapshot, directory, bits, args.plan)
@@ -390,6 +430,23 @@ def optimize(args):
 def main():
     parser = argparse.ArgumentParser(prog="leaf", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    doctor = commands.add_parser("doctor", help="prepare and check native runtimes without downloading a model")
+    doctor.add_argument("--task", choices=("generation", "embedding", "all"), default="all")
+    evaluator = commands.add_parser("evaluate", help="measure FP32 output fidelity and held-out perplexity, without timing benchmarks")
+    evaluator.add_argument("model", help="supported Hub ID or local snapshot")
+    evaluator.add_argument("--dataset", type=Path, required=True)
+    evaluator.add_argument("--text-column", default="text")
+    evaluator.add_argument("--dataset-source", required=True, help="dataset name, split and provenance")
+    evaluator.add_argument("--blocks", type=int, default=32)
+    evaluator.add_argument("--sequence-length", type=int, default=128)
+    evaluator.add_argument("--generate", type=int, default=16)
+    evaluator.add_argument("--threads", type=int, default=1)
+    evaluator.add_argument("--offline", action="store_true")
+    evaluator.add_argument("--output", type=Path, required=True, help="fresh results directory; partial progress is retained")
+    inspector = commands.add_parser("inspect", help="check decoder configuration and FP32 weight size without downloading weights")
+    inspector.add_argument("model", help="Hugging Face model ID, local snapshot, or registered alias")
+    inspector.add_argument("--offline", action="store_true")
+    inspector.add_argument("--output", type=Path, help="new JSON report path")
     embedder = commands.add_parser("embed", help="download/cache a supported embedding model and encode text with native FP32 execution")
     embedder.add_argument("model", help="Hugging Face model ID, local snapshot, or registered alias")
     embedder.add_argument("--offline", action="store_true", help="use only downloaded model files")
@@ -436,7 +493,17 @@ def main():
     alias.add_argument("name"); alias.add_argument("model")
     args = parser.parse_args()
     try:
-        if args.command == "embed":
+        if args.command == "doctor":
+            from leaf.runtime_check import doctor as check_runtime
+            check_runtime(args.task)
+        elif args.command == "evaluate":
+            if min(args.blocks, args.sequence_length - 1, args.generate) <= 0 or not 1 <= args.threads <= 64:
+                parser.error("blocks and generate must be positive, sequence-length >=2, threads 1..64")
+            from leaf.evaluation import evaluate
+            evaluate(args)
+        elif args.command == "inspect":
+            inspect_model(args)
+        elif args.command == "embed":
             if not 1 <= args.threads <= 64:
                 parser.error("threads must be 1..64")
             from leaf.embedding import run as embed
