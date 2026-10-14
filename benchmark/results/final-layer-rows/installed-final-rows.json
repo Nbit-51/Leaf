@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "executable_sha256": "8812daf54f6aecbc0058bec79cb612ee6328299a1334ed0ce3ccdcdf7ba58034",
+  "wheel_sha256": "3095afecca0cc7fc759bdfc63db8064fef6506eb8581f80f24d4a1fa79697ed8",
+  "long_prompt_generation_matches_before": true,
+  "profile_confirms_selection": true,
+  "prefill_activation_rows": 346,
+  "decode_activation_rows": 6,
+  "timing_qualified": false
+}

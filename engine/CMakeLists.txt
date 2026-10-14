@@ -127,6 +127,17 @@ if(WIN32)
   target_link_libraries(leaf_decoder PRIVATE psapi)
 endif()
 
+add_executable(leaf_decoder_final_rows_tests ../tests/native/test_decoder_final_rows.cpp
+  src/decoder.cpp src/kv_cache.cpp src/kernels/transformer.cpp)
+target_include_directories(leaf_decoder_final_rows_tests PRIVATE include)
+target_link_libraries(leaf_decoder_final_rows_tests PRIVATE Threads::Threads)
+if(NOT MSVC AND LEAF_ENABLE_AVX2)
+  target_compile_options(leaf_decoder_final_rows_tests PRIVATE -mno-avx2 -mno-fma)
+endif()
+if(WIN32)
+  target_link_libraries(leaf_decoder_final_rows_tests PRIVATE psapi)
+endif()
+
 # Header-only token-panel primitive exercises portable scalar execution and
 # runtime-dispatched AVX2/FMA without depending on whole-model artifacts.
 add_executable(leaf_token_panel_tests ../tests/native/test_token_panel.cpp)
