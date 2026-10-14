@@ -903,3 +903,16 @@ arrays; seeded32x32ResNet18 Python-reference output parity passes. Its27second
 Python-loop timing is not a native-engine result. Logs under
 build/release-onboarding-20261014/*smoke.log and help-*.log. Historical result
 JSON and dataset locations remain unchanged. Root user image remains untracked.
+
+PR4 initial hosted CI caught an ordering regression: early runtime selection
+preceded unsupported EOS metadata rejection. Fixed with a resolver preflight
+callback: metadata validation, runtime selection/build, then pinned weight fetch.
+Existing generation-policy test remains unchanged and passes; missing-override
+test now verifies metadata-only fetch and no weight fetch. Focused180tests pass.
+Rebuilt wheel SHA25646d80118f646af088209516f9879ca7d60f58c090037b525e327c96a171557e8,
+at build/release-onboarding-20261014/wheels. Actual venv console doctor and HubID
+generation pass again, with exact savedreference tokens. Native code unchanged;
+no need to repeat the full corpus or performance measurements for a CLI order fix.
+All three local CI Python suites pass:823main,44diagnostic,50embedding tests.
+The first full local run had5sandbox temporary-directory permission failures;
+the main suite passed outside sandbox. HostedCI must pass before merging PR4.

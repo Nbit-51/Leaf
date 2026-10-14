@@ -22,11 +22,22 @@ def test_doctor_accepts_matching_native_capabilities(tmp_path, monkeypatch):
 
 
 def test_invalid_override_fails_before_model_download(tmp_path, monkeypatch):
+    import sys
+    metadata = tmp_path / "metadata"
+    metadata.mkdir()
+    (metadata / "config.json").write_text(json.dumps(dict(model_type="llama", hidden_size=16,
+        intermediate_size=32, num_attention_heads=2, num_hidden_layers=1, vocab_size=32)))
+    requests = []
+    def download(*args, **kwargs):
+        requests.append(kwargs)
+        assert kwargs["allow_patterns"] == ["config.json", "generation_config.json"]
+        return str(metadata)
+    monkeypatch.setitem(sys.modules, "huggingface_hub", SimpleNamespace(snapshot_download=download))
     monkeypatch.setenv("LEAF_DECODER_BIN", str(tmp_path / "missing.exe"))
-    monkeypatch.setattr(cli, "resolve_model", lambda *a, **k: pytest.fail("Downloaded before runtime check"))
-    args = SimpleNamespace(cpu=None)
+    args = SimpleNamespace(cpu=None, model="owner/model", offline=False, plan=None)
     with pytest.raises(FileNotFoundError, match="Remove-Item Env:LEAF_DECODER_BIN"):
         cli.run(args)
+    assert len(requests) == 1
 
 
 def test_embedding_invalid_override_fails_before_model_download(tmp_path, monkeypatch):

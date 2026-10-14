@@ -73,15 +73,21 @@ def executable(cache: Path) -> Path:
 
 
 def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | None = None,
-                  metadata_only: bool = False) -> Path:
+                  metadata_only: bool = False, before_weights=None) -> Path:
+    def local_snapshot(path):
+        if before_weights is not None:
+            validate_model_generation(path, plan)
+            before_weights()
+        return path.resolve()
+
     local = Path(model)
     if local.is_dir():
-        return local.resolve()
+        return local_snapshot(local)
     aliases = cache / "aliases.json"
     if aliases.is_file():
         model = json.loads(aliases.read_text()).get(model, model)
         if Path(model).is_dir():
-            return Path(model).resolve()
+            return local_snapshot(Path(model))
     from huggingface_hub import snapshot_download
     from tools.decoder_plan import make_plan, validate_snapshot_generation
     # Check configuration/capabilities before fetching large weight shards.
@@ -96,6 +102,8 @@ def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | N
     else:
         imported_plan = make_plan(json.loads((Path(metadata) / "config.json").read_text()))
     validate_snapshot_generation(Path(metadata), imported_plan)
+    if before_weights is not None:
+        before_weights()
     return Path(snapshot_download(model, revision=Path(metadata).name,
                                   cache_dir=cache / "hub", local_files_only=offline,
                                   allow_patterns=["*.json", "*.safetensors", "tokenizer.model", "merges.txt", "vocab.json"]))
@@ -338,9 +346,13 @@ def run(args):
     pin_cpu(args.cpu)
     start = time.perf_counter()
     cache = cache_root()
-    runtime = executable(cache)  # Fail setup before downloading large weight files.
-    snapshot = resolve_model(args.model, cache, args.offline, args.plan)
-    validate_model_generation(snapshot, args.plan)
+    runtime = None
+    def prepare_runtime():
+        nonlocal runtime
+        runtime = executable(cache)
+    # Reject unsupported metadata before building, and setup failures before weights.
+    snapshot = resolve_model(args.model, cache, args.offline, args.plan,
+                             before_weights=prepare_runtime)
     directory = model_directory(snapshot, cache, args.plan)
     bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu)
     artifact = selected or prepare(snapshot, directory, bits, args.plan)
