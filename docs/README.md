@@ -20,6 +20,8 @@ architecture, current results and scope. Use this index for details and evidence
 
 ## Current Windows release evidence
 
+- [Final-layer FP32 row selection](final-layer-row-selection.md): byte-identical
+  tested outputs and stable Pythia/GPT-2 prefill gains over the previous Leaf build.
 - [FP32 default kernel stack](windows-fp32-release.md): default dispatch,
   correctness, installed wheel and conservative-build comparison.
 - [Attention/softmax follow-up](windows-attention-softmax.md): accepted GPT-2

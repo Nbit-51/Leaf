@@ -943,3 +943,30 @@ outputrows beforelastFFN; Leafdoesnot. Do not rerun benchmarking now; user wants
 checkpoint afterpush and willresume whenusage replenishes. See
  docs/pythia-runtime-comparison.md and docs/pythia-numerics-handoff.md.
 Localruns build/pythia-llama-20261014 and build/pythia-diagnostics-20261014.
+
+### Accepted final-layer FP32 MLP row selection — 2026-10-14
+
+Main starts at38a7518(PR5 merged,temporarybranchdeleted). Shared decoder candidate
+now discards earlier final-layer FFN rows only for last-logit FP32 requests>=32
+inputtokens. Keeps16..31rows on original16-token panel boundaries to retain exact
+packedGEMM and vectoractivation arithmetic. All K/V and attention rows remain;
+quantized/full-logit/single-token modes unchanged. No model-name dispatch.
+121reduced policies x85calls=10285forwardcalls/binary byteexact at1/2threads/scalar,
+includingINT8/INT4/W8A8negativecontrols.11configs include window8/odd dims/ReLU.
+33independent full-prefixTorch reference policies pass.15trainedchecks(GPT2,
+Pythia70/160)pass exactcached/full/generated output. Profile confirms378->346
+prefillactivationrows,2269->2205linearrows,decodeactivation6unchanged.
+Pythia63 gatepasses allstability:56.37785->53.44780ms(5.20%);decode10.2687->10.2673.
+GPT2samegatepasses:144.05315->140.4002ms(2.54%);decode28.22635->28.4785(+0.89%,
+within2%nonregression).6ABBApairs x31runs+10warmups,CPU2,above-normalchildpriority.
+No freshPyTorch/llama timingclaim. Original largerPythiastrictqualityfails remain.
+350focusedPython tests pass outside sandbox(initial5Temppermission failures).
+Wheel3095afecca0cc7fc759bdfc63db8064fef6506eb8581f80f24d4a1fa79697ed8 built;
+installed first/cached offlinegeneration pass withoutcompilerpaths/Torch;
+long128tokenprefixmatchesbefore andinstalledprofile confirmsrowselection.
+Localfiles build/final-layer-20261014. Evidence benchmark/results/final-layer-rows.
+README/Mermaiddiagram updated; docs/final-layer-row-selection.md details scope.
+NewCI native-driver target andfull-prefix oracle on all3OSes. Nextimplementation
+candidate: eliminate discarded last-layer attention/o-projection rows while
+preserving allkeys/values,maskpositions,androwarithmetic. Do notrepeatalready
+passingtests/timings absentnewchanges. User-ownedrootPNG untouched.

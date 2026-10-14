@@ -144,7 +144,7 @@ flowchart TB
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
     P --> D["Native decoder artifact"]
     G --> A["Native graph artifact"]
-    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache"]
+    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
     R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax<br/>W8A8 SiLU gating · quantized kernels"]
     K --> T["Tokens and logits"]
@@ -201,6 +201,13 @@ GPT-2 decode passes non-regression; its 1.62% reduction falls below the separate
 uses 31. Both use ten warmups and forward/reverse process order. Failures and
 all samples remain available, including earlier unsuccessful experiments.
 
+A newer [final-layer row-selection change](docs/final-layer-row-selection.md)
+reduces prefill versus the previous Leaf build by **5.20% on Pythia-70M**
+(56.38 → 53.45 ms) and **2.54% on GPT-2** (144.05 → 140.40 ms), with byte-identical
+tested outputs, stable timings and decode within non-regression. These are
+separate incremental comparisons; the table above retains the earlier matched
+PyTorch measurements.
+
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is
 **1.10 GB versus 4.40 GB** for FP32. This is an artifact-size reduction from
@@ -222,9 +229,9 @@ establish equivalent performance across those systems.
 The [Windows W8A8 SiLU release](docs/silu-gate-experiment.md) passes correctness,
 stable incremental acceptance and installed-package checks: **37.94% lower
 prefill time than the previous Leaf W8A8 path** (1320.31 → 819.38 ms), with decode
-passing non-regression. FP32 SiLU qualification remains open. Quantized-path
-vector attention is the next separate experiment; comparisons with llama.cpp,
-ONNX Runtime and OpenVINO remain outstanding.
+passing non-regression. FP32 SiLU qualification remains open. Next prefill work
+extends final-layer row selection through attention and its output projection.
+Quantized vector attention and broader matched runtime comparisons remain open.
 
 Further work includes broader quality datasets, complete-command latency,
 independent CPU/Linux evaluation, and compatible small Qwen, Mistral, Granite

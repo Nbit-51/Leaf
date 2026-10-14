@@ -29,7 +29,7 @@ jobs:
       - name: Configure portable build
         run: cmake -S engine -B build/ci -DCMAKE_BUILD_TYPE=Release -DLEAF_ENABLE_AVX2=OFF
       - name: Build native decoder and primitive tests
-        run: cmake --build build/ci --config Release --target leaf_decoder leaf_embed leaf_token_panel_tests leaf_attention_vector_tests leaf_silu_gate_tests
+        run: cmake --build build/ci --config Release --target leaf_decoder leaf_embed leaf_token_panel_tests leaf_attention_vector_tests leaf_silu_gate_tests leaf_decoder_final_rows_tests
       - name: Token-panel, attention and SiLU primitive correctness
         run: ctest --test-dir build/ci -C Release --output-on-failure -R '^leaf_(token_panel|attention_vector|silu_gate)_tests$'
       - name: Python decoder, CLI and dataset tests
@@ -56,6 +56,12 @@ jobs:
           runtime=build/ci/leaf_decoder
           if [ "${{ runner.os }}" = "Windows" ]; then runtime=build/ci/Release/leaf_decoder.exe; fi
           python tools/verify_sliding_window_decoder.py --executable "$runtime" --output build/sliding-window-ci
+      - name: Final-layer last-logit and cache validation
+        shell: bash
+        run: |
+          runtime=build/ci/leaf_decoder_final_rows_tests
+          if [ "${{ runner.os }}" = "Windows" ]; then runtime=build/ci/Release/leaf_decoder_final_rows_tests.exe; fi
+          python tools/verify_final_layer_rows.py --after "$runtime" --output build/final-rows-ci
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -64,3 +70,4 @@ jobs:
             benchmark/results/decoder-ci.json
             benchmark/results/embedding-ci.json
             build/sliding-window-ci/validation.json
+            build/final-rows-ci/validation.json

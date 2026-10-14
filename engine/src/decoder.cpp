@@ -616,7 +616,7 @@ struct Decoder::Impl {
     unsigned norm_kind, activation, position_kind, gated, parallel, rotary_dim, position_offset, final_norm;
     float embedding_scale;
     bool avx = false;
-    bool float_tiles = false, optimized_fp32 = false;
+    bool float_tiles = false, optimized_fp32 = false, fp32_artifact = false;
     bool vector_gelu = false, vector_attention = false, paired_gemv = false;
     bool vector_silu_gate = false;
     std::size_t vector_silu_gate_calls = 0;
@@ -740,8 +740,9 @@ struct Decoder::Impl {
         }
         // Qualification is scoped to FP32 artifacts, not architecture names.
         // Quantized/mixed artifacts keep their previously validated dispatch.
-        optimized_fp32 = LEAF_OPTIMIZED_FP32 && avx && activation_precision == 32 &&
+        fp32_artifact = activation_precision == 32 &&
             std::all_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 32; });
+        optimized_fp32 = LEAF_OPTIMIZED_FP32 && avx && fp32_artifact;
         if (optimized_fp32) {
             float_tiles = true;
             vector_gelu = vector_attention = paired_gemv = true;
@@ -1050,36 +1051,49 @@ struct Decoder::Impl {
             linear(attention.data(), tokens, prefix + "self_attn.o_proj", attn_projected);
             LEAF_TRACE(prefix + "attention", attention);
             LEAF_TRACE(prefix + "attn_projected", attn_projected);
+            std::size_t mlp_tokens = tokens;
+            if (layer + 1 == layers && !all_logits && fp32_artifact && tokens >= 32) {
+                // K/V for every input token have already been appended. Only
+                // the last output row is consumed, so earlier final-layer MLP
+                // rows cannot affect this request or subsequent cached tokens.
+                // Keep 16..31 trailing rows, aligned to the original panels.
+                // This preserves packed-GEMM/activation dispatch and per-lane
+                // arithmetic instead of switching the retained row to GEMV.
+                const auto first = ((tokens - 16) / 16) * 16;
+                hidden.erase(hidden.begin(), hidden.begin() + first * h);
+                attn_projected.erase(attn_projected.begin(), attn_projected.begin() + first * h);
+                mlp_tokens -= first;
+            }
             if (!parallel) {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Residual, tokens);
                 for (std::size_t j = 0; j < hidden.size(); ++j) hidden[j] += attn_projected[j];
             }
             normalize(hidden, prefix + "post_attention_layernorm", normalized);
             LEAF_TRACE(prefix + "post_norm", normalized);
-            linear(normalized.data(), tokens, prefix + "mlp.up_proj", up, true);
+            linear(normalized.data(), mlp_tokens, prefix + "mlp.up_proj", up, true);
             LEAF_TRACE(prefix + "up", up);
             if (gated) {
-                linear(normalized.data(), tokens, prefix + "mlp.gate_proj", gate, true);
-                DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
+                linear(normalized.data(), mlp_tokens, prefix + "mlp.gate_proj", gate, true);
+                DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, mlp_tokens);
 #if LEAF_OPTIMIZED_SILU_W8A8 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
                 // Isolate the prefill activation change; weight precision does
                 // not change the FP32 up/gate buffers. Decode stays unchanged.
-                if (vector_silu_gate && tokens >= 8) {
+                if (vector_silu_gate && mlp_tokens >= 8) {
                     leaf::kernels::silu_gate_inplace(up.data(), gate.data(), gate.size());
                     ++vector_silu_gate_calls;
                 } else
 #endif
                 for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= activate(gate[j]);
             } else {
-                DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, tokens);
+                DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, mlp_tokens);
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_VECTOR_GELU)
-                if (vector_gelu && tokens >= 8 && activation == 2)
+                if (vector_gelu && mlp_tokens >= 8 && activation == 2)
                     leaf::kernels::gelu_new_inplace(up.data(), up.size());
                 else
 #endif
                 for (auto& value : up) value = activate(value);
             }
-            linear(up.data(), tokens, prefix + "mlp.down_proj", projected, true);
+            linear(up.data(), mlp_tokens, prefix + "mlp.down_proj", projected, true);
             LEAF_TRACE(prefix + "activation", up);
             LEAF_TRACE(prefix + "down", projected);
             {
@@ -1092,7 +1106,7 @@ struct Decoder::Impl {
         else normalized = hidden;
         LEAF_TRACE("final_norm", normalized);
         std::vector<float> logits;
-        linear(normalized.data() + (all_logits ? 0 : (tokens - 1) * h), all_logits ? tokens : 1,
+        linear(normalized.data() + (all_logits ? 0 : normalized.size() - h), all_logits ? tokens : 1,
                "lm_head", logits);
         LEAF_TRACE("logits", logits);
         return logits;

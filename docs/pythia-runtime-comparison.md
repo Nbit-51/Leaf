@@ -91,3 +91,8 @@ MLP rows before selecting the final output row. Preserve every layer's required
 K/V entries and full-logit verification behavior. Measure this shared decoder
 change against Leaf's current binary, then compare the accepted build with
 llama.cpp. No speedup estimate is claimed before testing.
+
+The [final-layer MLP row-selection follow-up](final-layer-row-selection.md) now
+passes exact-output regression and stable incremental timing on Pythia and GPT-2.
+Its measurements are against the previous Leaf binary, with no fresh llama.cpp
+comparison. Final-layer attention still computes all input queries.
