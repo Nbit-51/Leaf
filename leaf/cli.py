@@ -15,7 +15,7 @@ import sys
 import tempfile
 import time
 
-FORMAT = "leaf-decoder-v2"
+FORMAT = "leaf-decoder-v4"
 
 
 def cache_root() -> Path:
@@ -89,19 +89,13 @@ def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | N
         if Path(model).is_dir():
             return local_snapshot(Path(model))
     from huggingface_hub import snapshot_download
-    from tools.decoder_plan import make_plan, validate_snapshot_generation
+    from tools.decoder_plan import load_snapshot_plan
     # Check configuration/capabilities before fetching large weight shards.
     metadata = snapshot_download(model, cache_dir=cache / "hub", local_files_only=offline,
                                  allow_patterns=["config.json", "generation_config.json"])
     if metadata_only:
         return Path(metadata)
-    if plan:
-        from tools.decoder_plan import validate_plan
-        imported_plan = json.loads(plan.read_text())
-        validate_plan(imported_plan)
-    else:
-        imported_plan = make_plan(json.loads((Path(metadata) / "config.json").read_text()))
-    validate_snapshot_generation(Path(metadata), imported_plan)
+    load_snapshot_plan(Path(metadata), plan)
     if before_weights is not None:
         before_weights()
     return Path(snapshot_download(model, revision=Path(metadata).name,
@@ -112,7 +106,7 @@ def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | N
 def inspect_model(args):
     """Inspect decoder configuration without downloading weights or building kernels."""
     import math
-    from tools.decoder_plan import make_plan, validate_plan, validate_snapshot_generation, tensor_shapes
+    from tools.decoder_plan import load_snapshot_plan, tensor_shapes
 
     snapshot = resolve_model(args.model, cache_root(), args.offline, metadata_only=True)
     source = json.loads((snapshot / "config.json").read_text(encoding="utf-8"))
@@ -121,17 +115,22 @@ def inspect_model(args):
                   config_sha256=hashlib.sha256((snapshot / "config.json").read_bytes()).hexdigest(),
                   snapshot=str(snapshot), scope="Configuration check only; no weights downloaded or executed.")
     try:
-        plan = make_plan(source)
-        validate_plan(plan)
-        validate_snapshot_generation(snapshot, plan)
+        plan = load_snapshot_plan(snapshot)
     except (ValueError, KeyError, TypeError) as error:
         record["reason"] = str(error)
     else:
-        minimum = sum(math.prod(shape) for shape in tensor_shapes(plan["config"]).values()) * 4
+        payloads = {}
+        for name, shape in tensor_shapes(plan["config"]).items():
+            specification = plan["tensors"][name]
+            identity = (specification["source"],
+                        json.dumps(specification.get("transforms", []), sort_keys=True), shape)
+            payloads[identity] = math.prod(shape) * 4
+        minimum = sum(payloads.values())
         record.update(configuration_supported=True,
                       fp32_required_weight_bytes_lower_bound=minimum,
                       fp32_required_weight_gib_lower_bound=round(minimum / 2**30, 3),
-                      memory_note="Required FP32 tensors only; excludes optional biases, KV cache, activations, source download and operating system.")
+                      memory_note="Required unique FP32 payloads only; identical source/transform/shape mappings share storage. "
+                                  "Excludes optional biases, KV cache, activations, source download and operating system.")
     rendered = json.dumps(record, indent=2) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -156,11 +155,8 @@ def model_directory(snapshot: Path, cache: Path, plan: Path | None = None) -> Pa
 
 
 def validate_model_generation(snapshot: Path, plan: Path | None = None) -> None:
-    from tools.decoder_plan import make_plan, validate_plan, validate_snapshot_generation
-    imported_plan = json.loads(plan.read_text(encoding="utf-8")) if plan else make_plan(
-        json.loads((snapshot / "config.json").read_text(encoding="utf-8")))
-    validate_plan(imported_plan)
-    validate_snapshot_generation(snapshot, imported_plan)
+    from tools.decoder_plan import load_snapshot_plan
+    load_snapshot_plan(snapshot, plan)
 
 
 def select_configuration(directory: Path, runtime: Path, requested: str, threads: int = 1,

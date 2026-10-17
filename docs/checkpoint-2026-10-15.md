@@ -19,11 +19,28 @@ Do not discard the user's untracked root PNG.
   match the reference, with no compiler on PATH or PyTorch loaded. Installed
   TinyLlama SiLU dispatch passes and all 512,000 checked logits exactly match
   the accepted release. All 19 source-bundle files and both runtimes are present.
-- SmolLM2-360M preparation is in progress. Qwen2.5-0.5B-Instruct configuration
-  is rejected for its multiple EOS tokens; do not discard that metadata.
-  Latency measurements must wait until builds/downloads stop.
-- Main publication and the new-default Ollama comparison remain pending.
-  The current release notes below supersede older candidate-only instructions.
+- Fresh TinyLlama/Ollama comparison is COMPLETE: Leaf/Ollama prefill
+  1391.4163/1530.6415 ms and cached forward 222.90765/251.448 ms. All twelve
+  passes and pooled distributions are stable; reductions 9.10% and 11.35%.
+  The unchanged Unicode logprob miss (0.0002179475 > 0.0002) keeps the
+  overall qualification false. Do not repeat this run or relax the limit.
+- Both SmolLM2-360M and Qwen2.5-0.5B-Instruct are downloaded via Leaf. General
+  multi-EOS support preserves Qwen's two declared stop tokens, adds version 4
+  artifacts, and retains versions 2/3. Final full unit suite: **1,029 passed**,
+  one pytest cache-permission warning. A failed system-temp fixture attempt
+  was stopped; the fresh workspace `--basetemp` run is the completed result.
+- Both models complete eight length-128 quality blocks (1,016 targets), with
+  100% next-token agreement and six exact continuations. Strict all-logit
+  gates fail (154/1,000 violations), so neither is fully fidelity-qualified.
+  Current-source installed-wheel GPT-2 and Qwen Hub-ID checks pass without
+  compiler paths, binary overrides or heavy model frameworks.
+- Publication uses [PR #7](https://github.com/Nbit-51/Leaf/pull/7), following
+  the protected-main workflow. Commit `0b44e71` contains the earlier release;
+  the continuation adds the completed comparison and multi-EOS work. Merge
+  only after checks on the final head pass, then delete its temporary branch.
+- Next: diagnose shared remaining numerical differences, then audited matched
+  comparisons for the two new models. Do not restart rejected attention/GELU
+  experiments or silently reuse old binaries for version-4 artifacts.
 
 ## Current release checkpoint — supersedes pending notes below
 
@@ -43,9 +60,9 @@ Do not discard the user's untracked root PNG.
   Source and Mermaid diagram updated. Experimental GELU remains off.
 - Fresh power-aware generation release adapter:
   `build/fp32-silu-20261015/leaf-generation-release.exe`.
-  **Next task: compare this default with Ollama**, with new output directory,
+  The default comparison with Ollama completed on October 17, in a new output directory,
   no inherited profile/experiment env vars, AC on, no concurrent heavy work.
-  Do not reuse old preflight: adapter/helper hashes changed. Keep the 2e-4
+  No old preflight was reused: adapter/helper hashes changed. Keep the 2e-4
   selected-logprob check and explicit diagnostic timing if it still fails.
 - The interrupted power-mixed Ollama run is invalidated; original diagnostic-b
   describes the older scalar FP32 default, not the newly shipped default.

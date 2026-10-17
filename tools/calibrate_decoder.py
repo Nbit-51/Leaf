@@ -15,7 +15,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.datasets import token_prefix
-from tools.decoder_plan import make_plan, tensor_shapes, validate_plan
+from tools.decoder_plan import load_snapshot_plan, tensor_shapes, validate_plan
 from tools.validate_decoder import digest
 
 
@@ -81,8 +81,7 @@ def main():
     if min(args.blocks, args.sequence_length, args.threads) <= 0:
         parser.error("calibration dimensions must be positive")
     torch.set_num_threads(args.threads)
-    config = json.loads((args.model / "config.json").read_text())
-    plan = json.loads(args.plan.read_text()) if args.plan else make_plan(config)
+    plan = load_snapshot_plan(args.model, args.plan)
     tokenizer = AutoTokenizer.from_pretrained(args.model, local_files_only=True)
     needed = args.blocks * args.sequence_length
     ids = token_prefix(tokenizer, args.dataset, needed, args.text_column)

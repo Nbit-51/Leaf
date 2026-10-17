@@ -158,8 +158,9 @@ at window 1. The initial failure is preserved alongside the successful
 full-prefix-oracle validation; windows 8 and 4096 also require cached-reference
 agreement. This discrepancy is not hidden by a tolerance change.
 
-Windowed artifacts use `LEAFDC03`/version 3 so older binaries reject them.
-Unwindowed artifacts remain version 2. KV storage still grows with context and
+Windowed single-EOS artifacts use `LEAFDC03`/version 3 so older binaries reject them.
+Unwindowed single-EOS artifacts remain version 2. Multi-EOS uses version 4,
+including when combined with a window. KV storage still grows with context and
 the mask allocation remains quadratic; this is **not** bounded-memory sliding KV
 or a speed claim. No trained Mistral 7B weights were downloaded or executed.
 
@@ -168,6 +169,63 @@ threads, scalar and chunked execution, plus 16 exact greedy tokens per model.
 Those limited checks are distinct from the larger corpus command above.
 All retained onboarding evidence is in
 [benchmark/results/model-onboarding](../benchmark/results/model-onboarding).
+
+## SmolLM2 and Qwen2.5 — October 17, 2026
+
+Both models were downloaded through Leaf's normal Hub-ID resolver at pinned
+revisions: SmolLM2-360M-Instruct `a10cc1512eabd3dde888204e902eca88bddb4951`
+and Qwen2.5-0.5B-Instruct `7ae557604adf67be50417f59c2c2f167def9a775`.
+Their metadata was preserved. They use the shared decoder and kernels.
+
+Qwen exposed a generation-policy gap: its configuration declares one primary
+EOS, while `generation_config.json` declares `[151645, 151643]`. Built-in plans
+now resolve that complete policy consistently for import, export, calibration
+and reference checks. Custom plans must match the declared policy. Multi-EOS
+artifacts use `LEAFDC04`; existing single-EOS/no-stop artifacts keep versions
+2/3. Older runtimes reject version 4 rather than discard stop tokens.
+Native tests force the secondary EOS and verify no additional decode forward.
+
+The reference uses literal full-prefix forward/argmax steps with the same EOS
+list. It cannot inherit Hub repetition penalties, sampling, forced tokens or
+suppression rules; Leaf explicitly implements greedy generation. The cache
+namespace and validation identity include the changed generation policy.
+
+Both FP32 evaluations use eight independent 128-token WikiText-2 test-prefix
+blocks, **1,016 scored targets**, and six fixed raw prompts with up to sixteen
+new tokens. These are bounded checks, not full-corpus or task benchmarks.
+
+| Model | Next-token agreement | Exact continuations | Perplexity ratio to PyTorch | Strict logit gate |
+|---|---:|---:|---:|---|
+| SmolLM2-360M-Instruct | 100% | 6/6 | 0.99999946 | Fail: 154 tolerance violations |
+| Qwen2.5-0.5B-Instruct | 100% | 6/6 | 1.00000058 | Fail: 1,000 tolerance violations |
+
+The `atol=2e-4, rtol=2e-4` limits are unchanged, and both overall fidelity
+verdicts remain **false**. Maximum probability errors on scored rows are
+`1.50e-5` and `1.04e-5` respectively. Matching tokens and near-identical
+perplexity do not erase the all-logit failures. No model-speed qualification
+or automatic quantization profile is granted by these checks.
+
+The final unit suite passes **1,029 tests**, including real native v2/v3/v4
+reader and termination cases. The current-source Windows wheel passes offline
+GPT-2 first preparation/cache reuse and actual cached Qwen Hub-ID execution,
+with no compiler on PATH or Torch/Transformers loaded. Qwen reuses its version-4
+artifact and generates `there was` from `Once upon a time,` in the two-token
+installed smoke check. This is install/functional evidence, not latency evidence.
+
+`inspect` also deduplicates identical source/transform/shape mappings when
+estimating required FP32 payloads. Its bounds exclude optional biases, KV,
+activations, source weights and operating-system memory.
+
+Evidence: [Smol quality](../benchmark/results/family-onboarding-20261017/smol-quality-8.json),
+[Qwen quality](../benchmark/results/family-onboarding-20261017/qwen-quality-8.json),
+[generation/format checks](../benchmark/results/family-onboarding-20261017/eos-validation.json),
+[full unit summary](../benchmark/results/family-onboarding-20261017/unit-validation.json),
+[installed GPT-2](../benchmark/results/family-onboarding-20261017/package-v4.json),
+[installed Qwen](../benchmark/results/family-onboarding-20261017/package-qwen-v4.json).
+
+Next, diagnose the remaining shared numerical differences before extending
+quality claims, then run audited matched competitor comparisons for these two
+models. The TinyLlama/Ollama timing result does not transfer to them.
 
 ## Dataset and individual-network scope
 

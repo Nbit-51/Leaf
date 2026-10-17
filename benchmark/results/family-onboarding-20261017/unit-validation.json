@@ -1,0 +1,15 @@
+{
+  "scope": "Final full unit suite after multi-EOS changes, with real new/legacy native runtime fixtures",
+  "passed": true,
+  "tests_passed": 1029,
+  "warnings": 1,
+  "warning": "Pytest cache write permission; test fixtures use fresh workspace --basetemp",
+  "command": "python -m pytest tests/unit -q --maxfail=1 --basetemp build/family-models-20261017/pytest-temp-full",
+  "log_sha256": "95c51829f134b13213edeb34c68c656f424e99f7e68b080398092140d63bab02",
+  "native_fixture_versions": [
+    2,
+    3,
+    4
+  ],
+  "includes_native_cases": true
+}

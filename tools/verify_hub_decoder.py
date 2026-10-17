@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from leaf import cli
 from tools.datasets import token_prefix
 from tools.decoder_validation import quality, run_native
+from tools.decoder_plan import generation_policy_identity, greedy_reference_tokens, load_snapshot_plan
 from tools.validate_decoder import GATES, digest, utc_now, write_record
 
 
@@ -46,6 +47,7 @@ def main():
         cache = cli.cache_root()
         snapshot = cli.resolve_model(args.model, cache, args.offline)
         cli.validate_model_generation(snapshot)
+        plan = load_snapshot_plan(snapshot)
         runtime = cli.executable(cache)
         artifact = cli.prepare(snapshot, cli.model_directory(snapshot, cache), 32)
         record.update(snapshot=str(snapshot), artifact=str(artifact),
@@ -54,6 +56,7 @@ def main():
                       artifact_sha256=digest(artifact), executable_sha256=digest(runtime),
                       dataset_sha256=digest(args.dataset), torch=torch.__version__,
                       transformers=transformers.__version__)
+        record["generation_policy"] = generation_policy_identity(plan, 16)
         write_record(report, record)
         tokenizer = AutoTokenizer.from_pretrained(snapshot, local_files_only=True, trust_remote_code=False)
         ids = token_prefix(tokenizer, args.dataset, 256, "text")
@@ -69,8 +72,7 @@ def main():
         with torch.inference_mode():
             references = [model(torch.tensor([row]), use_cache=False).logits[0].numpy().copy()
                           for row in sequences]
-            generated = model.generate(torch.tensor([prompt_ids]), do_sample=False, max_new_tokens=16,
-                                       pad_token_id=tokenizer.eos_token_id)[0, len(prompt_ids):].tolist()
+            generated = greedy_reference_tokens(model, prompt_ids, plan, 16)
         del model
         expected = np.concatenate(references)
         np.save(args.output / "reference.npy", expected)

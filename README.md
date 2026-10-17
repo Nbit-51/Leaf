@@ -101,7 +101,7 @@ native-loader limitation.
 
 | Area | Current capabilities |
 |---|---|
-| Decoder execution | Full native prefill, single-token decode, chunked evaluation and greedy generation |
+| Decoder execution | Full native prefill, single-token decode, chunked evaluation and greedy generation with all declared end tokens |
 | Embedding execution | FP32 EmbeddingGemma: bidirectional local/full attention, Q/K normalization, mean pooling, dense projections and L2-normalized output |
 | CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
 | Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
@@ -115,6 +115,9 @@ qualified local before/after gain on one short input. The other measured inputs
 remain timing-unqualified, and llama.cpp had lower observed baseline medians.
 See the [full embedding results and limits](docs/embedding.md).
 Reduced-model tests exercise six decoder architecture families.
+SmolLM2-360M-Instruct and Qwen2.5-0.5B-Instruct use the same shared decoder;
+their bounded output-quality checks and remaining strict numerical failures
+are recorded in the [onboarding report](docs/model-onboarding.md#smollm2-and-qwen25--october-17-2026).
 
 Import adapters cover supported configurations from Llama/Qwen2, GPT-2,
 GPT-NeoX, OPT and dense Mistral-style blocks. Compatibility depends on operators
@@ -136,7 +139,7 @@ validates their semantics and produces a versioned native artifact.
 ```mermaid
 flowchart TB
     H["Model ID · automatic download and cache"] --> S["Safetensors snapshot"]
-    S --> P["Validated decoder plan"]
+    S --> P["Validated decoder plan<br/>Complete end-token policy"]
     S --> B["Validated bidirectional embedding plan"]
     B --> N["C++ encoder · local/full attention and Q/K norms<br/>Finite masked-span attention · shared RoPE · vector GELU"]
     N --> V["Mean pooling · dense projections · L2 normalization"]
@@ -212,9 +215,13 @@ PyTorch measurements.
 The [FP32 SiLU release](docs/silu-gate-experiment.md#fp32-follow-up--october-15-2026)
 reduces TinyLlama prefill **26.69% versus the previous Leaf default**
 (1,897.61 → 1,391.20 ms). All twelve passes and pooled stability checks pass,
-with decode within non-regression and trained quality preserved. The fresh
-comparison of this default against Ollama is pending; this is not an Ollama
-or fresh PyTorch speedup claim.
+with decode within non-regression and trained quality preserved.
+
+A fresh [TinyLlama FP32 comparison with Ollama](docs/tinyllama-ollama-comparison.md#october-17-fp32-silu-default)
+measures **9.10% lower prefill** (1,391.42 vs 1,530.64 ms) and **11.35% lower
+cached decode** (222.91 vs 251.45 ms), with all timing stability checks passing.
+All continuations match, but one selected-logprob error narrowly exceeds the
+unchanged tolerance. These remain diagnostic timings, not an overall qualified win.
 
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is
@@ -242,8 +249,8 @@ gate and is integrated. The final-layer
 attention extension and [exact-erf GELU experiment](docs/gemm-activation-followup.md#exact-erf-gelu-experiment--october-15-2026)
 retain passing output checks but unqualified whole-model timings. The
 [TinyLlama/Ollama comparison](docs/tinyllama-ollama-comparison.md) has stable
-diagnostic timings with lower Leaf decode latency and higher prefill latency;
-its probability tolerance miss remains open. A reproduced
+diagnostic timings with lower Leaf prefill and decode latency on the new FP32
+default; its probability tolerance miss remains open. A reproduced
 [diagnostic startup-affinity race](docs/windows-timing-diagnosis.md#october-15-2026-diagnostic-startup-race)
 is fixed before further kernel changes or model downloads.
 Quantized vector attention and broader matched runtime comparisons remain open.

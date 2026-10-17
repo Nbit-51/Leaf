@@ -330,13 +330,14 @@ quality differences. vLLM's official Intel/AMD CPU route currently requires
 belongs in the later same-host Linux comparison, not a Windows-versus-WSL ranking.
 
 In the causal decoder, encoder-decoder models, mixture-of-experts routing,
-sliding-window attention, scaled RoPE, Q/K normalization, multiple EOS
-terminators, and general sampling policies are not implemented. The embedding
+scaled RoPE, Q/K normalization and general sampling policies are not implemented.
+Uniform causal sliding windows and multiple EOS terminators are supported;
+see the [current onboarding evidence](model-onboarding.md). The embedding
 runtime's bidirectional local attention and Q/K norms do not extend decoder
 compatibility. Arbitrary dynamic graph shapes remain unsupported. Existing
-generation uses a single scalar EOS or no-stop sentinel. Source
-`generation_config.json` termination settings must match the supported plan;
-multiple, malformed, or mismatched EOS settings are rejected. Greedy generation
+generation supports a scalar EOS, a validated list, or a no-stop sentinel.
+Built-in snapshot plans honor `generation_config.json` termination metadata;
+custom plans must match it. Malformed and out-of-vocabulary settings are rejected. Greedy generation
 and `--max-tokens` are explicit Leaf CLI policies, not implementation of every
 Hugging Face generation default. Unsupported semantics
 must be added and independently validated before claiming those models work.
@@ -1923,6 +1924,7 @@ python -X utf8 tools/probe_decoder_coverage.py --config 'C:\path\to\snapshot' --
 | `leaf-decoder-plan-v1` JSON | Dimensions, supported block semantics, canonical tensor mappings/transforms | Decoder preparation |
 | `LEAFDC02` decoder `.leaf`, version 2 | 64-byte-aligned mapped FP32/INT8/INT4 payloads, scales, optional input factors, decoder semantics | `leaf_decoder` |
 | `LEAFDC03` decoder `.leaf`, version 3 | Same header layout, with a positive uniform causal-window width in the former reserved word; old readers reject it | Current `leaf_decoder` |
+| `LEAFDC04` decoder `.leaf`, version 4 | Complete multi-EOS token list after the fixed header, optionally combined with the causal-window field; old readers reject it | Current `leaf_decoder` |
 | Graph `.leaf` version 2 | Nodes/attributes, 32-byte-aligned typed FP32/INT8 weights and per-channel scales | `leaf_infer` / graph C++ API |
 | Graph `.leaf` version 3 | v2 graph data plus embedded 64-byte-aligned liveness arena plan | Graph executor planned path |
 | `leaf-memory-plan-v1` JSON | Fingerprint, offsets, live intervals, alignment, unplanned tensors | Inspection and graph v3 export |
@@ -2062,7 +2064,8 @@ Current CPU-decoder release priorities:
 
 - [x] Qualify a Windows GPT-2 FP32 prefill improvement against fresh, order-balanced PyTorch measurements: 4.85% less time than SDPA; decode non-regression passes separately.
 - [x] Revalidate current-runtime TinyLlama FP32/W8A8 quality and matched latency; preserve the failed stability result and record both models' remaining hot paths.
-- [ ] Implement and validate vector SiLU/gating, then separately evaluate vector attention for quantized artifacts using the measured TinyLlama bottlenecks.
+- [x] Implement and validate vector SiLU/gating for Windows FP32 and W8A8, including stable incremental acceptance and installed-wheel checks.
+- [ ] Separately evaluate vector attention for quantized artifacts using the measured TinyLlama bottlenecks.
 - [ ] Qualify complete-command latency separately from warmed native forwards; installed first/cached smoke is already verified.
 - [ ] Requalify changed runtime binaries and further device/model configurations against matched PyTorch/native workloads before promotion.
 - [ ] Measure native GEMM/GEMV bottlenecks, per-core frequency behavior, and CNN packing before proposing another default kernel change.
@@ -2076,7 +2079,8 @@ Future coverage and performance work (not prerequisites for the current release)
 - [ ] Evaluate compatible small Qwen, Mistral, Granite and Gemma-family checkpoints, checking required operators and memory before selecting each workload; these are coverage goals, not current support claims.
 - [x] Implement native FP32 EmbeddingGemma attention, normalization, pooling and output projections; validate trained vectors and the installed CLI.
 - [ ] Qualify embedding retrieval-dataset quality, latency and memory against matched CPU competitors.
-- [ ] Add causal decoder scaled RoPE, sliding-window attention, Q/K normalization, and multiple-EOS/sampling policies with reference tests.
+- [x] Add uniform causal sliding-window attention and complete multiple-EOS termination with reference/native tests.
+- [ ] Add causal decoder scaled RoPE, Q/K normalization and sampling policies with reference tests.
 - [ ] Extend plan/operators for encoder-decoder models, MoE routing, and additional model domains.
 - [ ] Expand graph layouts, dynamic shapes, batching, and dataset preprocessing adapters.
 - [ ] Harden native artifacts against malformed/non-finite payloads and support Windows Unicode artifact paths.

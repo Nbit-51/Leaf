@@ -64,7 +64,7 @@ template <class T> void array(std::ostream& output, const std::vector<T>& values
 
 int main(int argc, char** argv) {
     if (argc == 2 && std::string(argv[1]) == "--runtime-info") {
-        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3]"
+        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4]"
 #ifdef LEAF_DIAGNOSTIC_TIMING
                   << ",\"diagnostic_start_gate_supported\":true,\"diagnostic_counter_version\":4"
 #endif
@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
                     const auto id = static_cast<std::uint32_t>(std::max_element(logits.begin(), logits.end()) - logits.begin());
                     generated.push_back(id);
                     std::cout << "TOKEN " << id << '\n' << std::flush;
-                    if (id == decoder.eos_token()) break;
+                    if (decoder.is_eos_token(id)) break;
                     if (token + 1 < generate) {
                         start = Clock::now(); logits = decoder.forward({id}); decodes.push_back(elapsed(start));
                     }

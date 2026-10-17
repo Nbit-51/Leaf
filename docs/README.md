@@ -31,8 +31,8 @@ architecture, current results and scope. Use this index for details and evidence
   also has a matched PyTorch comparison.
 - [Current TinyLlama evaluation](windows-tinyllama-current.md): FP32/W8A8 quality,
   all timing results, stability failures and the next measured hot paths.
-- [TinyLlama / Ollama FP32](tinyllama-ollama-comparison.md): stable diagnostic
-  timings, a decode advantage, a prefill deficit and the retained probability miss.
+- [TinyLlama / Ollama FP32](tinyllama-ollama-comparison.md): stable new-default
+  prefill/decode advantages, the earlier baseline and the retained probability miss.
 - [Raw benchmark records](../benchmark/results): full samples, gates and hashes.
 
 These reports have different workloads and runtime identities. Their results

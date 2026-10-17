@@ -1,0 +1,60 @@
+{
+  "format": "leaf-multi-eos-validation-v1",
+  "passed": true,
+  "python_tests_passed": 210,
+  "native_format_tests_passed": 22,
+  "python_test_log": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\eos-python-tests.log",
+  "native_test_log": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\eos-native-tests.log",
+  "build_log": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\eos-build.log",
+  "runtime": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\runtime\\leaf_decoder.exe",
+  "runtime_sha256": "14adfa5d41d23c882d80a34d3a6c00a1318746cde719385b7f5ae273de3e2df4",
+  "runtime_info": {
+    "runtime": "leaf_decoder",
+    "artifact_versions": [
+      2,
+      3,
+      4
+    ]
+  },
+  "legacy_runtime": "C:\\Users\\navaneeth\\leaf\\build\\fp32-silu-20261015\\release\\leaf_decoder.exe",
+  "legacy_runtime_sha256": "b9375d4b02486bb344e669bf95e1c8af81755fec514b765c6448dc7f08b07b22",
+  "source_sha256": {
+    "benchmark/decoder_generation_benchmark.cpp": "4f9edc44fa8eb1ebd30ed0f5a54847ef4a0d130a53d360c4065e2daaef80357e",
+    "engine/include/leaf/runtime/decoder.h": "7b212c197f6e707a31355ffe1942e30888df3a07a95fe5fb56464588e8123a6d",
+    "engine/src/decoder.cpp": "76ff024a6ed5ab4eaf2ab721ba617e36f9b65d89aedd8be5c7a6951fdf705299",
+    "engine/src/main_decoder.cpp": "cef90e4230531b3e5de5d94397d0e17fd7a493317e97e26bb4b2aa2aeb914beb",
+    "leaf/cli.py": "e104060a7a5d60bbe24fa4a6d16a8f12286e89be67c51a8e7e4d615ea1f6c85c",
+    "leaf/evaluation.py": "21d9477559f3ffb02bf3651557cc2f856d7d8a8b35046b5e431e3a1061b147d2",
+    "leaf/runtime_check.py": "86bfb1a33a16eb9acb893f5be62410f52c889f8b6019ce3bc956ee9c51b0a638",
+    "tests/unit/test_decoder_generation_format.py": "c9d6f85b7cbc8a0710da1fd5cdad2eeeb422e23be51f8e3e43fa40258d8ab87e",
+    "tests/unit/test_decoder_latency_phases.py": "b2254d0b9578dc5dda046eca8ca496e2a4ebe21dac702254d3548742fa3aa87c",
+    "tests/unit/test_decoder_plan.py": "4cbe67cb6cd21e1bde908ed128a72114ddc8d3c6694e754809d5b8f00fa3ab46",
+    "tests/unit/test_generation_policy.py": "72d87ab3799dba827a58823a0f9cceb1b065028ffcd9c21f0879375b6928845f",
+    "tests/unit/test_model_inspection.py": "b67ffb7a647ecf3d857cbc36ba8d30b7e0f70b3a90c509d11a5fdbfc3378d2b8",
+    "tests/unit/test_runtime_check.py": "b8d29a2df184573fbde304fce470a9d2f0f81f8808ce00a59fb457567214a8e0",
+    "tools/calibrate_decoder.py": "941fcc095dabcc03054b3e1d63eae07eccb2f6d9abee58755185ef3128641eb8",
+    "tools/decoder_plan.py": "b5cef0b915df31112b83290d5212df5c08b9b3b5ae04220f57619f97145e3c24",
+    "tools/export_decoder.py": "3ae7271ba437c45cef14ff15781a8d21aabb667e9734471d5718c3207c09a315",
+    "tools/validate_decoder.py": "e151ebeba1b42929f452e226f1aac70016e849591a93aa1a498f0cdcf47782a4",
+    "tools/verify_hub_decoder.py": "e3a4727d3673901b4ec6b79c77f1ca9d11e0060cd3b058dc8b0d36127ea2a163"
+  },
+  "scope": "Configuration, export format, cache identity, explicit greedy reference, and tiny native termination/reader tests. No trained-weight numerical or latency qualification.",
+  "python": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]",
+  "compiler_command": "C:/msys64/mingw64/bin/g++.exe -std=c++17 -O3 -DNDEBUG -pthread -I engine/include engine/src/decoder.cpp engine/src/main_decoder.cpp engine/src/kv_cache.cpp engine/src/kernels/transformer.cpp -o build/family-models-20261017/runtime/leaf_decoder.exe -static -static-libgcc -static-libstdc++ -lpsapi",
+  "test_runs": [
+    {
+      "log": "eos-python-tests.log",
+      "passed": 210
+    },
+    {
+      "log": "eos-native-tests.log",
+      "passed": 22
+    },
+    {
+      "log": "eos-inspection-calibration-tests.log",
+      "passed": 64
+    }
+  ],
+  "test_runs_overlap": true,
+  "source_frozen": true
+}

@@ -1,9 +1,40 @@
-# TinyLlama FP32: Leaf and Ollama — October 15, 2026
+# TinyLlama FP32: Leaf and Ollama — October 15–17, 2026
 
-Leaf has a lower measured cached-decode median than Ollama on this Windows
-workload, but a higher prefill median. A selected-token log-probability check
-narrowly misses the declared tolerance, so these remain diagnostic timings;
-there is no qualified overall speed or quality claim.
+The new FP32 SiLU default has lower measured prefill and cached-decode medians
+than Ollama on this Windows workload, with all stability checks passing.
+A selected-token log-probability check narrowly misses the declared tolerance,
+so these remain diagnostic timings; there is no qualified overall speed or
+quality claim. The previous default's prefill deficit remains recorded below.
+
+## October 17 FP32 SiLU default
+
+The updated default uses the accepted FP32 SiLU kernel. All other comparison
+settings and gates below remain unchanged. This is a fresh six-pair run,
+eleven measurements and three warmups per pass, with new eight-prompt quality
+checks; no old preflight was reused. AC power was checked for every request
+or native sample. Builds, model downloads and other inference were serialized
+outside the run; the parallel agent wrote source only.
+
+| Phase | Leaf pooled median | Ollama pooled median | Leaf reduction | Timing gate |
+|---|---:|---:|---:|---|
+| 63 uncached prefill tokens | 1,391.4163 ms | 1,530.6415 ms | **9.10%** | Pass |
+| One cached forward | 222.90765 ms | 251.448 ms | **11.35%** | Pass |
+
+All twelve individual passes and all pooled distributions pass p90/p10 <= 1.25.
+Median paired Leaf/Ollama ratios are 0.90833 prefill and 0.88852 decode.
+Every timed continuation matches; all eight quality continuations also match.
+The same Unicode case still has selected-logprob error 0.0002179475 against
+the unchanged 0.0002 limit. Seven of eight probability checks pass; the
+overall quality gate and `overall_speed_claim` remain **false**.
+
+This supports a stable latency advantage for these matched FP32 forwards,
+not universal model coverage or a fully qualified runtime win. The independent
+source-reference quality and incremental SiLU release gates pass as documented
+in the [SiLU report](silu-gate-experiment.md).
+
+Evidence: [complete new-default comparison](../benchmark/results/tinyllama-ollama-fp32/fp32-silu-comparison.json).
+
+## Previous default — October 15
 
 ## Matched execution
 
@@ -72,8 +103,8 @@ runner and native adapter reject offline/unknown AC state; a fresh rerun waits
 for mains power. The next Leaf candidate enables the existing FP32 vector
 [SiLU gate](silu-gate-experiment.md#fp32-follow-up--october-15-2026), whose trained
 correctness and native incremental latency gates now pass. The user requested
-a checkpoint push before another long Ollama run; no fresh post-integration
-Ollama speedup is claimed.
+a checkpoint push before another long Ollama run. That local checkpoint is
+`0b44e71`; the completed post-integration comparison is recorded above.
 
 `tools/benchmark_ollama_decoder.py --help` describes the runner's explicit local
 runtime, snapshot, audited GGUF and Leaf artifact inputs.
@@ -82,7 +113,8 @@ runtime, snapshot, audited GGUF and Leaf artifact inputs.
 service or global power setting is changed.
 
 Before claiming a matched win, investigate the probability discrepancy without
-relaxing its limit, and measure the newly integrated FP32 SiLU default. The
+relaxing its limit. The new FP32 SiLU comparison above closes the measured
+prefill deficit on this workload. The
 [diagnostic startup-affinity race](windows-timing-diagnosis.md#october-15-2026-diagnostic-startup-race)
 has been corrected so future profiles do not mix P-core and E-core work. This comparison does not
 establish performance for other models, operating systems or quantized modes.

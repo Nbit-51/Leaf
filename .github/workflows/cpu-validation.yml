@@ -56,6 +56,12 @@ jobs:
           runtime=build/ci/leaf_decoder
           if [ "${{ runner.os }}" = "Windows" ]; then runtime=build/ci/Release/leaf_decoder.exe; fi
           python tools/verify_sliding_window_decoder.py --executable "$runtime" --output build/sliding-window-ci
+      - name: Native multi-EOS generation and artifact validation
+        shell: bash
+        run: |
+          runtime=build/ci/leaf_decoder
+          if [ "${{ runner.os }}" = "Windows" ]; then runtime=build/ci/Release/leaf_decoder.exe; fi
+          LEAF_TEST_DECODER_BIN="$runtime" python -m pytest tests/unit/test_decoder_generation_format.py -q
       - name: Final-layer last-logit and cache validation
         shell: bash
         run: |

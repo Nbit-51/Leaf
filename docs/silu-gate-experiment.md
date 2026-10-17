@@ -3,7 +3,8 @@
 Status: integrated into the Windows W8A8 default after stable incremental
 acceptance, a fresh PyTorch comparison and installed-wheel correctness checks.
 FP32 SiLU separately passed native acceptance on October 15 and is integrated
-into the Windows default. A fresh Ollama comparison of that default is pending.
+into the Windows default. A fresh Ollama comparison has stable lower prefill
+and decode times, with its separate probability-tolerance miss retained.
 
 ## FP32 follow-up — October 15, 2026
 
@@ -79,6 +80,12 @@ accepted release. These are install/correctness checks, not new speed evidence.
 See [package smoke](../benchmark/results/fp32-silu-followup/release-package.json),
 [installed SiLU parity](../benchmark/results/fp32-silu-followup/release-package-silu-parity.json)
 and [bundle manifest](../benchmark/results/fp32-silu-followup/release-package-manifest.json).
+
+The October 17 [matched Ollama comparison](tinyllama-ollama-comparison.md#october-17-fp32-silu-default)
+measures 9.10% lower prefill and 11.35% lower cached-decode medians with all
+timing gates passing. The unchanged selected-logprob miss keeps the overall
+quality/speed qualification false; the independent SiLU release evidence above
+is not relabeled by that separate comparison.
 
 ## Release integration verified — 2026-10-10
 

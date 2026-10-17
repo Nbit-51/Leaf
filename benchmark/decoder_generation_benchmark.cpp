@@ -95,7 +95,7 @@ int main(int argc,char** argv) {
             };
             select();
             start=Clock::now();
-            while (generated.size()<maximum && generated.back()!=decoder.eos_token()) {
+            while (generated.size()<maximum && !decoder.is_eos_token(generated.back())) {
                 logits=decoder.forward({generated.back()});
                 select();
             }
