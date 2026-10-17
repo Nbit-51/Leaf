@@ -1,0 +1,2256 @@
+{
+  "format": "leaf-fp32-decode-silu-release-v1",
+  "complete": true,
+  "passed": true,
+  "recorded_at_utc": "2026-10-17T13:52:56.782572+00:00",
+  "baseline_commit": "1e0e57f3814fb13aedf489821b7160409986a231",
+  "acceptance_timing": false,
+  "scope": "Exact release binding and validation; timing is in the two raw acceptance records",
+  "unit_tests": {
+    "tests": 1040,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "initial_sandbox_attempt": {
+    "passed": 1018,
+    "failed": 22,
+    "reason": "System-temp PermissionError in native request-file tests; complete rerun with fresh workspace TEMP/TMP passed"
+  },
+  "candidate_exact_parity": {
+    "complete": true,
+    "passed": true,
+    "scope": "Exact native outputs before/after FP32 decode SiLU; no new reference or speed qualification",
+    "hashes": {
+      "build\\family-models-20261017\\runtime\\leaf_decoder.exe": "14adfa5d41d23c882d80a34d3a6c00a1318746cde719385b7f5ae273de3e2df4",
+      "build\\numerics-20261017\\decode-silu\\leaf_decoder.exe": "fa2f0a52bded0dc84891a8ab87e116fbed1348c8206697132dc3a7db816465d0"
+    },
+    "cases": [
+      {
+        "model": "smol",
+        "case": "full",
+        "exact": true,
+        "compared_values_or_tokens": 6291456,
+        "before_silu_calls": 32,
+        "after_silu_calls": 32
+      },
+      {
+        "model": "smol",
+        "case": "chunk16",
+        "exact": true,
+        "compared_values_or_tokens": 1622016,
+        "before_silu_calls": 64,
+        "after_silu_calls": 96
+      },
+      {
+        "model": "smol",
+        "case": "tokenwise",
+        "exact": true,
+        "compared_values_or_tokens": 1622016,
+        "before_silu_calls": 0,
+        "after_silu_calls": 1056
+      },
+      {
+        "model": "smol",
+        "case": "tokenwise-threads2",
+        "exact": true,
+        "compared_values_or_tokens": 835584,
+        "before_silu_calls": 0,
+        "after_silu_calls": 544
+      },
+      {
+        "model": "smol",
+        "case": "forced-scalar",
+        "exact": true,
+        "compared_values_or_tokens": 835584,
+        "before_silu_calls": 0,
+        "after_silu_calls": 0
+      },
+      {
+        "model": "smol",
+        "case": "generation",
+        "exact": true,
+        "compared_values_or_tokens": 16,
+        "before_silu_calls": 0,
+        "after_silu_calls": 480
+      },
+      {
+        "model": "qwen",
+        "case": "full",
+        "exact": true,
+        "compared_values_or_tokens": 19447808,
+        "before_silu_calls": 24,
+        "after_silu_calls": 24
+      },
+      {
+        "model": "qwen",
+        "case": "chunk16",
+        "exact": true,
+        "compared_values_or_tokens": 5013888,
+        "before_silu_calls": 48,
+        "after_silu_calls": 72
+      },
+      {
+        "model": "qwen",
+        "case": "tokenwise",
+        "exact": true,
+        "compared_values_or_tokens": 5013888,
+        "before_silu_calls": 0,
+        "after_silu_calls": 792
+      },
+      {
+        "model": "qwen",
+        "case": "tokenwise-threads2",
+        "exact": true,
+        "compared_values_or_tokens": 2582912,
+        "before_silu_calls": 0,
+        "after_silu_calls": 408
+      },
+      {
+        "model": "qwen",
+        "case": "forced-scalar",
+        "exact": true,
+        "compared_values_or_tokens": 2582912,
+        "before_silu_calls": 0,
+        "after_silu_calls": 0
+      },
+      {
+        "model": "qwen",
+        "case": "generation",
+        "exact": true,
+        "compared_values_or_tokens": 16,
+        "before_silu_calls": 0,
+        "after_silu_calls": 360
+      },
+      {
+        "model": "tinyllama",
+        "case": "full",
+        "exact": true,
+        "compared_values_or_tokens": 4096000,
+        "before_silu_calls": 22,
+        "after_silu_calls": 22
+      },
+      {
+        "model": "tinyllama",
+        "case": "chunk16",
+        "exact": true,
+        "compared_values_or_tokens": 1056000,
+        "before_silu_calls": 44,
+        "after_silu_calls": 66
+      },
+      {
+        "model": "tinyllama",
+        "case": "tokenwise",
+        "exact": true,
+        "compared_values_or_tokens": 1056000,
+        "before_silu_calls": 0,
+        "after_silu_calls": 726
+      },
+      {
+        "model": "tinyllama",
+        "case": "tokenwise-threads2",
+        "exact": true,
+        "compared_values_or_tokens": 544000,
+        "before_silu_calls": 0,
+        "after_silu_calls": 374
+      },
+      {
+        "model": "tinyllama",
+        "case": "forced-scalar",
+        "exact": true,
+        "compared_values_or_tokens": 544000,
+        "before_silu_calls": 0,
+        "after_silu_calls": 0
+      },
+      {
+        "model": "tinyllama",
+        "case": "generation",
+        "exact": true,
+        "compared_values_or_tokens": 16,
+        "before_silu_calls": 22,
+        "after_silu_calls": 352
+      },
+      {
+        "model": "tinyllama-w8a8-exclusion",
+        "case": "tokenwise",
+        "exact": true,
+        "compared_values_or_tokens": 1056000,
+        "before_silu_calls": 0,
+        "after_silu_calls": 0
+      },
+      {
+        "model": "tinyllama-w8a8-exclusion",
+        "case": "generation",
+        "exact": true,
+        "compared_values_or_tokens": 16,
+        "before_silu_calls": 22,
+        "after_silu_calls": 22
+      }
+    ]
+  },
+  "release_binding": {
+    "complete": true,
+    "passed": true,
+    "scope": "Release binding to the measured candidate; no timing qualification",
+    "hashes": {
+      "build\\numerics-20261017\\release\\leaf_decoder.exe": "83db825956f5657c068a5699efbc35e088527fc34ac24a37122e7805f2ea2900",
+      "build\\numerics-20261017\\decode-silu\\leaf_decoder.exe": "fa2f0a52bded0dc84891a8ab87e116fbed1348c8206697132dc3a7db816465d0",
+      "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\check_decode_release.py": "e7a84165272b5f91055b496fd62398cd533f9e5029cd4b59806616e2cc85dff6",
+      "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\898954fccee23671ea3da805\\decoder-32.leaf": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+      "build\\family-models-20261017\\smol-quality-8\\tokens.json": "1555203a81ad00cb7bfcc8e7f04aab2eccfc24e530e329471ad8d8046d959d9a",
+      "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\70ec40010513210f83bb089b\\decoder-32.leaf": "f01b07a042ce3e3da824076802376e3f0f1864e3134b1036c5c4e4bd517d7de7",
+      "build\\family-models-20261017\\qwen-quality-8\\tokens.json": "5856ecd9964691c327eab1a71886ca5dc63c821b6fad71a96eee1a0b3a6a020b",
+      "build\\tinyllama_windows_fair\\decoder-32.leaf": "71b98b53ce204393478990887c7beab7074e34bffc76e5a00c4f9183631e060a",
+      "build\\tinyllama_windows_fair\\tokens.json": "537a2ed92d0dbe9b77ceb462e3ee09fe41d0bc29a7d638e7a1bc2cfdf4c327f5",
+      "build\\tinyllama_windows_fair\\decoder-8-smooth.leaf": "6a831e4a655f4fa00ccf82ad1bf317492aeaa76c85950a56ec464a7f3611ffc5"
+    },
+    "cases": [
+      {
+        "model": "smol",
+        "workload": "tokenwise",
+        "exact": true,
+        "silu_calls": 288
+      },
+      {
+        "model": "smol",
+        "workload": "generation",
+        "exact": true,
+        "silu_calls": 128
+      },
+      {
+        "model": "qwen",
+        "workload": "tokenwise",
+        "exact": true,
+        "silu_calls": 216
+      },
+      {
+        "model": "qwen",
+        "workload": "generation",
+        "exact": true,
+        "silu_calls": 96
+      },
+      {
+        "model": "tinyllama",
+        "workload": "tokenwise",
+        "exact": true,
+        "silu_calls": 198
+      },
+      {
+        "model": "tinyllama",
+        "workload": "generation",
+        "exact": true,
+        "silu_calls": 88
+      },
+      {
+        "model": "tinyllama-w8a8-exclusion",
+        "workload": "tokenwise",
+        "exact": true,
+        "silu_calls": 0
+      },
+      {
+        "model": "tinyllama-w8a8-exclusion",
+        "workload": "generation",
+        "exact": true,
+        "silu_calls": 22
+      }
+    ]
+  },
+  "reduced_architecture_validation": {
+    "benchmark": "native-decoder-cross-architecture-parity",
+    "measured_at_utc": "2026-10-17T13:49:55.528742+00:00",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "machine": "AMD64",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "torch": "2.12.0+cpu",
+    "threads": 1,
+    "native_executable_sha256": "83db825956f5657c068a5699efbc35e088527fc34ac24a37122e7805f2ea2900",
+    "validation_script_sha256": "267f89fca5e188da2b6f4ff7a2b4d6ee88f5ec131ac9601d11d479a62bc40248",
+    "native_policy": {
+      "LEAF_DISABLE_VNNI": false,
+      "LEAF_EXPERIMENTAL_FLOAT_TILES": false,
+      "LEAF_EXPERIMENTAL_FLOAT_GEMV": false
+    },
+    "w8a8_silu_dispatch_audited": true,
+    "fp32_silu_dispatch_audited": true,
+    "scope": "Complete reduced-size random-weight models; trained quality is evaluated separately.",
+    "results": [
+      {
+        "architecture": "llama",
+        "random_weights": true,
+        "hidden_act": "silu",
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": false,
+        "enable_bias": null,
+        "tie_word_embeddings": false,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 1.4901161193847656e-07,
+            "relative_logit_rmse": 2.1385481829838682e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.56075713355813,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9999999953105796
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007803574204444885,
+            "relative_logit_rmse": 0.010825028643012047,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.53622368412863,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9998135153157165
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.10762426257133484,
+            "relative_logit_rmse": 0.18840645253658295,
+            "next_token_agreement": 0.625,
+            "perplexity": 132.23537347422177,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 1.005127788371357
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009840242564678192,
+            "relative_logit_rmse": 0.013589023612439632,
+            "next_token_agreement": 0.9791666666666666,
+            "perplexity": 131.4924554916311,
+            "pytorch_perplexity": 131.56075775050184,
+            "perplexity_ratio": 0.9994808310620993
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "custom-plan/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "qwen2",
+        "random_weights": true,
+        "hidden_act": "silu",
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": null,
+        "enable_bias": null,
+        "tie_word_embeddings": false,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 1.7881393432617188e-07,
+            "relative_logit_rmse": 2.2654290887658135e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 128.45367114128905,
+            "pytorch_perplexity": 128.4536723622312,
+            "perplexity_ratio": 0.9999999904950779
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007064491510391235,
+            "relative_logit_rmse": 0.010371503420174122,
+            "next_token_agreement": 0.9583333333333334,
+            "perplexity": 128.47324221486465,
+            "pytorch_perplexity": 128.4536723622312,
+            "perplexity_ratio": 1.0001523494990339
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.1149645745754242,
+            "relative_logit_rmse": 0.16695454716682434,
+            "next_token_agreement": 0.6041666666666666,
+            "perplexity": 129.0965233970744,
+            "pytorch_perplexity": 128.4536723622312,
+            "perplexity_ratio": 1.0050045360558506
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.008249245584011078,
+            "relative_logit_rmse": 0.012457630597054958,
+            "next_token_agreement": 1.0,
+            "perplexity": 128.3902052352126,
+            "pytorch_perplexity": 128.4536723622312,
+            "perplexity_ratio": 0.999505914265809
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "gpt2",
+        "random_weights": true,
+        "hidden_act": null,
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": null,
+        "enable_bias": null,
+        "tie_word_embeddings": true,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 2.5331974029541016e-07,
+            "relative_logit_rmse": 2.94093013053498e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 124.00435172140976,
+            "pytorch_perplexity": 124.00434945948474,
+            "perplexity_ratio": 1.000000018240691
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007787972688674927,
+            "relative_logit_rmse": 0.010542243719100952,
+            "next_token_agreement": 1.0,
+            "perplexity": 123.95225483395019,
+            "pytorch_perplexity": 124.00434945948474,
+            "perplexity_ratio": 0.9995798967878012
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.14794032275676727,
+            "relative_logit_rmse": 0.19200097024440765,
+            "next_token_agreement": 0.9166666666666666,
+            "perplexity": 123.50349263974888,
+            "pytorch_perplexity": 124.00434945948474,
+            "perplexity_ratio": 0.9959609737729441
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009080658666789532,
+            "relative_logit_rmse": 0.013598943129181862,
+            "next_token_agreement": 1.0,
+            "perplexity": 124.03102001057883,
+            "pytorch_perplexity": 124.00434945948474,
+            "perplexity_ratio": 1.0002150775453469
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "gpt_neox",
+        "random_weights": true,
+        "hidden_act": "gelu",
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": true,
+        "enable_bias": null,
+        "tie_word_embeddings": false,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 2.384185791015625e-07,
+            "relative_logit_rmse": 3.1841520353736996e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 126.88362946244001,
+            "pytorch_perplexity": 126.88362729643374,
+            "perplexity_ratio": 1.0000000170708099
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.006921906024217606,
+            "relative_logit_rmse": 0.011353250592947006,
+            "next_token_agreement": 0.9791666666666666,
+            "perplexity": 126.8470948400996,
+            "pytorch_perplexity": 126.88362729643374,
+            "perplexity_ratio": 0.9997120790356285
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.13640448451042175,
+            "relative_logit_rmse": 0.1991194784641266,
+            "next_token_agreement": 0.7916666666666666,
+            "perplexity": 126.70458463940213,
+            "pytorch_perplexity": 126.88362729643374,
+            "perplexity_ratio": 0.9985889222995389
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009485878050327301,
+            "relative_logit_rmse": 0.014979862608015537,
+            "next_token_agreement": 1.0,
+            "perplexity": 126.89620190343074,
+            "pytorch_perplexity": 126.88362729643374,
+            "perplexity_ratio": 1.0000991034640554
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "opt",
+        "random_weights": true,
+        "hidden_act": null,
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": null,
+        "enable_bias": true,
+        "tie_word_embeddings": true,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 2.980232238769531e-07,
+            "relative_logit_rmse": 2.933453799869312e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 128.3081103227231,
+            "pytorch_perplexity": 128.30811087195252,
+            "perplexity_ratio": 0.999999995719449
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.0076616071164608,
+            "relative_logit_rmse": 0.011497493833303452,
+            "next_token_agreement": 1.0,
+            "perplexity": 128.23985453284538,
+            "pytorch_perplexity": 128.30811087195252,
+            "perplexity_ratio": 0.999468027869452
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.1452876627445221,
+            "relative_logit_rmse": 0.19330798089504242,
+            "next_token_agreement": 0.9583333333333334,
+            "perplexity": 126.99028917198333,
+            "pytorch_perplexity": 128.30811087195252,
+            "perplexity_ratio": 0.9897292408795237
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.00912894681096077,
+            "relative_logit_rmse": 0.01363888755440712,
+            "next_token_agreement": 1.0,
+            "perplexity": 128.36844218598867,
+            "pytorch_perplexity": 128.30811087195252,
+            "perplexity_ratio": 1.0004702065491118
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "gpt2",
+        "random_weights": true,
+        "hidden_act": null,
+        "hidden_size": 30,
+        "sliding_window": null,
+        "attention_bias": null,
+        "enable_bias": null,
+        "tie_word_embeddings": true,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 8.940696716308594e-08,
+            "relative_logit_rmse": 1.5451394119736506e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 127.31271649922773,
+            "pytorch_perplexity": 127.31271635378694,
+            "perplexity_ratio": 1.0000000011423902
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.003949407488107681,
+            "relative_logit_rmse": 0.007713800296187401,
+            "next_token_agreement": 1.0,
+            "perplexity": 127.32717299030517,
+            "pytorch_perplexity": 127.31271635378694,
+            "perplexity_ratio": 1.0001135521802713
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.06959784030914307,
+            "relative_logit_rmse": 0.14053381979465485,
+            "next_token_agreement": 0.9583333333333334,
+            "perplexity": 127.81472731805854,
+            "pytorch_perplexity": 127.31271635378694,
+            "perplexity_ratio": 1.0039431329300725
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.00421375036239624,
+            "relative_logit_rmse": 0.009650723077356815,
+            "next_token_agreement": 0.9791666666666666,
+            "perplexity": 127.30646283491596,
+            "pytorch_perplexity": 127.31271635378694,
+            "perplexity_ratio": 0.9999508806421693
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "gpt_neox",
+        "random_weights": true,
+        "hidden_act": "gelu",
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": false,
+        "enable_bias": null,
+        "tie_word_embeddings": true,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 2.421438694000244e-07,
+            "relative_logit_rmse": 3.2838505603649537e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.25047878751215,
+            "pytorch_perplexity": 131.25047983647298,
+            "perplexity_ratio": 0.9999999920079468
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.008187606930732727,
+            "relative_logit_rmse": 0.011303645558655262,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.31028723801282,
+            "pytorch_perplexity": 131.25047983647298,
+            "perplexity_ratio": 1.0004556737744073
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.16043990850448608,
+            "relative_logit_rmse": 0.20517802238464355,
+            "next_token_agreement": 0.9583333333333334,
+            "perplexity": 131.92246955186278,
+            "pytorch_perplexity": 131.25047983647298,
+            "perplexity_ratio": 1.0051199029232276
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009575650095939636,
+            "relative_logit_rmse": 0.01393708772957325,
+            "next_token_agreement": 1.0,
+            "perplexity": 131.23820644247598,
+            "pytorch_perplexity": 131.25047983647298,
+            "perplexity_ratio": 0.999906488768557
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "opt",
+        "random_weights": true,
+        "hidden_act": null,
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": null,
+        "enable_bias": false,
+        "tie_word_embeddings": true,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 2.682209014892578e-07,
+            "relative_logit_rmse": 2.8250966011000855e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 130.10762309542488,
+            "pytorch_perplexity": 130.1076232364637,
+            "perplexity_ratio": 0.9999999989159835
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007307708263397217,
+            "relative_logit_rmse": 0.01217816211283207,
+            "next_token_agreement": 0.9583333333333334,
+            "perplexity": 130.08939605557504,
+            "pytorch_perplexity": 130.1076232364637,
+            "perplexity_ratio": 0.9998599068952667
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.12137538194656372,
+            "relative_logit_rmse": 0.19631211459636688,
+            "next_token_agreement": 0.8958333333333334,
+            "perplexity": 129.61009210721002,
+            "pytorch_perplexity": 130.1076232364637,
+            "perplexity_ratio": 0.9961760032434884
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.008617207407951355,
+            "relative_logit_rmse": 0.014333194121718407,
+            "next_token_agreement": 1.0,
+            "perplexity": 130.1548865555932,
+            "pytorch_perplexity": 130.1076232364637,
+            "perplexity_ratio": 1.0003632632581692
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "llama",
+        "random_weights": true,
+        "hidden_act": "relu",
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": false,
+        "enable_bias": null,
+        "tie_word_embeddings": false,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 1.7881393432617188e-07,
+            "relative_logit_rmse": 2.3193992149117548e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 130.88893149891234,
+            "pytorch_perplexity": 130.88893028552604,
+            "perplexity_ratio": 1.0000000092703507
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.006405338644981384,
+            "relative_logit_rmse": 0.009609831497073174,
+            "next_token_agreement": 0.9791666666666666,
+            "perplexity": 130.89769958187665,
+            "pytorch_perplexity": 130.88893028552604,
+            "perplexity_ratio": 1.0000669979984669
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.09993645548820496,
+            "relative_logit_rmse": 0.1699543297290802,
+            "next_token_agreement": 0.6875,
+            "perplexity": 131.23005079900756,
+            "pytorch_perplexity": 130.88893028552604,
+            "perplexity_ratio": 1.002606183064812
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009148668497800827,
+            "relative_logit_rmse": 0.012987948022782803,
+            "next_token_agreement": 0.9166666666666666,
+            "perplexity": 130.92932839970265,
+            "pytorch_perplexity": 130.88893028552604,
+            "perplexity_ratio": 1.0003086442381985
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "custom-plan/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      },
+      {
+        "architecture": "mistral",
+        "random_weights": true,
+        "hidden_act": "silu",
+        "hidden_size": 64,
+        "sliding_window": null,
+        "attention_bias": null,
+        "enable_bias": null,
+        "tie_word_embeddings": false,
+        "fp32_scalar_and_threads2_passed": true,
+        "chunked_cache_passed": true,
+        "greedy_generation_passed": true,
+        "cases": {
+          "32": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 1.7881393432617188e-07,
+            "relative_logit_rmse": 2.5295290129179193e-07,
+            "next_token_agreement": 1.0,
+            "perplexity": 127.049617500827,
+            "pytorch_perplexity": 127.04961546503507,
+            "perplexity_ratio": 1.0000000160235978
+          },
+          "8": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.007040068507194519,
+            "relative_logit_rmse": 0.011473859660327435,
+            "next_token_agreement": 1.0,
+            "perplexity": 127.05843662469672,
+            "pytorch_perplexity": 127.04961546503507,
+            "perplexity_ratio": 1.0000694308253462
+          },
+          "4": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.14301744103431702,
+            "relative_logit_rmse": 0.20204223692417145,
+            "next_token_agreement": 0.7708333333333334,
+            "perplexity": 127.88122907176603,
+            "pytorch_perplexity": 127.04961546503507,
+            "perplexity_ratio": 1.006545581454041
+          },
+          "8-smooth": {
+            "evaluated_tokens": 48,
+            "max_abs_logit_error": 0.009579658508300781,
+            "relative_logit_rmse": 0.014630415476858616,
+            "next_token_agreement": 0.9791666666666666,
+            "perplexity": 127.07221193545227,
+            "pytorch_perplexity": 127.04961546503507,
+            "perplexity_ratio": 1.0001778554805891
+          }
+        },
+        "paired_bit_exact_regression": {
+          "passed": true,
+          "checks": {
+            "32/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar1-threads1": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/verify-scalar0-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/chunk1-a8-excluded": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "32/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/verify-a8-threads2": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a32": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "4/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/verify-a8-scalar": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/chunk3-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            },
+            "8-smooth/greedy-reset-a8": {
+              "logits_array_equal": true,
+              "generated_tokens_equal": true
+            }
+          }
+        }
+      }
+    ],
+    "before_executable_sha256": "14adfa5d41d23c882d80a34d3a6c00a1318746cde719385b7f5ae273de3e2df4",
+    "paired_bit_exact_regression_passed": true,
+    "paired_scope": "Identical artifacts and requests under default kernel policy; no latency qualification"
+  },
+  "installed_gpt2": {
+    "benchmark": "installed-package-offline-runtime-smoke",
+    "measured_at_utc": "2026-10-17T13:51:17.936315+00:00",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+    "threads": 1,
+    "pinned_cpu": 2,
+    "model": "gpt2",
+    "model_config_sha256": "0daed7749b4f02b8f76240d5444551d7b08712dab4d0adb8239c56ba823bb7b4",
+    "source_weight_sha256": {
+      "model.safetensors": "248dfc3911869ec493c76e65bf2fcf7f615828b0254c12b473182f0f81d3a707"
+    },
+    "reference_record_sha256": "b6a3f755ea891921d2f03bd8f5027fee06dcd39c61444da766b09da2228828e0",
+    "package_check": {
+      "module": "leaf\\cli.py",
+      "bundled_runtime_selected": true,
+      "native_executable_sha256": "6906166822f62d32e5ddd868862e01260a60680bf6cc10b6a674b8f506c5a5dd",
+      "artifact_preexisting": false,
+      "runtime_environment_policy": {
+        "LEAF_DISABLE_VNNI": null,
+        "LEAF_DECODER_PROFILE": null,
+        "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+        "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+      },
+      "profile_native_binary_mismatch": true,
+      "automatic_weight_bits": 32,
+      "automatic_activation_bits": 32,
+      "heavy_model_libraries_loaded": []
+    },
+    "compiler_path_available": false,
+    "runtime_path_scope": "Windows System32 only",
+    "fresh_artifact_cache": true,
+    "operating_system_file_cache_flushed": false,
+    "timing_scope": "One observation per stage, not a speed gate. External timers include Python startup; CLI timers do not.",
+    "runs": [
+      {
+        "external_wall_ms": 3090.2815999997983,
+        "external_first_stdout_byte_ms": 2569.77790000019,
+        "external_first_visible_text_ms": 2624.9181000002864,
+        "stdout": "\r\n\r\nThe following is a list of the most common mistakes that can be made\r\n",
+        "preparation_message_seen": true,
+        "package_check": {
+          "module": "leaf\\cli.py",
+          "bundled_runtime_selected": true,
+          "native_executable_sha256": "6906166822f62d32e5ddd868862e01260a60680bf6cc10b6a674b8f506c5a5dd",
+          "artifact_preexisting": false,
+          "runtime_environment_policy": {
+            "LEAF_DISABLE_VNNI": null,
+            "LEAF_DECODER_PROFILE": null,
+            "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+            "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+          },
+          "export_module": "tools\\export_decoder.py",
+          "heavy_model_libraries_loaded": []
+        },
+        "stage": "first_preparation",
+        "generated_tokens_match_pytorch": true,
+        "cli_metrics": {
+          "avx2": true,
+          "vector_silu_gate_calls": 0,
+          "vector_silu_gate_enabled": false,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 497777600,
+          "peak_rss_bytes": 504258560,
+          "load_ms": 11.9081,
+          "prefill_p50_ms": 219.815,
+          "decode_p50_ms": 27.7229,
+          "prefill_samples_ms": [
+            219.815
+          ],
+          "decode_samples_ms": [
+            27.5373,
+            27.7229,
+            28.1966,
+            28.4083,
+            27.9079,
+            26.3667,
+            27.9131,
+            27.146,
+            33.97,
+            39.7352,
+            29.159,
+            25.8162,
+            25.747,
+            25.8924,
+            25.864
+          ],
+          "generated_tokens": [
+            198,
+            198,
+            464,
+            1708,
+            318,
+            257,
+            1351,
+            286,
+            262,
+            749,
+            2219,
+            10135,
+            326,
+            460,
+            307,
+            925
+          ],
+          "weight_bits": 32,
+          "time_to_first_token_ms": 2368.0826999998317,
+          "end_to_end_ms": 2857.1718000002875
+        }
+      },
+      {
+        "external_wall_ms": 1278.0431000001045,
+        "external_first_stdout_byte_ms": 765.6090000000404,
+        "external_first_visible_text_ms": 819.118399999752,
+        "stdout": "\r\n\r\nThe following is a list of the most common mistakes that can be made\r\n",
+        "preparation_message_seen": false,
+        "package_check": {
+          "module": "leaf\\cli.py",
+          "bundled_runtime_selected": true,
+          "native_executable_sha256": "6906166822f62d32e5ddd868862e01260a60680bf6cc10b6a674b8f506c5a5dd",
+          "artifact_preexisting": true,
+          "runtime_environment_policy": {
+            "LEAF_DISABLE_VNNI": null,
+            "LEAF_DECODER_PROFILE": null,
+            "LEAF_EXPERIMENTAL_FLOAT_TILES": null,
+            "LEAF_EXPERIMENTAL_FLOAT_GEMV": null
+          },
+          "export_module": null,
+          "heavy_model_libraries_loaded": []
+        },
+        "stage": "cached_repeat",
+        "generated_tokens_match_pytorch": true,
+        "cli_metrics": {
+          "avx2": true,
+          "vector_silu_gate_calls": 0,
+          "vector_silu_gate_enabled": false,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 497777600,
+          "peak_rss_bytes": 503042048,
+          "load_ms": 0.4177,
+          "prefill_p50_ms": 213.3241,
+          "decode_p50_ms": 27.6457,
+          "prefill_samples_ms": [
+            213.3241
+          ],
+          "decode_samples_ms": [
+            25.5594,
+            27.6457,
+            26.1403,
+            27.2028,
+            26.1744,
+            28.0573,
+            27.997,
+            32.6667,
+            27.6115,
+            28.6622,
+            27.1182,
+            27.5597,
+            28.9162,
+            27.8991,
+            27.8937
+          ],
+          "generated_tokens": [
+            198,
+            198,
+            464,
+            1708,
+            318,
+            257,
+            1351,
+            286,
+            262,
+            749,
+            2219,
+            10135,
+            326,
+            460,
+            307,
+            925
+          ],
+          "weight_bits": 32,
+          "time_to_first_token_ms": 563.7618000000657,
+          "end_to_end_ms": 1045.9540000001653
+        }
+      }
+    ],
+    "passed": true,
+    "wheel": "leaf_cpu-0.2.0-py3-none-win_amd64.whl",
+    "wheel_sha256": "29b33bf9b63924e6490750e0565f457780810b874061dd8c1e6048c771205057"
+  },
+  "installed_qwen": {
+    "format": "leaf-installed-fp32-decode-silu-smoke-v1",
+    "complete": true,
+    "passed": true,
+    "measured_at_utc": "2026-10-17T13:51:38.071427+00:00",
+    "acceptance_timing": false,
+    "compiler_path_available": false,
+    "invocation": [
+      "leaf",
+      "run",
+      "Qwen/Qwen2.5-0.5B-Instruct",
+      "--offline",
+      "--raw",
+      "--prompt",
+      "Once upon a time,",
+      "--max-tokens",
+      "2",
+      "--threads",
+      "1",
+      "--bits",
+      "32"
+    ],
+    "native_executable_sha256": "6906166822f62d32e5ddd868862e01260a60680bf6cc10b6a674b8f506c5a5dd",
+    "generated_tokens_exact": true,
+    "fp32_silu_calls": 24,
+    "cli_metrics": {
+      "avx2": true,
+      "vector_silu_gate_calls": 24,
+      "vector_silu_gate_enabled": true,
+      "optimized_fp32_active": true,
+      "vnni": false,
+      "activation_bits": 32,
+      "threads": 1,
+      "artifact_bytes": 1976158464,
+      "peak_rss_bytes": 1982513152,
+      "load_ms": 1.212,
+      "prefill_p50_ms": 1771.0986,
+      "decode_p50_ms": 98.5898,
+      "prefill_samples_ms": [
+        1771.0986
+      ],
+      "decode_samples_ms": [
+        98.5898
+      ],
+      "generated_tokens": [
+        1052,
+        572
+      ],
+      "weight_bits": 32,
+      "time_to_first_token_ms": 3159.040100000311,
+      "end_to_end_ms": 3530.7573999998567
+    },
+    "external_wall_ms": 3835.437300000194,
+    "external_first_stdout_byte_ms": 3382.113099999515,
+    "external_first_visible_text_ms": 3382.1434999999838,
+    "stdout": " there was\r\n",
+    "preparation_message_seen": false,
+    "package_check": {
+      "module": "leaf\\cli.py",
+      "bundled_runtime_selected": true,
+      "native_executable_sha256": "6906166822f62d32e5ddd868862e01260a60680bf6cc10b6a674b8f506c5a5dd",
+      "model": "Qwen/Qwen2.5-0.5B-Instruct",
+      "snapshot": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775",
+      "eos_token_ids": [
+        151645,
+        151643
+      ],
+      "artifact": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\70ec40010513210f83bb089b\\decoder-32.leaf",
+      "artifact_preexisting": true,
+      "artifact_version": 4,
+      "artifact_unchanged": true,
+      "artifact_bytes": 1976158464,
+      "exporter_loaded": false,
+      "heavy_model_libraries_loaded": [],
+      "compiler_path_available": false,
+      "runtime_path_scope": "Windows System32 only"
+    }
+  },
+  "source_sha256": {
+    "engine\\src\\decoder.cpp": "c02989f7fce2bb000ecc630e9225ca7373224ada382eeffea2c77fc34df59fcb",
+    "engine\\include\\leaf\\runtime\\decoder_config.h": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+    "tools\\benchmark_default_abba.py": "760a36bb90488a699eb35a0d9996fbe7620dc0ab297743ae210b73603061aeee",
+    "tools\\trace_decoder_logits.py": "1e8692d5a2eac893d6eba2d10b3c4a06cd7244054cb4fd1723e4a1f1c7f99b69",
+    "tools\\verify_decoder_architectures.py": "267f89fca5e188da2b6f4ff7a2b4d6ee88f5ec131ac9601d11d479a62bc40248",
+    "tools\\verify_silu_release.py": "1ef3e76bd51f4292894175c154795d599370ec7cd28629776f8bb785a8dd731b",
+    "tests\\unit\\test_decoder_trace.py": "e0d621a79a671de410f36647eeda7c47602d1c2ff4a0abedafed1fb91d35556b",
+    "tests\\unit\\test_default_abba_target.py": "ca6ca3119ce64d271721a74f58f78d893299f7218f70a1d9e8f0c27837282602",
+    "tests\\unit\\test_silu_release.py": "5a2ad4d692ff49bbfbb84b0a1ecc38d5d6c2656b1a286cc39dcb64e3e315bc42"
+  },
+  "unit_xml_sha256": "b0915cf07798fac08922f2c241bf9b154b53fda72934caf91daecd668e5aa9ba"
+}

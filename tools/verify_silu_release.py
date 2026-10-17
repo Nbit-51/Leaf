@@ -29,7 +29,7 @@ def check_release_dispatch(metrics, bits, *, scalar=False, tokenwise=False):
     eligible = bits in (8,32) and not scalar and metrics.get("avx2") is True
     calls = metrics.get("vector_silu_gate_calls")
     if (metrics.get("vector_silu_gate_enabled") is not eligible or type(calls) is not int or
-            calls < 0 or (calls > 0) != (eligible and not tokenwise)):
+            calls < 0 or (calls > 0) != (eligible and (bits == 32 or not tokenwise))):
         raise ValueError("Release SiLU dispatch differs from qualified precision/workload")
 
 

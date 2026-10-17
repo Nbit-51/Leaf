@@ -110,14 +110,24 @@ def main():
                 actual, metrics = paired_native(args.executable, before, artifact, requests,
                                                 paired_checks, label, **options)
                 if args.expect_w8a8_silu:
-                    precision_eligible = (weight_bits == 32 or
+                    fp32 = weight_bits == 32 and options.get('activation_bits', 32) == 32
+                    precision_eligible = (fp32 or
                         (options.get('activation_bits',32)==8 and weight_bits == 8))
                     eligible = bool(sys.platform == "win32" and metrics["avx2"] and
                         not options.get("scalar", False) and precision_eligible and
                         config.model_type in ("llama", "qwen2", "mistral") and
                         getattr(config, "hidden_act", None) == "silu")
-                    chunk = options.get("chunk") if options.get("mode") == "chunked" else None
-                    used = eligible and any(min(len(ids), chunk or len(ids)) >= 8 for ids in requests)
+                    def qualifies(size):
+                        return size >= 8 or (fp32 and size == 1)
+                    if options.get("mode") == "chunked":
+                        chunk = options["chunk"]
+                        sizes = [min(chunk, len(ids) - offset) for ids in requests
+                                 for offset in range(0, len(ids), chunk)]
+                    else:
+                        sizes = [len(ids) for ids in requests]
+                        if options.get("mode") == "generate" and len(metrics["generated_tokens"]) > len(requests):
+                            sizes.append(1)
+                    used = eligible and any(qualifies(size) for size in sizes)
                     if (metrics.get("experimental_silu_gate_build") or
                             metrics.get("vector_silu_gate_enabled") is not eligible or
                             type(metrics.get("vector_silu_gate_calls")) is not int or
@@ -143,6 +153,13 @@ def main():
                         np.testing.assert_allclose(alternative.reshape(expected.shape), expected, atol=5e-5, rtol=5e-4)
                     chunked, _ = native(artifact, sequences, "32/chunk3-a32", mode="chunked", chunk=3)
                     np.testing.assert_allclose(chunked.reshape(expected.shape), expected, atol=5e-5, rtol=5e-4)
+                    if args.expect_w8a8_silu:
+                        tokenwise, _ = native(artifact, [sequences[0]], "32/chunk1-a32", mode="chunked", chunk=1)
+                        np.testing.assert_allclose(tokenwise.reshape(-1, config.vocab_size),
+                                                   expected[:len(sequences[0])], atol=5e-5, rtol=5e-4)
+                        # FP32 weight storage does not qualify quantized activations.
+                        native(artifact, [sequences[0]], "32/chunk1-a8-excluded", mode="chunked", chunk=1,
+                               activation_bits=8)
                     _, native_generation = native(artifact, [sequences[0]], "32/greedy-a32", mode="generate", generate=4)
                     if native_generation["generated_tokens"] != generated:
                         raise AssertionError(f"{config.model_type}: greedy generation differs")
