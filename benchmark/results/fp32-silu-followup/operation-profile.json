@@ -1,0 +1,274 @@
+{
+  "scope": "Pinned CPU 2, battery-only diagnostic profile; not qualified before/after latency.",
+  "records": {
+    "before": {
+      "profile": {
+        "leaf_decoder_profile": 1,
+        "clock": "steady_clock",
+        "bucket_by": "forward_input_tokens",
+        "timings": {
+          "prefill": {
+            "forward": {
+              "calls": 1,
+              "tokens": 63,
+              "milliseconds": 2535.0123
+            },
+            "embedding": {
+              "calls": 1,
+              "tokens": 63,
+              "milliseconds": 0.4359
+            },
+            "rms_norm": {
+              "calls": 45,
+              "tokens": 2771,
+              "milliseconds": 9.9965
+            },
+            "linear_fp32": {
+              "calls": 155,
+              "tokens": 9607,
+              "milliseconds": 1789.0452
+            },
+            "rope": {
+              "calls": 45,
+              "tokens": 2835,
+              "milliseconds": 1.9486
+            },
+            "attention": {
+              "calls": 22,
+              "tokens": 1386,
+              "milliseconds": 34.0917
+            },
+            "activation": {
+              "calls": 22,
+              "tokens": 1354,
+              "milliseconds": 693.6098
+            },
+            "kv_append": {
+              "calls": 22,
+              "tokens": 1386,
+              "milliseconds": 2.139
+            },
+            "causal_mask": {
+              "calls": 1,
+              "tokens": 63,
+              "milliseconds": 0.0113
+            },
+            "residual": {
+              "calls": 44,
+              "tokens": 2772,
+              "milliseconds": 3.0895
+            }
+          },
+          "decode": {
+            "forward": {
+              "calls": 2,
+              "tokens": 2,
+              "milliseconds": 2501.5747
+            },
+            "embedding": {
+              "calls": 2,
+              "tokens": 2,
+              "milliseconds": 0.026
+            },
+            "rms_norm": {
+              "calls": 90,
+              "tokens": 90,
+              "milliseconds": 0.65
+            },
+            "linear_fp32": {
+              "calls": 310,
+              "tokens": 310,
+              "milliseconds": 2463.6309
+            },
+            "rope": {
+              "calls": 90,
+              "tokens": 90,
+              "milliseconds": 0.1284
+            },
+            "attention": {
+              "calls": 44,
+              "tokens": 44,
+              "milliseconds": 5.6305
+            },
+            "activation": {
+              "calls": 44,
+              "tokens": 44,
+              "milliseconds": 25.8941
+            },
+            "kv_append": {
+              "calls": 44,
+              "tokens": 44,
+              "milliseconds": 4.7434
+            },
+            "causal_mask": {
+              "calls": 2,
+              "tokens": 2,
+              "milliseconds": 0.0008
+            },
+            "residual": {
+              "calls": 88,
+              "tokens": 88,
+              "milliseconds": 0.1282
+            }
+          }
+        }
+      },
+      "output": {
+        "input_tokens": 64,
+        "cached_prompt_tokens": 1,
+        "uncached_prompt_tokens": 63,
+        "cached_decode_forwards": 1,
+        "prefill_ms": 2535.0211,
+        "generation_phase_ms": 295.851,
+        "quality_mode": true,
+        "ac_power_checked": false,
+        "prefill_vector_silu_calls": 0,
+        "cached_decode_vector_silu_calls": 0,
+        "generated_tokens": [
+          278,
+          1021
+        ],
+        "selected_logprobs": [
+          -0.005739212325,
+          -0.0002487152849
+        ]
+      }
+    },
+    "candidate": {
+      "profile": {
+        "leaf_decoder_profile": 1,
+        "clock": "steady_clock",
+        "bucket_by": "forward_input_tokens",
+        "timings": {
+          "prefill": {
+            "forward": {
+              "calls": 1,
+              "tokens": 63,
+              "milliseconds": 1837.2314
+            },
+            "embedding": {
+              "calls": 1,
+              "tokens": 63,
+              "milliseconds": 0.4335
+            },
+            "rms_norm": {
+              "calls": 45,
+              "tokens": 2771,
+              "milliseconds": 10.4085
+            },
+            "linear_fp32": {
+              "calls": 155,
+              "tokens": 9607,
+              "milliseconds": 1758.3898
+            },
+            "rope": {
+              "calls": 45,
+              "tokens": 2835,
+              "milliseconds": 1.8768
+            },
+            "attention": {
+              "calls": 22,
+              "tokens": 1386,
+              "milliseconds": 33.9451
+            },
+            "activation": {
+              "calls": 22,
+              "tokens": 1354,
+              "milliseconds": 26.3197
+            },
+            "kv_append": {
+              "calls": 22,
+              "tokens": 1386,
+              "milliseconds": 2.1238
+            },
+            "causal_mask": {
+              "calls": 1,
+              "tokens": 63,
+              "milliseconds": 0.0039
+            },
+            "residual": {
+              "calls": 44,
+              "tokens": 2772,
+              "milliseconds": 3.1082
+            }
+          },
+          "decode": {
+            "forward": {
+              "calls": 2,
+              "tokens": 2,
+              "milliseconds": 2558.449
+            },
+            "embedding": {
+              "calls": 2,
+              "tokens": 2,
+              "milliseconds": 0.0254
+            },
+            "rms_norm": {
+              "calls": 90,
+              "tokens": 90,
+              "milliseconds": 0.6689
+            },
+            "linear_fp32": {
+              "calls": 310,
+              "tokens": 310,
+              "milliseconds": 2520.3874
+            },
+            "rope": {
+              "calls": 90,
+              "tokens": 90,
+              "milliseconds": 0.1208
+            },
+            "attention": {
+              "calls": 44,
+              "tokens": 44,
+              "milliseconds": 5.5433
+            },
+            "activation": {
+              "calls": 44,
+              "tokens": 44,
+              "milliseconds": 27.3726
+            },
+            "kv_append": {
+              "calls": 44,
+              "tokens": 44,
+              "milliseconds": 3.4288
+            },
+            "causal_mask": {
+              "calls": 2,
+              "tokens": 2,
+              "milliseconds": 0.0007
+            },
+            "residual": {
+              "calls": 88,
+              "tokens": 88,
+              "milliseconds": 0.1271
+            }
+          }
+        }
+      },
+      "output": {
+        "input_tokens": 64,
+        "cached_prompt_tokens": 1,
+        "uncached_prompt_tokens": 63,
+        "cached_decode_forwards": 1,
+        "prefill_ms": 1837.2375,
+        "generation_phase_ms": 301.7862,
+        "quality_mode": true,
+        "ac_power_checked": false,
+        "prefill_vector_silu_calls": 22,
+        "cached_decode_vector_silu_calls": 0,
+        "generated_tokens": [
+          278,
+          1021
+        ],
+        "selected_logprobs": [
+          -0.005739212325,
+          -0.0002487152849
+        ]
+      }
+    }
+  },
+  "generated_tokens_and_selected_logprobs_exact": true,
+  "candidate_prefill_gate_calls": 22,
+  "candidate_decode_gate_calls": 0
+}

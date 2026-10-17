@@ -2,7 +2,8 @@
 
 The monitor runs on a different physical core. One-second telemetry includes
 load and warmup, has nonzero overhead, and is not per-inference profiling.
-No global power, process priority, or other application's state is changed.
+No global power settings or unrelated application's state is changed. Optional
+Above Normal priority applies only to the child created for this diagnostic.
 """
 from __future__ import annotations
 
@@ -28,7 +29,7 @@ from tools.decoder_validation import benchmark_stability
 from tools.validate_decoder import digest, native_policy, utc_now, write_record
 
 
-def validate_diagnostic_request(metrics: dict, runs: int) -> None:
+def validate_diagnostic_request(metrics: dict, runs: int, expected_cpu: int | None = None) -> None:
     """Validate diagnostic samples without qualifying them as performance evidence."""
     if not isinstance(metrics, dict):
         raise ValueError("Diagnostic metrics must be an object")
@@ -39,13 +40,38 @@ def validate_diagnostic_request(metrics: dict, runs: int) -> None:
     if metrics.get("diagnostic_timing_build"):
         names += ["thread_cpu_prefill_ms", "thread_cpu_decode_ms",
                   "thread_cycles_prefill", "thread_cycles_decode"]
-        if metrics.get("diagnostic_counter_version") == 2:
+        if metrics.get("diagnostic_counter_version", 1) >= 2:
             names += ["process_page_faults_prefill", "process_page_faults_decode"]
+        if expected_cpu is not None and metrics.get("diagnostic_counter_version", 1) < 3:
+            raise ValueError("Actual CPU verification requires diagnostic counter version 3")
+        if metrics.get("diagnostic_counter_version", 1) >= 3:
+            names += [f"logical_cpu_{boundary}_{phase}" for boundary in ("start", "end")
+                      for phase in ("prefill", "decode")]
+        if metrics.get("diagnostic_counter_version", 1) >= 4:
+            names += [f"thread_{counter}_{phase}" for counter in ("context_switches", "wait_reason_mask")
+                      for phase in ("prefill", "decode")]
+    elif expected_cpu is not None:
+        raise ValueError("Actual CPU verification requires an instrumented build")
     for name in names:
         values = metrics.get(name)
         if (not isinstance(values, list) or len(values) != runs or
                 any(type(v) not in (int, float) or not math.isfinite(v) or v < 0 for v in values)):
             raise ValueError(f"Diagnostic {name} must contain {runs} finite nonnegative samples")
+        if name.startswith("logical_cpu_"):
+            if any(type(v) is not int for v in values):
+                raise ValueError(f"Diagnostic {name} must contain integer CPU identifiers")
+            if expected_cpu is not None and any(v != expected_cpu for v in values):
+                raise ValueError(f"Diagnostic {name} differs from requested CPU {expected_cpu}")
+
+
+def spawn_pinned(command, *, parent, cpu: int, **kwargs):
+    """Inherit the target affinity at creation, restoring the monitor on failure too."""
+    previous = parent.cpu_affinity()
+    try:
+        parent.cpu_affinity([cpu])
+        return subprocess.Popen(command, **kwargs)
+    finally:
+        parent.cpu_affinity(previous)
 
 
 def parse_cpu_sets(data: bytes) -> list[dict]:
@@ -168,11 +194,17 @@ def main():
     parser.add_argument("--runs", type=int, default=31)
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--high-qos-abba", action="store_true")
+    parser.add_argument("--above-normal", action="store_true",
+                        help="match the scoped child priority used by current acceptance runs")
     args = parser.parse_args()
     if os.name != "nt" or args.runs < 5 or args.warmup < 0:
         parser.error("Requires Windows, at least five samples and nonnegative warmup")
     if args.output.exists():
         parser.error("Use a new result path; retain earlier diagnostics")
+    runtime = json.loads(subprocess.check_output([str(args.executable.resolve()), "--runtime-info"], text=True))
+    if (runtime.get("diagnostic_start_gate_supported") is not True or
+            runtime.get("diagnostic_counter_version", 0) < 3):
+        parser.error("Rebuild with LEAF_DIAGNOSTIC_TIMING for start-gate and actual-CPU verification")
     topology = cpu_sets()
     cpus = {c["logical_cpu"]: c for c in topology if c["group"] == 0}
     if args.cpu not in cpus or args.monitor_cpu not in cpus or cpus[args.cpu]["core"] == cpus[args.monitor_cpu]["core"]:
@@ -183,7 +215,7 @@ def main():
     inputs = {str(p): digest(p) for p in (args.executable, args.artifact, args.tokens, Path(__file__))}
     me = psutil.Process()
     original_affinity = me.cpu_affinity()
-    # Child affinity is set after spawn; verify it before collecting samples.
+    # The child inherits the benchmark CPU at creation; Python monitors elsewhere.
     me.cpu_affinity([args.monitor_cpu])
     counters = Counters(args.cpu)
     record = {"benchmark": "windows-native-environment-diagnostic-v1", "measured_at_utc": utc_now(),
@@ -192,6 +224,9 @@ def main():
               "active_power_scheme": subprocess.check_output(["powercfg", "/getactivescheme"], text=True).strip(),
               "processor_power_settings": subprocess.check_output(["powercfg", "/query", "SCHEME_CURRENT", "SUB_PROCESSOR"], text=True),
               "runs": args.runs, "warmup": args.warmup, "prefill_tokens": len(ids) - 1,
+              "windows_process_priority": "above_normal" if args.above_normal else "normal",
+              "child_start_policy": "inherit-target-affinity-then-wait-for-monitor-gate",
+              "diagnostic_runtime": runtime,
               "process_sampler": "PDH wildcard counters", "monitor_pid": os.getpid(),
               "counter_unavailable": counters.unavailable, "passes": [], "automatic_selection_authorized": False,
               "scope": "Instrumented diagnostic, not acceptance timing. 1 Hz telemetry includes load/warmup. No thermal/power-limit sensors; process totals cannot locate competitors on a core. Inaccessible/short-lived processes may be missed."}
@@ -207,18 +242,26 @@ def main():
                            str(root / "logits.bin"), str(root / "metrics.json"), "bench", "1", str(args.runs), str(args.warmup), "1", "0", "1", "32"]
                 env = dict(os.environ)
                 env.pop("LEAF_DECODER_PROFILE", None)
+                gate = root / f"start-{index}.ready"
+                env["LEAF_DIAGNOSTIC_START_GATE"] = str(gate)
                 samples = []
                 start = time.perf_counter()
-                with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env) as child:
+                flags = subprocess.ABOVE_NORMAL_PRIORITY_CLASS if args.above_normal else 0
+                with spawn_pinned(command, parent=me, cpu=args.cpu, stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE, text=True, env=env, creationflags=flags) as child:
                     try:
                         process = psutil.Process(child.pid)
-                        process.cpu_affinity([args.cpu])
+                        if args.above_normal and process.nice() != psutil.ABOVE_NORMAL_PRIORITY_CLASS:
+                            raise RuntimeError("Native child priority did not match request")
                         if process.cpu_affinity() != [args.cpu]:
                             raise RuntimeError("Native child affinity did not match request")
                         qos = set_child_high_qos(child) if high_qos else None
                         process.cpu_percent()
                         psutil.cpu_percent(percpu=True)
                         counters.read()  # Prime this pass; ignore the initial interval.
+                        measured_at = utc_now()
+                        start = time.perf_counter()
+                        gate.touch()
                         last = time.perf_counter()
                         while child.poll() is None:
                             try:
@@ -251,12 +294,14 @@ def main():
                         raise
                 metrics = json.loads((root / "metrics.json").read_text())
                 item = {"index": index, "high_qos": high_qos, "child_pid": child.pid, "qos": qos,
+                        "measured_at_utc": measured_at, "finished_at_utc": utc_now(),
                         "elapsed_seconds": time.perf_counter() - start, "latency": metrics,
                         "stability": benchmark_stability(metrics), "telemetry": samples,
                         "request_validated": False}
                 record["passes"].append(item)
-                validate_diagnostic_request(metrics, args.runs)
+                validate_diagnostic_request(metrics, args.runs, expected_cpu=args.cpu)
                 item["request_validated"] = True
+                item["actual_cpu_boundaries_match_request"] = True
                 write_record(args.output, dict(record, complete=False))
                 print(json.dumps({"prefill": metrics["prefill_p50_ms"], "decode": metrics["decode_p50_ms"],
                                   "stable": item["stability"]["passed"]}), flush=True)

@@ -15,6 +15,7 @@ dependencies first; datasets and model weights are not part of the Python wheel.
 | `run_baselines.py`, `workloads.py`, `datasets.py` | Shared deterministic synthetic workloads and Python graph baselines |
 | `*.cpp` | Isolated native kernel and operator benchmark programs |
 | `llama_decoder_benchmark.cpp` | Pinned llama.cpp adapter matching Leaf's last-logit prefill and one cached decode step; orchestrated by `tools/benchmark_decoder_competitor.py` |
+| `decoder_generation_benchmark.cpp` | Native generation adapter for the matched FP32 Ollama comparison; orchestrated by `tools/benchmark_ollama_decoder.py` |
 | `data/` | Local downloaded datasets/checkpoints; ignored by Git |
 | `results/` | Retained measurements, provenance and failures; consult the associated documentation before comparing |
 | `experiments/` | Preserved experimental patches and implementations |

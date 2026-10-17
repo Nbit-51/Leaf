@@ -2,7 +2,7 @@ import struct
 
 import pytest
 
-from tools.diagnose_windows_benchmark import parse_cpu_sets, validate_diagnostic_request
+from tools.diagnose_windows_benchmark import parse_cpu_sets, spawn_pinned, validate_diagnostic_request
 from tools.benchmark_decoder_comparison import validate_timing_request
 from tools.summarize_windows_diagnostics import distribution, summarize
 
@@ -54,6 +54,87 @@ def test_page_fault_counter_version_requires_matching_samples():
         validate_diagnostic_request(metrics, 5)
 
 
+def cpu_metrics():
+    metrics = instrumented_metrics()
+    metrics.update(diagnostic_counter_version=3, process_page_faults_prefill=[0] * 5,
+                   process_page_faults_decode=[0] * 5)
+    for boundary in ('start', 'end'):
+        for phase in ('prefill', 'decode'):
+            metrics[f'logical_cpu_{boundary}_{phase}'] = [2] * 5
+    return metrics
+
+
+def test_actual_cpu_boundaries_match_even_when_process_mask_is_not_evidence():
+    metrics = cpu_metrics()
+    validate_diagnostic_request(metrics, 5, expected_cpu=2)
+    metrics['logical_cpu_start_prefill'][0] = 27
+    with pytest.raises(ValueError, match='requested CPU 2'):
+        validate_diagnostic_request(metrics, 5, expected_cpu=2)
+
+
+@pytest.mark.parametrize('key,value', [('logical_cpu_end_decode', None),
+    ('logical_cpu_start_prefill', [2.0] * 5), ('process_page_faults_decode', [0] * 4)])
+def test_counter_v3_requires_cpu_and_fault_samples(key, value):
+    metrics = cpu_metrics()
+    metrics[key] = value
+    with pytest.raises(ValueError):
+        validate_diagnostic_request(metrics, 5, expected_cpu=2)
+
+
+def test_old_counter_version_cannot_assert_actual_cpu():
+    with pytest.raises(ValueError, match='version 3'):
+        validate_diagnostic_request(instrumented_metrics(), 5, expected_cpu=2)
+
+
+@pytest.mark.parametrize('phase', ['prefill', 'decode'])
+def test_dispatch_counters_are_required_without_removing_slow_samples(phase):
+    from tools.diagnose_acceptance_spread import dispatch_summary
+    metrics = cpu_metrics()
+    metrics['diagnostic_counter_version'] = 4
+    for name in ('prefill','decode'):
+        metrics['thread_context_switches_'+name] = [1]*5
+        metrics['thread_wait_reason_mask_'+name] = [0]*5
+    metrics[phase+'_samples_ms'][-1] *= 2
+    metrics['thread_context_switches_'+phase][-1] = 12
+    validate_diagnostic_request(metrics,5,expected_cpu=2)
+    result = dispatch_summary(metrics,phase)
+    assert len(result['slow_samples'])==1
+    assert result['slow_samples'][0]['context_switches']==12
+    assert result['slow_samples'][0]['cycle_ratio']==1
+    assert len(metrics[phase+'_samples_ms'])==5
+    del metrics['thread_wait_reason_mask_'+phase]
+    with pytest.raises(ValueError,match='wait_reason_mask'):
+        validate_diagnostic_request(metrics,5,expected_cpu=2)
+
+
+@pytest.mark.parametrize('fail', [False, True])
+def test_child_inherits_target_affinity_and_monitor_is_restored(monkeypatch, fail):
+    class Parent:
+        affinity = [27]
+
+        def cpu_affinity(self, value=None):
+            if value is not None:
+                self.affinity = value
+            return list(self.affinity)
+
+    parent = Parent()
+    child = object()
+
+    def popen(command, **kwargs):
+        assert parent.cpu_affinity() == [2]
+        if fail:
+            raise OSError('spawn failed')
+        return child
+
+    monkeypatch.setattr('tools.diagnose_windows_benchmark.subprocess.Popen', popen)
+    if fail:
+        with pytest.raises(OSError, match='spawn failed'):
+            spawn_pinned(['unused'], parent=parent, cpu=2)
+    else:
+        assert spawn_pinned(['unused'], parent=parent, cpu=2) is child
+    assert parent.cpu_affinity() == [27]
+
+
 @pytest.mark.parametrize('key,value', [('threads', 2), ('threads', True), ('activation_bits', 8),
     ('prefill_samples_ms', [100] * 4), ('thread_cpu_decode_ms', None),
     ('thread_cycles_prefill', [float('nan')] * 5), ('thread_cpu_prefill_ms', [-1] * 5)])
@@ -74,8 +155,12 @@ def test_published_summary_omits_process_names_and_pids():
     record = {"cpu": 2, "monitor_cpu": 27, "cpu_sets": topology, "complete": False, "inputs_unchanged": True,
               "measured_at_utc": "test", "runs": 31, "warmup": 10, "native_policy": {}, "active_power_scheme": "test",
               "processor_power_settings": "test", "counter_unavailable": {}, "scope": "diagnostic",
-              "passes": [{"index": 0, "high_qos": False, "latency": {}, "stability": {}, "telemetry": [sample]}]}
+              "passes": [{"index": 0, "high_qos": False, "latency": cpu_metrics(), "stability": {}, "telemetry": [sample]}]}
     result = summarize(record)
     text = json.dumps(result)
     assert all(secret not in text for secret in ("private-app-name", "Code#3", "23456", "34567"))
     assert result["passes"][0]["estimated_process_cpu_seconds_by_category"] == {"other_processes": 1, "vs_code": 0.5}
+    assert result["passes"][0]["actual_cpu_boundary_counts"] == {2: 20}
+    assert result["passes"][0]["actual_cpu_boundaries_match_request"] is True
+    record['passes'][0]['latency']['logical_cpu_start_prefill'][0] = 27
+    assert summarize(record)['passes'][0]['actual_cpu_boundaries_match_request'] is False

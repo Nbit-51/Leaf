@@ -67,8 +67,8 @@ def main():
     parser.add_argument("--conservative-executable", type=Path,
                         help="release audit: exact quantized/scalar parity and optimized FP32 dispatch")
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--expect-w8a8-silu", action="store_true",
-                        help="audit Windows W8A8-only SiLU default and excluded dispatch paths")
+    parser.add_argument("--expect-w8a8-silu", "--expect-silu-defaults", action="store_true",
+                        help="audit Windows FP32/W8A8 SiLU defaults and excluded dispatch paths")
     args = parser.parse_args()
     if args.before_executable and args.conservative_executable:
         parser.error("Choose a full paired regression or a conservative release audit")
@@ -99,18 +99,22 @@ def main():
                                            do_sample=False, pad_token_id=2)[0, len(sequences[0]):].tolist()
             cases = {}
             paired_checks = {}
+            artifact_precisions = {}
 
             def native(artifact, requests, label, **options):
                 before = args.before_executable
-                quantized = label.startswith(("8/", "4/", "8-smooth/"))
+                weight_bits = artifact_precisions[artifact]
+                quantized = weight_bits != 32
                 if args.conservative_executable and (quantized or options.get("scalar")):
                     before = args.conservative_executable
                 actual, metrics = paired_native(args.executable, before, artifact, requests,
                                                 paired_checks, label, **options)
                 if args.expect_w8a8_silu:
+                    precision_eligible = (weight_bits == 32 or
+                        (options.get('activation_bits',32)==8 and weight_bits == 8))
                     eligible = bool(sys.platform == "win32" and metrics["avx2"] and
-                        not options.get("scalar", False) and options.get("activation_bits", 32) == 8 and
-                        label.startswith(("8/", "8-smooth/")) and config.model_type in ("llama", "qwen2", "mistral") and
+                        not options.get("scalar", False) and precision_eligible and
+                        config.model_type in ("llama", "qwen2", "mistral") and
                         getattr(config, "hidden_act", None) == "silu")
                     chunk = options.get("chunk") if options.get("mode") == "chunked" else None
                     used = eligible and any(min(len(ids), chunk or len(ids)) >= 8 for ids in requests)
@@ -118,7 +122,7 @@ def main():
                             metrics.get("vector_silu_gate_enabled") is not eligible or
                             type(metrics.get("vector_silu_gate_calls")) is not int or
                             (metrics["vector_silu_gate_calls"] > 0) != used):
-                        raise AssertionError(f"{label}: W8A8-only SiLU release dispatch differs")
+                        raise AssertionError(f"{label}: FP32/W8A8 SiLU release dispatch differs")
                 if args.conservative_executable:
                     expected_dispatch = not quantized and not options.get("scalar", False) and metrics["avx2"]
                     if metrics.get("optimized_fp32_active") is not expected_dispatch:
@@ -127,7 +131,7 @@ def main():
 
             for bits in (32, 8, 4):
                 artifact = root / f"{config.model_type}-{bits}.leaf"
-                export_decoder(snapshot, artifact, bits)
+                artifact_precisions[artifact] = export_decoder(snapshot, artifact, bits)['weight_bits']
                 actual, _ = native(artifact, sequences, f"{bits}/verify-a32")
                 actual = actual.reshape(expected.shape)
                 measurements = quality(actual, expected, sequences)
@@ -167,7 +171,8 @@ def main():
                         saved_config["model_type"] = "custom_decoder"
                         (snapshot / "config.json").write_text(json.dumps(saved_config))
                         custom_artifact = root / "custom.leaf"
-                        export_decoder(snapshot, custom_artifact, plan_path=custom_plan)
+                        artifact_precisions[custom_artifact] = export_decoder(
+                            snapshot, custom_artifact, plan_path=custom_plan)['weight_bits']
                         custom, _ = native(custom_artifact, sequences, "custom-plan/verify-a32")
                         np.testing.assert_allclose(custom.reshape(expected.shape), expected, atol=5e-5, rtol=5e-4)
                         saved_config["model_type"] = "llama"
@@ -200,7 +205,8 @@ def main():
                         "source_weight_sha256": {p.name: digest(p) for p in snapshot.glob("*.safetensors")}}
             np.savez(calibration, **arrays, __metadata__=json.dumps(metadata))
             smoothed = root / f"{config.model_type}-smooth.leaf"
-            export_decoder(snapshot, smoothed, 8, calibration_path=calibration)
+            artifact_precisions[smoothed] = export_decoder(
+                snapshot, smoothed, 8, calibration_path=calibration)['weight_bits']
             vector, _ = native(smoothed, sequences, "8-smooth/verify-a8", activation_bits=8)
             scalar, _ = native(smoothed, sequences, "8-smooth/verify-a8-scalar", activation_bits=8, scalar=True)
             np.testing.assert_allclose(vector, scalar, atol=5e-5, rtol=5e-4)
@@ -233,6 +239,7 @@ def main():
               "validation_script_sha256": digest(Path(__file__)),
               "native_policy": native_policy(),
               "w8a8_silu_dispatch_audited": args.expect_w8a8_silu,
+              "fp32_silu_dispatch_audited": args.expect_w8a8_silu,
               "scope": "Complete reduced-size random-weight models; trained quality is evaluated separately.",
               "results": results}
     if args.before_executable is not None:

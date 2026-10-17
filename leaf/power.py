@@ -5,6 +5,28 @@ import os
 import subprocess
 
 
+class _SystemPowerStatus(ctypes.Structure):
+    _fields_ = [("ACLineStatus", ctypes.c_ubyte), ("BatteryFlag", ctypes.c_ubyte),
+                ("BatteryLifePercent", ctypes.c_ubyte), ("SystemStatusFlag", ctypes.c_ubyte),
+                ("BatteryLifeTime", ctypes.c_uint32), ("BatteryFullLifeTime", ctypes.c_uint32)]
+
+
+def require_benchmark_ac() -> dict:
+    """Reject offline/unknown Windows AC state; no settings are changed."""
+    if os.name != "nt":
+        raise RuntimeError("Windows benchmark power check requires Windows")
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    query = kernel.GetSystemPowerStatus
+    query.argtypes = [ctypes.POINTER(_SystemPowerStatus)]
+    query.restype = ctypes.c_int
+    state = _SystemPowerStatus()
+    if not query(ctypes.byref(state)):
+        raise OSError(ctypes.get_last_error(), "Cannot verify benchmark AC power")
+    if state.ACLineStatus != 1:
+        raise RuntimeError("Benchmark requires verified AC power; offline or unknown power invalidates timing")
+    return {"ac_line_status": int(state.ACLineStatus), "battery_saver": bool(state.SystemStatusFlag)}
+
+
 class _PowerThrottlingState(ctypes.Structure):
     # Windows ULONG is 32 bits even on a 64-bit process. Do not use c_ulong,
     # whose width differs on non-Windows hosts running the mocked unit tests.

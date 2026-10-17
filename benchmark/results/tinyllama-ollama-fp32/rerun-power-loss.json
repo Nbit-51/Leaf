@@ -1,0 +1,7 @@
+{
+  "reason": "User reported mains power loss during the run; comparison interrupted and not qualified.",
+  "reported_at_utc": "2026-10-15T10:49:36.757804+00:00",
+  "complete": false,
+  "acceptance_timing": false,
+  "power_plugged_at_stop": false
+}

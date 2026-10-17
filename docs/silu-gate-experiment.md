@@ -1,8 +1,84 @@
-# Windows W8A8 vector SiLU/gating release
+# Windows FP32 and W8A8 vector SiLU/gating releases
 
 Status: integrated into the Windows W8A8 default after stable incremental
 acceptance, a fresh PyTorch comparison and installed-wheel correctness checks.
-**FP32 SiLU remains experimental; its incremental timing remains unqualified.**
+FP32 SiLU separately passed native acceptance on October 15 and is integrated
+into the Windows default. A fresh Ollama comparison of that default is pending.
+
+## FP32 follow-up — October 15, 2026
+
+A fresh TinyLlama FP32 check of the existing vector SiLU route passes all
+1,016 held-out targets with 100% next-token agreement and perplexity ratio
+0.9999998867. Maximum absolute logit error against the frozen source reference
+is 0.0004682541, within the unchanged trained-model thresholds. Chunk16,
+tokenwise cache and reference generation pass. This is source-reference
+qualification; the separate Ollama selected-logprob tolerance miss remains open.
+
+A pinned, battery-only diagnostic profile identifies a substantial default-path
+cost: scalar activation is 27.36% of prefill. The candidate executes 22 vector
+gates, records 1.43% activation share, and does not call the vector gate during
+cached decode. Its two generated tokens and selected log probabilities exactly
+match the default in this diagnostic. These are operation-profile observations,
+**not qualified before/after latency or an Ollama speedup**. Linear operations
+remain the largest cost after vector gating.
+
+The candidate reuses the shared SiLU kernel and metadata-based dispatch, rather
+than introducing a TinyLlama-specific operator. It retains the optimized FP32
+matrix/attention stack. It is built with `LEAF_EXPERIMENTAL_SILU_GATE=1` and
+passed fresh plugged-in acceptance timing before default integration. The existing
+4,907,400-value primitive test was rerun successfully: maximum observed error
+zero ULP, AVX2 exercised. The full Python suite passes **989 tests**, with four
+existing ONNX deprecation warnings.
+
+| Phase | Previous FP32 default | Accepted candidate | Verdict |
+|---|---:|---:|---|
+| Prefill | 1,897.61205 ms | 1,391.1965 ms | **26.69% lower** |
+| Cached decode | 226.0822 ms | 225.3048 ms | Non-regression passes |
+
+All twelve passes and both pooled distributions pass the unchanged spread
+checks. Pooled ratios are 0.73313 prefill and 0.99656 decode; median paired
+ratios are 0.73229 and 0.99932. Six balanced pairs, 31 samples / ten warmups,
+CPU 2, one thread, Above Normal priority, no concurrent builds/profiling.
+AC power was verified at every pass boundary. No samples were discarded.
+Earlier failed runs remain recorded and are not relabeled.
+
+`LEAF_OPTIMIZED_SILU_FP32` selects pure FP32 artifacts on supported Windows
+CPUs with a SiLU-gated FFN and at least eight forward tokens. INT4/mixed
+artifacts, other activations, single-token calls and forced scalar keep their
+existing paths. Disable this policy with `-ConservativeFp32Silu` or CMake
+`LEAF_CONSERVATIVE_FP32_SILU=ON`. The broad research flag remains available.
+
+Local binaries and inputs are in `build/fp32-silu-20261015/`. The completed gate
+used this command; preserve its result rather than rerunning it:
+
+```powershell
+python tools/benchmark_default_abba.py --before build/fp32-silu-20261015/before.exe --after build/fp32-silu-20261015/leaf_decoder.exe --workdir build/tinyllama_windows_fair --silu-quality build/fp32-silu-20261015/trained-quality.json --cpu 2 --pairs 6 --runs 31 --warmup 10 --output build/fp32-silu-20261015/timing-32.json
+```
+
+This is a long whole-model run. The power-aware Ollama adapter is also built
+as `leaf-generation-before.exe` / `leaf-generation-candidate.exe` in that folder;
+its runtime-info reports the sample-level AC guard. Model timing refuses offline
+or unknown AC state. Quality-only checks remain possible on battery. Do not
+reuse the old generation adapter or relabel the earlier Ollama timings.
+
+Evidence: [trained quality](../benchmark/results/fp32-silu-followup/trained-quality.json),
+[diagnostic profile](../benchmark/results/fp32-silu-followup/operation-profile.json),
+[native power guard](../benchmark/results/fp32-silu-followup/power-guard-check.json).
+Acceptance: [native timing](../benchmark/results/fp32-silu-followup/timing-32.json).
+Release binding: [exact output parity and dispatch](../benchmark/results/fp32-silu-followup/release-parity.json).
+
+On October 17, the default release also passes all ten reduced configuration
+cases, including custom plans and FP32/W8A8 dispatch exclusions. The audit uses
+exported precision metadata, rather than test-label text, to classify artifacts.
+See the [architecture audit](../benchmark/results/fp32-silu-followup/release-architectures.json).
+
+The fresh Windows wheel also passes offline GPT-2 preparation and cache reuse
+without a compiler on PATH or PyTorch loaded. Its TinyLlama FP32 SiLU dispatch
+passes, and all 512,000 logits in a 16-token request are byte-identical to the
+accepted release. These are install/correctness checks, not new speed evidence.
+See [package smoke](../benchmark/results/fp32-silu-followup/release-package.json),
+[installed SiLU parity](../benchmark/results/fp32-silu-followup/release-package-silu-parity.json)
+and [bundle manifest](../benchmark/results/fp32-silu-followup/release-package-manifest.json).
 
 ## Release integration verified — 2026-10-10
 
@@ -292,7 +368,8 @@ mix profiling with acceptance timing. If the candidate qualifies, run a fresh
 matched PyTorch comparison before claiming a framework speedup. FP32 and W8A8
 need separate conclusions, and W8A8 retains its documented quality tradeoff.
 For Windows W8A8, these steps and release checks are now complete; the README
-and Mermaid diagram show the integrated default. FP32 remains opt-in.
+and Mermaid diagram show the integrated default. The later FP32 qualification
+and default integration are recorded at the top of this report.
 
 Do not restart GPT-2 GEMM/packing experiments or widen this change to quantized
 attention without evidence. That follow-up remains a separate experiment.

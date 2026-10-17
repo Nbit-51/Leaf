@@ -9,7 +9,10 @@
 #define LEAF_TRACE(name, values) ((void)0)
 #endif
 #include "leaf/kernels/token_panel.h"
-#if LEAF_OPTIMIZED_SILU_W8A8 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
+#ifdef LEAF_EXPERIMENTAL_GELU_ERF
+#include "leaf/kernels/gelu_erf.h"
+#endif
+#if LEAF_OPTIMIZED_SILU_W8A8 || LEAF_OPTIMIZED_SILU_FP32 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
 #include "leaf/kernels/silu_gate.h"
 #endif
 #ifdef LEAF_DIAGNOSTIC_TIMING
@@ -754,6 +757,9 @@ struct Decoder::Impl {
             std::any_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 8; }) &&
             std::none_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 4; });
 #endif
+#if LEAF_OPTIMIZED_SILU_FP32
+        vector_silu_gate = vector_silu_gate || (avx && gated && activation == 0 && fp32_artifact);
+#endif
 #ifdef LEAF_EXPERIMENTAL_SILU_GATE
         vector_silu_gate = avx && gated && activation == 0;
 #endif
@@ -1075,7 +1081,13 @@ struct Decoder::Impl {
             if (gated) {
                 linear(normalized.data(), mlp_tokens, prefix + "mlp.gate_proj", gate, true);
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, mlp_tokens);
-#if LEAF_OPTIMIZED_SILU_W8A8 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
+#ifdef LEAF_EXPERIMENTAL_GELU_ERF
+                if (fp32_artifact && avx && mlp_tokens >= 8 && activation == 1) {
+                    leaf::kernels::gelu_erf_inplace(gate.data(), gate.size());
+                    for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= gate[j];
+                } else
+#endif
+#if LEAF_OPTIMIZED_SILU_W8A8 || LEAF_OPTIMIZED_SILU_FP32 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
                 // Isolate the prefill activation change; weight precision does
                 // not change the FP32 up/gate buffers. Decode stays unchanged.
                 if (vector_silu_gate && mlp_tokens >= 8) {
@@ -1086,6 +1098,11 @@ struct Decoder::Impl {
                 for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= activate(gate[j]);
             } else {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, mlp_tokens);
+#ifdef LEAF_EXPERIMENTAL_GELU_ERF
+                if (fp32_artifact && avx && mlp_tokens >= 8 && activation == 1)
+                    leaf::kernels::gelu_erf_inplace(up.data(), up.size());
+                else
+#endif
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_VECTOR_GELU)
                 if (vector_gelu && mlp_tokens >= 8 && activation == 2)
                     leaf::kernels::gelu_new_inplace(up.data(), up.size());

@@ -162,3 +162,63 @@ stable improvement; obtain stable whole-model GELU evidence and fresh matched
 PyTorch measurements before considering promotion. The completed phase profile
 puts linear and attention ahead of activation. Broader trained-model and longer-prefix
 checks remain necessary before claiming general performance portability.
+
+## Exact-erf GELU experiment — October 15, 2026
+
+This is a different operator from GPT-2's GELU-tanh above. Pythia configures
+GELU-erf, whose scalar libm calls account for about 14% of the separate current
+prefill profile. Reusing the tanh formula would change the model semantics.
+
+The new MinGW AVX2 kernel reproduces the existing libm polynomial operations
+for erf arguments in [2^-28, 1.25) by magnitude, using separate multiply/add
+rounding. Other values, exceptional lanes, other rounding modes and unsupported
+platforms use scalar libm. Coefficients and the retained Sun notice come from
+[MinGW's sf_erf.c](https://sources.debian.org/src/mingw-w64/6.0.0-3/mingw-w64-crt/math/sf_erf.c/).
+No quantization or GELU formula substitution is involved.
+
+The native test checks **2,810,330 values**, including interval boundaries,
+random float bit patterns, signed zeros, NaN/Inf classes, unaligned pointers,
+vector tails and non-nearest rounding modes. Finite results match scalar libm
+bit-for-bit. Paired decoder/reference checks pass **132 policies across twelve
+configurations**, totaling **11,220 calls per binary**. This includes a gated
+GELU Llama configuration, scalar and quantized negative controls. Eleven trained
+GPT-2/Pythia checks pass byte-exact logits, cache continuation and generation;
+the existing larger Pythia reference-tolerance failures remain open.
+
+The isolated operator comparison is stable in every pass and pooled case:
+
+| Elements / input distribution | Scalar → vector, ms | Reduction | 5% operator gate |
+|---|---:|---:|---|
+| 129,024 / normal σ0.5 | 0.56776 → 0.21246 | 62.58% | Pass |
+| 129,024 / normal σ1 | 2.16021 → 1.57756 | 26.97% | Pass |
+| 129,024 / normal σ2 | 7.33810 → 6.67349 | 9.06% | Pass |
+| 390,144 / normal σ1 | 6.58313 → 4.82181 | 26.76% | Pass |
+| 129,024 / uniform [-6,6] | 12.09408 → 11.95679 | 1.14% | Below threshold |
+
+Both paths include an identical input copy. Six alternating pairs each have ten
+warmups and 31 measurements; each measurement averages eight activations of the
+same frozen input. One thread, CPU2, Above Normal child priority. These are
+synthetic operator measurements, not model latencies. The aggregate report's
+`passed` remains false because the last case misses the predeclared 5% target;
+the other four cases individually pass it.
+
+The two predeclared 63-token model comparisons observe Pythia-70M prefill
+**53.55265 → 50.99170 ms (4.78%)** and Pythia-160M
+**195.79530 → 186.71225 ms (4.64%)**. Decode pooled ratios are 1.01826 and
+1.01013, within the 1.02 non-regression limit. Both model gates fail timing
+stability. No failed samples were removed and no unchanged run was repeated.
+This qualifies operator results only, not a stable model speedup.
+
+The decoder integration remains **off by default** behind compile-time
+`LEAF_EXPERIMENTAL_GELU_ERF`. It targets FP32 prefill with at least eight rows;
+ordinary builds, single-token decode and quantized paths keep their original
+dispatch. The separately rejected attention-row candidate is not combined with
+this experiment. Nothing has been pushed to GitHub.
+
+[Native checks, paired/reference regression, operator samples and both model runs](../benchmark/results/gelu-erf).
+Build `tests/native/test_gelu_erf.cpp` and `benchmark/gelu_erf_benchmark.cpp`
+against `engine/include`. Run `tools/benchmark_gelu_erf.py --directory BUILD_DIR
+--cpu 2` with a fresh directory containing `gelu_erf_benchmark.exe`. For the
+decoder candidate add `-DLEAF_EXPERIMENTAL_GELU_ERF=1` to the normal build and use
+the existing paired-cache and AB/BA runners. Do not use the isolated timings as
+an Ollama or PyTorch comparison.

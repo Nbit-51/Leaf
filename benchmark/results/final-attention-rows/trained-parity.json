@@ -1,0 +1,342 @@
+{
+  "complete": true,
+  "passed": true,
+  "scope": "Trained paired regression, not a new reference-quality qualification",
+  "checks": [
+    {
+      "model": "gpt2",
+      "scalar": false,
+      "threads": 1,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "gpt2",
+      "scalar": true,
+      "threads": 1,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "gpt2",
+      "scalar": false,
+      "threads": 2,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "gpt2",
+      "mode": "verify",
+      "bit_exact": true
+    },
+    {
+      "model": "gpt2",
+      "mode": "generate",
+      "bit_exact": true
+    },
+    {
+      "model": "pythia70",
+      "scalar": false,
+      "threads": 1,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "pythia70",
+      "scalar": true,
+      "threads": 1,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "pythia70",
+      "scalar": false,
+      "threads": 2,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "pythia70",
+      "mode": "verify",
+      "bit_exact": true
+    },
+    {
+      "model": "pythia70",
+      "mode": "generate",
+      "bit_exact": true
+    },
+    {
+      "model": "pythia160",
+      "scalar": false,
+      "threads": 1,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "pythia160",
+      "scalar": true,
+      "threads": 1,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "pythia160",
+      "scalar": false,
+      "threads": 2,
+      "bit_exact": true,
+      "calls": 18,
+      "cache_shapes_passed": true
+    },
+    {
+      "model": "pythia160",
+      "mode": "verify",
+      "bit_exact": true
+    },
+    {
+      "model": "pythia160",
+      "mode": "generate",
+      "bit_exact": true
+    }
+  ],
+  "hashes": {
+    "build\\gpt2_windows_fair\\decoder-32.leaf": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8",
+    "build\\manual-model-cache\\models\\0ba2eff1d3343234ba895c0d\\decoder-32.leaf": "164d7c29a66cbca954c283f248838f9471bf5627d2cd0a1948d048a93134034b",
+    "build\\model-onboarding-20261013\\cache\\models\\c0434e4c40852918478f124e\\decoder-32.leaf": "102fe03aef0040f960556ac3143b1777d1f456697314ddd240df64a4fa1a8f55",
+    "C:\\Users\\navaneeth\\leaf\\build\\final-attention-20261015\\test_before.exe": "78779fd3b66e0485be95990fdbe9a15496eb3e7161fd8e5780a31e2721177beb",
+    "C:\\Users\\navaneeth\\leaf\\build\\final-attention-20261015\\test_after.exe": "648ed3fe52b42fae8d387d22c5da33638c4e9f4b627767669b39ac3f0286c88d",
+    "C:\\Users\\navaneeth\\leaf\\build\\final-attention-20261015\\before.exe": "d4a6db6058802fb52216a2e5edff6643d982338442badb9b49bd7df66aeb7284",
+    "C:\\Users\\navaneeth\\leaf\\build\\final-attention-20261015\\after.exe": "d1dcc3d46e3a0d843487f77345587b9c8861620c15978029d5f3d57c0d08c5d8"
+  },
+  "operation_profiles": {
+    "before": {
+      "leaf_decoder_profile": 1,
+      "clock": "steady_clock",
+      "bucket_by": "forward_input_tokens",
+      "timings": {
+        "prefill": {
+          "forward": {
+            "calls": 1,
+            "tokens": 63,
+            "milliseconds": 119.4353
+          },
+          "embedding": {
+            "calls": 1,
+            "tokens": 63,
+            "milliseconds": 0.1259
+          },
+          "layer_norm": {
+            "calls": 13,
+            "tokens": 755,
+            "milliseconds": 1.0259
+          },
+          "linear_fp32": {
+            "calls": 37,
+            "tokens": 2205,
+            "milliseconds": 98.4383
+          },
+          "rope": {
+            "calls": 13,
+            "tokens": 819,
+            "milliseconds": 0.2639
+          },
+          "attention": {
+            "calls": 6,
+            "tokens": 378,
+            "milliseconds": 1.9807
+          },
+          "activation": {
+            "calls": 6,
+            "tokens": 346,
+            "milliseconds": 16.65
+          },
+          "kv_append": {
+            "calls": 6,
+            "tokens": 378,
+            "milliseconds": 0.6771
+          },
+          "causal_mask": {
+            "calls": 1,
+            "tokens": 63,
+            "milliseconds": 0.0109
+          },
+          "residual": {
+            "calls": 6,
+            "tokens": 378,
+            "milliseconds": 0.0985
+          }
+        },
+        "decode": {
+          "forward": {
+            "calls": 1,
+            "tokens": 1,
+            "milliseconds": 9.8025
+          },
+          "embedding": {
+            "calls": 1,
+            "tokens": 1,
+            "milliseconds": 0.0032
+          },
+          "layer_norm": {
+            "calls": 13,
+            "tokens": 13,
+            "milliseconds": 0.0254
+          },
+          "linear_fp32": {
+            "calls": 37,
+            "tokens": 37,
+            "milliseconds": 9.2351
+          },
+          "rope": {
+            "calls": 13,
+            "tokens": 13,
+            "milliseconds": 0.0055
+          },
+          "attention": {
+            "calls": 6,
+            "tokens": 6,
+            "milliseconds": 0.2835
+          },
+          "activation": {
+            "calls": 6,
+            "tokens": 6,
+            "milliseconds": 0.2145
+          },
+          "kv_append": {
+            "calls": 6,
+            "tokens": 6,
+            "milliseconds": 0.0049
+          },
+          "causal_mask": {
+            "calls": 1,
+            "tokens": 1,
+            "milliseconds": 0.0003
+          },
+          "residual": {
+            "calls": 6,
+            "tokens": 6,
+            "milliseconds": 0.0027
+          }
+        }
+      }
+    },
+    "after": {
+      "leaf_decoder_profile": 1,
+      "clock": "steady_clock",
+      "bucket_by": "forward_input_tokens",
+      "timings": {
+        "prefill": {
+          "forward": {
+            "calls": 1,
+            "tokens": 63,
+            "milliseconds": 117.7219
+          },
+          "embedding": {
+            "calls": 1,
+            "tokens": 63,
+            "milliseconds": 0.119
+          },
+          "layer_norm": {
+            "calls": 13,
+            "tokens": 755,
+            "milliseconds": 0.9841
+          },
+          "linear_fp32": {
+            "calls": 37,
+            "tokens": 2141,
+            "milliseconds": 98.6297
+          },
+          "rope": {
+            "calls": 13,
+            "tokens": 787,
+            "milliseconds": 0.2658
+          },
+          "attention": {
+            "calls": 6,
+            "tokens": 346,
+            "milliseconds": 1.717
+          },
+          "activation": {
+            "calls": 6,
+            "tokens": 346,
+            "milliseconds": 14.9647
+          },
+          "kv_append": {
+            "calls": 6,
+            "tokens": 378,
+            "milliseconds": 0.6446
+          },
+          "causal_mask": {
+            "calls": 1,
+            "tokens": 63,
+            "milliseconds": 0.0106
+          },
+          "residual": {
+            "calls": 6,
+            "tokens": 346,
+            "milliseconds": 0.2029
+          }
+        },
+        "decode": {
+          "forward": {
+            "calls": 1,
+            "tokens": 1,
+            "milliseconds": 9.5233
+          },
+          "embedding": {
+            "calls": 1,
+            "tokens": 1,
+            "milliseconds": 0.0031
+          },
+          "layer_norm": {
+            "calls": 13,
+            "tokens": 13,
+            "milliseconds": 0.0311
+          },
+          "linear_fp32": {
+            "calls": 37,
+            "tokens": 37,
+            "milliseconds": 8.9124
+          },
+          "rope": {
+            "calls": 13,
+            "tokens": 13,
+            "milliseconds": 0.0062
+          },
+          "attention": {
+            "calls": 6,
+            "tokens": 6,
+            "milliseconds": 0.3022
+          },
+          "activation": {
+            "calls": 6,
+            "tokens": 6,
+            "milliseconds": 0.2226
+          },
+          "kv_append": {
+            "calls": 6,
+            "tokens": 6,
+            "milliseconds": 0.0049
+          },
+          "causal_mask": {
+            "calls": 1,
+            "tokens": 1,
+            "milliseconds": 0.0003
+          },
+          "residual": {
+            "calls": 6,
+            "tokens": 6,
+            "milliseconds": 0.0029
+          }
+        }
+      }
+    }
+  }
+}

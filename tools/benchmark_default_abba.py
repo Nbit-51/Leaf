@@ -18,7 +18,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from leaf.affinity import pin_cpu  # noqa: E402
-from leaf.power import keep_awake  # noqa: E402
+from leaf.power import keep_awake, require_benchmark_ac  # noqa: E402
 from tools.benchmark_decoder_comparison import validate_timing_request  # noqa: E402
 from tools.decoder_validation import benchmark_stability, latency_stability, run_native  # noqa: E402
 from tools.validate_decoder import digest, utc_now, write_record  # noqa: E402
@@ -60,6 +60,7 @@ def main() -> None:
     if any(v for k, v in os.environ.items() if k.startswith("LEAF_EXPERIMENTAL_") or
            k in ("LEAF_DISABLE_VNNI", "LEAF_DECODER_PROFILE")):
         parser.error("Clear inherited native experimental/profiling policies")
+    require_benchmark_ac()
     pin_cpu(args.cpu)
     artifact = args.workdir / ("decoder-32.leaf" if args.activation_bits == 32 else "decoder-8-smooth.leaf")
     paths = [args.before, args.after, artifact, args.workdir / "tokens.json", Path(__file__),
@@ -81,10 +82,12 @@ def main() -> None:
             pair = {"order": ["before", "after"] if index % 2 == 0 else ["after", "before"]}
             record["pairs"].append(pair)
             for stage in pair["order"]:
+                power_before = require_benchmark_ac()
                 binary = args.before if stage == "before" else args.after
                 _, metrics = run_native(binary, artifact, [data["benchmark_ids"]], mode="bench", threads=1,
                                         runs=args.runs, warmup=args.warmup, windows_above_normal=True,
                                         activation_bits=args.activation_bits)
+                metrics["power_at_pass_boundaries"] = dict(before=power_before, after=require_benchmark_ac())
                 validate_timing_request(metrics, runs=args.runs, threads=1, activation_bits=args.activation_bits)
                 if args.silu_quality:
                     if stage == "after":

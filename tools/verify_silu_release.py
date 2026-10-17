@@ -1,7 +1,7 @@
 """Bind a release build to accepted SiLU results through exact native parity.
 
-W8A8 must match the accepted experimental executable; FP32 must match the
-unchanged baseline. No timings or automatic precision selection are qualified.
+The selected precision must match its accepted experimental executable.
+No new timings or automatic precision selection are qualified.
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ def check_release_dispatch(metrics, bits, *, scalar=False, tokenwise=False):
         raise ValueError("Release executable contains experimental build flags")
     if metrics.get("diagnostic_timing_build"):
         raise ValueError("Release executable contains diagnostic instrumentation")
-    eligible = bits == 8 and not scalar and metrics.get("avx2") is True
+    eligible = bits in (8,32) and not scalar and metrics.get("avx2") is True
     calls = metrics.get("vector_silu_gate_calls")
     if (metrics.get("vector_silu_gate_enabled") is not eligible or type(calls) is not int or
             calls < 0 or (calls > 0) != (eligible and not tokenwise)):
@@ -37,6 +37,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("release", "before", "candidate", "quality", "acceptance", "workdir", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument('--acceptance-bits',type=int,choices=(8,32),default=8)
+    parser.add_argument('--only-accepted-precision',action='store_true')
     args = parser.parse_args()
     if sys.platform != "win32" or args.output.exists():
         parser.error("Require Windows and a fresh output")
@@ -45,12 +47,13 @@ def main():
     accepted = json.loads(args.acceptance.read_text())
     tokens_path = args.workdir / "tokens.json"
     artifact8 = args.workdir / "decoder-8-smooth.leaf"
-    validate_silu_quality(quality, args.candidate, artifact8, tokens_path, 8)
+    accepted_artifact = args.workdir / ('decoder-32.leaf' if args.acceptance_bits==32 else 'decoder-8-smooth.leaf')
+    validate_silu_quality(quality, args.candidate, accepted_artifact, tokens_path, args.acceptance_bits)
     saved = {Path(p).resolve(): h for p, h in accepted.get("hashes", {}).items()}
     if (accepted.get("complete") is not True or accepted.get("gate", {}).get("passed") is not True or
-            accepted.get("activation_bits") != 8):
-        raise ValueError("Require completed passing W8A8 acceptance")
-    for path in (args.before, args.candidate, artifact8, tokens_path, args.quality):
+            accepted.get("activation_bits") != args.acceptance_bits):
+        raise ValueError("Require completed passing acceptance at the selected precision")
+    for path in (args.before, args.candidate, accepted_artifact, tokens_path, args.quality):
         if saved.get(path.resolve()) != digest(path):
             raise ValueError("Acceptance does not match the reference binaries/inputs")
     artifact32 = args.workdir / "decoder-32.leaf"
@@ -65,7 +68,10 @@ def main():
     tokens = json.loads(tokens_path.read_text())
     write_record(args.output, record)
     with keep_awake():
-        for bits, artifact, reference in ((32, artifact32, args.before), (8, artifact8, args.candidate)):
+        for bits, artifact in ((32, artifact32), (8, artifact8)):
+            if args.only_accepted_precision and bits!=args.acceptance_bits:
+                continue
+            reference = args.candidate if bits==args.acceptance_bits else args.before
             workloads = [("full", tokens["sequences"], {}),
                          ("chunk16", [tokens["sequences"][0]], dict(mode="chunked", chunk=16)),
                          ("tokenwise", [tokens["sequences"][0]], dict(mode="chunked", chunk=1)),

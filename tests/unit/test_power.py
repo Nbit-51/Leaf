@@ -7,6 +7,29 @@ import pytest
 from leaf import power
 
 
+@pytest.mark.parametrize('status,success', [(1,True),(0,False),(255,False)])
+def test_benchmark_rejects_offline_and_unknown_ac(monkeypatch,status,success):
+    monkeypatch.setattr(power,'os',SimpleNamespace(name='nt'))
+    def query(pointer):
+        pointer._obj.ACLineStatus=status
+        return 1
+    monkeypatch.setattr(ctypes,'WinDLL',lambda *a,**k: SimpleNamespace(GetSystemPowerStatus=query),raising=False)
+    if success:
+        assert power.require_benchmark_ac()['ac_line_status']==1
+    else:
+        with pytest.raises(RuntimeError,match='verified AC power'):
+            power.require_benchmark_ac()
+
+
+def test_unavailable_power_status_never_qualifies(monkeypatch):
+    monkeypatch.setattr(power,'os',SimpleNamespace(name='nt'))
+    def query(pointer): return 0
+    monkeypatch.setattr(ctypes,'WinDLL',lambda *a,**k: SimpleNamespace(GetSystemPowerStatus=query),raising=False)
+    monkeypatch.setattr(ctypes,'get_last_error',lambda:5,raising=False)
+    with pytest.raises(OSError,match='verify benchmark AC power'):
+        power.require_benchmark_ac()
+
+
 def fake_windows(monkeypatch, results):
     calls = []
     def state(flags):
