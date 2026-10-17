@@ -134,13 +134,13 @@ def logit_diagnostics(actual: np.ndarray, expected: np.ndarray,
 def evaluate(args):
     from leaf import cli
     from tools.datasets import token_prefix
-    from tools.decoder_plan import make_plan
+    from tools.decoder_plan import generation_policy_identity, greedy_reference_tokens, load_snapshot_plan
     from tools.decoder_validation import quality, run_native
     from tools.validate_decoder import GATES, digest, utc_now
     try:
         import torch
         import transformers
-        from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+        from transformers import AutoModelForCausalLM, AutoTokenizer
     except ImportError as error:
         raise RuntimeError('Quality evaluation requires validation dependencies: '
                            'python -m pip install "leaf-cpu[validation]" (or ".[validation]" from source).') from error
@@ -167,7 +167,9 @@ def evaluate(args):
         runtime = cli.executable(cache)
         snapshot = cli.resolve_model(args.model, cache, args.offline)
         cli.validate_model_generation(snapshot)
-        config = make_plan(json.loads((snapshot / "config.json").read_text()))["config"]
+        plan = load_snapshot_plan(snapshot)
+        config = plan["config"]
+        record["generation_policy"] = generation_policy_identity(plan, args.generate)
         if args.sequence_length > config["max_positions"]:
             raise ValueError("Evaluation sequence length exceeds model context")
         artifact = cli.prepare(snapshot, cli.model_directory(snapshot, cache), 32)
@@ -201,17 +203,13 @@ def evaluate(args):
                 write_record(report, record)
                 print(f"Quality block {index + 1}/{args.blocks}: agreement {measured['next_token_agreement']:.4%}", flush=True)
                 del actual, expected
-            eos = config["eos"] if config["eos"] < config["vocab"] else None
-            policy = GenerationConfig(do_sample=False, num_beams=1, max_new_tokens=args.generate,
-                                      eos_token_id=eos, pad_token_id=eos if eos is not None else 0,
-                                      use_cache=False)
             for prompt in PROMPTS:
                 _, prompt_ids = cli.encode_prompt(snapshot, prompt, raw=True)
                 if prompt_ids != tokenizer.encode(prompt):
                     raise ValueError("Leaf/reference prompt tokenization differs")
-                if len(prompt_ids) + args.generate > config["max_positions"]:
+                if len(prompt_ids) + args.generate - 1 > config["max_positions"]:
                     raise ValueError("Generation check exceeds model context")
-                expected = model.generate(torch.tensor([prompt_ids]), generation_config=policy)[0, len(prompt_ids):].tolist()
+                expected = greedy_reference_tokens(model, prompt_ids, plan, args.generate)
                 _, metrics = run_native(runtime, artifact, [prompt_ids], mode="generate", generate=args.generate, threads=args.threads)
                 compared = generation_comparison(expected, metrics["generated_tokens"])
                 record["generations"].append(dict(prompt=prompt, input_ids=prompt_ids, **compared,

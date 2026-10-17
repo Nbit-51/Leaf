@@ -8,7 +8,7 @@ import tempfile
 
 import numpy as np
 import torch
-from transformers import AutoModelForCausalLM, MistralConfig
+from transformers import AutoModelForCausalLM, LlamaConfig, MistralConfig
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from leaf.evaluation import write_record
@@ -60,6 +60,11 @@ def main():
     configs.append(MistralConfig(vocab_size=128, hidden_size=64, intermediate_size=128,
         num_hidden_layers=2, num_attention_heads=4, num_key_value_heads=2,
         max_position_embeddings=256, sliding_window=8, bos_token_id=1, eos_token_id=2))
+    # Exercise exact GELU both as a plain MLP activation (GPT-NeoX) and as a
+    # gated activation. Kernel dispatch must follow semantics, not model names.
+    configs.append(LlamaConfig(vocab_size=128, hidden_size=64, intermediate_size=128,
+        num_hidden_layers=2, num_attention_heads=4, num_key_value_heads=2,
+        max_position_embeddings=256, hidden_act='gelu', bos_token_id=1, eos_token_id=2))
     try:
         with tempfile.TemporaryDirectory(prefix='leaf_final_rows_') as temporary:
             root = Path(temporary)

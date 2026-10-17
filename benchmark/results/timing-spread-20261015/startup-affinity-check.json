@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "release_ignores_diagnostic_start_gate": true,
+  "release_has_no_diagnostic_counters": true,
+  "release_runtime_info_unchanged": true,
+  "release_logits_bit_exact": true,
+  "compared_logits": 3219456,
+  "corrected_passes_cpu_verified": 4,
+  "legacy_passes_rejected_by_current_validator": [
+    {
+      "pass_index": 1,
+      "reason": "Diagnostic logical_cpu_start_prefill differs from requested CPU 2"
+    }
+  ],
+  "focused_python_tests_passed": 88
+}

@@ -34,6 +34,8 @@ def main():
     for name in ("executable", "model", "workdir", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--cpu", type=int, default=2)
+    parser.add_argument("--bits", type=int, nargs="+", choices=(32,8), default=[32,8],
+                        help="verify selected existing artifacts without repeating unrelated precisions")
     parser.add_argument("--require-silu-gate", action="store_true",
                         help="require actual candidate dispatch and also check tokenwise cache parity")
     args = parser.parse_args()
@@ -51,7 +53,8 @@ def main():
     for name, expected in baseline["quality_cache_sha256"].items():
         if digest(args.workdir / name) != expected:
             raise ValueError("Frozen quality cache differs")
-    cases = [("fp32", "decoder-32", 32), ("w8a8", "decoder-8-smooth", 8)]
+    formats = {32: ("fp32", "decoder-32", 32), 8: ("w8a8", "decoder-8-smooth", 8)}
+    cases = [formats[bits] for bits in dict.fromkeys(args.bits)]
     files = [args.executable, args.workdir / "pytorch.json", args.workdir / "reference.npy",
              args.workdir / "tokens.json", args.model / "config.json", Path(__file__)]
     files += list(args.model.glob("*.safetensors"))

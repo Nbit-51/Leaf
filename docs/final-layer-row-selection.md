@@ -18,7 +18,9 @@ future tokens use the stored keys/values, which precede that MLP. The final
 normalization operates on the retained suffix and the output projection reads
 its final row. This does not prune model weights or alter activation precision.
 
-## Correctness
+## Initial MLP release — October 14, 2026
+
+### Correctness
 
 The paired native regression covers eleven reduced configurations: GPT-2,
 GPT-NeoX, OPT, Llama, Qwen2 and Mistral, including odd dimensions, bias/tied-weight
@@ -42,7 +44,7 @@ An operation-count profile of Pythia-70M at 63-token prefill confirms activation
 rows decrease from **378 to 346** and FP32 linear rows from **2269 to 2205**.
 Decode activation rows stay at 6. This profile is separate from acceptance timing.
 
-## Windows incremental timing
+### Windows incremental timing
 
 Both 63-token FP32 prefill experiments pass the incremental gate:
 
@@ -77,6 +79,61 @@ compiler paths or Torch during inference. Long-prefix generation matches the
 before binary, and its operation profile confirms the optimized path is present.
 [Installed package smoke](../benchmark/results/final-layer-rows/package-runtime.json),
 [installed dispatch check](../benchmark/results/final-layer-rows/installed-final-rows.json).
+
+## Query and attention extension — October 15, 2026
+
+**Unshipped candidate.** The [patch](../benchmark/experiments/final-attention-rows.patch)
+and all results are retained. No Git push or release was made. The default
+decoder retains the accepted MLP-only selection described above.
+
+The extension moves the same row selection ahead of the final query projection,
+query RoPE/reorder, attention and attention output projection. K/V projections,
+K RoPE, K/V append and the final input normalization still cover every input row.
+Single-token decode, full-logit requests and quantized/mixed paths retain their
+previous work. The retained suffix starts on the original GEMM panel boundary.
+
+The paired regression again passes all **121 policies / 10,285 forward calls per
+binary**, with byte-identical output files. The same run also checks the FP32
+results against independent full-prefix PyTorch references. All **15 trained
+checks** pass for GPT-2, Pythia-70M and Pythia-160M, including one/two threads,
+scalar execution, cached continuation, full logits and generation. These checks
+do not resolve the existing larger Pythia strict-reference failures.
+
+The separate Pythia-70M 63-token operation profile confirms this extension changes
+attention query rows **378 → 346**, FP32 linear rows **2205 → 2141**, and RoPE
+rows **819 → 787**. K/V append rows stay **378**, activation rows stay **346**,
+and decode row counts are unchanged. Counts sum across layers and projections;
+they are not percentages of total elapsed time.
+
+The built wheel passes first preparation and cached execution with compiler
+paths removed and no Torch during inference. Its 128-token generation matches
+the shipped baseline exactly, and the installed operation profile confirms
+the query/attention selection is present.
+
+Acceptance timing uses the same gate, CPU, priority, pairing and sample counts
+as the initial release. The predeclared primary workloads are **127-token prefill
++ one cached decode token** for Pythia-70M and GPT-2; the earlier **63-token**
+workloads are secondary checks. All raw samples and any failures are retained.
+
+| Workload | Prefill before → candidate | Observed reduction | Incremental gate |
+|---|---:|---:|---|
+| Pythia-70M, 127 tokens | 103.02450 → 99.42025 ms | 3.50% | Failed per-pass stability |
+| GPT-2, 127 tokens | 276.21700 → 269.15230 ms | 2.56% | Failed per-pass stability |
+| Pythia-70M, 63 tokens | 60.80025 → 60.09575 ms | 1.16% | Failed stability and 2% prefill threshold |
+| GPT-2, 63 tokens | 139.29445 → 138.04605 ms | 0.90% | Failed per-pass stability and 2% prefill threshold |
+
+All four pooled decode ratios are below 1.02. Both 127-token pooled prefill
+ratios pass 0.98, but each workload has unstable individual passes. Pythia's
+63-token pooled decode also fails stability. These observations do not qualify
+a new model speedup. In Pythia's fourth 127-token pair both binaries show much
+faster low-percentile prefill samples (62.82/66.53 ms) alongside ordinary samples
+around 100 ms; the data do not identify the cause. No outliers were removed and
+no unchanged acceptance run was repeated.
+
+[Complete timing, paired/reference checks, profiles and installed-wheel evidence](../benchmark/results/final-attention-rows).
+Next: investigate shared exact-erf GELU, which remains scalar and accounts for
+about 14% of the separate Pythia profile. This is an operator-level opportunity;
+the existing vector GELU-tanh is a different activation and cannot substitute for it.
 
 ## Reproduction
 

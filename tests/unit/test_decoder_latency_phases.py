@@ -352,12 +352,14 @@ def test_fresh_baseline_keeps_full_logits_quality_but_times_last_token_only(cach
     tokenizer = SimpleNamespace(chat_template=None, eos_token_id=0, encode=lambda prompt: [1, 2],
                                 decode=lambda tokens: "mock generated text")
     monkeypatch.setitem(sys.modules, "transformers", SimpleNamespace(
-        AutoTokenizer=SimpleNamespace(from_pretrained=lambda *args, **kwargs: tokenizer)))
+        AutoTokenizer=SimpleNamespace(from_pretrained=lambda *args, **kwargs: tokenizer),
+        GenerationConfig=lambda **kwargs: SimpleNamespace(**kwargs)))
     monkeypatch.setitem(sys.modules, "psutil", SimpleNamespace(
         cpu_count=lambda: 2, virtual_memory=lambda: SimpleNamespace(total=1024),
         Process=lambda: SimpleNamespace(memory_info=lambda: SimpleNamespace(rss=64))))
     monkeypatch.setattr(validation, "token_prefix", lambda *args: [1, 2, 3, 4, 5, 6])
     monkeypatch.setattr(validation, "load_pytorch_model", lambda args: (model, 0.1))
+    monkeypatch.setattr("tools.decoder_plan.greedy_reference_tokens", lambda *args: [4, 5])
     validation.baseline(args)
     record = json.loads((args.workdir / "pytorch.json").read_text())
     assert validation.latency_workload_matches(record)

@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "executable_sha256": "288691212a605292caadd575fef8803921781bb02d24473d854b8a0b9166e7a4",
+  "wheel_sha256": "a5368cf3a460090ac06f6b5d73f07255b4738b3ebecfc2755985e022c0476456",
+  "long_prompt_generation_matches_before": true,
+  "profile_confirms_selection": true,
+  "prefill_row_counts": {
+    "attention": 346,
+    "linear_fp32": 2141,
+    "activation": 346,
+    "kv_append": 378
+  },
+  "complete_key_value_cache": true,
+  "timing_qualified": false
+}

@@ -23,6 +23,7 @@ public:
     std::vector<float> forward(const std::vector<std::uint32_t>& tokens, bool all_logits = false);
     std::uint32_t vocabulary_size() const;
     std::uint32_t eos_token() const;
+    bool is_eos_token(std::uint32_t token) const;
     std::size_t cache_tokens() const;
     std::uint64_t weight_bytes() const;
     bool uses_avx2() const;

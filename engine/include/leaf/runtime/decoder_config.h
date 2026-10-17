@@ -1,6 +1,6 @@
 #pragma once
 
-// Qualified Windows W8A8 SiLU prefill policy. FP32 and INT4 stay unchanged.
+// Qualified Windows W8A8 SiLU prefill policy. INT4 remains excluded.
 // The experiment flag retains its broader, opt-in precision coverage.
 #ifndef LEAF_OPTIMIZED_SILU_W8A8
 #if defined(_WIN32) && !defined(LEAF_EXPERIMENTAL_SILU_GATE)
@@ -22,5 +22,15 @@
 #define LEAF_OPTIMIZED_FP32 1
 #else
 #define LEAF_OPTIMIZED_FP32 0
+#endif
+#endif
+
+// FP32 SiLU is qualified separately from W8A8. Explicit research and
+// conservative FP32 builds retain their own dispatch policies.
+#ifndef LEAF_OPTIMIZED_SILU_FP32
+#if defined(_WIN32) && LEAF_OPTIMIZED_FP32 && !defined(LEAF_EXPERIMENTAL_SILU_GATE)
+#define LEAF_OPTIMIZED_SILU_FP32 1
+#else
+#define LEAF_OPTIMIZED_SILU_FP32 0
 #endif
 #endif

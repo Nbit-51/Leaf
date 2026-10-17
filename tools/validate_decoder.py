@@ -94,6 +94,11 @@ def validate_baseline_provenance(args, record: dict) -> None:
                         ("text_column", args.text_column)):
         if record.get(name) != value:
             raise ValueError(f"Native comparison settings differ from baseline: {name}")
+    from tools.decoder_plan import eos_token_ids, generation_policy_identity, load_snapshot_plan
+    plan = load_snapshot_plan(args.model, getattr(args, "plan", None))
+    if "generation_policy" in record or len(eos_token_ids(plan["config"])) > 1:
+        if record.get("generation_policy") != generation_policy_identity(plan, getattr(args, "generate", 16)):
+            raise ValueError("Baseline generation policy changed; rerun full validation")
 
 
 def quality_cache_hashes(workdir: Path) -> dict:
@@ -137,18 +142,15 @@ def baseline_quality_identity(record: dict) -> dict:
     """Fields that a timing-only phase must never replace or reinterpret."""
     names = ("model_config_sha256", "source_weight_sha256", "dataset_sha256", "text_column",
              "sequence_length", "blocks", "threads", "pinned_cpu", "generation_prompt",
-             "generated_tokens", "generated_text", "quality_gate_thresholds")
+             "generated_tokens", "generated_text", "quality_gate_thresholds", "generation_policy")
     return {**{name: record.get(name) for name in names},
             "quality_measured_at_utc": record.get("quality_measured_at_utc", record.get("measured_at_utc"))}
 
 
 def decoder_plan_identity(args) -> tuple[dict, str]:
-    from tools.decoder_plan import make_plan, validate_plan, validate_snapshot_generation
+    from tools.decoder_plan import load_snapshot_plan
     filename = getattr(args, "plan", None)
-    plan = json.loads(filename.read_text(encoding="utf-8")) if filename else make_plan(
-        json.loads((args.model / "config.json").read_text(encoding="utf-8")))
-    validate_plan(plan)
-    validate_snapshot_generation(args.model, plan)
+    plan = load_snapshot_plan(args.model, filename)
     identity = hashlib.sha256(json.dumps(plan, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
     return plan, identity
 
@@ -331,6 +333,8 @@ def baseline(args):
     import psutil
     import torch
     from transformers import AutoTokenizer
+    from tools.decoder_plan import generation_policy_identity, greedy_reference_tokens
+    plan, _ = decoder_plan_identity(args)
     tokenizer = AutoTokenizer.from_pretrained(args.model, local_files_only=True)
     needed = args.blocks * args.sequence_length
     ids = token_prefix(tokenizer, args.dataset, needed, args.text_column)
@@ -351,9 +355,7 @@ def baseline(args):
         for index, sequence in enumerate(sequences):
             references.append(model(torch.tensor([sequence]), use_cache=False).logits[0].numpy().copy())
             print(f"PyTorch quality block {index + 1}/{len(sequences)}", flush=True)
-        generation = model.generate(torch.tensor([generation_ids]), max_new_tokens=args.generate,
-                                    do_sample=False, pad_token_id=tokenizer.eos_token_id)
-    generated = generation[0, len(generation_ids):].tolist()
+        generated = greedy_reference_tokens(model, generation_ids, plan, args.generate)
     reference = np.concatenate(references)
     np.save(args.workdir / "reference.npy", reference)
     data = {"sequences": sequences, "generation_ids": generation_ids, "generated_tokens": generated,
@@ -380,6 +382,7 @@ def baseline(args):
               "parameter_bytes": sum(p.numel() * p.element_size() for p in model.parameters()),
               "resident_bytes": psutil.Process().memory_info().rss,
               "generation_prompt": prompt, "generated_tokens": generated,
+              "generation_policy": generation_policy_identity(plan, args.generate),
               "generated_text": tokenizer.decode(generated), "latency": benchmarks,
               "quality_gate_thresholds": GATES}
     write_record(args.workdir / "pytorch.json", record)

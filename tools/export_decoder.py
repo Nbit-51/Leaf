@@ -15,7 +15,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from tools.decoder_plan import config_values, make_plan, tensor_shapes, validate_plan, validate_snapshot_generation
+from tools.decoder_plan import config_values, eos_token_ids, load_snapshot_plan, tensor_shapes, validate_plan
 
 MAGIC = b"LEAFDC02"
 HEADER = struct.Struct("<8sIIQ10Iff8If")
@@ -124,15 +124,15 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
     if (not isinstance(int8_group_size, int) or isinstance(int8_group_size, bool) or
             int8_group_size < 0 or int8_group_size % 2):
         raise ValueError("INT8 group size must be zero (per row) or positive and even")
-    config = json.loads((snapshot / "config.json").read_text(encoding="utf-8"))
-    plan = json.loads(plan_path.read_text(encoding="utf-8")) if plan_path else make_plan(config)
-    validate_plan(plan)
-    validate_snapshot_generation(snapshot, plan)
+    plan = load_snapshot_plan(snapshot, plan_path)
     kept_fp32 = validate_fp32_tensors(plan, keep_fp32_tensors)
     values = config_values(plan["config"])
     # Old readers must reject new semantics rather than run full attention.
-    version = 3 if plan["config"].get("sliding_window", 0) else 2
-    magic = b"LEAFDC03" if version == 3 else MAGIC
+    eos_tokens = eos_token_ids(plan["config"])
+    version = 4 if len(eos_tokens) > 1 else 3 if plan["config"].get("sliding_window", 0) else 2
+    magic = f"LEAFDC0{version}".encode("ascii")
+    generation_metadata = (struct.pack(f"<{len(eos_tokens) + 1}I", len(eos_tokens), *eos_tokens)
+                           if version == 4 else b"")
     files = sorted(snapshot.glob("*.safetensors"))
     if not files:
         raise FileNotFoundError("Snapshot has no safetensors weights")
@@ -220,7 +220,7 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
                             scale_offset, scales))
         if identity is not None:
             shared_payloads[identity] = (data_offset, size, scale_offset, scales)
-    metadata_size = HEADER.size + sum(4 + len(d[0].encode()) + DESCRIPTOR.size for d in descriptors)
+    metadata_size = HEADER.size + len(generation_metadata) + sum(4 + len(d[0].encode()) + DESCRIPTOR.size for d in descriptors)
     data_base = (metadata_size + 63) & ~63
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".partial")
@@ -229,6 +229,7 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
     try:
         with temporary.open("wb") as stream:
             stream.write(HEADER.pack(magic, version, len(descriptors), data_base, *values))
+            stream.write(generation_metadata)
             for name, rows, cols, precision, group, start, size, scale_start, scales in descriptors:
                 encoded = name.encode("utf-8")
                 stream.write(struct.pack("<I", len(encoded)))
@@ -277,6 +278,8 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
               "tensor_count": len(descriptors), "artifact_bytes": output.stat().st_size,
               "unique_payloads": len(written),
               "source": snapshot.name}
+    if version == 4:
+        record["eos_token_ids"] = eos_tokens
     if calibration_metadata:
         record.update(smoothing_alpha=alpha, calibration=calibration_metadata)
     return record

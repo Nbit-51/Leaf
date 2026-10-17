@@ -1,0 +1,18 @@
+{
+  "runtime_info": {
+    "runtime": "leaf_decoder",
+    "artifact_versions": [
+      2,
+      3,
+      4
+    ]
+  },
+  "native_executable_sha256": "e671191a8c321cf5e246bc22775bcd6ebb7fcc241c247ae5ce0eebe7f5cefa7f",
+  "wheel_sha256": "89dfca81716314af536aabf12b011706d263510b8152282ba8177a1e6e9b265e",
+  "installed_binary_matches_wheel": true,
+  "wheel_policy_modules_match_frozen_source": true,
+  "optional_gelu_erf_header_present": true,
+  "compiler_path_available": false,
+  "runtime_path_scope": "Windows System32 only",
+  "passed": true
+}

@@ -101,9 +101,9 @@ native-loader limitation.
 
 | Area | Current capabilities |
 |---|---|
-| Decoder execution | Full native prefill, single-token decode, chunked evaluation and greedy generation |
+| Decoder execution | Full native prefill, single-token decode, chunked evaluation and greedy generation with all declared end tokens |
 | Embedding execution | FP32 EmbeddingGemma: bidirectional local/full attention, Q/K normalization, mean pooling, dense projections and L2-normalized output |
-| CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
+| CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
 | Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
 | Precision | FP32, weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
 | Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
@@ -115,6 +115,9 @@ qualified local before/after gain on one short input. The other measured inputs
 remain timing-unqualified, and llama.cpp had lower observed baseline medians.
 See the [full embedding results and limits](docs/embedding.md).
 Reduced-model tests exercise six decoder architecture families.
+SmolLM2-360M-Instruct and Qwen2.5-0.5B-Instruct use the same shared decoder;
+their bounded output-quality checks and remaining strict numerical failures
+are recorded in the [onboarding report](docs/model-onboarding.md#smollm2-and-qwen25--october-17-2026).
 
 Import adapters cover supported configurations from Llama/Qwen2, GPT-2,
 GPT-NeoX, OPT and dense Mistral-style blocks. Compatibility depends on operators
@@ -136,7 +139,7 @@ validates their semantics and produces a versioned native artifact.
 ```mermaid
 flowchart TB
     H["Model ID · automatic download and cache"] --> S["Safetensors snapshot"]
-    S --> P["Validated decoder plan"]
+    S --> P["Validated decoder plan<br/>Complete end-token policy"]
     S --> B["Validated bidirectional embedding plan"]
     B --> N["C++ encoder · local/full attention and Q/K norms<br/>Finite masked-span attention · shared RoPE · vector GELU"]
     N --> V["Mean pooling · dense projections · L2 normalization"]
@@ -146,13 +149,14 @@ flowchart TB
     G --> A["Native graph artifact"]
     D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
-    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax<br/>W8A8 SiLU gating · quantized kernels"]
+    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax<br/>FP32/W8A8 SiLU gating · quantized kernels"]
     K --> T["Tokens and logits"]
     E --> U["Graph outputs"]
 ```
 
-The validated FP32 kernel stack and W8A8 vector SiLU gating are enabled by default
-on supported Windows CPUs. FP32 SiLU remains experimental.
+The validated FP32 kernel stack and FP32/W8A8 vector SiLU gating are enabled by
+default on supported Windows CPUs. Single-token and forced-scalar SiLU keep
+their existing paths.
 Other operating systems retain their existing defaults pending performance
 qualification. The CLI uses a lightweight Python/tokenizer launcher; the native
 decoder owns the generation loop. Decoder, embedding and graph artifacts use
@@ -208,6 +212,17 @@ tested outputs, stable timings and decode within non-regression. These are
 separate incremental comparisons; the table above retains the earlier matched
 PyTorch measurements.
 
+The [FP32 SiLU release](docs/silu-gate-experiment.md#fp32-follow-up--october-15-2026)
+reduces TinyLlama prefill **26.69% versus the previous Leaf default**
+(1,897.61 → 1,391.20 ms). All twelve passes and pooled stability checks pass,
+with decode within non-regression and trained quality preserved.
+
+A fresh [TinyLlama FP32 comparison with Ollama](docs/tinyllama-ollama-comparison.md#october-17-fp32-silu-default)
+measures **9.10% lower prefill** (1,391.42 vs 1,530.64 ms) and **11.35% lower
+cached decode** (222.91 vs 251.45 ms), with all timing stability checks passing.
+All continuations match, but one selected-logprob error narrowly exceeds the
+unchanged tolerance. These remain diagnostic timings, not an overall qualified win.
+
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is
 **1.10 GB versus 4.40 GB** for FP32. This is an artifact-size reduction from
@@ -229,8 +244,15 @@ establish equivalent performance across those systems.
 The [Windows W8A8 SiLU release](docs/silu-gate-experiment.md) passes correctness,
 stable incremental acceptance and installed-package checks: **37.94% lower
 prefill time than the previous Leaf W8A8 path** (1320.31 → 819.38 ms), with decode
-passing non-regression. FP32 SiLU qualification remains open. Next prefill work
-extends final-layer row selection through attention and its output projection.
+passing non-regression. FP32 SiLU now passes its separate native acceptance
+gate and is integrated. The final-layer
+attention extension and [exact-erf GELU experiment](docs/gemm-activation-followup.md#exact-erf-gelu-experiment--october-15-2026)
+retain passing output checks but unqualified whole-model timings. The
+[TinyLlama/Ollama comparison](docs/tinyllama-ollama-comparison.md) has stable
+diagnostic timings with lower Leaf prefill and decode latency on the new FP32
+default; its probability tolerance miss remains open. A reproduced
+[diagnostic startup-affinity race](docs/windows-timing-diagnosis.md#october-15-2026-diagnostic-startup-race)
+is fixed before further kernel changes or model downloads.
 Quantized vector attention and broader matched runtime comparisons remain open.
 
 Further work includes broader quality datasets, complete-command latency,

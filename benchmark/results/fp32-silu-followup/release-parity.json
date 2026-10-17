@@ -1,0 +1,132 @@
+{
+  "complete": true,
+  "passed": true,
+  "scope": "Release binding to accepted FP32 SiLU candidate; full trained quality belongs to the bound candidate. No timing from this check.",
+  "measured_at_utc": "2026-10-15T11:25:32.351432+00:00",
+  "release_sha256": "b9375d4b02486bb344e669bf95e1c8af81755fec514b765c6448dc7f08b07b22",
+  "candidate_sha256": "9f057489c7e5838591ff787d0ae8231c22ef738dd1e8d9e0b99c5a664157b169",
+  "artifact_sha256": "71b98b53ce204393478990887c7beab7074e34bffc76e5a00c4f9183631e060a",
+  "checks": [
+    {
+      "workload": "full",
+      "logits_exact": true,
+      "generation_exact": true,
+      "execution": {
+        "avx2": true,
+        "vector_silu_gate_calls": 22,
+        "vector_silu_gate_enabled": true,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4183470080,
+        "load_ms": 0.5043,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      }
+    },
+    {
+      "workload": "chunk16",
+      "logits_exact": true,
+      "generation_exact": true,
+      "execution": {
+        "avx2": true,
+        "vector_silu_gate_calls": 44,
+        "vector_silu_gate_enabled": true,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4149264384,
+        "load_ms": 0.4945,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      }
+    },
+    {
+      "workload": "tokenwise",
+      "logits_exact": true,
+      "generation_exact": true,
+      "execution": {
+        "avx2": true,
+        "vector_silu_gate_calls": 0,
+        "vector_silu_gate_enabled": true,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4143919104,
+        "load_ms": 0.4028,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      }
+    },
+    {
+      "workload": "generation",
+      "logits_exact": true,
+      "generation_exact": true,
+      "execution": {
+        "avx2": true,
+        "vector_silu_gate_calls": 22,
+        "vector_silu_gate_enabled": true,
+        "optimized_fp32_active": true,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4148523008,
+        "load_ms": 0.48,
+        "prefill_p50_ms": 2246.9163,
+        "decode_p50_ms": 224.1663,
+        "prefill_samples_ms": [
+          2246.9163
+        ],
+        "decode_samples_ms": [
+          222.3806,
+          229.3058,
+          224.1663
+        ],
+        "generated_tokens": [
+          29907,
+          598,
+          1319,
+          20039
+        ]
+      }
+    },
+    {
+      "workload": "scalar",
+      "logits_exact": true,
+      "generation_exact": true,
+      "execution": {
+        "avx2": false,
+        "vector_silu_gate_calls": 0,
+        "vector_silu_gate_enabled": false,
+        "optimized_fp32_active": false,
+        "vnni": false,
+        "activation_bits": 32,
+        "threads": 1,
+        "artifact_bytes": 4400212544,
+        "peak_rss_bytes": 4144955392,
+        "load_ms": 0.4911,
+        "prefill_p50_ms": 0,
+        "decode_p50_ms": 0,
+        "prefill_samples_ms": [],
+        "decode_samples_ms": [],
+        "generated_tokens": []
+      }
+    }
+  ]
+}

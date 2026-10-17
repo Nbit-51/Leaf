@@ -9,7 +9,10 @@
 #define LEAF_TRACE(name, values) ((void)0)
 #endif
 #include "leaf/kernels/token_panel.h"
-#if LEAF_OPTIMIZED_SILU_W8A8 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
+#ifdef LEAF_EXPERIMENTAL_GELU_ERF
+#include "leaf/kernels/gelu_erf.h"
+#endif
+#if LEAF_OPTIMIZED_SILU_W8A8 || LEAF_OPTIMIZED_SILU_FP32 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
 #include "leaf/kernels/silu_gate.h"
 #endif
 #ifdef LEAF_DIAGNOSTIC_TIMING
@@ -612,6 +615,7 @@ struct Decoder::Impl {
     std::unordered_map<std::string, Weight> weights;
     std::vector<KVCache> caches;
     std::size_t h, f, heads, kv_heads, layers, vocab, max_positions, eos, dim, sliding_window;
+    std::vector<std::uint32_t> eos_tokens;
     float theta, epsilon;
     unsigned norm_kind, activation, position_kind, gated, parallel, rotary_dim, position_offset, final_norm;
     float embedding_scale;
@@ -653,14 +657,15 @@ struct Decoder::Impl {
 #endif
         Reader reader{mapping}; reader.require(8);
         const bool window_format = std::memcmp(mapping.data, "LEAFDC03", 8) == 0;
-        check(window_format || std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
+        const bool multi_eos_format = std::memcmp(mapping.data, "LEAFDC04", 8) == 0;
+        check(multi_eos_format || window_format || std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
         reader.position = 8;
-        check(reader.u32() == (window_format ? 3u : 2u), "unsupported decoder artifact version");
+        check(reader.u32() == (multi_eos_format ? 4u : window_format ? 3u : 2u), "unsupported decoder artifact version");
         const auto count = reader.u32(); const auto base = reader.u64();
         h = reader.u32(); f = reader.u32(); heads = reader.u32(); kv_heads = reader.u32();
         layers = reader.u32(); vocab = reader.u32(); max_positions = reader.u32(); eos = reader.u32();
         dim = reader.u32(); sliding_window = reader.u32();
-        check(window_format ? sliding_window > 0 : sliding_window == 0,
+        check(multi_eos_format || (window_format ? sliding_window > 0 : sliding_window == 0),
               "invalid sliding-window artifact configuration");
         theta = reader.f32(); epsilon = reader.f32();
         norm_kind = reader.u32(); activation = reader.u32(); position_kind = reader.u32();
@@ -678,6 +683,22 @@ struct Decoder::Impl {
               "decoder workspace dimensions overflow address space");
         check(base % 64 == 0 && base <= mapping.size && count <= mapping.size / 56,
               "invalid tensor table");
+        check(eos < vocab || eos == 0xffffffffu, "invalid EOS token");
+        if (multi_eos_format) {
+            const auto eos_count = reader.u32();
+            check(eos_count >= 2 && eos_count <= 1024 && eos_count <= vocab &&
+                  reader.position <= base && eos_count <= (base - reader.position) / 4,
+                  "invalid multi-EOS token count");
+            for (std::uint32_t i = 0; i < eos_count; ++i) {
+                const auto token = reader.u32();
+                check(token < vocab && std::find(eos_tokens.begin(), eos_tokens.end(), token) == eos_tokens.end(),
+                      "invalid or duplicate EOS token");
+                eos_tokens.push_back(token);
+            }
+            check(eos == eos_tokens.front(), "multi-EOS primary token mismatch");
+        } else if (eos < vocab) {
+            eos_tokens.push_back(static_cast<std::uint32_t>(eos));
+        }
         for (std::size_t i = 0; i < count; ++i) {
             const auto name = reader.string();
             const auto rank = reader.u32(); Weight weight;
@@ -753,6 +774,9 @@ struct Decoder::Impl {
         vector_silu_gate = avx && gated && activation == 0 && activation_precision == 8 &&
             std::any_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 8; }) &&
             std::none_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 4; });
+#endif
+#if LEAF_OPTIMIZED_SILU_FP32
+        vector_silu_gate = vector_silu_gate || (avx && gated && activation == 0 && fp32_artifact);
 #endif
 #ifdef LEAF_EXPERIMENTAL_SILU_GATE
         vector_silu_gate = avx && gated && activation == 0;
@@ -1075,7 +1099,13 @@ struct Decoder::Impl {
             if (gated) {
                 linear(normalized.data(), mlp_tokens, prefix + "mlp.gate_proj", gate, true);
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, mlp_tokens);
-#if LEAF_OPTIMIZED_SILU_W8A8 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
+#ifdef LEAF_EXPERIMENTAL_GELU_ERF
+                if (fp32_artifact && avx && mlp_tokens >= 8 && activation == 1) {
+                    leaf::kernels::gelu_erf_inplace(gate.data(), gate.size());
+                    for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= gate[j];
+                } else
+#endif
+#if LEAF_OPTIMIZED_SILU_W8A8 || LEAF_OPTIMIZED_SILU_FP32 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
                 // Isolate the prefill activation change; weight precision does
                 // not change the FP32 up/gate buffers. Decode stays unchanged.
                 if (vector_silu_gate && mlp_tokens >= 8) {
@@ -1086,6 +1116,11 @@ struct Decoder::Impl {
                 for (std::size_t j = 0; j < gate.size(); ++j) up[j] *= activate(gate[j]);
             } else {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, mlp_tokens);
+#ifdef LEAF_EXPERIMENTAL_GELU_ERF
+                if (fp32_artifact && avx && mlp_tokens >= 8 && activation == 1)
+                    leaf::kernels::gelu_erf_inplace(up.data(), up.size());
+                else
+#endif
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_VECTOR_GELU)
                 if (vector_gelu && mlp_tokens >= 8 && activation == 2)
                     leaf::kernels::gelu_new_inplace(up.data(), up.size());
@@ -1122,6 +1157,9 @@ std::vector<float> Decoder::forward(const std::vector<std::uint32_t>& tokens, bo
 }
 std::uint32_t Decoder::vocabulary_size() const { return static_cast<std::uint32_t>(impl_->vocab); }
 std::uint32_t Decoder::eos_token() const { return static_cast<std::uint32_t>(impl_->eos); }
+bool Decoder::is_eos_token(std::uint32_t token) const {
+    return std::find(impl_->eos_tokens.begin(), impl_->eos_tokens.end(), token) != impl_->eos_tokens.end();
+}
 std::size_t Decoder::cache_tokens() const { return impl_->caches[0].length(); }
 std::uint64_t Decoder::weight_bytes() const { return impl_->mapping.size; }
 bool Decoder::uses_avx2() const { return impl_->avx; }

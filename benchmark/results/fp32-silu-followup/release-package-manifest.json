@@ -1,0 +1,10 @@
+{
+  "wheel": "C:\\Users\\navaneeth\\leaf\\build\\fp32-silu-20261017\\wheel\\leaf_cpu-0.2.0-py3-none-win_amd64.whl",
+  "wheel_sha256": "77a2cbbd0c58a53e1dcbe33c5a4e812580c6e5a419b68757b0aa36329ee9211f",
+  "declared_source_files": 19,
+  "all_declared_sources_present": true,
+  "optional_gelu_erf_header_present": true,
+  "bundled_decoder_and_embed_present": true,
+  "installed_binaries_match_wheel": true,
+  "passed": true
+}

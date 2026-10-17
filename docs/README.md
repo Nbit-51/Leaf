@@ -26,10 +26,13 @@ architecture, current results and scope. Use this index for details and evidence
   correctness, installed wheel and conservative-build comparison.
 - [Attention/softmax follow-up](windows-attention-softmax.md): accepted GPT-2
   prefill improvement, fresh PyTorch comparison and retained failed attempts.
-- [W8A8 vector SiLU release](silu-gate-experiment.md): stable TinyLlama improvement,
-  fresh PyTorch comparison, default dispatch and installed-wheel validation.
+- [FP32/W8A8 vector SiLU releases](silu-gate-experiment.md): stable TinyLlama
+  incremental improvements, default dispatch and correctness evidence; W8A8
+  also has a matched PyTorch comparison.
 - [Current TinyLlama evaluation](windows-tinyllama-current.md): FP32/W8A8 quality,
   all timing results, stability failures and the next measured hot paths.
+- [TinyLlama / Ollama FP32](tinyllama-ollama-comparison.md): stable new-default
+  prefill/decode advantages, the earlier baseline and the retained probability miss.
 - [Raw benchmark records](../benchmark/results): full samples, gates and hashes.
 
 These reports have different workloads and runtime identities. Their results
@@ -48,6 +51,7 @@ should not be combined into a universal speedup claim.
 | MLP experiments and rejected variants | [MLP report](mlp-prefill-experiment.md), [preserved patches](../benchmark/experiments) |
 | Detailed measurements, previous defaults and older model evaluations | [Full reference and history](project-reference.md) |
 | Resume checkpoint | [Prefill checkpoint](prefill-checkpoint-2026-10-07.md) |
+| October 15–17 release work and next actions | [Current checkpoint](checkpoint-2026-10-15.md) |
 | Pythia attention-score sensitivity and retained tolerance failures | [Numerical investigation](pythia-numerics-handoff.md) |
 | Matched Pythia-70M Leaf/llama.cpp baseline and next prefill experiment | [Runtime comparison](pythia-runtime-comparison.md) |
 

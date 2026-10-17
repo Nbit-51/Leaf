@@ -1,0 +1,74 @@
+{
+  "format": "leaf-installed-package-hub-id-v4-smoke-v1",
+  "measured_at_utc": "2026-10-17T02:19:27.219512+00:00",
+  "invocation": [
+    "leaf",
+    "run",
+    "Qwen/Qwen2.5-0.5B-Instruct",
+    "--offline",
+    "--raw",
+    "--prompt",
+    "Once upon a time,",
+    "--max-tokens",
+    "2",
+    "--threads",
+    "1",
+    "--bits",
+    "32"
+  ],
+  "compiler_path_available": false,
+  "acceptance_timing": false,
+  "cli_metrics": {
+    "avx2": true,
+    "vector_silu_gate_calls": 0,
+    "vector_silu_gate_enabled": true,
+    "optimized_fp32_active": true,
+    "vnni": false,
+    "activation_bits": 32,
+    "threads": 1,
+    "artifact_bytes": 1976158464,
+    "peak_rss_bytes": 1982509056,
+    "load_ms": 1.1835,
+    "prefill_p50_ms": 989.6319,
+    "decode_p50_ms": 121.4518,
+    "prefill_samples_ms": [
+      989.6319
+    ],
+    "decode_samples_ms": [
+      121.4518
+    ],
+    "generated_tokens": [
+      1052,
+      572
+    ],
+    "weight_bits": 32,
+    "time_to_first_token_ms": 2307.608099999925,
+    "end_to_end_ms": 2699.109600000156
+  },
+  "external_wall_ms": 2975.324499999715,
+  "external_first_stdout_byte_ms": 2503.8266999999905,
+  "external_first_visible_text_ms": 2503.852800000004,
+  "stdout": " there was\r\n",
+  "preparation_message_seen": false,
+  "package_check": {
+    "module": "leaf\\cli.py",
+    "bundled_runtime_selected": true,
+    "native_executable_sha256": "e671191a8c321cf5e246bc22775bcd6ebb7fcc241c247ae5ce0eebe7f5cefa7f",
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "snapshot": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775",
+    "eos_token_ids": [
+      151645,
+      151643
+    ],
+    "artifact": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\70ec40010513210f83bb089b\\decoder-32.leaf",
+    "artifact_preexisting": true,
+    "artifact_version": 4,
+    "artifact_unchanged": true,
+    "artifact_bytes": 1976158464,
+    "exporter_loaded": false,
+    "heavy_model_libraries_loaded": [],
+    "compiler_path_available": false,
+    "runtime_path_scope": "Windows System32 only"
+  },
+  "passed": true
+}

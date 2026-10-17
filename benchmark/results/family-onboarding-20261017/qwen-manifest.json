@@ -1,0 +1,53 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "snapshot": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775",
+  "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "download_complete": true,
+  "resolved_via": "leaf.cli.resolve_model",
+  "files": [
+    {
+      "name": "config.json",
+      "bytes": 659,
+      "sha256": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45"
+    },
+    {
+      "name": "generation_config.json",
+      "bytes": 242,
+      "sha256": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6"
+    },
+    {
+      "name": "merges.txt",
+      "bytes": 1671839,
+      "sha256": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3"
+    },
+    {
+      "name": "model.safetensors",
+      "bytes": 988097824,
+      "sha256": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe"
+    },
+    {
+      "name": "tokenizer.json",
+      "bytes": 7031645,
+      "sha256": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539"
+    },
+    {
+      "name": "tokenizer_config.json",
+      "bytes": 7305,
+      "sha256": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583"
+    },
+    {
+      "name": "vocab.json",
+      "bytes": 2776833,
+      "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+    }
+  ],
+  "total_snapshot_file_bytes": 999586347,
+  "safetensors_tensor_count": 290,
+  "safetensors_dtypes": [
+    "BF16"
+  ],
+  "source_parameter_count": 494032768,
+  "source_headers_validated": true,
+  "weights_numerically_verified": false,
+  "timing_qualified": false
+}

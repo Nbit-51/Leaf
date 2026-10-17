@@ -1,6 +1,9 @@
 #include "leaf/runtime/decoder.h"
 #ifdef LEAF_DIAGNOSTIC_TIMING
 #include "../../tests/native/decoder_diagnostic.h"
+#include <cstdlib>
+#include <filesystem>
+#include <thread>
 #endif
 
 #include <algorithm>
@@ -61,7 +64,11 @@ template <class T> void array(std::ostream& output, const std::vector<T>& values
 
 int main(int argc, char** argv) {
     if (argc == 2 && std::string(argv[1]) == "--runtime-info") {
-        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3]}\n";
+        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4]"
+#ifdef LEAF_DIAGNOSTIC_TIMING
+                  << ",\"diagnostic_start_gate_supported\":true,\"diagnostic_counter_version\":4"
+#endif
+                  << "}\n";
         return 0;
     }
     if (argc < 6 || argc > 13) {
@@ -70,6 +77,17 @@ int main(int argc, char** argv) {
         return 1;
     }
     try {
+#ifdef LEAF_DIAGNOSTIC_TIMING
+        // The monitor releases this gate only after affinity, QoS and telemetry
+        // setup. Ordinary builds do not read or wait on this environment key.
+        if (const char* gate = std::getenv("LEAF_DIAGNOSTIC_START_GATE")) {
+            const auto deadline = Clock::now() + std::chrono::seconds(30);
+            while (!std::filesystem::exists(gate)) {
+                if (Clock::now() >= deadline) throw std::runtime_error("diagnostic start gate timed out");
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
+#endif
         const std::string mode = argv[5];
         if (mode != "verify" && mode != "chunked" && mode != "bench" && mode != "generate")
             throw std::runtime_error("unknown decoder mode");
@@ -103,6 +121,9 @@ int main(int argc, char** argv) {
 #ifdef LEAF_DIAGNOSTIC_TIMING
         if (threads != 1) throw std::runtime_error("Thread-counter diagnostics require one inference thread");
         leaf::diagnostics::Samples prefill_counters, decode_counters;
+        leaf::diagnostics::ThreadDispatch thread_dispatch;
+        prefill_counters.reserve(std::size_t(runs) * requests.size());
+        decode_counters.reserve(std::size_t(runs) * requests.size());
 #endif
         std::vector<std::uint32_t> generated;
         for (const auto& ids : requests) {
@@ -141,7 +162,7 @@ int main(int argc, char** argv) {
                     const auto id = static_cast<std::uint32_t>(std::max_element(logits.begin(), logits.end()) - logits.begin());
                     generated.push_back(id);
                     std::cout << "TOKEN " << id << '\n' << std::flush;
-                    if (id == decoder.eos_token()) break;
+                    if (decoder.is_eos_token(id)) break;
                     if (token + 1 < generate) {
                         start = Clock::now(); logits = decoder.forward({id}); decodes.push_back(elapsed(start));
                     }

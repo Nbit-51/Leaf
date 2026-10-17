@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "checked_values": 2810330,
+  "finite_outputs_bit_exact": true,
+  "exceptional_classes_passed": true,
+  "vector_available": true
+}

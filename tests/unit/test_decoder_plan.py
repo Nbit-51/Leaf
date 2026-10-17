@@ -155,9 +155,11 @@ def test_custom_plan_cannot_silently_discard_unknown_operator_weights():
 
 
 def test_multiple_eos_is_not_silently_collapsed():
-    with pytest.raises(ValueError, match="Multiple EOS"):
-        make_plan(dict(model_type="llama", hidden_size=16, intermediate_size=32,
-                       num_attention_heads=2, num_hidden_layers=1, vocab_size=32, eos_token_id=[1, 2]))
+    plan = make_plan(dict(model_type="llama", hidden_size=16, intermediate_size=32,
+                         num_attention_heads=2, num_hidden_layers=1, vocab_size=32, eos_token_id=[1, 2]))
+    validate_plan(plan)
+    assert plan["config"]["eos"] == 1
+    assert plan["config"]["eos_tokens"] == [1, 2]
 
 
 def test_no_eos_is_not_converted_to_token_zero():

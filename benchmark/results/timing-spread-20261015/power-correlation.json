@@ -1,0 +1,51 @@
+{
+  "scope": "Recent local Windows Kernel-Power events correlated with conservative run bounds; no assertion about older unrecorded runs.",
+  "transitions": [
+    {
+      "time_utc": "2026-10-15T10:12:43.5569335Z",
+      "event_id": 507,
+      "message": "The system is exiting Modern Standby \r\n\r\nReason: Input Keyboard."
+    },
+    {
+      "time_utc": "2026-10-15T10:04:41.5121436Z",
+      "event_id": 506,
+      "message": "The system is entering Modern Standby \r\n\r\nReason: Idle Timeout."
+    }
+  ],
+  "runs": [
+    {
+      "path": "build\\ollama-20261015\\diagnostic-b\\comparison.json",
+      "sha256": "cc57e635feefa34e850b1604c3edccc628c809a265a4a7d02f199ca4aa7d1853",
+      "start_utc": "2026-10-15T09:50:34.698187+00:00",
+      "end_upper_bound_utc": "2026-10-15T09:57:39.117329+00:00",
+      "end_source": "result_file_last_write_utc",
+      "overlaps_observed_standby": false
+    },
+    {
+      "path": "build\\timing-spread-20261015\\pythia70-highqos-abba.json",
+      "sha256": "8d4518eeccf0f709fec4525a13821a26f495fd88e776fe8a56bf92aebcdb8f18",
+      "start_utc": "2026-10-15T10:01:23.679423+00:00",
+      "end_upper_bound_utc": "2026-10-15T10:01:44.221811+00:00",
+      "end_source": "result_file_last_write_utc",
+      "overlaps_observed_standby": false
+    },
+    {
+      "path": "build\\timing-spread-20261015\\pythia70-gated-v3-abba.json",
+      "sha256": "80b245671e62d7e241aa1a6e8a3d0f595b4637e06728c3353a46cbda948e9851",
+      "start_utc": "2026-10-15T10:23:42.173875+00:00",
+      "end_upper_bound_utc": "2026-10-15T10:24:01.228409+00:00",
+      "end_source": "last_pass_finished_at_utc",
+      "overlaps_observed_standby": false
+    },
+    {
+      "path": "build\\timing-spread-20261015\\legacy-launch-cpu-trace.json",
+      "sha256": "0f955edd2f773c1ae9d7bef2853b9932f1097bfb97f833237302d5eeaf21d01f",
+      "start_utc": "2026-10-15T10:24:43.907624+00:00",
+      "end_upper_bound_utc": "2026-10-15T10:25:05.319824+00:00",
+      "end_source": "result_file_last_write_utc",
+      "overlaps_observed_standby": false
+    }
+  ],
+  "hibernation_enabled": false,
+  "available_sleep_model": "S0 Low Power Idle (Network Connected)"
+}

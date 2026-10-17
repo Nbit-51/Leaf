@@ -1,0 +1,5 @@
+{
+  "passed": true,
+  "native_refused_battery_timing": true,
+  "reason": "AC power lost or unknown: benchmark sample invalid; timing stopped"
+}

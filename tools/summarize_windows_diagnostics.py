@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
+from collections import Counter, defaultdict
 import json
 from pathlib import Path
 import statistics
@@ -37,10 +37,15 @@ def summarize(record):
                 seconds = item.get("cpu_seconds", item["one_core_percent"] * sample["interval_seconds"] / 100)
                 category = ("vs_code" if name == "code" else
                             "cpp_tools" if name in ("g++", "gcc", "cc1plus", "clang", "clang++", "clangd", "cpptools", "cmake", "ninja", "msbuild", "cl") else
-                            "native_benchmark" if name == "leaf_decoder" else
+                            "native_benchmark" if item.get("pid") == p.get("child_pid", -1) or name == "leaf_decoder" else
                             "python_processes" if name == "python" else "other_processes")
                 totals[category] += seconds
+        cpu_counts = Counter(v for key, values in p["latency"].items()
+                             if key.startswith("logical_cpu_") for v in values)
         passes.append({"index": p["index"], "high_qos": p["high_qos"], "latency": p["latency"],
+            "measured_at_utc": p.get("measured_at_utc"), "finished_at_utc": p.get("finished_at_utc"),
+            "actual_cpu_boundary_counts": dict(cpu_counts),
+            "actual_cpu_boundaries_match_request": (set(cpu_counts) == {cpu}) if cpu_counts else None,
             "stability": p["stability"], "telemetry_samples": len(samples),
             "collection_seconds": distribution([s.get("collection_seconds") for s in samples]),
             "child_one_core_percent": distribution([s.get("child_one_core_percent") for s in samples]),
@@ -59,6 +64,8 @@ def summarize(record):
             "measured_at_utc": record["measured_at_utc"], "cpu": cpu, "monitor_cpu": record["monitor_cpu"],
             "cpu_sets": record["cpu_sets"], "runs": record["runs"], "warmup": record["warmup"],
             "native_policy": record["native_policy"], "process_sampler": record.get("process_sampler", "initial psutil enumeration (high overhead)"),
+            "child_start_policy": record.get("child_start_policy", "legacy-post-spawn-affinity"),
+            "windows_process_priority": record.get("windows_process_priority", "not-recorded"),
             "active_power_scheme": record["active_power_scheme"], "processor_power_settings": record["processor_power_settings"],
             "counter_unavailable": record["counter_unavailable"], "passes": passes, "stages": stages,
             "automatic_selection_authorized": False, "acceptance_timing": False,
