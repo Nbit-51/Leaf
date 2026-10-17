@@ -25,7 +25,7 @@
 #endif
 #endif
 
-// FP32 SiLU is qualified separately from W8A8. Explicit research and
+// FP32 SiLU prefill and decode are qualified separately from W8A8 prefill. Research and
 // conservative FP32 builds retain their own dispatch policies.
 #ifndef LEAF_OPTIMIZED_SILU_FP32
 #if defined(_WIN32) && LEAF_OPTIMIZED_FP32 && !defined(LEAF_EXPERIMENTAL_SILU_GATE)

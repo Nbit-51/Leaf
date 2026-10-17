@@ -149,14 +149,14 @@ flowchart TB
     G --> A["Native graph artifact"]
     D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
-    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax<br/>FP32/W8A8 SiLU gating · quantized kernels"]
+    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax<br/>FP32 SiLU prefill + decode · W8A8 SiLU prefill"]
     K --> T["Tokens and logits"]
     E --> U["Graph outputs"]
 ```
 
 The validated FP32 kernel stack and FP32/W8A8 vector SiLU gating are enabled by
-default on supported Windows CPUs. Single-token and forced-scalar SiLU keep
-their existing paths.
+default on supported Windows CPUs. FP32 SiLU covers prefill and single-token
+decode; W8A8 SiLU remains prefill-only. Forced-scalar execution retains its path.
 Other operating systems retain their existing defaults pending performance
 qualification. The CLI uses a lightweight Python/tokenizer launcher; the native
 decoder owns the generation loop. Decoder, embedding and graph artifacts use
@@ -216,6 +216,13 @@ The [FP32 SiLU release](docs/silu-gate-experiment.md#fp32-follow-up--october-15-
 reduces TinyLlama prefill **26.69% versus the previous Leaf default**
 (1,897.61 → 1,391.20 ms). All twelve passes and pooled stability checks pass,
 with decode within non-regression and trained quality preserved.
+
+A [shared FP32 decode SiLU change](docs/fp32-decode-silu.md) lowers cached decode
+**5.63% on SmolLM2-360M** (83.44 → 78.74 ms) and **5.48% on Qwen2.5-0.5B**
+(115.61 → 109.27 ms) versus the previous Leaf default. All 24 passes are stable,
+prefill passes non-regression, and tested outputs are byte-identical. These are
+incremental Leaf comparisons; the existing strict logit-tolerance misses on
+these two models remain open.
 
 A fresh [TinyLlama FP32 comparison with Ollama](docs/tinyllama-ollama-comparison.md#october-17-fp32-silu-default)
 measures **9.10% lower prefill** (1,391.42 vs 1,530.64 ms) and **11.35% lower

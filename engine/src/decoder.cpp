@@ -1106,9 +1106,10 @@ struct Decoder::Impl {
                 } else
 #endif
 #if LEAF_OPTIMIZED_SILU_W8A8 || LEAF_OPTIMIZED_SILU_FP32 || defined(LEAF_EXPERIMENTAL_SILU_GATE)
-                // Isolate the prefill activation change; weight precision does
-                // not change the FP32 up/gate buffers. Decode stays unchanged.
-                if (vector_silu_gate && mlp_tokens >= 8) {
+                // FP32 qualifies prefill and single-token decode. Quantized
+                // and historical research policies retain prefill-only use.
+                if (vector_silu_gate && (mlp_tokens >= 8 ||
+                    (LEAF_OPTIMIZED_SILU_FP32 && fp32_artifact && mlp_tokens == 1))) {
                     leaf::kernels::silu_gate_inplace(up.data(), gate.data(), gate.size());
                     ++vector_silu_gate_calls;
                 } else

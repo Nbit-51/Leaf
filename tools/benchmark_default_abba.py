@@ -4,6 +4,8 @@ Predeclared incremental gate (unchanged policy): pooled-median prefill ratio
 <= 0.98, pooled-median decode ratio <= 1.02, every pass and both pooled sample
 sets meet the existing stability checks. Also reports median paired ratios.
 FP32 builds must report optimized_fp32_active. Every raw sample is retained.
+For --target-phase decode the improvement/non-regression limits swap:
+decode <= 0.98 and prefill <= 1.02; sample counts and stability limits do not.
 The SiLU candidate mode also supports W8A8 and requires bound trained quality.
 """
 from __future__ import annotations
@@ -48,6 +50,8 @@ def main() -> None:
     parser.add_argument("--runs", type=int, default=31)
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--activation-bits", type=int, choices=(8, 32), default=32)
+    parser.add_argument("--target-phase", choices=("prefill", "decode"), default="prefill",
+                        help="phase requiring >=2%% improvement; the other allows <=2%% regression")
     parser.add_argument("--silu-quality", type=Path,
                         help="completed candidate quality record; enables SiLU dispatch checks")
     args = parser.parse_args()
@@ -75,7 +79,9 @@ def main() -> None:
                   threads=1, runs_per_pass=args.runs, warmup_per_pass=args.warmup,
                   activation_bits=args.activation_bits, silu_candidate=bool(args.silu_quality),
                   automatic_selection_authorized=False,
-                  windows_above_normal=True, criteria=__doc__, pairs=[], complete=False)
+                  windows_above_normal=True, criteria=__doc__, target_phase=args.target_phase,
+                  ratio_limits={phase: 0.98 if phase == args.target_phase else 1.02
+                                for phase in ("prefill", "decode")}, pairs=[], complete=False)
     write_record(args.output, record)
     with keep_awake():
         for index in range(args.pairs):
@@ -104,7 +110,7 @@ def main() -> None:
     if any(digest(Path(p)) != v for p, v in hashes.items()):
         raise ValueError("Inputs changed during measurement")
     summary = {}
-    for phase, limit in (("prefill", 0.98), ("decode", 1.02)):
+    for phase, limit in record["ratio_limits"].items():
         pooled = {s: [v for p in record["pairs"] for v in p[s][phase + "_samples_ms"]] for s in ("before", "after")}
         paired = [p["after"][phase + "_p50_ms"] / p["before"][phase + "_p50_ms"] for p in record["pairs"]]
         medians = {s: statistics.median(v) for s, v in pooled.items()}
