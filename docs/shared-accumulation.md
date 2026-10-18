@@ -3,7 +3,8 @@
 The isolated accumulation candidate passes the previously failing trained
 SmolLM2 and Qwen2.5 fidelity checks without relaxing tolerances. Its complete
 Smol timing comparison is stable but slower, so **it is not enabled in the
-released runtime**. Qwen timing is still in progress at this checkpoint.
+released runtime**. Both complete timing comparisons are stable and fail the
+prefill improvement gate.
 
 ## What changed
 
@@ -66,11 +67,18 @@ stability checks. Loading, tokenization and command startup are excluded.
 | Model | Before / after prefill | Before / after decode | Outcome |
 |---|---:|---:|---|
 | SmolLM2 | 492.9177 / 514.36175 ms | 80.5039 / 80.10565 ms | **4.35% higher prefill; gate fails**, all twelve passes stable |
-| Qwen2.5 | Pending | Pending | Running serially after Smol |
+| Qwen2.5 | 565.62355 / 589.518 ms | 110.15875 / 109.54915 ms | **4.22% higher prefill; gate fails**, all twelve passes stable |
 
 The before binary is the released FP32 default from PR #8. These are
 incremental Leaf comparisons; no competitor win is claimed. Failed gates stay
 recorded and are not relabeled as passes because accuracy improved.
+
+The median paired prefill ratios are 1.04620 and 1.04271. Decode passes
+non-regression; its sub-1% reductions are not claimed as improvements.
+[Raw reports and validation manifest](../benchmark/results/shared-accumulation-20261018/validation.json)
+retain all samples, exact binary/input identities, full quality, scalar
+controls, earlier failed checks and the interrupted no-sample launch. No
+quality or stability threshold was changed to obtain these results.
 
 ## What the bounded experiments ruled out
 

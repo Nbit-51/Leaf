@@ -53,10 +53,12 @@ other model load, build, microbenchmark or test concurrently with acceptance.
 
 Smol is complete: all twelve passes and pooled distributions stable, but
 prefill **492.9177→514.36175 ms (+4.35%)** fails the unchanged speed gate.
-Decode **80.5039→80.10565 ms** passes non-regression. Qwen is now running
-serially in tool session **76390**, output `acceptance-qwen.json`; do not start
-another Qwen run. Its first pair is stable at 565.53→587.98 ms prefill.
-The following command records its current invocation, not a rerun request:
+Decode **80.5039→80.10565 ms** passes non-regression. Qwen is also complete:
+all twelve passes and pooled distributions stable, prefill
+**565.62355→589.518 ms (+4.22%)** fails the unchanged speed gate; decode
+**110.15875→109.54915 ms** passes non-regression. No acceptance process is
+active. **Do not repeat these completed comparisons.**
+The following command records the invocation, not a rerun request:
 
 ```powershell
 $env:TEMP = "$PWD\build\linear-accumulation-20261018-scalar\tmp"
@@ -74,8 +76,12 @@ and the failed report is retained as `20261017-v2/cache-quality.json`.
 `cache-quality-v2.json` is the completed original-candidate run (with genuine
 scalar failures). Final candidate `cache-quality.json` passes all cases.
 
-Do not promote or advertise a speed win unless final gates pass. If performance
-misses its gate, preserve the demonstrated accuracy fix and report its cost;
-any release-criterion change requires the user's explicit decision. Publish
-reviewable work through a PR, never bypass protected main. Merge/delete the
-temporary branch only when the actual release decision and all CI checks permit.
+The release decision is to preserve the demonstrated accuracy fix and measured
+cost as an isolated experiment; **no production default is changed**. Publish
+source, raw reports and regression guards through a PR, never bypass protected
+main. Merge/delete the temporary branch after all CI checks pass. Enabling the
+slower candidate would require a separate explicit release-criterion decision.
+Next kernel work must reduce partial-combination/conversion overhead while
+retaining this candidate as the numerical reference. Independent-CPU timing,
+larger contexts and full trained GPT-2/TinyLlama reevaluation remain outside
+the completed Smol/Qwen qualification. No more local tests are queued.

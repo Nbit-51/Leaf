@@ -1,0 +1,64 @@
+{
+  "complete": true,
+  "release_default_changed": false,
+  "acceptance_timing": false,
+  "base_commit": "08bc3b60fad4bff7b5c0f9215adc06b1bd187f87",
+  "source_sha256": {
+    "C:\\Users\\navaneeth\\leaf\\engine\\src\\decoder.cpp": "c02989f7fce2bb000ecc630e9225ca7373224ada382eeffea2c77fc34df59fcb",
+    "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_decoder.cpp": "cef90e4230531b3e5de5d94397d0e17fd7a493317e97e26bb4b2aa2aeb914beb",
+    "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\token_panel.h": "5b3609bad5de9723a7fca27c606cf6ba261cd7b829eeab65c35670ac5db5f556",
+    "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\row_reuse.h": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\blocked_sum.h": "bb2b974190c11ad62700a0742d0e6f341f247e1668111c8d79d131bcd48edf75",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\probe.cpp": "53d459b056f0a12ba64f619547abd4f90fd059c3d66ab3aa72a7c27beee06a7b",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\build.py": "5df17d1721dbd545d69a4f837724e42e0d071f444c27502507f5d7465b4a002f",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261018-inline\\decoder.cpp": "964e1cad53b837592807aeed5618311882415fb226ec94f0d9bd05175f630bd2",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261018-inline\\main_decoder.cpp": "a05648dc5f75383d2505eba65524972357c8fbd85b7c5b4f571aec4d83118539"
+  },
+  "commands": [
+    [
+      "C:/msys64/mingw64/bin/g++.exe",
+      "-std=c++17",
+      "-O3",
+      "-DNDEBUG",
+      "-pthread",
+      "-static",
+      "-static-libgcc",
+      "-static-libstdc++",
+      "-I",
+      "C:\\Users\\navaneeth\\leaf\\engine\\include",
+      "-I",
+      "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation",
+      "-DLEAF_ACCUMULATION_INLINE_PARTIAL=1",
+      "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261018-inline\\decoder.cpp",
+      "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261018-inline\\main_decoder.cpp",
+      "C:\\Users\\navaneeth\\leaf\\engine\\src\\kv_cache.cpp",
+      "C:\\Users\\navaneeth\\leaf\\engine\\src\\kernels\\transformer.cpp",
+      "-o",
+      "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261018-inline\\leaf_decoder.exe",
+      "-lpsapi"
+    ],
+    [
+      "C:/msys64/mingw64/bin/g++.exe",
+      "-std=c++17",
+      "-O3",
+      "-DNDEBUG",
+      "-pthread",
+      "-static",
+      "-static-libgcc",
+      "-static-libstdc++",
+      "-I",
+      "C:\\Users\\navaneeth\\leaf\\engine\\include",
+      "-I",
+      "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation",
+      "-DLEAF_ACCUMULATION_INLINE_PARTIAL=1",
+      "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\probe.cpp",
+      "-o",
+      "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261018-inline\\probe.exe"
+    ]
+  ],
+  "inline_partial": true,
+  "binary_sha256": {
+    "leaf_decoder.exe": "38984995e65306efa226a59f1214968fe1d20a3743054079dc44dcc14a3e83bf",
+    "probe.exe": "f985907c373967343fb97b2031ce6887444550967187b0492b13454f8cc1c68a"
+  }
+}

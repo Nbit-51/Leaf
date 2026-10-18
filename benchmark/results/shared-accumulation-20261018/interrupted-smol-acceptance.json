@@ -1,0 +1,29 @@
+{
+  "format": "leaf-default-abba-v1",
+  "measured_at_utc": "2026-10-18T10:56:09.994778+00:00",
+  "hashes": {
+    "build\\numerics-20261017\\release\\leaf_decoder.exe": "83db825956f5657c068a5699efbc35e088527fc34ac24a37122e7805f2ea2900",
+    "build\\linear-accumulation-20261018-scalar\\leaf_decoder.exe": "d725b5e54780907225d3cdaf85749bbc6d67ecca3e3ddeac2873de99c584102d",
+    "build\\numerics-20261017\\decode-silu\\smol-work\\decoder-32.leaf": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+    "build\\numerics-20261017\\decode-silu\\smol-work\\tokens.json": "05f9ecdb962b53b8c16820cbf22953ba8adcbaf9692af2f3da8714e767af2246",
+    "C:\\Users\\navaneeth\\leaf\\tools\\benchmark_default_abba.py": "760a36bb90488a699eb35a0d9996fbe7620dc0ab297743ae210b73603061aeee",
+    "C:\\Users\\navaneeth\\leaf\\tools\\decoder_validation.py": "414d9d575f2bb38ee5d100947e6e46da868b45facee9a99c03a5f400343133fd",
+    "C:\\Users\\navaneeth\\leaf\\tools\\benchmark_decoder_comparison.py": "a403a058aeb93deb73c7893fe7e61bed8c7e84faec7e825ef4c6a0e87b5f97c0"
+  },
+  "cpu": 2,
+  "threads": 1,
+  "runs_per_pass": 31,
+  "warmup_per_pass": 10,
+  "activation_bits": 32,
+  "silu_candidate": false,
+  "automatic_selection_authorized": false,
+  "windows_above_normal": true,
+  "criteria": "Serial balanced AB/BA whole-model timing of two default-policy Windows builds.\n\nPredeclared incremental gate (unchanged policy): pooled-median prefill ratio\n<= 0.98, pooled-median decode ratio <= 1.02, every pass and both pooled sample\nsets meet the existing stability checks. Also reports median paired ratios.\nFP32 builds must report optimized_fp32_active. Every raw sample is retained.\nFor --target-phase decode the improvement/non-regression limits swap:\ndecode <= 0.98 and prefill <= 1.02; sample counts and stability limits do not.\nThe SiLU candidate mode also supports W8A8 and requires bound trained quality.\n",
+  "target_phase": "prefill",
+  "ratio_limits": {
+    "prefill": 0.98,
+    "decode": 1.02
+  },
+  "pairs": [],
+  "complete": false
+}

@@ -1,0 +1,176 @@
+{
+  "complete": true,
+  "passed": true,
+  "acceptance_timing": false,
+  "scope": "Exact new/default-AVX logits on all eight old quality blocks plus all six continuations per model",
+  "hashes": {
+    "build\\linear-accumulation-20261018-scalar\\leaf_decoder.exe": "d725b5e54780907225d3cdaf85749bbc6d67ecca3e3ddeac2873de99c584102d",
+    "build\\linear-accumulation-20261017-v2\\leaf_decoder.exe": "d099543ba60734ecd8e72a697a9e5e03d5f8a5f50878ae4af1cee839b2fa9390",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\bind_quality.py": "0accd63058c496620d10de8fd6bc1d93f92875dc1bd595fc49df8244a97ea569",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\all_results.json": "71face5e244d784819f937a25206865c295c8889fe4359eec28bbec85d02da0d",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\config.json": "224f72354f10d617a359cc82ad15a3c96e866b9b2ffadb81997eeea9e88e22ee",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\eval_results.json": "db9bcb5c4f2a3be0d7e88f86af26f375c22c240954af86942d1554d87a488ce8",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\generation_config.json": "87b916edaaab66b3899b9d0dd0752727dff6666686da0504d89ae0a6e055a013",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\model.safetensors": "e6bffe7435d7ddc10fd3b9a9efd429dafbacb1cb17015fb5562664e7532bf86e",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\special_tokens_map.json": "2b7379f3ae813529281a5c602bc5a11c1d4e0a99107aaa597fe936c1e813ca52",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\tokenizer_config.json": "4ec77d44f62efeb38d7e044a1db318f6a939438425312dfa333b8382dbad98df",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\train_results.json": "fceae2634b0a268a8adbda73fd0b2192922b496054011f588d2c6e888db1cea1",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\trainer_state.json": "2263f580ae0d7890acc11253b83138b3fc1250dc6728688a3387ce813b92eed1",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\vocab.json": "82b84012e3add4d01d12ba14442026e49b8cbbaead1f79ecf3d919784f82dc79",
+    "build\\linear-accumulation-20261017-v2\\full-quality-smol\\quality.json": "a087a5744a89703aa5bd93058178560449113270a4333626a2477bf8cd2e6af1",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\898954fccee23671ea3da805\\decoder-32.leaf": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+    "build\\linear-accumulation-20261017-v2\\full-quality-smol\\tokens.json": "1555203a81ad00cb7bfcc8e7f04aab2eccfc24e530e329471ad8d8046d959d9a",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\generation_config.json": "e558847a8b4402616f1273797b015104dc266fe4b520056fca88823ba8f8ebe6",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\vocab.json": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+    "build\\linear-accumulation-20261017-v2\\full-quality-qwen\\quality.json": "25876a768a2eba96bc82c808f081792aade35b8079c7c5a81624587867b1803f",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\70ec40010513210f83bb089b\\decoder-32.leaf": "f01b07a042ce3e3da824076802376e3f0f1864e3134b1036c5c4e4bd517d7de7",
+    "build\\linear-accumulation-20261017-v2\\full-quality-qwen\\tokens.json": "5856ecd9964691c327eab1a71886ca5dc63c821b6fad71a96eee1a0b3a6a020b"
+  },
+  "cases": [
+    {
+      "model": "smol",
+      "block": 0,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "block": 1,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "block": 2,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "block": 3,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "block": 4,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "block": 5,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "block": 6,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "block": 7,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "generation": 0,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "generation": 1,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "generation": 2,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "generation": 3,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "generation": 4,
+      "exact": true
+    },
+    {
+      "model": "smol",
+      "generation": 5,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "block": 0,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "block": 1,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "block": 2,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "block": 3,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "block": 4,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "block": 5,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "block": 6,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "block": 7,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "generation": 0,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "generation": 1,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "generation": 2,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "generation": 3,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "generation": 4,
+      "exact": true
+    },
+    {
+      "model": "qwen",
+      "generation": 5,
+      "exact": true
+    }
+  ]
+}
