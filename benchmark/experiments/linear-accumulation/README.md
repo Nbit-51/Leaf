@@ -80,35 +80,35 @@ To collect another explicitly diagnostic micro probe after a source revision:
 python benchmark/experiments/linear-accumulation/run_probe.py --build build/linear-accumulation-next --timing
 ```
 
-## Deferred larger verification
+## Completed follow-up and current checkpoint
 
-These commands are queued, **not executed**. They use the existing v2 build;
-do not rebuild it or rerun completed small checks unless sources change.
+The originally deferred full tests are complete. Do not rerun the old commands.
+The scalar-corrected FP64-outer candidate passes full trained quality, cache,
+scalar/thread regressions, ten reduced architecture configurations and 1,048
+unit tests, but its stable whole-model prefill is 4.2–4.4% slower than release.
+
+The newer balanced FP32 tree with global K=256 chunks and explicit Q/K/V and
+up/gate packing reuse passes full eight-block quality and six exact reference
+continuations on each of SmolLM2 and Qwen, plus all twelve cache/scalar/thread/
+earlier-model/W8A8 checks. Its short model screen is closer to parity, but
+still does not demonstrate the unchanged >=2% prefill improvement gate.
+Release defaults remain unchanged. Publication is stopped at the user's
+request while linear overhead is addressed.
+
+[The current checkpoint](../../../docs/checkpoint-2026-10-18-accumulation.md)
+records exact completed results, local report paths, the failed twelve-row
+cache hypothesis and the matched external OpenBLAS probe. That DLL is slower
+on all four tested single-core projection shapes; OpenBLAS is not integrated.
+Selected libraries remain permitted if actual model-quality and timing gates
+show a useful benefit. A kernel probe is not a whole-model claim.
+
+To reproduce the newer candidate, choose a fresh output directory:
 
 ```powershell
-cd C:\Users\navaneeth\leaf
-$env:LEAF_DECODER_BIN = (Resolve-Path build/linear-accumulation-20261017-v2/leaf_decoder.exe).Path
-$env:LEAF_CACHE_DIR = "$PWD\build\family-models-20261017\cache"
-$env:PYTHONPATH = "$PWD\build\python-deps"
-$env:TEMP = "$PWD\build\linear-accumulation-20261017-v2\tmp"
-$env:TMP = $env:TEMP
-$models = Get-Content build/numerics-20261017/model-paths.json -Raw | ConvertFrom-Json
-python -m leaf.cli evaluate $models.smol.snapshot --offline --dataset benchmark/data/wikitext2-test.parquet --dataset-source "WikiText-2 test split; eight length-128 blocks" --blocks 8 --sequence-length 128 --generate 16 --threads 1 --output build/linear-accumulation-20261017-v2/full-quality-smol
-python -m leaf.cli evaluate $models.qwen.snapshot --offline --dataset benchmark/data/wikitext2-test.parquet --dataset-source "WikiText-2 test split; eight length-128 blocks" --blocks 8 --sequence-length 128 --generate 16 --threads 1 --output build/linear-accumulation-20261017-v2/full-quality-qwen
-python tools/verify_decoder_architectures.py --executable $env:LEAF_DECODER_BIN --expect-silu-defaults --output build/linear-accumulation-20261017-v2/architecture-quality.json
+python benchmark/experiments/linear-accumulation/build.py --precise-scalar --tree-outer --tree-chunk-size 256 --reuse-packing --output build/linear-accumulation-next
 ```
 
-Inspect each completed quality report's `passed` field; process success alone
-does not qualify quality. Confirm frozen artifact/token hashes match the
-earlier records. Do not use `--before-executable` for an exact FP32 regression:
-this candidate deliberately changes FP32 arithmetic. Separately bind unchanged
-quantized execution and validate forced scalar, two threads, chunked cache and
-generation against the reference before promotion. Include trained GPT-2 and
-TinyLlama regression checks before a release.
-
-After quality and kernel overhead are resolved, run serial full-model ABBA
-against `build/numerics-20261017/release/leaf_decoder.exe` on AC and an idle PC.
-Use frozen existing workdirs, six pairs, 31 samples and ten warmups, retaining
-the existing >=2% target improvement, <=2% other-phase regression and stability
-limits. No current speed or full-family quality claim is authorized by these
-small results. Clear the developer `LEAF_DECODER_BIN` override before normal use.
+`preflight.py` performs only a two-pair, seven-sample diagnostic screen and
+explicitly cannot qualify a release. `acceptance.py` still requires complete
+strict eight-block quality before invoking the unchanged six-pair, 31-sample,
+ten-warmup gate. Do not lower its limits or repeat completed failed candidates.

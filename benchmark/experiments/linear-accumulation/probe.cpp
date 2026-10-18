@@ -1,4 +1,7 @@
 #include "blocked_sum.h"
+#ifdef LEAF_ACCUMULATION_TREE_OUTER
+#include "tree_sum.h"
+#endif
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -10,6 +13,13 @@
 using Gemm = decltype(&leaf::kernels::gemm_token_panels_f32);
 using Clock = std::chrono::steady_clock;
 volatile double checksum = 0;
+#ifdef LEAF_ACCUMULATION_TREE_OUTER
+constexpr Gemm candidate_gemm = &leaf::experiments::gemm_tree_sum;
+constexpr auto candidate_name = "6x16_fp32_tree";
+#else
+constexpr Gemm candidate_gemm = &leaf::experiments::gemm_blocked_sum;
+constexpr auto candidate_name = "6x16_k128_fp64_outer_sum";
+#endif
 
 
 struct Error {
@@ -52,7 +62,14 @@ void shape(std::size_t tokens, std::size_t columns, std::size_t rows, bool strid
     panels.pack(input.data(), tokens, columns, xs);
     const auto* b = with_bias ? bias.data() : nullptr;
     leaf::kernels::gemm_token_panels_f32_row_reuse(weights.data(),rows,columns,ws,panels,baseline.data(),ys,b);
-    leaf::experiments::gemm_blocked_sum(weights.data(),rows,columns,ws,panels,candidate.data(),ys,b);
+    candidate_gemm(weights.data(),rows,columns,ws,panels,candidate.data(),ys,b,true);
+#ifdef LEAF_ACCUMULATION_TREE_CACHE
+    std::vector<float> tree_reference(tokens*ys, sentinel);
+    leaf::experiments::tree_sum_detail::gemm(weights.data(), rows, columns, ws, panels,
+                                            tree_reference.data(), ys, b);
+    if (std::memcmp(tree_reference.data(), candidate.data(), candidate.size()*sizeof(float)))
+        throw std::runtime_error("Cache traversal changed tree arithmetic");
+#endif
     Error base_error, split_error;
     for (std::size_t t=0;t<tokens;++t) {
         for (std::size_t r=0;r<rows;++r) {
@@ -68,7 +85,7 @@ void shape(std::size_t tokens, std::size_t columns, std::size_t rows, bool strid
     if (split_error.violations || base_error.violations) throw std::runtime_error("precision check failed");
     std::vector<float> scalar_base(tokens*ys,sentinel), scalar_split(tokens*ys,sentinel);
     leaf::kernels::gemm_token_panels_f32_row_reuse(weights.data(),rows,columns,ws,panels,scalar_base.data(),ys,b,false);
-    leaf::experiments::gemm_blocked_sum(weights.data(),rows,columns,ws,panels,scalar_split.data(),ys,b,false);
+    candidate_gemm(weights.data(),rows,columns,ws,panels,scalar_split.data(),ys,b,false);
     if (std::memcmp(scalar_base.data(),scalar_split.data(),scalar_base.size()*sizeof(float))) throw std::runtime_error("scalar fallback changed");
     std::cout << "{\"m\":"<<tokens<<",\"k\":"<<columns<<",\"n\":"<<rows
               <<",\"strided\":"<<(strided?"true":"false")<<",\"bias\":"<<(with_bias?"true":"false")
@@ -77,7 +94,7 @@ void shape(std::size_t tokens, std::size_t columns, std::size_t rows, bool strid
     std::cout << ",\"passes\":[";
     if (timing) for(unsigned pass=0;pass<4;++pass) {
         const bool split = pass==1 || pass==2;
-        Gemm gemm = split ? &leaf::experiments::gemm_blocked_sum : &leaf::kernels::gemm_token_panels_f32_row_reuse;
+        Gemm gemm = split ? candidate_gemm : &leaf::kernels::gemm_token_panels_f32_row_reuse;
         std::cout << (pass?",":"") << "{\"algorithm\":\""<<(split?"blocked_sum":"row_reuse")<<"\",\"ms\":[";
         for(unsigned run=0;run<9;++run) {
             const auto start=Clock::now();
@@ -99,7 +116,7 @@ int main(int argc,char**argv) {
         if (leaf::experiments::rms_square_sum(values, 129) != 67108992.0f)
             throw std::runtime_error("RMS lost small squares");
         const bool timing=argc>1 && std::string(argv[1])=="timing";
-        std::cout<<std::setprecision(12)<<"{\"candidate\":\"6x16_k128_fp64_outer_sum\",\"packing_included\":true,\"synthetic\":true,\"model_latency_measured\":false,\"shapes\":[";
+        std::cout<<std::setprecision(12)<<"{\"candidate\":\""<<candidate_name<<"\",\"packing_included\":true,\"synthetic\":true,\"model_latency_measured\":false,\"shapes\":[";
         bool comma=false;
         auto run=[&](std::size_t m,std::size_t k,std::size_t n,bool strides,bool bias) {
             if(comma) std::cout<<','; comma=true; shape(m,k,n,strides,bias,timing && !strides);
@@ -112,5 +129,6 @@ int main(int argc,char**argv) {
         }
         run(63,960,2560,false,true); run(63,896,4864,false,true);
         std::cout<<"]}\n";
+        return 0;
     } catch(const std::exception&e) { std::cerr<<e.what()<<'\n'; return 1; }
 }
