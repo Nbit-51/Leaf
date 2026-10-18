@@ -15,10 +15,14 @@ inline float rms_square_sum(const float* values, std::size_t width) {
 #if defined(__x86_64__) && defined(__GNUC__)
 namespace blocked_sum_detail {
 // Keep the existing twelve FMA accumulators, six-row reuse and increasing-K
-// order within each 128-column chunk. A call boundary keeps outer FP64 sums
-// out of the inner register allocation. Scratch is bounded to 1,152 bytes.
+// order within each 128-column chunk. The original call boundary and an
+// implementation-only inline variant are retained for comparison.
 template <unsigned Rows>
+#if defined(LEAF_ACCUMULATION_INLINE_PARTIAL)
+__attribute__((target("avx2,fma"), always_inline)) inline void partial(
+#else
 __attribute__((target("avx2,fma"), noinline)) void partial(
+#endif
         const float* weights, std::size_t columns, std::size_t weight_stride,
         const float* packed, float* result) {
     leaf::kernels::token_panel_detail::accumulate_kblock<Rows>(
@@ -71,6 +75,59 @@ __attribute__((target("avx2,fma"))) inline void gemm(
         row += live;
     }
 }
+
+template <unsigned Rows>
+__attribute__((target("avx2,fma"), always_inline)) inline void accumulate_chunk(
+        const float* weights, std::size_t columns, std::size_t weight_stride,
+        const float* packed, double* total) {
+    alignas(32) float part[Rows * 16];
+    partial<Rows>(weights, columns, weight_stride, packed, part);
+    for (unsigned lane = 0; lane < Rows * 16; lane += 4) {
+        const auto value = _mm256_cvtps_pd(_mm_load_ps(part + lane));
+        _mm256_store_pd(total + lane, _mm256_add_pd(_mm256_load_pd(total + lane), value));
+    }
+}
+
+// Match the existing bounded row-block size, now with FP64 outer sums.
+// A 128-column input panel (8 KiB) is reused across up to sixteen six-row
+// tiles. Unlike a full-K six-row traversal, this working set fits in L1.
+// Maximum explicit scratch: 12 KiB totals + 384-byte partial tile per worker.
+__attribute__((target("avx2,fma"))) inline void gemm_cached(
+        const float* weights, std::size_t rows, std::size_t columns,
+        std::size_t weight_stride, const leaf::kernels::TokenPanelsF32& input,
+        float* output, std::size_t output_stride, const float* bias) {
+    constexpr std::size_t row_block = 96, column_block = 128;
+    alignas(32) double total[row_block * 16];
+    for (std::size_t panel = 0; panel < input.panels(); ++panel) {
+        const auto first_token = panel * 16;
+        const auto count = std::min<std::size_t>(16, input.tokens() - first_token);
+        for (std::size_t first_row = 0; first_row < rows;) {
+            const auto live_rows = std::min(row_block, rows - first_row);
+            std::fill(total, total + live_rows * 16, 0.0);
+            for (std::size_t first_col = 0; first_col < columns;) {
+                const auto width = std::min(column_block, columns - first_col);
+                const auto* x = input.panel(panel) + first_col * 16;
+                const auto* w = weights + first_row * weight_stride + first_col;
+                std::size_t row = 0;
+                for (; live_rows - row >= 6; row += 6)
+                    accumulate_chunk<6>(w + row * weight_stride, width, weight_stride, x, total + row * 16);
+                switch (live_rows - row) {
+                case 5: accumulate_chunk<5>(w + row * weight_stride, width, weight_stride, x, total + row * 16); break;
+                case 4: accumulate_chunk<4>(w + row * weight_stride, width, weight_stride, x, total + row * 16); break;
+                case 3: accumulate_chunk<3>(w + row * weight_stride, width, weight_stride, x, total + row * 16); break;
+                case 2: accumulate_chunk<2>(w + row * weight_stride, width, weight_stride, x, total + row * 16); break;
+                case 1: accumulate_chunk<1>(w + row * weight_stride, width, weight_stride, x, total + row * 16); break;
+                }
+                first_col += width;
+            }
+            for (std::size_t token = 0; token < count; ++token)
+                for (std::size_t row = 0; row < live_rows; ++row)
+                    output[(first_token + token) * output_stride + first_row + row] =
+                        static_cast<float>(total[row * 16 + token]) + (bias ? bias[first_row + row] : 0.0f);
+            first_row += live_rows;
+        }
+    }
+}
 } // namespace blocked_sum_detail
 #endif
 
@@ -85,7 +142,11 @@ inline void gemm_blocked_sum(const float* weights, std::size_t rows,
     leaf::kernels::token_panel_detail::extent(input.tokens(), output_stride, rows);
 #if defined(__x86_64__) && defined(__GNUC__)
     if (use_avx2 && leaf::kernels::token_panel_f32_avx2_available()) {
+#if defined(LEAF_ACCUMULATION_CACHE_BLOCKED)
+        blocked_sum_detail::gemm_cached(weights, rows, columns, weight_stride, input, output, output_stride, bias);
+#else
         blocked_sum_detail::gemm(weights, rows, columns, weight_stride, input, output, output_stride, bias);
+#endif
         return;
     }
 #endif

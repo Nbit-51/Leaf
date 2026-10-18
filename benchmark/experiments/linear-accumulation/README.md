@@ -1,5 +1,14 @@
 # Shared linear accumulation candidate
 
+**October 18 continuation:** the precise-scalar candidate now passes complete
+Smol/Qwen eight-block quality, cache/thread/scalar checks, ten reduced
+architectures and 1,048 unit tests. Smol's controlled timing is stable but
+prefill is 4.35% slower; Qwen timing is in progress. Released defaults remain
+unchanged. See [current findings](../../../docs/shared-accumulation.md) and
+[live checkpoint](../../../docs/checkpoint-2026-10-18-accumulation.md).
+Build this revision with `build.py --precise-scalar --output FRESH_DIRECTORY`.
+The October 17 commands/results below are retained historical evidence.
+
 Windows experiment based on `main` at `107cb98`. Release dispatch is unchanged.
 The generated candidate marks its native metrics with
 `experimental_accumulation_build: true`; do not package or advertise it as a

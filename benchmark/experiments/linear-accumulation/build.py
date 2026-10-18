@@ -19,6 +19,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--compiler', default='C:/msys64/mingw64/bin/g++.exe')
+    parser.add_argument('--inline-partial', action='store_true',
+                        help='eliminate the partial-call boundary without changing arithmetic')
+    parser.add_argument('--cache-blocked', action='store_true',
+                        help='reuse each K chunk across the existing 96-row block; implies inline partial')
+    parser.add_argument('--precise-scalar', action='store_true',
+                        help='use FP64 dot reductions only for pure-FP32 scalar execution')
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -37,6 +43,22 @@ def main():
         }''')
     text = replace_once(text, 'epsilon, norm_kind, output, h);',
                         'epsilon, norm_kind, output, h, fp32_artifact);')
+    if args.precise_scalar:
+        text = replace_once(text, 'void quant_dot_scalar(', '''void dot_scalar_precise(const Weight& w, std::size_t row, const float* inputs,
+                        std::size_t tokens, float* result) {
+    const auto* values = reinterpret_cast<const float*>(w.data) + row * w.cols;
+    for (std::size_t token = 0; token < tokens; ++token) {
+        double total = 0.0;
+        for (std::size_t col = 0; col < w.cols; ++col)
+            total += static_cast<double>(values[col]) * inputs[token * w.cols + col];
+        result[token] = static_cast<float>(total);
+    }
+}
+
+void quant_dot_scalar(''')
+        text = replace_once(text, '        optimized_fp32 = LEAF_OPTIMIZED_FP32 && avx && fp32_artifact;',
+            '''        if (fp32_artifact && !avx) dot = dot_scalar_precise;
+        optimized_fp32 = LEAF_OPTIMIZED_FP32 && avx && fp32_artifact;''')
     # Restrict changed arithmetic to the pure-FP32 policy, including research builds.
     text = replace_once(text, 'leaf::kernels::gemm_token_panels_f32_row_reuse(',
         '(fp32_artifact ? leaf::experiments::gemm_blocked_sum : leaf::kernels::gemm_token_panels_f32_row_reuse)(')
@@ -52,6 +74,10 @@ def main():
     generated_main.write_text(main_source, newline='\n')
     common = [args.compiler, '-std=c++17', '-O3', '-DNDEBUG', '-pthread',
               '-static', '-static-libgcc', '-static-libstdc++', '-I', str(ROOT / 'engine/include'), '-I', str(HERE)]
+    if args.inline_partial or args.cache_blocked:
+        common.append('-DLEAF_ACCUMULATION_INLINE_PARTIAL=1')
+    if args.cache_blocked:
+        common.append('-DLEAF_ACCUMULATION_CACHE_BLOCKED=1')
     jobs = [common + [str(generated), str(generated_main), str(ROOT / 'engine/src/kv_cache.cpp'),
                      str(ROOT / 'engine/src/kernels/transformer.cpp'), '-o', str(output / 'leaf_decoder.exe'), '-lpsapi'],
             common + [str(HERE / 'probe.cpp'), '-o', str(output / 'probe.exe')]]
@@ -61,7 +87,8 @@ def main():
     hashes = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
     manifest = dict(complete=False, release_default_changed=False, acceptance_timing=False,
         base_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-        source_sha256=hashes, commands=jobs)
+        source_sha256=hashes, commands=jobs, inline_partial=args.inline_partial or args.cache_blocked,
+        cache_blocked=args.cache_blocked, precise_scalar=args.precise_scalar)
     (output / 'build.json').write_text(json.dumps(manifest, indent=2))
     try:
         for command in jobs:
