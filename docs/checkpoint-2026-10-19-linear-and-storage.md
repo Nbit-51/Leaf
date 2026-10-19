@@ -1,7 +1,9 @@
 # October 19: exact kernels, linear cost and Smol/Qwen versus Ollama
 
-Stay on `codex/linear-accumulation`; do not merge or publish yet. Accurate
-accumulation remains separate from released defaults. No process is left running.
+This checkpoint records work completed on `codex/linear-accumulation` before
+publication. Accurate accumulation remains separate from released defaults.
+The user subsequently authorized merging after CI passes and deleting the branch.
+No benchmark or local model server is left running.
 
 ## Implemented and checked
 
