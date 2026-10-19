@@ -1,0 +1,76 @@
+{
+  "complete": true,
+  "acceptance_timing": false,
+  "binaries": {
+    "before": {
+      "path": "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\before\\leaf_decoder.exe",
+      "sha256": "6c55fafd526d38c9705836e327508edf41318e88802aeb001e9dea2a3c90d81b",
+      "command": [
+        "C:/msys64/mingw64/bin/g++.exe",
+        "-std=c++17",
+        "-O3",
+        "-DNDEBUG",
+        "-pthread",
+        "-static",
+        "-static-libgcc",
+        "-static-libstdc++",
+        "-I",
+        "C:\\Users\\navaneeth\\leaf\\engine\\include",
+        "-I",
+        "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation",
+        "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\before\\decoder.cpp",
+        "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_decoder.cpp",
+        "C:\\Users\\navaneeth\\leaf\\engine\\src\\kv_cache.cpp",
+        "C:\\Users\\navaneeth\\leaf\\engine\\src\\kernels\\transformer.cpp",
+        "-o",
+        "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\before\\leaf_decoder.exe",
+        "-lpsapi"
+      ]
+    },
+    "after": {
+      "path": "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\after\\leaf_decoder.exe",
+      "sha256": "1d6c5f33c7940d9971ab502f3fd7f7cb5b871b5a9d6d2525e5be40b377d3c4ee",
+      "command": [
+        "C:/msys64/mingw64/bin/g++.exe",
+        "-std=c++17",
+        "-O3",
+        "-DNDEBUG",
+        "-pthread",
+        "-static",
+        "-static-libgcc",
+        "-static-libstdc++",
+        "-I",
+        "C:\\Users\\navaneeth\\leaf\\engine\\include",
+        "-I",
+        "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation",
+        "-DLEAF_ACCUMULATION_INLINE_PARTIAL=1",
+        "-DLEAF_ACCUMULATION_TREE_OUTER=1",
+        "-DLEAF_ACCUMULATION_TREE_CHUNK=256",
+        "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\after\\decoder.cpp",
+        "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_decoder.cpp",
+        "C:\\Users\\navaneeth\\leaf\\engine\\src\\kv_cache.cpp",
+        "C:\\Users\\navaneeth\\leaf\\engine\\src\\kernels\\transformer.cpp",
+        "-o",
+        "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\after\\leaf_decoder.exe",
+        "-lpsapi"
+      ]
+    }
+  },
+  "hashes": {
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\projection_diagnosis.py": "bd662e1a72f98bfcdbcc2c46d3e854933a295cdc796c8ca0a933dcf5962be7f0",
+    "C:\\Users\\navaneeth\\leaf\\engine\\src\\decoder.cpp": "c02989f7fce2bb000ecc630e9225ca7373224ada382eeffea2c77fc34df59fcb",
+    "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\before\\decoder.cpp": "c34ecc40ed4062675f5d99d2d9b63aa31dae3a1a2c1707c3b095d190bbf4a754",
+    "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_decoder.cpp": "cef90e4230531b3e5de5d94397d0e17fd7a493317e97e26bb4b2aa2aeb914beb",
+    "C:\\Users\\navaneeth\\leaf\\engine\\src\\kv_cache.cpp": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3",
+    "C:\\Users\\navaneeth\\leaf\\engine\\src\\kernels\\transformer.cpp": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29",
+    "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\token_panel.h": "5b3609bad5de9723a7fca27c606cf6ba261cd7b829eeab65c35670ac5db5f556",
+    "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\row_reuse.h": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569",
+    "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\decoder_config.h": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\release\\leaf_decoder.exe": "83db825956f5657c068a5699efbc35e088527fc34ac24a37122e7805f2ea2900",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261018-k256\\decoder.cpp": "3c6feda57098e8e07e42714cfacf1836a841e70edf58193a85859da449a90d9e",
+    "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\after\\decoder.cpp": "e68a057a62f2289e867d7b1175d7a63f2e757ba9994d0f8fd21fccdb37e93f17",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261018-k256\\leaf_decoder.exe": "e10228a4676abcf493928918b20a35e98bda4b6cf74ca697b12b6ca2060047d4",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\tree_sum.h": "594105193dfdc408e0b2a85ad95a26ae78a3f1ad3d1ea6dcbd3a79347b16ab7c",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\blocked_sum.h": "50918808b3be2e03cb081282597660fb0e6b41328a537c6226c65c604c7693a0"
+  }
+}

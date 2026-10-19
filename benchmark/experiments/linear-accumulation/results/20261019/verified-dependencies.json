@@ -1,0 +1,37 @@
+{
+  "scope": "Dependency state at completed verification; supplements, does not rewrite the earlier build manifest",
+  "sha256": {
+    "engine\\include\\leaf\\graph_parser.h": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d",
+    "engine\\include\\leaf\\kernels\\attention_vector.h": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1",
+    "engine\\include\\leaf\\kernels\\conv.h": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba",
+    "engine\\include\\leaf\\kernels\\gelu.h": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc",
+    "engine\\include\\leaf\\kernels\\gelu_erf.h": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457",
+    "engine\\include\\leaf\\kernels\\gemm.h": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46",
+    "engine\\include\\leaf\\kernels\\gemv_pair.h": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef",
+    "engine\\include\\leaf\\kernels\\mlp_panel.h": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+    "engine\\include\\leaf\\kernels\\row_reuse.h": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569",
+    "engine\\include\\leaf\\kernels\\silu_gate.h": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926",
+    "engine\\include\\leaf\\kernels\\token_panel.h": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97",
+    "engine\\include\\leaf\\kernels\\transformer.h": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375",
+    "engine\\include\\leaf\\kernels\\unrolled_token.h": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4",
+    "engine\\include\\leaf\\kernels\\weight_panel.h": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2",
+    "engine\\include\\leaf\\kernels\\wide_token.h": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+    "engine\\include\\leaf\\runtime\\arena.h": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6",
+    "engine\\include\\leaf\\runtime\\decoder.h": "7b212c197f6e707a31355ffe1942e30888df3a07a95fe5fb56464588e8123a6d",
+    "engine\\include\\leaf\\runtime\\decoder_config.h": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+    "engine\\include\\leaf\\runtime\\embedding.h": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de",
+    "engine\\include\\leaf\\runtime\\executor.h": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d",
+    "engine\\include\\leaf\\runtime\\host_support.h": "7ceffefe8d7c6495857d5cc4b689b31bdceebffe34489fe997616e9c556af224",
+    "engine\\include\\leaf\\runtime\\kv_cache.h": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315",
+    "engine\\src\\decoder.cpp": "c02989f7fce2bb000ecc630e9225ca7373224ada382eeffea2c77fc34df59fcb",
+    "engine\\src\\kv_cache.cpp": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3",
+    "engine\\src\\kernels\\transformer.cpp": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29",
+    "build\\linear-accumulation-20261019-pipeline\\decoder.cpp": "3c6feda57098e8e07e42714cfacf1836a841e70edf58193a85859da449a90d9e",
+    "benchmark\\experiments\\linear-accumulation\\blocked_sum.h": "50918808b3be2e03cb081282597660fb0e6b41328a537c6226c65c604c7693a0",
+    "benchmark\\experiments\\linear-accumulation\\tree_sum.h": "594105193dfdc408e0b2a85ad95a26ae78a3f1ad3d1ea6dcbd3a79347b16ab7c"
+  },
+  "binaries": {
+    "generation-adapter.exe": "02aa881dd3ad22f22ae257214f7f586f1053ce448e4b63d8257d230f1e8a8337",
+    "leaf_decoder.exe": "af65268c755564834ae9c1d25d591d1480f4120c04ea8a4d1a8138110dcca7be"
+  }
+}

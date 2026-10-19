@@ -1,0 +1,492 @@
+{
+  "complete": true,
+  "diagnostic_only": true,
+  "original_gate_unchanged": true,
+  "scope": "Failed prompts only; cached eager FP32 reference, FP64 selected-token log-softmax",
+  "torch": "2.12.0+cpu",
+  "transformers": "5.14.1",
+  "hashes": {
+    "build\\ollama-family-20261019\\qwen-comparison\\comparison.json": "ebedcbd2298ae649055aa638c5d99c3a83301fcb078056dc1a41009bbf483fb5",
+    "build\\ollama-family-20261019\\qwen-comparison\\leaf-quality\\results.jsonl": "df74cbf1cd7fa3f2839375f5f5288b3d90bea5fb8a60081a70cb309c6ef5da90",
+    "build\\ollama-family-20261019\\qwen-comparison\\ollama-quality.json": "44f7a3d96168f9b0e68c05ea9aee821a7380fedaf40e3b302f2f8f2e1ec381fd",
+    "build\\ollama-family-20261019\\qwen\\gguf-audit.json": "8ee6b977ba38a7b99625eb700c5033acca6a83199c2a6c95c5be45b967288e9f",
+    "C:\\Users\\navaneeth\\leaf\\tools\\diagnose_ollama_quality.py": "198926643464c25b72ed9637160f828dc318955bbb20ab620695546d57ec1de4",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539"
+  },
+  "checks": [
+    {
+      "index": 0,
+      "prompt": "The purpose of a computer is",
+      "reference_greedy_tokens": [
+        311,
+        1882,
+        1995,
+        13,
+        576,
+        6366,
+        374,
+        264
+      ],
+      "leaf_generated_tokens": [
+        311,
+        1882,
+        1995,
+        13,
+        576,
+        6366,
+        374,
+        264
+      ],
+      "reference_logprobs": [
+        -0.2392675896383878,
+        -1.9173455567488986,
+        -0.9454648897590658,
+        -1.0516926774153497,
+        -2.062859850591966,
+        -2.3862347892378963,
+        -1.9499818202039094,
+        -1.2825442597168255
+      ],
+      "leaf_logprobs": [
+        -0.2392670215,
+        -1.917344035,
+        -0.9454623599,
+        -1.051693007,
+        -2.062859559,
+        -2.386236952,
+        -1.949985809,
+        -1.282542751
+      ],
+      "ollama_logprobs": [
+        -0.2389048933982849,
+        -1.9171156883239746,
+        -0.9452687501907349,
+        -1.0514572858810425,
+        -2.0626494884490967,
+        -2.3857104778289795,
+        -1.9496431350708008,
+        -1.2823020219802856
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 3.98879609053715e-06,
+      "ollama_reported_max_abs_error": 0.0005243114089168444,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    },
+    {
+      "index": 1,
+      "prompt": "Once upon a time, a small robot found",
+      "reference_greedy_tokens": [
+        264,
+        31626,
+        2415,
+        13,
+        576,
+        2415,
+        11508,
+        311
+      ],
+      "leaf_generated_tokens": [
+        264,
+        31626,
+        2415,
+        13,
+        576,
+        2415,
+        11508,
+        311
+      ],
+      "reference_logprobs": [
+        -1.0631197110331705,
+        -3.1278197983291385,
+        -0.8619186476398042,
+        -1.2947691195517486,
+        -0.29286589952129205,
+        -0.0491391077070098,
+        -1.8319805533608466,
+        -0.12396812799416779
+      ],
+      "leaf_logprobs": [
+        -1.063115041,
+        -3.127823178,
+        -0.861918069,
+        -1.294763079,
+        -0.2928675352,
+        -0.04913911684,
+        -1.831976969,
+        -0.1239681122
+      ],
+      "ollama_logprobs": [
+        -1.0627540349960327,
+        -3.1273581981658936,
+        -0.8617432117462158,
+        -1.2946006059646606,
+        -0.2927353084087372,
+        -0.04904641583561897,
+        -1.8318548202514648,
+        -0.12386664003133774
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 6.040551748576206e-06,
+      "ollama_reported_max_abs_error": 0.00046160016324492403,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    },
+    {
+      "index": 2,
+      "prompt": "Question: What is the capital of France?\nAnswer:",
+      "reference_greedy_tokens": [
+        576,
+        6722,
+        315,
+        9625,
+        374,
+        12095,
+        13,
+        12095
+      ],
+      "leaf_generated_tokens": [
+        576,
+        6722,
+        315,
+        9625,
+        374,
+        12095,
+        13,
+        12095
+      ],
+      "reference_logprobs": [
+        -0.3859045782735997,
+        -0.1263216891435306,
+        -0.07095343880154203,
+        -0.021008084105481828,
+        -0.041655617839918335,
+        -0.010218429244474692,
+        -0.7750867029397206,
+        -1.2041834606579336
+      ],
+      "leaf_logprobs": [
+        -0.3859027091,
+        -0.1263177411,
+        -0.07095232806,
+        -0.02100740043,
+        -0.04165497851,
+        -0.01021833433,
+        -0.7750745287,
+        -1.204174397
+      ],
+      "ollama_logprobs": [
+        -0.38559794425964355,
+        -0.12601931393146515,
+        -0.07090474665164948,
+        -0.02094832807779312,
+        -0.04158611595630646,
+        -0.010125587694346905,
+        -0.7749574780464172,
+        -1.2037826776504517
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 1.2174239720552649e-05,
+      "ollama_reported_max_abs_error": 0.00040078300748191964,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    },
+    {
+      "index": 3,
+      "prompt": "Two plus two equals",
+      "reference_greedy_tokens": [
+        198,
+        16141,
+        78191,
+        25,
+        320,
+        32,
+        8,
+        220
+      ],
+      "leaf_generated_tokens": [
+        198,
+        16141,
+        78191,
+        25,
+        320,
+        32,
+        8,
+        220
+      ],
+      "reference_logprobs": [
+        -2.4759865174991695,
+        -0.156376263714197,
+        -0.0011483084236054708,
+        -0.016165650599862857,
+        -9.906936885073492e-06,
+        -0.0005079088457158321,
+        -0.003595024647122358,
+        -0.6507157272990085
+      ],
+      "leaf_logprobs": [
+        -2.475993966,
+        -0.156375844,
+        -0.001148298771,
+        -0.01616470497,
+        -9.907423256e-06,
+        -0.0005079361943,
+        -0.003594861548,
+        -0.6507102295
+      ],
+      "ollama_logprobs": [
+        -2.475560188293457,
+        -0.15613289177417755,
+        -0.001138500520028174,
+        -0.016019903123378754,
+        -9.655998837843072e-06,
+        -0.0004975841147825122,
+        -0.003586158389225602,
+        -0.6504915952682495
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 7.4485008303426525e-06,
+      "ollama_reported_max_abs_error": 0.00042632920571250565,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    },
+    {
+      "index": 4,
+      "prompt": "def add(a, b):\n    return",
+      "reference_greedy_tokens": [
+        264,
+        488,
+        293,
+        271,
+        750,
+        32256,
+        2877,
+        11
+      ],
+      "leaf_generated_tokens": [
+        264,
+        488,
+        293,
+        271,
+        750,
+        32256,
+        2877,
+        11
+      ],
+      "reference_logprobs": [
+        -0.03412100174678301,
+        -0.052969414480937616,
+        -0.000539677229177471,
+        -0.36231398804399007,
+        -0.13319020014106897,
+        -0.3762066847680572,
+        -0.009422798700640556,
+        -0.004487403020476677
+      ],
+      "leaf_logprobs": [
+        -0.03412138648,
+        -0.05296923274,
+        -0.0005396751943,
+        -0.3623145146,
+        -0.1331894475,
+        -0.3762042163,
+        -0.009422795367,
+        -0.004487370456
+      ],
+      "ollama_logprobs": [
+        -0.034078869968652725,
+        -0.05294697731733322,
+        -0.0005322322831489146,
+        -0.3622896075248718,
+        -0.13300830125808716,
+        -0.3759746253490448,
+        -0.00936907809227705,
+        -0.004483663011342287
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 2.4684680571818163e-06,
+      "ollama_reported_max_abs_error": 0.00023205941901238702,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    },
+    {
+      "index": 5,
+      "prompt": "Hello! Caf\u00e9, na\u00efve, and Unicode text:",
+      "reference_greedy_tokens": [
+        358,
+        2776,
+        264,
+        220,
+        17,
+        20,
+        4666,
+        6284
+      ],
+      "leaf_generated_tokens": [
+        358,
+        2776,
+        264,
+        220,
+        17,
+        20,
+        4666,
+        6284
+      ],
+      "reference_logprobs": [
+        -1.4062693824827086,
+        -1.469277282955467,
+        -2.0239635314756654,
+        -3.5097239165318967,
+        -1.2744962389701477,
+        -1.9816979809583657,
+        -0.3598660480719822,
+        -0.03055471001593446
+      ],
+      "leaf_logprobs": [
+        -1.406268236,
+        -1.469278724,
+        -2.023966071,
+        -3.509731404,
+        -1.274494358,
+        -1.981695539,
+        -0.3598648468,
+        -0.03055492566
+      ],
+      "ollama_logprobs": [
+        -1.4054181575775146,
+        -1.4686319828033447,
+        -2.02350115776062,
+        -3.509052276611328,
+        -1.2740565538406372,
+        -1.981317162513733,
+        -0.35941293835639954,
+        -0.030288120731711388
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 7.487468103306583e-06,
+      "ollama_reported_max_abs_error": 0.0008512249051939591,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    },
+    {
+      "index": 6,
+      "prompt": "A A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the",
+      "reference_greedy_tokens": [
+        1852,
+        1614,
+        11,
+        11127,
+        323,
+        17654,
+        5003,
+        13
+      ],
+      "leaf_generated_tokens": [
+        1852,
+        1614,
+        11,
+        11127,
+        323,
+        17654,
+        5003,
+        13
+      ],
+      "reference_logprobs": [
+        -0.013252219568563817,
+        -0.0578300426893108,
+        -0.06182150227787986,
+        -0.03539706114279184,
+        -0.19270726612101186,
+        -0.020992366370034432,
+        -0.010610074081416343,
+        -0.5340496499373941
+      ],
+      "leaf_logprobs": [
+        -0.01325225294,
+        -0.05783037287,
+        -0.06182166172,
+        -0.03539701822,
+        -0.1927072792,
+        -0.02099240503,
+        -0.01061006857,
+        -0.5340484021
+      ],
+      "ollama_logprobs": [
+        -0.013075105845928192,
+        -0.05764564871788025,
+        -0.06164969503879547,
+        -0.035189252346754074,
+        -0.19254618883132935,
+        -0.020775116980075836,
+        -0.010533541440963745,
+        -0.5338020920753479
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 1.2478373940805199e-06,
+      "ollama_reported_max_abs_error": 0.00024755786204622154,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    },
+    {
+      "index": 7,
+      "prompt": "B A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the",
+      "reference_greedy_tokens": [
+        1852,
+        1614,
+        11,
+        11127,
+        323,
+        17654,
+        5003,
+        13
+      ],
+      "leaf_generated_tokens": [
+        1852,
+        1614,
+        11,
+        11127,
+        323,
+        17654,
+        5003,
+        13
+      ],
+      "reference_logprobs": [
+        -0.012877317189836646,
+        -0.04095917681418726,
+        -0.06222661092865067,
+        -0.03344431288874716,
+        -0.17065753037713804,
+        -0.019268182975114456,
+        -0.01047053127307862,
+        -0.5665321661726672
+      ],
+      "leaf_logprobs": [
+        -0.0128773388,
+        -0.04095922093,
+        -0.06222636453,
+        -0.0334442425,
+        -0.1706561786,
+        -0.01926811582,
+        -0.0104705149,
+        -0.5665291303
+      ],
+      "ollama_logprobs": [
+        -0.012702634558081627,
+        -0.0407719761133194,
+        -0.06204472482204437,
+        -0.033242158591747284,
+        -0.1704881638288498,
+        -0.019055653363466263,
+        -0.010395068675279617,
+        -0.5662526488304138
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 3.0358726672563563e-06,
+      "ollama_reported_max_abs_error": 0.0002795173422533992,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    }
+  ]
+}

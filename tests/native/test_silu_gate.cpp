@@ -60,7 +60,7 @@ void exercise(const std::vector<float>& gates, const std::vector<float>& inputs)
 
 int main() {
     try {
-        for (std::size_t n : {0, 1, 3, 4, 5, 7, 8, 9, 31, 63, 2048, 5632, 354816, 1000001}) {
+        for (std::size_t n : {0, 1, 3, 4, 5, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 2048, 5632, 354816, 1000001}) {
             std::vector<float> g(n), u(n);
             for (std::size_t i = 0; i < n; ++i) {
                 g[i] = -80.0f + 160.0f * static_cast<float>(i) / std::max<std::size_t>(1, n - 1);
@@ -85,9 +85,10 @@ int main() {
             -std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
             -INFINITY, INFINITY, NAN};
         for (float gate : specials) for (float input : specials) {
-            // Every SIMD lane and a scalar tail, mixed with ordinary inputs.
-            for (unsigned lane = 0; lane < 5; ++lane) {
-                g.assign(5, 0.375f); u.assign(5, -2.5f);
+            // Every lane of a four-stream batch and a scalar tail, mixed
+            // with ordinary inputs. Also exercises identical input/output.
+            for (unsigned lane = 0; lane < 17; ++lane) {
+                g.assign(17, 0.375f); u.assign(17, -2.5f);
                 g[lane] = gate; u[lane] = input;
                 exercise(g, u);
             }

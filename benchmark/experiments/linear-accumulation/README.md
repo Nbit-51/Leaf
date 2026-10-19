@@ -1,5 +1,12 @@
 # Shared linear accumulation candidate
 
+**October 19:** exact SiLU/workspace changes pass native tests, 1,048 unit tests
+and full trained-quality rebinding. Fresh Smol/Qwen FP32 Ollama comparisons have
+stable timing advantages with a retained cross-runtime probability preflight
+failure. The independent reference check and source-preserving storage probe
+are in the [latest checkpoint](../../../docs/checkpoint-2026-10-19-linear-and-storage.md).
+An operator probe is not an integrated model optimization.
+
 **October 18 continuation:** the precise-scalar candidate now passes complete
 Smol/Qwen eight-block quality, cache/thread/scalar checks, ten reduced
 architectures and 1,048 unit tests. Both controlled timings are stable, but
@@ -85,7 +92,7 @@ python benchmark/experiments/linear-accumulation/run_probe.py --build build/line
 The originally deferred full tests are complete. Do not rerun the old commands.
 The scalar-corrected FP64-outer candidate passes full trained quality, cache,
 scalar/thread regressions, ten reduced architecture configurations and 1,048
-unit tests, but its stable whole-model prefill is 4.2–4.4% slower than release.
+unit tests, but its stable whole-model prefill is 4.2â€“4.4% slower than release.
 
 The newer balanced FP32 tree with global K=256 chunks and explicit Q/K/V and
 up/gate packing reuse passes full eight-block quality and six exact reference

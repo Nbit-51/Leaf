@@ -146,6 +146,39 @@ void check_matrix(std::size_t tokens, std::size_t rows, std::size_t columns, boo
             require(panels.panel(0)[col * 16 + lane] == 0.0f, "repacked tail padding contains stale values");
 }
 
+void check_reused_workspace() {
+    const std::size_t shapes[][2] = {{33, 257}, {7, 9}, {31, 257}, {9, 513}, {1, 1}, {65, 513}};
+    for (bool vector : {false, true}) {
+        leaf::kernels::TokenPanelsF32 panels;
+        unsigned generation = 0;
+        for (const auto& shape : shapes) {
+            const auto tokens = shape[0], columns = shape[1], stride = columns + 3;
+            std::vector<float> input(tokens * stride, sentinel);
+            for (std::size_t token = 0; token < tokens; ++token)
+                for (std::size_t col = 0; col < columns; ++col)
+                    input[token * stride + col] = (token + col) % 17 == 0 ? -0.0f :
+                        static_cast<float>(++generation + token * 7 + col) / 8.0f;
+            const auto saved = input;
+            panels.pack(input.data(), tokens, columns, stride, vector);
+            const auto count = (tokens + 15) / 16;
+            require(panels.tokens() == tokens && panels.columns() == columns && panels.panels() == count,
+                    "reused workspace exposes old matrix extents");
+            require(panels.storage_size() == count * columns * 16, "workspace logical size changed");
+            for (std::size_t panel = 0; panel < count; ++panel)
+                for (std::size_t col = 0; col < columns; ++col)
+                    for (std::size_t lane = 0; lane < 16; ++lane) {
+                        const auto token = panel * 16 + lane;
+                        const float expected = token < tokens ? input[token * stride + col] : 0.0f;
+                        const auto* actual = panels.panel(panel) + col * 16 + lane;
+                        require(std::memcmp(actual, &expected, sizeof(float)) == 0,
+                                "width/token changes leaked stale values or altered packed bits");
+                    }
+            require(std::memcmp(input.data(), saved.data(), input.size() * sizeof(float)) == 0,
+                    "repacking changed caller input");
+        }
+    }
+}
+
 void check_row_slices(std::size_t rows, std::size_t columns, std::size_t slice_rows) {
     constexpr std::size_t tokens = 29;
     std::vector<float> input(tokens * columns, 0.25f), weights(rows * columns, 0.5f);
@@ -243,6 +276,7 @@ int main() {
         check_matrix(33, 101, 255, false);
         check_row_slices(13, 30, 5);
         check_row_slices(211, 257, 108);
+        check_reused_workspace();
         check_invalid();
         std::cout << "FP32 token-panel correctness passed; AVX2/FMA available="
                   << leaf::kernels::token_panel_f32_avx2_available() << '\n';

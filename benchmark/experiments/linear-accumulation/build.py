@@ -136,6 +136,12 @@ void quant_dot_scalar(''')
                Path(__file__), generated, generated_main]
     if args.tree_outer:
         sources.append(HERE / 'tree_sum.h')
+    # The decoder includes activation, attention and runtime headers as well.
+    # Retain all engine headers and translation units so a kernel-only change
+    # cannot produce an apparently identical build manifest.
+    sources.extend([ROOT / 'engine/src/kv_cache.cpp', ROOT / 'engine/src/kernels/transformer.cpp'])
+    sources.extend(sorted((ROOT / 'engine/include').rglob('*.h')))
+    sources = list(dict.fromkeys(sources))
     hashes = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
     manifest = dict(complete=False, release_default_changed=False, acceptance_timing=False,
         base_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),

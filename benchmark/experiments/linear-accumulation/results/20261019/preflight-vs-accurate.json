@@ -1,0 +1,469 @@
+{
+  "complete": true,
+  "acceptance_timing": false,
+  "release_qualified": false,
+  "scope": "Diagnostic only: two balanced pairs, seven samples and three warmups per pass",
+  "measured_at_utc": "2026-10-19T02:55:53.194291+00:00",
+  "cpu": 2,
+  "threads": 1,
+  "hashes": {
+    "build\\linear-accumulation-20261018-k256\\leaf_decoder.exe": "e10228a4676abcf493928918b20a35e98bda4b6cf74ca697b12b6ca2060047d4",
+    "build\\linear-accumulation-20261019-pipeline\\leaf_decoder.exe": "af65268c755564834ae9c1d25d591d1480f4120c04ea8a4d1a8138110dcca7be",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\preflight.py": "a7ffd89a30d53e5df8d35f46f524107841e81e36f639cf2f69e2f9a58ae41b4a",
+    "C:\\Users\\navaneeth\\leaf\\tools\\decoder_validation.py": "414d9d575f2bb38ee5d100947e6e46da868b45facee9a99c03a5f400343133fd",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\decode-silu\\smol-work\\decoder-32.leaf": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\decode-silu\\smol-work\\tokens.json": "05f9ecdb962b53b8c16820cbf22953ba8adcbaf9692af2f3da8714e767af2246",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\decode-silu\\qwen-work\\decoder-32.leaf": "f01b07a042ce3e3da824076802376e3f0f1864e3134b1036c5c4e4bd517d7de7",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\decode-silu\\qwen-work\\tokens.json": "a07ba9ef734f9e1de4db78aa98950befaf0140309cb07d3cc7addaf923bc24d9"
+  },
+  "models": {
+    "smol": {
+      "pairs": [
+        {
+          "order": [
+            "before",
+            "after"
+          ],
+          "before": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1447312000,
+            "peak_rss_bytes": 1461350400,
+            "load_ms": 0.6406,
+            "prefill_p50_ms": 501.3136,
+            "decode_p50_ms": 80.8349,
+            "prefill_samples_ms": [
+              500.2872,
+              499.9917,
+              506.3374,
+              512.5725,
+              505.8589,
+              501.3136,
+              498.6701
+            ],
+            "decode_samples_ms": [
+              78.8331,
+              78.9873,
+              85.7532,
+              82.5603,
+              81.0227,
+              80.8264,
+              80.8349
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal",
+            "power_at_pass_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          "after": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1447312000,
+            "peak_rss_bytes": 1461362688,
+            "load_ms": 0.7183,
+            "prefill_p50_ms": 497.7417,
+            "decode_p50_ms": 81.7314,
+            "prefill_samples_ms": [
+              495.087,
+              497.7417,
+              497.45,
+              492.9297,
+              504.0717,
+              508.3812,
+              498.7027
+            ],
+            "decode_samples_ms": [
+              80.8519,
+              82.1488,
+              81.7314,
+              78.7578,
+              83.3196,
+              82.1177,
+              81.3577
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal",
+            "power_at_pass_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        },
+        {
+          "order": [
+            "after",
+            "before"
+          ],
+          "after": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1447312000,
+            "peak_rss_bytes": 1461362688,
+            "load_ms": 0.6747,
+            "prefill_p50_ms": 500.4163,
+            "decode_p50_ms": 81.3966,
+            "prefill_samples_ms": [
+              501.6877,
+              508.3958,
+              500.4163,
+              491.0966,
+              497.6517,
+              496.5436,
+              502.9224
+            ],
+            "decode_samples_ms": [
+              83.8136,
+              79.2251,
+              81.762,
+              81.7653,
+              81.3966,
+              79.2794,
+              80.4394
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal",
+            "power_at_pass_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          "before": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1447312000,
+            "peak_rss_bytes": 1461350400,
+            "load_ms": 0.6442,
+            "prefill_p50_ms": 502.7588,
+            "decode_p50_ms": 81.4941,
+            "prefill_samples_ms": [
+              503.6338,
+              496.0426,
+              502.7588,
+              512.0289,
+              499.4181,
+              503.1176,
+              494.9284
+            ],
+            "decode_samples_ms": [
+              80.1931,
+              82.7686,
+              85.6993,
+              81.9195,
+              81.4941,
+              81.2313,
+              80.9567
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal",
+            "power_at_pass_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        }
+      ],
+      "summary": {
+        "prefill": {
+          "pooled_median_ms": {
+            "before": 502.0362,
+            "after": 498.2222
+          },
+          "pooled_ratio": 0.9924029382741723,
+          "paired_ratios": [
+            0.9928749190127696,
+            0.995340708108938
+          ]
+        },
+        "decode": {
+          "pooled_median_ms": {
+            "before": 81.12700000000001,
+            "after": 81.564
+          },
+          "pooled_ratio": 1.0053866160464455,
+          "paired_ratios": [
+            1.0110905066994575,
+            0.9988035943706355
+          ]
+        }
+      }
+    },
+    "qwen": {
+      "pairs": [
+        {
+          "order": [
+            "before",
+            "after"
+          ],
+          "before": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1976158464,
+            "peak_rss_bytes": 1988341760,
+            "load_ms": 0.6849,
+            "prefill_p50_ms": 585.0342,
+            "decode_p50_ms": 111.3385,
+            "prefill_samples_ms": [
+              593.5864,
+              593.8084,
+              585.0342,
+              584.1248,
+              597.7377,
+              581.2943,
+              576.254
+            ],
+            "decode_samples_ms": [
+              123.6461,
+              111.3385,
+              110.6292,
+              114.5198,
+              112.6465,
+              108.6789,
+              110.38
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal",
+            "power_at_pass_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          "after": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1976158464,
+            "peak_rss_bytes": 1988341760,
+            "load_ms": 0.6829,
+            "prefill_p50_ms": 572.4566,
+            "decode_p50_ms": 112.1603,
+            "prefill_samples_ms": [
+              573.3918,
+              571.3264,
+              572.4566,
+              564.9812,
+              578.265,
+              573.5007,
+              571.1964
+            ],
+            "decode_samples_ms": [
+              112.8793,
+              111.4431,
+              112.1603,
+              112.6361,
+              111.613,
+              111.783,
+              115.2831
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal",
+            "power_at_pass_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        },
+        {
+          "order": [
+            "after",
+            "before"
+          ],
+          "after": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1976158464,
+            "peak_rss_bytes": 1988349952,
+            "load_ms": 0.6484,
+            "prefill_p50_ms": 575.1696,
+            "decode_p50_ms": 110.6325,
+            "prefill_samples_ms": [
+              569.7897,
+              574.0854,
+              576.0233,
+              574.021,
+              581.4733,
+              589.9304,
+              575.1696
+            ],
+            "decode_samples_ms": [
+              109.1131,
+              110.6741,
+              109.8943,
+              110.6325,
+              104.8859,
+              116.2221,
+              116.2832
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal",
+            "power_at_pass_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          "before": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1976158464,
+            "peak_rss_bytes": 1988354048,
+            "load_ms": 0.6333,
+            "prefill_p50_ms": 578.49,
+            "decode_p50_ms": 110.6204,
+            "prefill_samples_ms": [
+              574.9653,
+              594.5986,
+              588.9513,
+              578.49,
+              578.4365,
+              577.0541,
+              579.526
+            ],
+            "decode_samples_ms": [
+              111.3828,
+              121.3091,
+              109.6091,
+              108.7494,
+              110.0322,
+              110.6204,
+              112.058
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal",
+            "power_at_pass_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        }
+      ],
+      "summary": {
+        "prefill": {
+          "pooled_median_ms": {
+            "before": 582.70955,
+            "after": 573.76085
+          },
+          "pooled_ratio": 0.984642949476287,
+          "paired_ratios": [
+            0.9785010859194213,
+            0.9942602292174453
+          ]
+        },
+        "decode": {
+          "pooled_median_ms": {
+            "before": 110.98384999999999,
+            "after": 111.69800000000001
+          },
+          "pooled_ratio": 1.0064347200065598,
+          "paired_ratios": [
+            1.0073810945899218,
+            1.0001093830794319
+          ]
+        }
+      }
+    }
+  }
+}

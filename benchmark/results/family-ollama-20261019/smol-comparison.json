@@ -1,0 +1,4504 @@
+{
+  "format": "leaf-ollama-cpu-generation-v1",
+  "measured_at_utc": "2026-10-19T03:05:06.796280+00:00",
+  "scope": "Serial Leaf/Ollama FP32 generation comparison with checked cache/output work.\n\nScope: backend-reported uncached prefill and generation of two output tokens\n(one cached forward after the prefill token). HTTP/load time is separate. Six\nbalanced pairs, 3 warmups/11 measurements by default. No sample filtering.\n",
+  "cpu": 2,
+  "threads": 1,
+  "weight_bits": 32,
+  "kv_bits": 32,
+  "cached_prompt_tokens": 0,
+  "generated_tokens_per_sample": 2,
+  "cached_decode_forwards": 1,
+  "runs_per_pass": 11,
+  "warmup_per_pass": 3,
+  "workload": [
+    {
+      "prompt": "A A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the",
+      "ids": [
+        49,
+        330,
+        5649,
+        10776,
+        6090,
+        260,
+        1578,
+        335,
+        253,
+        1679,
+        2583,
+        30,
+        378,
+        4308,
+        804,
+        260,
+        1142,
+        1743,
+        28,
+        9577,
+        284,
+        15595,
+        4840,
+        30,
+        216,
+        330,
+        5649,
+        10776,
+        6090,
+        260,
+        1578,
+        335,
+        253,
+        1679,
+        2583,
+        30,
+        378,
+        4308,
+        804,
+        260,
+        1142,
+        1743,
+        28,
+        9577,
+        284,
+        15595,
+        4840,
+        30,
+        216,
+        330,
+        5649,
+        10776,
+        6090,
+        260,
+        1578,
+        335,
+        253,
+        1679,
+        2583,
+        30,
+        378,
+        4308,
+        804,
+        260
+      ]
+    },
+    {
+      "prompt": "B A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the",
+      "ids": [
+        50,
+        330,
+        5649,
+        10776,
+        6090,
+        260,
+        1578,
+        335,
+        253,
+        1679,
+        2583,
+        30,
+        378,
+        4308,
+        804,
+        260,
+        1142,
+        1743,
+        28,
+        9577,
+        284,
+        15595,
+        4840,
+        30,
+        216,
+        330,
+        5649,
+        10776,
+        6090,
+        260,
+        1578,
+        335,
+        253,
+        1679,
+        2583,
+        30,
+        378,
+        4308,
+        804,
+        260,
+        1142,
+        1743,
+        28,
+        9577,
+        284,
+        15595,
+        4840,
+        30,
+        216,
+        330,
+        5649,
+        10776,
+        6090,
+        260,
+        1578,
+        335,
+        253,
+        1679,
+        2583,
+        30,
+        378,
+        4308,
+        804,
+        260
+      ]
+    }
+  ],
+  "complete": true,
+  "overall_speed_claim": false,
+  "criteria": "Quality passed; each pass and pooled p90/p10 <=1.25; Leaf/Ollama median paired prefill <=0.98 and decode <=1.02",
+  "pairs": [
+    {
+      "order": [
+        "leaf",
+        "ollama"
+      ],
+      "leaf": {
+        "samples": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 498.9288,
+            "generation_phase_ms": 81.181,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 493.5172,
+            "generation_phase_ms": 82.8041,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 491.1342,
+            "generation_phase_ms": 81.8875,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.8418,
+            "generation_phase_ms": 83.2402,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 480.6348,
+            "generation_phase_ms": 79.4201,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 504.6527,
+            "generation_phase_ms": 83.2293,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.0422,
+            "generation_phase_ms": 83.3324,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 492.5745,
+            "generation_phase_ms": 81.1574,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 495.2599,
+            "generation_phase_ms": 81.53,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 492.6187,
+            "generation_phase_ms": 79.8828,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 492.1348,
+            "generation_phase_ms": 83.2669,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "warmups": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 1027.1318,
+            "generation_phase_ms": 88.555,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 510.3935,
+            "generation_phase_ms": 82.4661,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.026,
+            "generation_phase_ms": 78.3046,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 491.1342,
+            "p90_ms": 498.9288,
+            "p90_p10_ratio": 1.0158706113318925,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 79.8828,
+            "p90_ms": 83.2669,
+            "p90_p10_ratio": 1.0423633122524498,
+            "reason": "passed"
+          }
+        }
+      },
+      "ollama": {
+        "samples": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:25.625737Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 677616400,
+            "load_duration": 4049000,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 578523000,
+            "eval_count": 2,
+            "eval_duration": 90874000,
+            "external_request_ms": 679.0311000004294,
+            "prefill_ms": 578.523,
+            "generation_phase_ms": 90.874,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:26.3231304Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 695536400,
+            "load_duration": 4728300,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 596933000,
+            "eval_count": 2,
+            "eval_duration": 90011000,
+            "external_request_ms": 697.7499000004173,
+            "prefill_ms": 596.933,
+            "generation_phase_ms": 90.011,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:27.0354596Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 700708500,
+            "load_duration": 3920700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 595108000,
+            "eval_count": 2,
+            "eval_duration": 96985000,
+            "external_request_ms": 711.8376999997054,
+            "prefill_ms": 595.108,
+            "generation_phase_ms": 96.985,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:27.7236803Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 686145700,
+            "load_duration": 4668100,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 586387000,
+            "eval_count": 2,
+            "eval_duration": 91874000,
+            "external_request_ms": 688.2564999996248,
+            "prefill_ms": 586.387,
+            "generation_phase_ms": 91.874,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:28.4078024Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 682136300,
+            "load_duration": 4638000,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 582056000,
+            "eval_count": 2,
+            "eval_duration": 91032000,
+            "external_request_ms": 684.1926999995849,
+            "prefill_ms": 582.056,
+            "generation_phase_ms": 91.032,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:29.1026199Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 682682900,
+            "load_duration": 3388700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 583826000,
+            "eval_count": 2,
+            "eval_duration": 92694000,
+            "external_request_ms": 694.4397999995999,
+            "prefill_ms": 583.826,
+            "generation_phase_ms": 92.694,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:29.8069694Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 701868500,
+            "load_duration": 4280200,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 590531000,
+            "eval_count": 2,
+            "eval_duration": 103563000,
+            "external_request_ms": 703.9311999997153,
+            "prefill_ms": 590.531,
+            "generation_phase_ms": 103.563,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:30.4944726Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 685463500,
+            "load_duration": 4845500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 585104000,
+            "eval_count": 2,
+            "eval_duration": 92326000,
+            "external_request_ms": 687.9354000002422,
+            "prefill_ms": 585.104,
+            "generation_phase_ms": 92.326,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:31.1858422Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 688401500,
+            "load_duration": 3774100,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 589188000,
+            "eval_count": 2,
+            "eval_duration": 91686000,
+            "external_request_ms": 690.881200000149,
+            "prefill_ms": 589.188,
+            "generation_phase_ms": 91.686,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:31.8799545Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 675404200,
+            "load_duration": 5116800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 573599000,
+            "eval_count": 2,
+            "eval_duration": 92820000,
+            "external_request_ms": 693.1455000003552,
+            "prefill_ms": 573.599,
+            "generation_phase_ms": 92.82,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:32.5554596Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 673945700,
+            "load_duration": 4557800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 575909000,
+            "eval_count": 2,
+            "eval_duration": 89697000,
+            "external_request_ms": 675.4700999999841,
+            "prefill_ms": 575.909,
+            "generation_phase_ms": 89.697,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "warmups": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:23.5599776Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 1987328700,
+            "load_duration": 1250128400,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 635152000,
+            "eval_count": 2,
+            "eval_duration": 96588000,
+            "external_request_ms": 2005.6175999998231,
+            "prefill_ms": 635.152,
+            "generation_phase_ms": 96.588,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:24.2586366Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 687595100,
+            "load_duration": 3509300,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 592175000,
+            "eval_count": 2,
+            "eval_duration": 88214000,
+            "external_request_ms": 689.246799999637,
+            "prefill_ms": 592.175,
+            "generation_phase_ms": 88.214,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:24.9459398Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 684905600,
+            "load_duration": 4019900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 584220000,
+            "eval_count": 2,
+            "eval_duration": 92347000,
+            "external_request_ms": 687.0629000004556,
+            "prefill_ms": 584.22,
+            "generation_phase_ms": 92.347,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 575.909,
+            "p90_ms": 595.108,
+            "p90_p10_ratio": 1.0333368639837195,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 90.011,
+            "p90_ms": 96.985,
+            "p90_p10_ratio": 1.0774794191821,
+            "reason": "passed"
+          }
+        }
+      }
+    },
+    {
+      "order": [
+        "ollama",
+        "leaf"
+      ],
+      "ollama": {
+        "samples": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:36.6876584Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 682485800,
+            "load_duration": 5003100,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 583559000,
+            "eval_count": 2,
+            "eval_duration": 89357000,
+            "external_request_ms": 683.6550999996689,
+            "prefill_ms": 583.559,
+            "generation_phase_ms": 89.357,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:37.3721621Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 669961500,
+            "load_duration": 4022300,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 575464000,
+            "eval_count": 2,
+            "eval_duration": 87431000,
+            "external_request_ms": 684.0476999996099,
+            "prefill_ms": 575.464,
+            "generation_phase_ms": 87.431,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:38.0788904Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 704527700,
+            "load_duration": 4072500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 599855000,
+            "eval_count": 2,
+            "eval_duration": 95729000,
+            "external_request_ms": 707.010099999934,
+            "prefill_ms": 599.855,
+            "generation_phase_ms": 95.729,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:38.748003Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 666620200,
+            "load_duration": 4049700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 569787000,
+            "eval_count": 2,
+            "eval_duration": 88767000,
+            "external_request_ms": 668.7552000003052,
+            "prefill_ms": 569.787,
+            "generation_phase_ms": 88.767,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:39.4193492Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 654656000,
+            "load_duration": 3502900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 565459000,
+            "eval_count": 2,
+            "eval_duration": 81885000,
+            "external_request_ms": 670.9751999997025,
+            "prefill_ms": 565.459,
+            "generation_phase_ms": 81.885,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:40.0806208Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 659181300,
+            "load_duration": 3549400,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 562122000,
+            "eval_count": 2,
+            "eval_duration": 89102000,
+            "external_request_ms": 660.8899000002566,
+            "prefill_ms": 562.122,
+            "generation_phase_ms": 89.102,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:40.7656101Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 667819800,
+            "load_duration": 2915800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 572702000,
+            "eval_count": 2,
+            "eval_duration": 88593000,
+            "external_request_ms": 685.2859000000535,
+            "prefill_ms": 572.702,
+            "generation_phase_ms": 88.593,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:41.470421Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 681608200,
+            "load_duration": 6916000,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 582295000,
+            "eval_count": 2,
+            "eval_duration": 88743000,
+            "external_request_ms": 703.7998000005246,
+            "prefill_ms": 582.295,
+            "generation_phase_ms": 88.743,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:42.175565Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 703523200,
+            "load_duration": 3579700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 603606000,
+            "eval_count": 2,
+            "eval_duration": 92528000,
+            "external_request_ms": 705.5227999999261,
+            "prefill_ms": 603.606,
+            "generation_phase_ms": 92.528,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:42.8688077Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 677179000,
+            "load_duration": 3443700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 577045000,
+            "eval_count": 2,
+            "eval_duration": 93567000,
+            "external_request_ms": 693.3188999992126,
+            "prefill_ms": 577.045,
+            "generation_phase_ms": 93.567,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:43.5475334Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 676077200,
+            "load_duration": 4264200,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 576953000,
+            "eval_count": 2,
+            "eval_duration": 90560000,
+            "external_request_ms": 677.8604999999516,
+            "prefill_ms": 576.953,
+            "generation_phase_ms": 90.56,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "warmups": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:34.6207625Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 1839279200,
+            "load_duration": 1157251600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 588411000,
+            "eval_count": 2,
+            "eval_duration": 88479000,
+            "external_request_ms": 1840.5099000001428,
+            "prefill_ms": 588.411,
+            "generation_phase_ms": 88.479,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:35.3131111Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 666564600,
+            "load_duration": 2997500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 570897000,
+            "eval_count": 2,
+            "eval_duration": 88235000,
+            "external_request_ms": 684.1770000000906,
+            "prefill_ms": 570.897,
+            "generation_phase_ms": 88.235,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:05:36.0041758Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 666863300,
+            "load_duration": 3520500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 568352000,
+            "eval_count": 2,
+            "eval_duration": 91101000,
+            "external_request_ms": 690.688599999703,
+            "prefill_ms": 568.352,
+            "generation_phase_ms": 91.101,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 565.459,
+            "p90_ms": 599.855,
+            "p90_p10_ratio": 1.0608284597114912,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 87.431,
+            "p90_ms": 93.567,
+            "p90_p10_ratio": 1.0701810570621404,
+            "reason": "passed"
+          }
+        }
+      },
+      "leaf": {
+        "samples": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 495.1761,
+            "generation_phase_ms": 81.8677,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 496.3187,
+            "generation_phase_ms": 80.8456,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 492.6018,
+            "generation_phase_ms": 80.9163,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 500.2273,
+            "generation_phase_ms": 81.1498,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 490.0657,
+            "generation_phase_ms": 83.2843,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 494.6138,
+            "generation_phase_ms": 79.7417,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 493.64,
+            "generation_phase_ms": 78.1567,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 482.0545,
+            "generation_phase_ms": 83.1292,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 484.3319,
+            "generation_phase_ms": 75.4524,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 478.4935,
+            "generation_phase_ms": 81.2729,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 494.1183,
+            "generation_phase_ms": 81.7322,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "warmups": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 997.9171,
+            "generation_phase_ms": 83.795,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 492.6818,
+            "generation_phase_ms": 80.8666,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 504.9814,
+            "generation_phase_ms": 89.1734,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 482.0545,
+            "p90_ms": 496.3187,
+            "p90_p10_ratio": 1.0295904301277137,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 78.1567,
+            "p90_ms": 83.1292,
+            "p90_p10_ratio": 1.0636221846623513,
+            "reason": "passed"
+          }
+        }
+      }
+    },
+    {
+      "order": [
+        "leaf",
+        "ollama"
+      ],
+      "leaf": {
+        "samples": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 498.2718,
+            "generation_phase_ms": 78.9886,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 492.8264,
+            "generation_phase_ms": 81.5373,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 490.7132,
+            "generation_phase_ms": 80.1071,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 498.8631,
+            "generation_phase_ms": 80.899,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 500.0777,
+            "generation_phase_ms": 81.3328,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 550.2029,
+            "generation_phase_ms": 86.1761,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 488.3203,
+            "generation_phase_ms": 77.9297,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 486.0037,
+            "generation_phase_ms": 81.7982,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 493.0712,
+            "generation_phase_ms": 84.9881,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 488.404,
+            "generation_phase_ms": 80.6299,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 495.818,
+            "generation_phase_ms": 83.0035,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "warmups": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 1017.2822,
+            "generation_phase_ms": 77.245,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 480.1946,
+            "generation_phase_ms": 80.1201,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 487.956,
+            "generation_phase_ms": 85.2594,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 488.3203,
+            "p90_ms": 500.0777,
+            "p90_p10_ratio": 1.024077229638006,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 78.9886,
+            "p90_ms": 84.9881,
+            "p90_p10_ratio": 1.0759539984250892,
+            "reason": "passed"
+          }
+        }
+      },
+      "ollama": {
+        "samples": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:05.3589521Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 686818200,
+            "load_duration": 3555600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 587223000,
+            "eval_count": 2,
+            "eval_duration": 91024000,
+            "external_request_ms": 688.3141999996951,
+            "prefill_ms": 587.223,
+            "generation_phase_ms": 91.024,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:06.060405Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 699768100,
+            "load_duration": 4533400,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 593945000,
+            "eval_count": 2,
+            "eval_duration": 96574000,
+            "external_request_ms": 702.0769999999175,
+            "prefill_ms": 593.945,
+            "generation_phase_ms": 96.574,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:06.7516587Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 688781600,
+            "load_duration": 4548300,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 588817000,
+            "eval_count": 2,
+            "eval_duration": 91777000,
+            "external_request_ms": 690.7633000000715,
+            "prefill_ms": 588.817,
+            "generation_phase_ms": 91.777,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:07.4397317Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 685914600,
+            "load_duration": 4530700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 587907000,
+            "eval_count": 2,
+            "eval_duration": 90153000,
+            "external_request_ms": 688.2047000008242,
+            "prefill_ms": 587.907,
+            "generation_phase_ms": 90.153,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:08.125676Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 683313200,
+            "load_duration": 3549000,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 585518000,
+            "eval_count": 2,
+            "eval_duration": 90023000,
+            "external_request_ms": 685.1710999999341,
+            "prefill_ms": 585.518,
+            "generation_phase_ms": 90.023,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:08.8136957Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 685357400,
+            "load_duration": 5590500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 583150000,
+            "eval_count": 2,
+            "eval_duration": 92414000,
+            "external_request_ms": 687.8419999993639,
+            "prefill_ms": 583.15,
+            "generation_phase_ms": 92.414,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:09.5036015Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 688009100,
+            "load_duration": 4534900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 588863000,
+            "eval_count": 2,
+            "eval_duration": 91092000,
+            "external_request_ms": 689.4929000000047,
+            "prefill_ms": 588.863,
+            "generation_phase_ms": 91.092,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:10.227362Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 700176600,
+            "load_duration": 4524600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 601298000,
+            "eval_count": 2,
+            "eval_duration": 90859000,
+            "external_request_ms": 724.048799999764,
+            "prefill_ms": 601.298,
+            "generation_phase_ms": 90.859,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:10.9093242Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 679264800,
+            "load_duration": 3518800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 580730000,
+            "eval_count": 2,
+            "eval_duration": 90759000,
+            "external_request_ms": 681.5201999997953,
+            "prefill_ms": 580.73,
+            "generation_phase_ms": 90.759,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:11.5926041Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 681319500,
+            "load_duration": 4539100,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 583653000,
+            "eval_count": 2,
+            "eval_duration": 90123000,
+            "external_request_ms": 683.63650000083,
+            "prefill_ms": 583.653,
+            "generation_phase_ms": 90.123,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:12.2790457Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 683867100,
+            "load_duration": 4534500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 589142000,
+            "eval_count": 2,
+            "eval_duration": 86440000,
+            "external_request_ms": 685.7038000007378,
+            "prefill_ms": 589.142,
+            "generation_phase_ms": 86.44,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "warmups": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:03.3116408Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 1893189100,
+            "load_duration": 1213027400,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 585591000,
+            "eval_count": 2,
+            "eval_duration": 90447000,
+            "external_request_ms": 1895.6786999997348,
+            "prefill_ms": 585.591,
+            "generation_phase_ms": 90.447,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:03.9938726Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 673026500,
+            "load_duration": 3998900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 571393000,
+            "eval_count": 2,
+            "eval_duration": 92524000,
+            "external_request_ms": 674.0921000000526,
+            "prefill_ms": 571.393,
+            "generation_phase_ms": 92.524,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:04.6697847Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 673617400,
+            "load_duration": 4638700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 574452000,
+            "eval_count": 2,
+            "eval_duration": 90945000,
+            "external_request_ms": 675.6051000002117,
+            "prefill_ms": 574.452,
+            "generation_phase_ms": 90.945,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 583.15,
+            "p90_ms": 593.945,
+            "p90_p10_ratio": 1.0185115321958331,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 90.023,
+            "p90_ms": 92.414,
+            "p90_p10_ratio": 1.0265598791419972,
+            "reason": "passed"
+          }
+        }
+      }
+    },
+    {
+      "order": [
+        "ollama",
+        "leaf"
+      ],
+      "ollama": {
+        "samples": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:16.3958062Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 686793300,
+            "load_duration": 3545900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 588250000,
+            "eval_count": 2,
+            "eval_duration": 90668000,
+            "external_request_ms": 688.6084999996456,
+            "prefill_ms": 588.25,
+            "generation_phase_ms": 90.668,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:17.0883535Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 676826900,
+            "load_duration": 2911800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 577893000,
+            "eval_count": 2,
+            "eval_duration": 92498000,
+            "external_request_ms": 692.6886000001105,
+            "prefill_ms": 577.893,
+            "generation_phase_ms": 92.498,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:17.7755292Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 684709300,
+            "load_duration": 5566200,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 583816000,
+            "eval_count": 2,
+            "eval_duration": 90612000,
+            "external_request_ms": 686.59899999966,
+            "prefill_ms": 583.816,
+            "generation_phase_ms": 90.612,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:18.4751847Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 697798600,
+            "load_duration": 4533600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 597807000,
+            "eval_count": 2,
+            "eval_duration": 91085000,
+            "external_request_ms": 699.7467000001052,
+            "prefill_ms": 597.807,
+            "generation_phase_ms": 91.085,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:19.1599223Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 682793000,
+            "load_duration": 4537400,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 583953000,
+            "eval_count": 2,
+            "eval_duration": 91075000,
+            "external_request_ms": 684.8511999996845,
+            "prefill_ms": 583.953,
+            "generation_phase_ms": 91.075,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:19.8431314Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 680767500,
+            "load_duration": 4531900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 582805000,
+            "eval_count": 2,
+            "eval_duration": 90104000,
+            "external_request_ms": 683.1294000003254,
+            "prefill_ms": 582.805,
+            "generation_phase_ms": 90.104,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:20.5494988Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 681729600,
+            "load_duration": 4010600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 583384000,
+            "eval_count": 2,
+            "eval_duration": 90598000,
+            "external_request_ms": 705.4013999995732,
+            "prefill_ms": 583.384,
+            "generation_phase_ms": 90.598,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:21.2357496Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 684287500,
+            "load_duration": 3564800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 585801000,
+            "eval_count": 2,
+            "eval_duration": 91037000,
+            "external_request_ms": 686.8221999993693,
+            "prefill_ms": 585.801,
+            "generation_phase_ms": 91.037,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:21.9330266Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 694694600,
+            "load_duration": 4531600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 591747000,
+            "eval_count": 2,
+            "eval_duration": 94791000,
+            "external_request_ms": 696.9436999997924,
+            "prefill_ms": 591.747,
+            "generation_phase_ms": 94.791,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:22.6208036Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 685710300,
+            "load_duration": 4538600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 586908000,
+            "eval_count": 2,
+            "eval_duration": 91063000,
+            "external_request_ms": 687.5902000001588,
+            "prefill_ms": 586.908,
+            "generation_phase_ms": 91.063,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:23.3088377Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 685032300,
+            "load_duration": 4009100,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 586546000,
+            "eval_count": 2,
+            "eval_duration": 89635000,
+            "external_request_ms": 687.3785000007047,
+            "prefill_ms": 586.546,
+            "generation_phase_ms": 89.635,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "warmups": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:14.332706Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 1830500500,
+            "load_duration": 1136863900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 596525000,
+            "eval_count": 2,
+            "eval_duration": 92523000,
+            "external_request_ms": 1832.549800000379,
+            "prefill_ms": 596.525,
+            "generation_phase_ms": 92.523,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:15.0177911Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 675392100,
+            "load_duration": 4002500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 574189000,
+            "eval_count": 2,
+            "eval_duration": 93244000,
+            "external_request_ms": 676.6803000000436,
+            "prefill_ms": 574.189,
+            "generation_phase_ms": 93.244,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:15.7067586Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 686790200,
+            "load_duration": 4554700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 587065000,
+            "eval_count": 2,
+            "eval_duration": 91350000,
+            "external_request_ms": 689.021799999864,
+            "prefill_ms": 587.065,
+            "generation_phase_ms": 91.35,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 582.805,
+            "p90_ms": 591.747,
+            "p90_p10_ratio": 1.0153430392669933,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 90.104,
+            "p90_ms": 92.498,
+            "p90_p10_ratio": 1.026569297700435,
+            "reason": "passed"
+          }
+        }
+      },
+      "leaf": {
+        "samples": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 507.4841,
+            "generation_phase_ms": 82.3009,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.7743,
+            "generation_phase_ms": 82.1781,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 498.0484,
+            "generation_phase_ms": 84.1096,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 490.219,
+            "generation_phase_ms": 82.0787,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 495.6704,
+            "generation_phase_ms": 81.7326,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 498.5271,
+            "generation_phase_ms": 82.2272,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 501.76,
+            "generation_phase_ms": 86.1341,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 506.3863,
+            "generation_phase_ms": 80.4064,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 502.767,
+            "generation_phase_ms": 83.6592,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 494.6057,
+            "generation_phase_ms": 84.1787,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 495.7715,
+            "generation_phase_ms": 81.7678,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "warmups": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 1024.188,
+            "generation_phase_ms": 83.868,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 496.191,
+            "generation_phase_ms": 82.4176,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.6156,
+            "generation_phase_ms": 88.2486,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 494.6057,
+            "p90_ms": 506.3863,
+            "p90_p10_ratio": 1.0238181646511555,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 81.7326,
+            "p90_ms": 84.1787,
+            "p90_p10_ratio": 1.0299280825521273,
+            "reason": "passed"
+          }
+        }
+      }
+    },
+    {
+      "order": [
+        "leaf",
+        "ollama"
+      ],
+      "leaf": {
+        "samples": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.2027,
+            "generation_phase_ms": 83.3995,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 498.7506,
+            "generation_phase_ms": 80.7766,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.7581,
+            "generation_phase_ms": 80.6009,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.891,
+            "generation_phase_ms": 82.674,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.5691,
+            "generation_phase_ms": 81.9816,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 516.6189,
+            "generation_phase_ms": 78.5407,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 501.7182,
+            "generation_phase_ms": 82.937,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 501.7685,
+            "generation_phase_ms": 82.5402,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 496.0735,
+            "generation_phase_ms": 84.4741,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 497.7415,
+            "generation_phase_ms": 84.0612,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 503.208,
+            "generation_phase_ms": 81.3205,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "warmups": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 1030.0965,
+            "generation_phase_ms": 85.4707,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 508.5986,
+            "generation_phase_ms": 82.4918,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 504.0924,
+            "generation_phase_ms": 81.3046,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 497.2027,
+            "p90_ms": 503.208,
+            "p90_p10_ratio": 1.0120781725441155,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 80.6009,
+            "p90_ms": 84.0612,
+            "p90_p10_ratio": 1.0429312824050352,
+            "reason": "passed"
+          }
+        }
+      },
+      "ollama": {
+        "samples": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:45.6384983Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 684279600,
+            "load_duration": 5533100,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 586031000,
+            "eval_count": 2,
+            "eval_duration": 89809000,
+            "external_request_ms": 686.5958000007595,
+            "prefill_ms": 586.031,
+            "generation_phase_ms": 89.809,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:46.3358046Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 694807900,
+            "load_duration": 4089400,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 597043000,
+            "eval_count": 2,
+            "eval_duration": 89697000,
+            "external_request_ms": 696.990000000369,
+            "prefill_ms": 597.043,
+            "generation_phase_ms": 89.697,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:47.0239762Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 685228000,
+            "load_duration": 3515200,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 585203000,
+            "eval_count": 2,
+            "eval_duration": 91500000,
+            "external_request_ms": 687.1221000001242,
+            "prefill_ms": 585.203,
+            "generation_phase_ms": 91.5,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:47.7073369Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 680799600,
+            "load_duration": 4547100,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 582828000,
+            "eval_count": 2,
+            "eval_duration": 89881000,
+            "external_request_ms": 683.8589999997566,
+            "prefill_ms": 582.828,
+            "generation_phase_ms": 89.881,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:48.3998042Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 689779100,
+            "load_duration": 3547700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 590889000,
+            "eval_count": 2,
+            "eval_duration": 90652000,
+            "external_request_ms": 692.4506999994264,
+            "prefill_ms": 590.889,
+            "generation_phase_ms": 90.652,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:49.0865317Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 684434100,
+            "load_duration": 4535500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 586551000,
+            "eval_count": 2,
+            "eval_duration": 90206000,
+            "external_request_ms": 686.3810000004378,
+            "prefill_ms": 586.551,
+            "generation_phase_ms": 90.206,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:49.788559Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 699835500,
+            "load_duration": 3548000,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 594082000,
+            "eval_count": 2,
+            "eval_duration": 98369000,
+            "external_request_ms": 701.3553999995565,
+            "prefill_ms": 594.082,
+            "generation_phase_ms": 98.369,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:50.4884341Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 698122700,
+            "load_duration": 6537600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 596043000,
+            "eval_count": 2,
+            "eval_duration": 90669000,
+            "external_request_ms": 700.585300000057,
+            "prefill_ms": 596.043,
+            "generation_phase_ms": 90.669,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:51.1808052Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 689933300,
+            "load_duration": 3694400,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 590114000,
+            "eval_count": 2,
+            "eval_duration": 91024000,
+            "external_request_ms": 691.6654999995444,
+            "prefill_ms": 590.114,
+            "generation_phase_ms": 91.024,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:51.8697275Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 686767100,
+            "load_duration": 3533800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 589748000,
+            "eval_count": 2,
+            "eval_duration": 89470000,
+            "external_request_ms": 688.6629999999059,
+            "prefill_ms": 589.748,
+            "generation_phase_ms": 89.47,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:52.5549121Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 683003600,
+            "load_duration": 3655300,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 585011000,
+            "eval_count": 2,
+            "eval_duration": 90171000,
+            "external_request_ms": 684.8323000003802,
+            "prefill_ms": 585.011,
+            "generation_phase_ms": 90.171,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "warmups": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:43.5602623Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 2145007000,
+            "load_duration": 1432148000,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 614496000,
+            "eval_count": 2,
+            "eval_duration": 93871000,
+            "external_request_ms": 2157.8542000006564,
+            "prefill_ms": 614.496,
+            "generation_phase_ms": 93.871,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:44.2609839Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 690567400,
+            "load_duration": 4009400,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 591854000,
+            "eval_count": 2,
+            "eval_duration": 89958000,
+            "external_request_ms": 691.9631000000663,
+            "prefill_ms": 591.854,
+            "generation_phase_ms": 89.958,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:44.952183Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 688655200,
+            "load_duration": 5011200,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 588546000,
+            "eval_count": 2,
+            "eval_duration": 91659000,
+            "external_request_ms": 689.8473000001104,
+            "prefill_ms": 588.546,
+            "generation_phase_ms": 91.659,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 585.011,
+            "p90_ms": 596.043,
+            "p90_p10_ratio": 1.0188577650676656,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 89.697,
+            "p90_ms": 91.5,
+            "p90_p10_ratio": 1.0201010067226328,
+            "reason": "passed"
+          }
+        }
+      }
+    },
+    {
+      "order": [
+        "ollama",
+        "leaf"
+      ],
+      "ollama": {
+        "samples": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:56.9309739Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 683690500,
+            "load_duration": 3000300,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 580748000,
+            "eval_count": 2,
+            "eval_duration": 96333000,
+            "external_request_ms": 696.080400000028,
+            "prefill_ms": 580.748,
+            "generation_phase_ms": 96.333,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:57.6288514Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 695354700,
+            "load_duration": 3550800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 594035000,
+            "eval_count": 2,
+            "eval_duration": 93341000,
+            "external_request_ms": 697.4435000001904,
+            "prefill_ms": 594.035,
+            "generation_phase_ms": 93.341,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:58.3107219Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 678903100,
+            "load_duration": 3560700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 580973000,
+            "eval_count": 2,
+            "eval_duration": 89751000,
+            "external_request_ms": 681.5725999995266,
+            "prefill_ms": 580.973,
+            "generation_phase_ms": 89.751,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:58.9945216Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 682018500,
+            "load_duration": 4203600,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 585172000,
+            "eval_count": 2,
+            "eval_duration": 89121000,
+            "external_request_ms": 684.1332999993028,
+            "prefill_ms": 585.172,
+            "generation_phase_ms": 89.121,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:59.6753314Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 678488100,
+            "load_duration": 4046900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 580189000,
+            "eval_count": 2,
+            "eval_duration": 90431000,
+            "external_request_ms": 680.6021000002147,
+            "prefill_ms": 580.189,
+            "generation_phase_ms": 90.431,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:07:00.3602389Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 682063600,
+            "load_duration": 5010700,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 583689000,
+            "eval_count": 2,
+            "eval_duration": 89113000,
+            "external_request_ms": 684.218299999884,
+            "prefill_ms": 583.689,
+            "generation_phase_ms": 89.113,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:07:01.0636292Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 701575900,
+            "load_duration": 4544900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 606827000,
+            "eval_count": 2,
+            "eval_duration": 86433000,
+            "external_request_ms": 703.6176000001433,
+            "prefill_ms": 606.827,
+            "generation_phase_ms": 86.433,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:07:01.7549871Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 688874600,
+            "load_duration": 3540800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 596202000,
+            "eval_count": 2,
+            "eval_duration": 85061000,
+            "external_request_ms": 691.4297000002989,
+            "prefill_ms": 596.202,
+            "generation_phase_ms": 85.061,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:07:02.4476375Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 689862200,
+            "load_duration": 3533800,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 590924000,
+            "eval_count": 2,
+            "eval_duration": 90956000,
+            "external_request_ms": 692.4370000006093,
+            "prefill_ms": 590.924,
+            "generation_phase_ms": 90.956,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:07:03.1347825Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 684636600,
+            "load_duration": 4533300,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 591931000,
+            "eval_count": 2,
+            "eval_duration": 85435000,
+            "external_request_ms": 686.8140999995376,
+            "prefill_ms": 591.931,
+            "generation_phase_ms": 85.435,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:07:03.825578Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 688228300,
+            "load_duration": 4054500,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 594066000,
+            "eval_count": 2,
+            "eval_duration": 86310000,
+            "external_request_ms": 690.1984000005541,
+            "prefill_ms": 594.066,
+            "generation_phase_ms": 86.31,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "warmups": [
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:54.7490536Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 1964995400,
+            "load_duration": 1206568000,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 638050000,
+            "eval_count": 2,
+            "eval_duration": 113447000,
+            "external_request_ms": 1966.0723999995753,
+            "prefill_ms": 638.05,
+            "generation_phase_ms": 113.447,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:55.5181686Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 740250900,
+            "load_duration": 5608200,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 634161000,
+            "eval_count": 2,
+            "eval_duration": 96264000,
+            "external_request_ms": 760.2367999998023,
+            "prefill_ms": 634.161,
+            "generation_phase_ms": 96.264,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          },
+          {
+            "model": "leaf-smollm2-360m-f32",
+            "created_at": "2026-10-19T03:06:56.2349153Z",
+            "response": " same model",
+            "done": true,
+            "done_reason": "length",
+            "total_duration": 714677700,
+            "load_duration": 4702900,
+            "prompt_eval_count": 64,
+            "prompt_eval_cached_count": 0,
+            "prompt_eval_duration": 614911000,
+            "eval_count": 2,
+            "eval_duration": 90942000,
+            "external_request_ms": 716.1200000000463,
+            "prefill_ms": 614.911,
+            "generation_phase_ms": 90.942,
+            "power_at_request_boundaries": {
+              "before": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              },
+              "after": {
+                "ac_line_status": 1,
+                "battery_saver": false
+              }
+            }
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 580.748,
+            "p90_ms": 596.202,
+            "p90_p10_ratio": 1.0266105092053694,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 85.435,
+            "p90_ms": 93.341,
+            "p90_p10_ratio": 1.092538186925733,
+            "reason": "passed"
+          }
+        }
+      },
+      "leaf": {
+        "samples": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 495.0295,
+            "generation_phase_ms": 74.4654,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 511.8328,
+            "generation_phase_ms": 76.5142,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 506.8369,
+            "generation_phase_ms": 77.8189,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 518.6833,
+            "generation_phase_ms": 85.0649,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 523.4091,
+            "generation_phase_ms": 78.8163,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 498.8346,
+            "generation_phase_ms": 73.9541,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 507.7561,
+            "generation_phase_ms": 79.6703,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 512.5357,
+            "generation_phase_ms": 73.8691,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 513.2278,
+            "generation_phase_ms": 78.3624,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 511.5493,
+            "generation_phase_ms": 79.642,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 518.8677,
+            "generation_phase_ms": 78.7507,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "warmups": [
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 1088.6546,
+            "generation_phase_ms": 82.132,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 527.3931,
+            "generation_phase_ms": 76.1449,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          },
+          {
+            "input_tokens": 64,
+            "cached_prompt_tokens": 0,
+            "uncached_prompt_tokens": 64,
+            "cached_decode_forwards": 1,
+            "prefill_ms": 523.5017,
+            "generation_phase_ms": 76.2518,
+            "quality_mode": false,
+            "ac_power_checked": true,
+            "prefill_vector_silu_calls": 32,
+            "cached_decode_vector_silu_calls": 32,
+            "generated_tokens": [
+              1142,
+              1743
+            ],
+            "response": " same model"
+          }
+        ],
+        "stability": {
+          "prefill": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 498.8346,
+            "p90_ms": 518.8677,
+            "p90_p10_ratio": 1.040159804472264,
+            "reason": "passed"
+          },
+          "decode": {
+            "passed": true,
+            "sample_count": 11,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 73.9541,
+            "p90_ms": 79.6703,
+            "p90_p10_ratio": 1.0772938890473955,
+            "reason": "passed"
+          }
+        }
+      }
+    }
+  ],
+  "hashes": {
+    "build\\ollama-20261015\\runtime\\ollama.exe": "96d1fd3377ab61340e18a7be12860baace02df965906461dfb9cdb66b3458824",
+    "build\\linear-accumulation-20261019-pipeline\\generation-adapter.exe": "02aa881dd3ad22f22ae257214f7f586f1053ce448e4b63d8257d230f1e8a8337",
+    "build\\ollama-family-20261019\\smol\\decoder-32.leaf": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+    "build\\ollama-family-20261019\\smol\\gguf-audit.json": "0b26eeab5d79fe3c39920541ddce6209e90741d61fa2e56a32bac5b2de8c4309",
+    "C:\\Users\\navaneeth\\leaf\\tools\\benchmark_ollama_decoder.py": "f08f3217207518e4b7354ee3cec3c360da2f572de6247ead361acad9a9839f1e",
+    "C:\\Users\\navaneeth\\leaf\\tools\\ollama_validation.py": "a789d26f7891a7e26346f16cf717a9a91f5a2b8d1059a00fe1acae815322fd10",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\decoder_generation_benchmark.cpp": "4f9edc44fa8eb1ebd30ed0f5a54847ef4a0d130a53d360c4065e2daaef80357e",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c"
+  },
+  "ollama_version": {
+    "version": "0.40.4"
+  },
+  "ollama_model_info": {
+    "modelfile": "# Modelfile generated by \"ollama show\"\n# To build a new Modelfile based on this, replace FROM with:\n# FROM leaf-smollm2-360m-f32:latest\n\nFROM C:\\Users\\navaneeth\\leaf\\build\\ollama-family-20261019\\models\\blobs\\sha256-a289e189925d14ede184e4d9e139e3c4e8f0b9d155f98870de7b66cd38567b0f\nTEMPLATE \"{{- range .Messages }}<|im_start|>{{ .Role }}\n{{ .Content }}<|im_end|>\n{{ end }}<|im_start|>assistant\n\"\nPARAMETER stop <|im_start|>\nPARAMETER stop <|im_end|>\n",
+    "parameters": "stop                           \"<|im_start|>\"\nstop                           \"<|im_end|>\"",
+    "template": "{{- range .Messages }}<|im_start|>{{ .Role }}\n{{ .Content }}<|im_end|>\n{{ end }}<|im_start|>assistant\n",
+    "details": {
+      "parent_model": "model-f32.gguf",
+      "format": "gguf",
+      "family": "llama",
+      "families": [
+        "llama"
+      ],
+      "parameter_size": "361.82M",
+      "quantization_level": "F32",
+      "runner": "llamacpp"
+    },
+    "model_info": {
+      "general.architecture": "llama",
+      "general.file_type": 0,
+      "general.parameter_count": 361821120,
+      "general.quantization_version": 2,
+      "general.size_label": "362M",
+      "general.type": "model",
+      "llama.attention.head_count": 15,
+      "llama.attention.head_count_kv": 5,
+      "llama.attention.key_length": 64,
+      "llama.attention.layer_norm_rms_epsilon": 1e-05,
+      "llama.attention.value_length": 64,
+      "llama.block_count": 32,
+      "llama.context_length": 8192,
+      "llama.embedding_length": 960,
+      "llama.feed_forward_length": 2560,
+      "llama.rope.dimension_count": 64,
+      "llama.rope.freq_base": 100000,
+      "llama.vocab_size": 49152,
+      "tokenizer.ggml.add_bos_token": false,
+      "tokenizer.ggml.add_space_prefix": false,
+      "tokenizer.ggml.bos_token_id": 1,
+      "tokenizer.ggml.eos_token_id": 2,
+      "tokenizer.ggml.merges": [],
+      "tokenizer.ggml.model": "gpt2",
+      "tokenizer.ggml.padding_token_id": 2,
+      "tokenizer.ggml.pre": "smollm",
+      "tokenizer.ggml.token_type": [],
+      "tokenizer.ggml.tokens": [],
+      "tokenizer.ggml.unknown_token_id": 0
+    },
+    "capabilities": [
+      "completion"
+    ],
+    "modified_at": "2026-10-19T08:31:57.4801965+05:30"
+  },
+  "backend_policy": {
+    "pid": 28912,
+    "command": [
+      "C:\\Users\\navaneeth\\leaf\\build\\ollama-20261015\\runtime\\lib\\ollama\\llama-server.exe",
+      "--model",
+      "C:\\Users\\navaneeth\\leaf\\build\\ollama-family-20261019\\models\\blobs\\sha256-a289e189925d14ede184e4d9e139e3c4e8f0b9d155f98870de7b66cd38567b0f",
+      "--port",
+      "61192",
+      "--host",
+      "127.0.0.1",
+      "--no-webui",
+      "--offline",
+      "-c",
+      "256",
+      "-np",
+      "1",
+      "--log-verbosity",
+      "4",
+      "--no-log-prefix",
+      "--no-log-timestamps",
+      "--no-jinja",
+      "--chat-template",
+      "chatml",
+      "--load-mode",
+      "none",
+      "--cache-type-k",
+      "f32",
+      "--cache-type-v",
+      "f32",
+      "--flash-attn",
+      "off",
+      "-b",
+      "256",
+      "-ub",
+      "256",
+      "-ngl",
+      "0",
+      "-t",
+      "1",
+      "--context-shift",
+      "--keep",
+      "4"
+    ],
+    "affinity": [
+      2
+    ],
+    "priority": "above_normal"
+  },
+  "reused_preflight": {
+    "path": "build\\ollama-family-20261019\\smol-comparison\\comparison.json",
+    "sha256": "a2d6378a6e418635baac1f5a462fef26cee303ecf47020d0164da406403b908e"
+  },
+  "quality": {
+    "scope": "Eight greedy continuations and selected-token log probabilities; not full-logit/perplexity qualification",
+    "checks": [
+      {
+        "prompt": "The purpose of a computer is",
+        "leaf_text": " to process information, and the computer's",
+        "ollama_text": " to process information, and the computer's",
+        "selected_logprob_max_abs_error": 0.00017083498150638476,
+        "logprob_abs_limit": 0.0002,
+        "passed": true
+      },
+      {
+        "prompt": "Once upon a time, a small robot found",
+        "leaf_text": " itself in a strange and unfamiliar world.",
+        "ollama_text": " itself in a strange and unfamiliar world.",
+        "selected_logprob_max_abs_error": 0.00011248552069087481,
+        "logprob_abs_limit": 0.0002,
+        "passed": true
+      },
+      {
+        "prompt": "Question: What is the capital of France?\nAnswer:",
+        "leaf_text": "",
+        "ollama_text": "",
+        "selected_logprob_max_abs_error": null,
+        "logprob_abs_limit": 0.0002,
+        "passed": false
+      },
+      {
+        "prompt": "Two plus two equals",
+        "leaf_text": " four.\n\nThis is a fundamental",
+        "ollama_text": " four.\n\nThis is a fundamental",
+        "selected_logprob_max_abs_error": 0.00026336888162226124,
+        "logprob_abs_limit": 0.0002,
+        "passed": false
+      },
+      {
+        "prompt": "def add(a, b):\n    return",
+        "leaf_text": " a + b\n\nresult = add",
+        "ollama_text": " a + b\n\nresult = add",
+        "selected_logprob_max_abs_error": 8.680423487556627e-05,
+        "logprob_abs_limit": 0.0002,
+        "passed": true
+      },
+      {
+        "prompt": "Hello! Caf\u00e9, na\u00efve, and Unicode text:",
+        "leaf_text": " \n\"Hello, world!\"\n",
+        "ollama_text": " \n\"Hello, world!\"\n",
+        "selected_logprob_max_abs_error": 0.0001891315328917953,
+        "logprob_abs_limit": 0.0002,
+        "passed": true
+      },
+      {
+        "prompt": "A A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the",
+        "leaf_text": " same model, inputs and processor settings.",
+        "ollama_text": " same model, inputs and processor settings.",
+        "selected_logprob_max_abs_error": 0.00016712271612506768,
+        "logprob_abs_limit": 0.0002,
+        "passed": true
+      },
+      {
+        "prompt": "B A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the same model, inputs and processor settings.  A careful engineer measured the program on a local computer. The experiment used the",
+        "leaf_text": " same model, inputs and processor settings.",
+        "ollama_text": " same model, inputs and processor settings.",
+        "selected_logprob_max_abs_error": 0.00017280058403957438,
+        "logprob_abs_limit": 0.0002,
+        "passed": true
+      }
+    ],
+    "passed": false
+  },
+  "ollama_process_state": {
+    "models": [
+      {
+        "name": "leaf-smollm2-360m-f32:latest",
+        "model": "leaf-smollm2-360m-f32:latest",
+        "size": 1482162175,
+        "digest": "3754a2e8c1219e77a582af5c7c3ba329ffd9a360c5247c78256c438dc3b32efd",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "llama",
+          "families": [
+            "llama"
+          ],
+          "parameter_size": "361.82M",
+          "quantization_level": "F32"
+        },
+        "expires_at": "2026-10-19T08:42:03.825578+05:30",
+        "size_vram": 0,
+        "context_length": 256,
+        "runner": "llamacpp"
+      }
+    ]
+  },
+  "gate": {
+    "prefill": {
+      "medians_ms": {
+        "leaf": 497.6553,
+        "ollama": 585.9159999999999
+      },
+      "pooled_ratio": 0.8493628779552018,
+      "median_paired_ratio": 0.8472221542306102,
+      "pooled_stability": {
+        "leaf": {
+          "passed": true,
+          "sample_count": 66,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 489.23485,
+          "p90_ms": 512.18425,
+          "p90_p10_ratio": 1.0469087596682862,
+          "reason": "passed"
+        },
+        "ollama": {
+          "passed": true,
+          "sample_count": 66,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 576.431,
+          "p90_ms": 596.5675,
+          "p90_p10_ratio": 1.0349330622398865,
+          "reason": "passed"
+        }
+      },
+      "every_pass_stable": true,
+      "passed": true
+    },
+    "decode": {
+      "medians_ms": {
+        "leaf": 81.53365,
+        "ollama": 90.66
+      },
+      "pooled_ratio": 0.8993343260533863,
+      "median_paired_ratio": 0.8991911937855869,
+      "pooled_stability": {
+        "leaf": {
+          "passed": true,
+          "sample_count": 66,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 78.0432,
+          "p90_ms": 84.08539999999999,
+          "p90_p10_ratio": 1.077421223117453,
+          "reason": "passed"
+        },
+        "ollama": {
+          "passed": true,
+          "sample_count": 66,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 88.012,
+          "p90_ms": 94.179,
+          "p90_p10_ratio": 1.070069990455847,
+          "reason": "passed"
+        }
+      },
+      "every_pass_stable": true,
+      "passed": true
+    }
+  },
+  "timed_generated_text_matches": true
+}
