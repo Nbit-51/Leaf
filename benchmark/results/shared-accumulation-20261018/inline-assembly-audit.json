@@ -1,0 +1,24 @@
+{
+  "assembly": "build\\linear-accumulation-20261018-inline\\probe-inspect.s",
+  "partial_calls": 0,
+  "inner_six_row_loops": [
+    {
+      "label": ".L216",
+      "instructions": 28,
+      "fma_count": 12,
+      "stack_vector_instructions": []
+    },
+    {
+      "label": ".L1523",
+      "instructions": 76,
+      "fma_count": 12,
+      "stack_vector_instructions": []
+    },
+    {
+      "label": ".L1521",
+      "instructions": 28,
+      "fma_count": 12,
+      "stack_vector_instructions": []
+    }
+  ]
+}

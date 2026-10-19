@@ -1,0 +1,155 @@
+{
+  "candidate": "6x16_k128_fp64_outer_sum",
+  "packing_included": true,
+  "synthetic": true,
+  "model_latency_measured": false,
+  "shapes": [
+    {
+      "m": 63,
+      "k": 960,
+      "n": 2560,
+      "strided": false,
+      "bias": true,
+      "scalar_fallback_bit_exact": true,
+      "row_reuse": {
+        "max_abs_error": 1.73956673577e-06,
+        "rmse": 1.7903746147e-07,
+        "max_tolerance_ratio": 0.00569988212859,
+        "violations": 0
+      },
+      "blocked_sum": {
+        "max_abs_error": 3.95014449261e-07,
+        "rmse": 6.59252345897e-08,
+        "max_tolerance_ratio": 0.00162094583756,
+        "violations": 0
+      },
+      "passes": [
+        {
+          "algorithm": "row_reuse",
+          "ms": [
+            5.0175,
+            4.2128,
+            3.927,
+            3.7733,
+            3.3804,
+            3.2665,
+            3.3449
+          ]
+        },
+        {
+          "algorithm": "blocked_sum",
+          "ms": [
+            4.913,
+            3.6301,
+            3.4281,
+            3.5558,
+            3.4263,
+            3.8892,
+            3.4268
+          ]
+        },
+        {
+          "algorithm": "blocked_sum",
+          "ms": [
+            3.7608,
+            3.4636,
+            3.4033,
+            3.5313,
+            3.4438,
+            4.1407,
+            3.4492
+          ]
+        },
+        {
+          "algorithm": "row_reuse",
+          "ms": [
+            3.2773,
+            3.6633,
+            3.2774,
+            3.284,
+            3.6126,
+            3.2539,
+            3.3012
+          ]
+        }
+      ]
+    },
+    {
+      "m": 63,
+      "k": 896,
+      "n": 4864,
+      "strided": false,
+      "bias": true,
+      "scalar_fallback_bit_exact": true,
+      "row_reuse": {
+        "max_abs_error": 1.88169175852e-06,
+        "rmse": 1.67592960158e-07,
+        "max_tolerance_ratio": 0.00535650315814,
+        "violations": 0
+      },
+      "blocked_sum": {
+        "max_abs_error": 3.62476304649e-07,
+        "rmse": 6.43176213636e-08,
+        "max_tolerance_ratio": 0.00177346060721,
+        "violations": 0
+      },
+      "passes": [
+        {
+          "algorithm": "row_reuse",
+          "ms": [
+            5.8276,
+            5.8056,
+            7.0995,
+            5.9654,
+            5.9387,
+            5.7533,
+            5.7495
+          ]
+        },
+        {
+          "algorithm": "blocked_sum",
+          "ms": [
+            6.1224,
+            6.0563,
+            6.0454,
+            6.068,
+            8.0169,
+            7.5942,
+            6.2653
+          ]
+        },
+        {
+          "algorithm": "blocked_sum",
+          "ms": [
+            6.049,
+            6.0732,
+            6.0547,
+            6.0435,
+            8.0284,
+            7.4296,
+            6.3669
+          ]
+        },
+        {
+          "algorithm": "row_reuse",
+          "ms": [
+            5.7568,
+            5.7276,
+            5.8283,
+            5.798,
+            5.897,
+            5.8662,
+            5.811
+          ]
+        }
+      ]
+    }
+  ],
+  "binary_sha256": "f53362fd8629367d0a87fa106fb808aa4d861ea9a531a255195cb07df4b35921",
+  "acceptance_timing": false,
+  "full_model_speed_qualified": false,
+  "observed_child_affinity": [
+    2
+  ],
+  "pinned_cpu": 2
+}

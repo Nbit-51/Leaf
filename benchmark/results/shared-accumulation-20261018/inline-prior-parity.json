@@ -1,0 +1,62 @@
+{
+  "complete": true,
+  "passed": true,
+  "acceptance_timing": false,
+  "full_quality_qualified": false,
+  "scope": "Exact old-candidate logits on two retained 128-token blocks only",
+  "input_sha256": {
+    "build\\linear-accumulation-20261018-inline\\leaf_decoder.exe": "38984995e65306efa226a59f1214968fe1d20a3743054079dc44dcc14a3e83bf",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\check_prior_parity.py": "4573ba705bfeb0a7665ac90eeedc6e97b8024a4d8b734139a3954d608fe710cb",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\898954fccee23671ea3da805\\decoder-32.leaf": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\smol-quality-8\\tokens.json": "1555203a81ad00cb7bfcc8e7f04aab2eccfc24e530e329471ad8d8046d959d9a",
+    "build\\linear-accumulation-20261017-v2\\smol-block1-logits.npy": "7952143dc3e92bffb334e85d8d7c73d38e645a04e0edd8d41929b8cb3223cdcc",
+    "build\\linear-accumulation-20261017-v2\\saved-blocks.json": "c514e006bc3d0d55c31fdfda07fa41573da19d29a96f29a4f39c7ef82990e5a0",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\70ec40010513210f83bb089b\\decoder-32.leaf": "f01b07a042ce3e3da824076802376e3f0f1864e3134b1036c5c4e4bd517d7de7",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\qwen-quality-8\\tokens.json": "5856ecd9964691c327eab1a71886ca5dc63c821b6fad71a96eee1a0b3a6a020b",
+    "build\\linear-accumulation-20261017-v2\\qwen-block1-logits.npy": "fe8d4a2a462391fc527b510f21d91117510466e2a5e04e42902406750f783602"
+  },
+  "cases": [
+    {
+      "model": "smol",
+      "exact": true,
+      "values": 6291456,
+      "prior_quality": {
+        "block": 1,
+        "tokens": 128,
+        "violations": 0,
+        "max_abs_error": 0.00017452239990234375,
+        "max_tolerance_ratio": 0.45555350406405126,
+        "row0_violations": 0,
+        "next_token_agreement": 1.0,
+        "worst": {
+          "row": 0,
+          "token": 44387,
+          "native": -0.1362423300743103,
+          "reference": -0.13634586334228516
+        },
+        "allclose": true
+      }
+    },
+    {
+      "model": "qwen",
+      "exact": true,
+      "values": 19447808,
+      "prior_quality": {
+        "block": 1,
+        "tokens": 128,
+        "violations": 0,
+        "max_abs_error": 0.0001049041748046875,
+        "max_tolerance_ratio": 0.37884230425844834,
+        "row0_violations": 0,
+        "next_token_agreement": 1.0,
+        "worst": {
+          "row": 1,
+          "token": 93967,
+          "native": 0.048364076763391495,
+          "reference": 0.04828464984893799
+        },
+        "allclose": true
+      }
+    }
+  ]
+}

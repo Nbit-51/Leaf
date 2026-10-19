@@ -1,0 +1,101 @@
+{
+  "complete": true,
+  "diagnostic_only": true,
+  "original_gate_unchanged": true,
+  "scope": "Failed prompts only; cached eager FP32 reference, FP64 selected-token log-softmax",
+  "torch": "2.12.0+cpu",
+  "transformers": "5.14.1",
+  "hashes": {
+    "build\\ollama-family-20261019\\smol-comparison\\comparison.json": "a2d6378a6e418635baac1f5a462fef26cee303ecf47020d0164da406403b908e",
+    "build\\ollama-family-20261019\\smol-comparison\\leaf-quality\\results.jsonl": "0feadc95da688ff5e6dd9924ecebf908095afc2273ea954c1f2fb43a0955cbcc",
+    "build\\ollama-family-20261019\\smol-comparison\\ollama-quality.json": "594385f7fe0d388ca541334c90ab727c704231203bd208599f9de74ba44b1730",
+    "build\\ollama-family-20261019\\smol\\gguf-audit.json": "0b26eeab5d79fe3c39920541ddce6209e90741d61fa2e56a32bac5b2de8c4309",
+    "C:\\Users\\navaneeth\\leaf\\tools\\diagnose_ollama_quality.py": "198926643464c25b72ed9637160f828dc318955bbb20ab620695546d57ec1de4",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\config.json": "224f72354f10d617a359cc82ad15a3c96e866b9b2ffadb81997eeea9e88e22ee",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\model.safetensors": "e6bffe7435d7ddc10fd3b9a9efd429dafbacb1cb17015fb5562664e7532bf86e",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c"
+  },
+  "checks": [
+    {
+      "index": 2,
+      "prompt": "Question: What is the capital of France?\nAnswer:",
+      "reference_greedy_tokens": [
+        2
+      ],
+      "leaf_generated_tokens": [
+        2
+      ],
+      "reference_logprobs": [
+        -0.26999443022161174
+      ],
+      "leaf_logprobs": [
+        -0.2699906763
+      ],
+      "ollama_logprobs": [],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 3.753921611726607e-06,
+      "ollama_reported_max_abs_error": null,
+      "ollama_unreported_positions": 1,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    },
+    {
+      "index": 3,
+      "prompt": "Two plus two equals",
+      "reference_greedy_tokens": [
+        1876,
+        30,
+        198,
+        198,
+        1348,
+        314,
+        253,
+        4959
+      ],
+      "leaf_generated_tokens": [
+        1876,
+        30,
+        198,
+        198,
+        1348,
+        314,
+        253,
+        4959
+      ],
+      "reference_logprobs": [
+        -0.4861390653710984,
+        -0.6739620716070966,
+        -1.2446843102390375,
+        -0.8614620429395963,
+        -2.512301127119599,
+        -2.146262731997549,
+        -0.9778012969606387,
+        -1.2744830633192201
+      ],
+      "leaf_logprobs": [
+        -0.4861389977,
+        -0.6739619778,
+        -1.244683015,
+        -0.8614634035,
+        -2.512296144,
+        -2.146260766,
+        -0.9778012805,
+        -1.274483439
+      ],
+      "ollama_logprobs": [
+        -0.48597386479377747,
+        -0.6738424301147461,
+        -1.244519829750061,
+        -0.8612000346183777,
+        -2.5121169090270996,
+        -2.146097421646118,
+        -0.9776439666748047,
+        -1.2743940353393555
+      ],
+      "leaf_greedy_matches_reference": true,
+      "leaf_max_abs_error": 4.983119599177854e-06,
+      "ollama_reported_max_abs_error": 0.0002620083212185875,
+      "ollama_unreported_positions": 0,
+      "ollama_note": "Errors use aligned visible-token positions; unreported terminal EOS cannot be scored"
+    }
+  ]
+}

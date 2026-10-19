@@ -1,0 +1,234 @@
+{
+  "complete": true,
+  "acceptance_timing": false,
+  "model_speed_claim": false,
+  "scope": "Test source-preserving BF16 storage on real tied vocabulary weights.\n\nIsolated GEMV probe, not model speed or artifact-format support. No source\nweight rounding: only an already BF16 checkpoint is accepted.\n",
+  "command": [
+    "C:/msys64/mingw64/bin/g++.exe",
+    "-std=c++17",
+    "-O3",
+    "-DNDEBUG",
+    "-static",
+    "-I",
+    "C:\\Users\\navaneeth\\leaf\\engine\\include",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\source-bf16\\probe.cpp",
+    "-o",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261019\\probe.exe"
+  ],
+  "hashes": {
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\source-bf16\\run_probe.py": "651df02833033579e1be9ddbfdee63e17214494e37ddf2d7200dd65a10dca553",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\source-bf16\\probe.cpp": "2d5bc924569f1f046060ec08f7c48f6ee76bd7c017f34f9d481769501c3c5428",
+    "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\gemv_pair.h": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261019\\probe.exe": "e8c88bcd14320cc07a5fc5f882765a7e271f9a6ff66e1d835c1b50265830dd5a",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\model.safetensors": "e6bffe7435d7ddc10fd3b9a9efd429dafbacb1cb17015fb5562664e7532bf86e",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261019\\smol-head.bf16": "bc8a09d622a836b0b05ee1d8144054f8ac8b2d7e239e6957aae3b52134c12cb3",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261019\\qwen-head.bf16": "4e96b0df6d274768cbb7e72404011853d23349999b658dc2f4dfb3c431ea223f"
+  },
+  "models": {
+    "smol": {
+      "exact_fp32_output": true,
+      "cpu": 2,
+      "rows": 49152,
+      "columns": 960,
+      "fp32_weight_bytes": 188743680,
+      "bf16_weight_bytes": 94371840,
+      "passes": [
+        {
+          "stage": "fp32",
+          "ms": [
+            9.1284,
+            9.7392,
+            9.6559,
+            10.282,
+            9.5058,
+            9.6323,
+            10.3311,
+            11.0105,
+            9.748,
+            9.5411,
+            10.6507
+          ]
+        },
+        {
+          "stage": "bf16",
+          "ms": [
+            6.4228,
+            7.2047,
+            5.8778,
+            6.5207,
+            6.3002,
+            6.0459,
+            6.1101,
+            5.9829,
+            5.8109,
+            6.2167,
+            5.6354
+          ]
+        },
+        {
+          "stage": "bf16",
+          "ms": [
+            5.875,
+            5.8945,
+            5.6314,
+            6.1638,
+            5.4792,
+            5.9074,
+            8.3003,
+            5.9888,
+            6.5493,
+            5.9228,
+            5.9555
+          ]
+        },
+        {
+          "stage": "fp32",
+          "ms": [
+            9.4997,
+            9.7653,
+            10.2281,
+            10.3198,
+            10.2075,
+            11.8543,
+            10.3166,
+            9.2674,
+            8.9895,
+            9.0672,
+            9.3457
+          ]
+        }
+      ],
+      "medians_ms": {
+        "fp32": 9.7436,
+        "bf16": 5.98585
+      },
+      "ratio": 0.6143365901720104,
+      "pooled_stability": {
+        "fp32": {
+          "passed": true,
+          "sample_count": 22,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 9.142299999999999,
+          "p90_ms": 10.61874,
+          "p90_p10_ratio": 1.1614954661299675,
+          "reason": "passed"
+        },
+        "bf16": {
+          "passed": true,
+          "sample_count": 22,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 5.65295,
+          "p90_ms": 6.54644,
+          "p90_p10_ratio": 1.1580572975172254,
+          "reason": "passed"
+        }
+      },
+      "every_pass_stable": true
+    },
+    "qwen": {
+      "exact_fp32_output": true,
+      "cpu": 2,
+      "rows": 151936,
+      "columns": 896,
+      "fp32_weight_bytes": 544538624,
+      "bf16_weight_bytes": 272269312,
+      "passes": [
+        {
+          "stage": "fp32",
+          "ms": [
+            29.8284,
+            29.3662,
+            29.1334,
+            30.0899,
+            29.4692,
+            29.7886,
+            29.0701,
+            30.5439,
+            29.6519,
+            29.2649,
+            29.2369
+          ]
+        },
+        {
+          "stage": "bf16",
+          "ms": [
+            17.7735,
+            18.9161,
+            18.7316,
+            17.7729,
+            18.0803,
+            18.2882,
+            16.7679,
+            18.6372,
+            20.1269,
+            17.7872,
+            18.949
+          ]
+        },
+        {
+          "stage": "bf16",
+          "ms": [
+            18.587,
+            18.7746,
+            18.013,
+            17.9627,
+            17.9935,
+            19.2599,
+            17.2452,
+            17.2909,
+            17.3414,
+            19.0046,
+            18.5194
+          ]
+        },
+        {
+          "stage": "fp32",
+          "ms": [
+            29.3315,
+            28.0311,
+            28.7282,
+            29.3997,
+            29.3183,
+            29.3443,
+            29.3403,
+            28.0019,
+            29.164,
+            29.8295,
+            30.0511
+          ]
+        }
+      ],
+      "medians_ms": {
+        "fp32": 29.3423,
+        "bf16": 18.18425
+      },
+      "ratio": 0.6197281740013564,
+      "pooled_stability": {
+        "fp32": {
+          "passed": true,
+          "sample_count": 22,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 28.76239,
+          "p90_ms": 30.028940000000002,
+          "p90_p10_ratio": 1.0440349359006675,
+          "reason": "passed"
+        },
+        "bf16": {
+          "passed": true,
+          "sample_count": 22,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 17.29595,
+          "p90_ms": 18.99904,
+          "p90_p10_ratio": 1.098467560324816,
+          "reason": "passed"
+        }
+      },
+      "every_pass_stable": true
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "complete": true,
+  "acceptance_timing": false,
+  "baseline_sha256": "83db825956f5657c068a5699efbc35e088527fc34ac24a37122e7805f2ea2900",
+  "results": {
+    "smol": {
+      "passed": false,
+      "violations": 147,
+      "max_abs_error": 0.0006561279296875,
+      "max_tolerance_ratio": 1.889180047751954,
+      "next_token_agreement": 1.0
+    },
+    "qwen": {
+      "passed": false,
+      "violations": 481,
+      "max_abs_error": 0.00047101080417633057,
+      "max_tolerance_ratio": 2.1099927574625683,
+      "next_token_agreement": 1.0
+    }
+  }
+}

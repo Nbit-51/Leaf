@@ -260,6 +260,9 @@ diagnostic timings with lower Leaf prefill and decode latency on the new FP32
 default; its probability tolerance miss remains open. A reproduced
 [diagnostic startup-affinity race](docs/windows-timing-diagnosis.md#october-15-2026-diagnostic-startup-race)
 is fixed before further kernel changes or model downloads.
+An isolated [shared accumulation candidate](docs/shared-accumulation.md) now
+passes the full SmolLM2/Qwen2.5 fidelity checks without relaxed tolerances.
+It remains outside the default runtime while its performance cost is evaluated.
 Quantized vector attention and broader matched runtime comparisons remain open.
 
 Further work includes broader quality datasets, complete-command latency,

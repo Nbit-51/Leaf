@@ -65,7 +65,12 @@ public:
         if (panels > limit / 16 || columns > limit / (panels * 16) ||
             panels * 16 * columns > values_.max_size())
             throw std::overflow_error("token-panel packing workspace overflows address space");
-        values_.resize(panels * 16 * columns);
+        // Keep the constructed high-water workspace. Shrinking between hidden
+        // and MLP widths makes a later resize clear an already allocated tail
+        // that the pack below immediately overwrites. Logical extents remain
+        // separate, including explicit zero padding of every active panel.
+        const auto required = panels * 16 * columns;
+        if (required > values_.size()) values_.resize(required);
 #if LEAF_TOKEN_PANEL_AVX2
         vector_pack = vector_pack && __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
 #else
@@ -102,7 +107,7 @@ public:
     std::size_t tokens() const noexcept { return tokens_; }
     std::size_t columns() const noexcept { return columns_; }
     std::size_t panels() const noexcept { return panels_; }
-    std::size_t storage_size() const noexcept { return values_.size(); }
+    std::size_t storage_size() const noexcept { return panels_ * columns_ * 16; }
     const float* panel(std::size_t index) const {
         if (index >= panels_) throw std::out_of_range("token-panel index is outside the packed input");
         return values_.data() + index * columns_ * 16;

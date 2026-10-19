@@ -1,0 +1,3706 @@
+{
+  "complete": true,
+  "acceptance_timing": false,
+  "runs": 7,
+  "warmup": 3,
+  "cpu": 2,
+  "scope": "Two balanced diagnostic pairs, warm-only scopes; nested times must not be summed twice",
+  "hashes": {
+    "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\build.json": "9632a671db7351fea9b619e499c79bfbb869bb5c244cef2abd7e4d4f241e0a99",
+    "C:\\Users\\navaneeth\\leaf\\build\\projection-diagnosis-20261019-v2\\parity.json": "e1d65baa0c49102f5b7972c254c4c3d41748d8eb551361a8b392fb65702fe623",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\decode-silu\\smol-work\\decoder-32.leaf": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\decode-silu\\smol-work\\tokens.json": "05f9ecdb962b53b8c16820cbf22953ba8adcbaf9692af2f3da8714e767af2246",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\decode-silu\\qwen-work\\decoder-32.leaf": "f01b07a042ce3e3da824076802376e3f0f1864e3134b1036c5c4e4bd517d7de7",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\decode-silu\\qwen-work\\tokens.json": "a07ba9ef734f9e1de4db78aa98950befaf0140309cb07d3cc7addaf923bc24d9"
+  },
+  "models": {
+    "smol": [
+      {
+        "stage": "before",
+        "raw": {
+          "avx2": true,
+          "vector_silu_gate_calls": 640,
+          "vector_silu_gate_enabled": true,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 1447312000,
+          "peak_rss_bytes": 1461321728,
+          "load_ms": 0.6514,
+          "prefill_p50_ms": 499.0543,
+          "decode_p50_ms": 78.12,
+          "prefill_samples_ms": [
+            492.1333,
+            511.2678,
+            507.7218,
+            499.0543,
+            493.3928,
+            491.2134,
+            504.413
+          ],
+          "decode_samples_ms": [
+            78.5356,
+            79.4321,
+            80.0342,
+            74.3592,
+            76.4895,
+            74.641,
+            78.12
+          ],
+          "generated_tokens": [],
+          "diagnostic_profile": {
+            "leaf_decoder_profile": 1,
+            "clock": "steady_clock",
+            "warm_only": true,
+            "skipped_forwards": 6,
+            "bucket_by": "forward_input_tokens",
+            "timings": {
+              "prefill": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 3499.1482,
+                  "thread_cycles": 7659034628,
+                  "thread_cpu_ms": 3343.75
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.4035,
+                  "thread_cycles": 901096,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 455,
+                  "tokens": 28217,
+                  "milliseconds": 36.0467,
+                  "thread_cycles": 78693582,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1575,
+                  "tokens": 98119,
+                  "milliseconds": 3221.2421,
+                  "thread_cycles": 7048451787,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 455,
+                  "tokens": 28665,
+                  "milliseconds": 8.4954,
+                  "thread_cycles": 17772593,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 119.879,
+                  "thread_cycles": 264129414,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 94.3778,
+                  "thread_cycles": 206566265,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 2.5614,
+                  "thread_cycles": 5276621,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.023,
+                  "thread_cycles": 46312,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 448,
+                  "tokens": 28224,
+                  "milliseconds": 12.6534,
+                  "thread_cycles": 25106456,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 301.2984,
+                  "thread_cycles": 667548042,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 108.1391,
+                  "thread_cycles": 235858166,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 106.5366,
+                  "thread_cycles": 234548586,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 306.443,
+                  "thread_cycles": 665297737,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 782.8228,
+                  "thread_cycles": 1712891288,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 781.7173,
+                  "thread_cycles": 1712391078,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 770.4047,
+                  "thread_cycles": 1681187098,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 62.4737,
+                  "thread_cycles": 135998438,
+                  "thread_cpu_ms": 0
+                },
+                "pack_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 7.3234,
+                  "thread_cycles": 16356779,
+                  "thread_cpu_ms": 0
+                },
+                "pack_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 7.9369,
+                  "thread_cycles": 16739253,
+                  "thread_cpu_ms": 0
+                },
+                "pack_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 7.4599,
+                  "thread_cycles": 16125230,
+                  "thread_cpu_ms": 0
+                },
+                "pack_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 7.4455,
+                  "thread_cycles": 16634421,
+                  "thread_cpu_ms": 0
+                },
+                "pack_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 7.4366,
+                  "thread_cycles": 15709138,
+                  "thread_cpu_ms": 0
+                },
+                "pack_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 8.1922,
+                  "thread_cycles": 16427512,
+                  "thread_cpu_ms": 0
+                },
+                "pack_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 23.7895,
+                  "thread_cycles": 51582408,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 293.5755,
+                  "thread_cycles": 649973380,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 99.7956,
+                  "thread_cycles": 218237185,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 98.7509,
+                  "thread_cycles": 217592769,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 298.6249,
+                  "thread_cycles": 647499325,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 774.5794,
+                  "thread_cycles": 1695353938,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 772.9783,
+                  "thread_cycles": 1694401457,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 745.9389,
+                  "thread_cycles": 1628096015,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 62.3798,
+                  "thread_cycles": 135767807,
+                  "thread_cpu_ms": 0
+                }
+              },
+              "decode": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 541.5833,
+                  "thread_cycles": 1186668948,
+                  "thread_cpu_ms": 500
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0145,
+                  "thread_cycles": 27420,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 455,
+                  "tokens": 455,
+                  "milliseconds": 1.4065,
+                  "thread_cycles": 2795681,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1575,
+                  "tokens": 1575,
+                  "milliseconds": 514.0929,
+                  "thread_cycles": 1125821242,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 455,
+                  "tokens": 455,
+                  "milliseconds": 0.5113,
+                  "thread_cycles": 755707,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 20.7646,
+                  "thread_cycles": 45343179,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 2.021,
+                  "thread_cycles": 4271616,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 0.2818,
+                  "thread_cycles": 450891,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.005,
+                  "thread_cycles": 6223,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 448,
+                  "tokens": 448,
+                  "milliseconds": 0.5846,
+                  "thread_cycles": 779673,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 43.2274,
+                  "thread_cycles": 92553766,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 13.9813,
+                  "thread_cycles": 31566633,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 16.2273,
+                  "thread_cycles": 31640148,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 42.5274,
+                  "thread_cycles": 93611505,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 114.9198,
+                  "thread_cycles": 248311518,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 112.2089,
+                  "thread_cycles": 246688358,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 100.3293,
+                  "thread_cycles": 226338279,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 69.2265,
+                  "thread_cycles": 152359378,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 42.9273,
+                  "thread_cycles": 91800352,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 13.6876,
+                  "thread_cycles": 30949853,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 15.9702,
+                  "thread_cycles": 31078655,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 42.2028,
+                  "thread_cycles": 92898664,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 114.6375,
+                  "thread_cycles": 247548438,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 111.9237,
+                  "thread_cycles": 245895788,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 100.0058,
+                  "thread_cycles": 225465290,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 69.1189,
+                  "thread_cycles": 152093498,
+                  "thread_cpu_ms": 0
+                }
+              }
+            }
+          },
+          "windows_process_priority": "above_normal"
+        },
+        "power_before": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        },
+        "power_after": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        }
+      },
+      {
+        "stage": "after",
+        "raw": {
+          "avx2": true,
+          "vector_silu_gate_calls": 640,
+          "vector_silu_gate_enabled": true,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 1447312000,
+          "peak_rss_bytes": 1461374976,
+          "load_ms": 0.8134,
+          "prefill_p50_ms": 497.4497,
+          "decode_p50_ms": 79.2938,
+          "prefill_samples_ms": [
+            496.0257,
+            497.8438,
+            496.8687,
+            497.4497,
+            495.5976,
+            499.7324,
+            498.2225
+          ],
+          "decode_samples_ms": [
+            79.3991,
+            79.2938,
+            78.7429,
+            79.2241,
+            81.6324,
+            80.422,
+            78.521
+          ],
+          "generated_tokens": [],
+          "diagnostic_profile": {
+            "leaf_decoder_profile": 1,
+            "clock": "steady_clock",
+            "warm_only": true,
+            "skipped_forwards": 6,
+            "bucket_by": "forward_input_tokens",
+            "timings": {
+              "prefill": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 3481.6893,
+                  "thread_cycles": 7691801070,
+                  "thread_cpu_ms": 3375
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.3903,
+                  "thread_cycles": 888653,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 455,
+                  "tokens": 28217,
+                  "milliseconds": 35.7918,
+                  "thread_cycles": 78179561,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1575,
+                  "tokens": 98119,
+                  "milliseconds": 3207.4279,
+                  "thread_cycles": 7084676110,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 455,
+                  "tokens": 28665,
+                  "milliseconds": 8.1963,
+                  "thread_cycles": 18334534,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 116.908,
+                  "thread_cycles": 258976283,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 94.9563,
+                  "thread_cycles": 207111163,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 2.6542,
+                  "thread_cycles": 5383523,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.0229,
+                  "thread_cycles": 45388,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 448,
+                  "tokens": 28224,
+                  "milliseconds": 11.8644,
+                  "thread_cycles": 26100173,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 305.8559,
+                  "thread_cycles": 670554575,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 100.0113,
+                  "thread_cycles": 222353504,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 100.49,
+                  "thread_cycles": 222282565,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 302.8069,
+                  "thread_cycles": 669899291,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 785.2711,
+                  "thread_cycles": 1737073628,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 780.1842,
+                  "thread_cycles": 1723505107,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 767.8938,
+                  "thread_cycles": 1696198605,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 63.4121,
+                  "thread_cycles": 140122134,
+                  "thread_cpu_ms": 0
+                },
+                "pack_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 3.883,
+                  "thread_cycles": 8616035,
+                  "thread_cpu_ms": 0
+                },
+                "pack_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 3.8552,
+                  "thread_cycles": 8630784,
+                  "thread_cpu_ms": 0
+                },
+                "pack_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 3.7059,
+                  "thread_cycles": 8146260,
+                  "thread_cpu_ms": 0
+                },
+                "pack_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 14.4322,
+                  "thread_cycles": 31908105,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 301.5637,
+                  "thread_cycles": 660693205,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 99.7084,
+                  "thread_cycles": 221622216,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 100.1353,
+                  "thread_cycles": 221604492,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 298.5686,
+                  "thread_cycles": 660087011,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 781.0149,
+                  "thread_cycles": 1727293136,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 779.627,
+                  "thread_cycles": 1722033099,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 753.045,
+                  "thread_cycles": 1662811087,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 63.3128,
+                  "thread_cycles": 139877221,
+                  "thread_cpu_ms": 0
+                }
+              },
+              "decode": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 557.2057,
+                  "thread_cycles": 1219870718,
+                  "thread_cpu_ms": 515.625
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0144,
+                  "thread_cycles": 27881,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 455,
+                  "tokens": 455,
+                  "milliseconds": 1.4885,
+                  "thread_cycles": 2965701,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1575,
+                  "tokens": 1575,
+                  "milliseconds": 529.6303,
+                  "thread_cycles": 1157492007,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 455,
+                  "tokens": 455,
+                  "milliseconds": 0.5212,
+                  "thread_cycles": 748336,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 20.7365,
+                  "thread_cycles": 46274005,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 2.0153,
+                  "thread_cycles": 4387965,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 0.2902,
+                  "thread_cycles": 471406,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0055,
+                  "thread_cycles": 6913,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 448,
+                  "tokens": 448,
+                  "milliseconds": 0.5809,
+                  "thread_cycles": 800859,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 43.1946,
+                  "thread_cycles": 95629817,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 14.8302,
+                  "thread_cycles": 33046055,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 15.7652,
+                  "thread_cycles": 32964012,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 42.6685,
+                  "thread_cycles": 95443873,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 117.1486,
+                  "thread_cycles": 255041983,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 114.9122,
+                  "thread_cycles": 252811932,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 107.7547,
+                  "thread_cycles": 233675143,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 71.8039,
+                  "thread_cycles": 156187697,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 42.8923,
+                  "thread_cycles": 94859601,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 14.5501,
+                  "thread_cycles": 32416139,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 15.4943,
+                  "thread_cycles": 32372577,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 42.3886,
+                  "thread_cycles": 94734935,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 116.6837,
+                  "thread_cycles": 254219213,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 114.6195,
+                  "thread_cycles": 251983408,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 107.4312,
+                  "thread_cycles": 232749614,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 71.6877,
+                  "thread_cycles": 155899465,
+                  "thread_cpu_ms": 0
+                }
+              }
+            }
+          },
+          "windows_process_priority": "above_normal"
+        },
+        "power_before": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        },
+        "power_after": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        }
+      },
+      {
+        "stage": "after",
+        "raw": {
+          "avx2": true,
+          "vector_silu_gate_calls": 640,
+          "vector_silu_gate_enabled": true,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 1447312000,
+          "peak_rss_bytes": 1461387264,
+          "load_ms": 0.6804,
+          "prefill_p50_ms": 505.1188,
+          "decode_p50_ms": 80.9336,
+          "prefill_samples_ms": [
+            516.8933,
+            502.9903,
+            501.2558,
+            612.3019,
+            494.4163,
+            505.1188,
+            511.2091
+          ],
+          "decode_samples_ms": [
+            74.6111,
+            78.5678,
+            91.3451,
+            76.914,
+            83.656,
+            80.9336,
+            86.3637
+          ],
+          "generated_tokens": [],
+          "diagnostic_profile": {
+            "leaf_decoder_profile": 1,
+            "clock": "steady_clock",
+            "warm_only": true,
+            "skipped_forwards": 6,
+            "bucket_by": "forward_input_tokens",
+            "timings": {
+              "prefill": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 3644.1301,
+                  "thread_cycles": 7921232362,
+                  "thread_cpu_ms": 3359.375
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.393,
+                  "thread_cycles": 895564,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 455,
+                  "tokens": 28217,
+                  "milliseconds": 37.1312,
+                  "thread_cycles": 79800653,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1575,
+                  "tokens": 98119,
+                  "milliseconds": 3356.6361,
+                  "thread_cycles": 7299484379,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 455,
+                  "tokens": 28665,
+                  "milliseconds": 8.7204,
+                  "thread_cycles": 18567712,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 124.2556,
+                  "thread_cycles": 266629018,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 98.034,
+                  "thread_cycles": 211156537,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 2.6695,
+                  "thread_cycles": 5564158,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.0229,
+                  "thread_cycles": 45849,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 448,
+                  "tokens": 28224,
+                  "milliseconds": 12.504,
+                  "thread_cycles": 26188416,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 315.6762,
+                  "thread_cycles": 692749196,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 106.4708,
+                  "thread_cycles": 229448686,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 105.462,
+                  "thread_cycles": 228832590,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 320.0244,
+                  "thread_cycles": 690717077,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 821.2221,
+                  "thread_cycles": 1787670144,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 820.4435,
+                  "thread_cycles": 1778974822,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 801.8759,
+                  "thread_cycles": 1744385575,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 64.0192,
+                  "thread_cycles": 143901391,
+                  "thread_cpu_ms": 0
+                },
+                "pack_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 3.9355,
+                  "thread_cycles": 8677783,
+                  "thread_cpu_ms": 0
+                },
+                "pack_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 4.6404,
+                  "thread_cycles": 8854962,
+                  "thread_cpu_ms": 0
+                },
+                "pack_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 4.5334,
+                  "thread_cycles": 8438636,
+                  "thread_cpu_ms": 0
+                },
+                "pack_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 15.1413,
+                  "thread_cycles": 32233891,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 311.081,
+                  "thread_cycles": 682738331,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 106.1525,
+                  "thread_cycles": 228670397,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 105.117,
+                  "thread_cycles": 228092546,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 314.9855,
+                  "thread_cycles": 680605524,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 816.0944,
+                  "thread_cycles": 1777515268,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 819.8896,
+                  "thread_cycles": 1777464316,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 786.1737,
+                  "thread_cycles": 1710619073,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 63.9154,
+                  "thread_cycles": 143648872,
+                  "thread_cpu_ms": 0
+                }
+              },
+              "decode": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 572.3609,
+                  "thread_cycles": 1244352618,
+                  "thread_cpu_ms": 546.875
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0144,
+                  "thread_cycles": 27417,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 455,
+                  "tokens": 455,
+                  "milliseconds": 1.4916,
+                  "thread_cycles": 2959260,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1575,
+                  "tokens": 1575,
+                  "milliseconds": 542.795,
+                  "thread_cycles": 1180800947,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 455,
+                  "tokens": 455,
+                  "milliseconds": 0.5791,
+                  "thread_cycles": 789129,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 22.2001,
+                  "thread_cycles": 47372772,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 2.0771,
+                  "thread_cycles": 4453179,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 0.304,
+                  "thread_cycles": 491220,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0055,
+                  "thread_cycles": 6911,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 448,
+                  "tokens": 448,
+                  "milliseconds": 0.5852,
+                  "thread_cycles": 799004,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 46.8393,
+                  "thread_cycles": 97355982,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 15.0904,
+                  "thread_cycles": 33478061,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 15.1681,
+                  "thread_cycles": 33123228,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 44.6988,
+                  "thread_cycles": 98511660,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 118.3201,
+                  "thread_cycles": 260991813,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 118.4754,
+                  "thread_cycles": 257726579,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 111.2738,
+                  "thread_cycles": 239557716,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 71.4661,
+                  "thread_cycles": 157301448,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 46.5323,
+                  "thread_cycles": 96563174,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 14.8092,
+                  "thread_cycles": 32838223,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 14.897,
+                  "thread_cycles": 32516119,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 44.4146,
+                  "thread_cycles": 97764941,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 118.0371,
+                  "thread_cycles": 260191182,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 118.1805,
+                  "thread_cycles": 256897378,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 110.9387,
+                  "thread_cycles": 238657766,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 71.3465,
+                  "thread_cycles": 156996168,
+                  "thread_cpu_ms": 0
+                }
+              }
+            }
+          },
+          "windows_process_priority": "above_normal"
+        },
+        "power_before": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        },
+        "power_after": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        }
+      },
+      {
+        "stage": "before",
+        "raw": {
+          "avx2": true,
+          "vector_silu_gate_calls": 640,
+          "vector_silu_gate_enabled": true,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 1447312000,
+          "peak_rss_bytes": 1461317632,
+          "load_ms": 0.668,
+          "prefill_p50_ms": 497.3231,
+          "decode_p50_ms": 81.2938,
+          "prefill_samples_ms": [
+            492.4838,
+            497.3231,
+            514.1462,
+            498.3693,
+            492.7139,
+            499.6912,
+            493.1976
+          ],
+          "decode_samples_ms": [
+            81.2938,
+            78.351,
+            84.7771,
+            84.1242,
+            81.2551,
+            81.1312,
+            82.2122
+          ],
+          "generated_tokens": [],
+          "diagnostic_profile": {
+            "leaf_decoder_profile": 1,
+            "clock": "steady_clock",
+            "warm_only": true,
+            "skipped_forwards": 6,
+            "bucket_by": "forward_input_tokens",
+            "timings": {
+              "prefill": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 3487.8736,
+                  "thread_cycles": 7677687525,
+                  "thread_cpu_ms": 3296.875
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.4068,
+                  "thread_cycles": 926208,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 455,
+                  "tokens": 28217,
+                  "milliseconds": 35.8303,
+                  "thread_cycles": 78309481,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1575,
+                  "tokens": 98119,
+                  "milliseconds": 3213.3102,
+                  "thread_cycles": 7070741882,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 455,
+                  "tokens": 28665,
+                  "milliseconds": 7.4957,
+                  "thread_cycles": 16801218,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 117.762,
+                  "thread_cycles": 264092774,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 96.5443,
+                  "thread_cycles": 206479645,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 2.404,
+                  "thread_cycles": 5246207,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.022,
+                  "thread_cycles": 44007,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 448,
+                  "tokens": 28224,
+                  "milliseconds": 10.6768,
+                  "thread_cycles": 23055428,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 303.9319,
+                  "thread_cycles": 669453699,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 108.412,
+                  "thread_cycles": 235770393,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 105.6507,
+                  "thread_cycles": 235484919,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 304.6116,
+                  "thread_cycles": 667042072,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 779.1691,
+                  "thread_cycles": 1718313974,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 779.9997,
+                  "thread_cycles": 1717616313,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 764.9223,
+                  "thread_cycles": 1682824567,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 65.2183,
+                  "thread_cycles": 141549696,
+                  "thread_cpu_ms": 0
+                },
+                "pack_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 7.2716,
+                  "thread_cycles": 16033079,
+                  "thread_cpu_ms": 0
+                },
+                "pack_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 7.2793,
+                  "thread_cycles": 16185598,
+                  "thread_cpu_ms": 0
+                },
+                "pack_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 7.0737,
+                  "thread_cycles": 15800597,
+                  "thread_cpu_ms": 0
+                },
+                "pack_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 7.9124,
+                  "thread_cycles": 16116487,
+                  "thread_cpu_ms": 0
+                },
+                "pack_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 7.4766,
+                  "thread_cycles": 15536103,
+                  "thread_cpu_ms": 0
+                },
+                "pack_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 7.5948,
+                  "thread_cycles": 16174307,
+                  "thread_cpu_ms": 0
+                },
+                "pack_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 22.5754,
+                  "thread_cycles": 49523799,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 296.2593,
+                  "thread_cycles": 652174613,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 100.8156,
+                  "thread_cycles": 218702358,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 98.2773,
+                  "thread_cycles": 218856504,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 224,
+                  "tokens": 14112,
+                  "milliseconds": 296.321,
+                  "thread_cycles": 649760016,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 771.1359,
+                  "thread_cycles": 1700947339,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 771.8658,
+                  "thread_cycles": 1699850865,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 224,
+                  "tokens": 13888,
+                  "milliseconds": 741.9411,
+                  "thread_cycles": 1631828028,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 65.0927,
+                  "thread_cycles": 141295104,
+                  "thread_cpu_ms": 0
+                }
+              },
+              "decode": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 573.1107,
+                  "thread_cycles": 1250248582,
+                  "thread_cpu_ms": 546.875
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0164,
+                  "thread_cycles": 31796,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 455,
+                  "tokens": 455,
+                  "milliseconds": 1.4595,
+                  "thread_cycles": 2844512,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1575,
+                  "tokens": 1575,
+                  "milliseconds": 544.9698,
+                  "thread_cycles": 1186559769,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 455,
+                  "tokens": 455,
+                  "milliseconds": 0.5244,
+                  "thread_cycles": 784737,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 21.5384,
+                  "thread_cycles": 47943698,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 2.0277,
+                  "thread_cycles": 4451785,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 0.297,
+                  "thread_cycles": 478308,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0061,
+                  "thread_cycles": 8295,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 448,
+                  "tokens": 448,
+                  "milliseconds": 0.5176,
+                  "thread_cycles": 767467,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 44.8593,
+                  "thread_cycles": 97492824,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 16.4237,
+                  "thread_cycles": 33456375,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 15.3353,
+                  "thread_cycles": 33707069,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 45.215,
+                  "thread_cycles": 99060716,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 121.528,
+                  "thread_cycles": 261067628,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 117.8352,
+                  "thread_cycles": 261086272,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 111.185,
+                  "thread_cycles": 241682207,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 71.1433,
+                  "thread_cycles": 156239540,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 44.5492,
+                  "thread_cycles": 96727896,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 16.1365,
+                  "thread_cycles": 32801366,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 15.0684,
+                  "thread_cycles": 33127375,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 44.937,
+                  "thread_cycles": 98383802,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 121.2517,
+                  "thread_cycles": 260305919,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 117.5534,
+                  "thread_cycles": 260301530,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 224,
+                  "tokens": 224,
+                  "milliseconds": 110.8751,
+                  "thread_cycles": 240860612,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 71.0321,
+                  "thread_cycles": 155968130,
+                  "thread_cpu_ms": 0
+                }
+              }
+            }
+          },
+          "windows_process_priority": "above_normal"
+        },
+        "power_before": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        },
+        "power_after": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        }
+      }
+    ],
+    "qwen": [
+      {
+        "stage": "before",
+        "raw": {
+          "avx2": true,
+          "vector_silu_gate_calls": 480,
+          "vector_silu_gate_enabled": true,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 1976158464,
+          "peak_rss_bytes": 1988317184,
+          "load_ms": 0.6929,
+          "prefill_p50_ms": 577.6303,
+          "decode_p50_ms": 111.4174,
+          "prefill_samples_ms": [
+            580.1184,
+            580.4686,
+            589.9556,
+            570.956,
+            577.6303,
+            561.8327,
+            573.2094
+          ],
+          "decode_samples_ms": [
+            113.2608,
+            110.68,
+            111.4174,
+            111.532,
+            108.8871,
+            106.0285,
+            112.9873
+          ],
+          "generated_tokens": [],
+          "diagnostic_profile": {
+            "leaf_decoder_profile": 1,
+            "clock": "steady_clock",
+            "warm_only": true,
+            "skipped_forwards": 6,
+            "bucket_by": "forward_input_tokens",
+            "timings": {
+              "prefill": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 4033.7065,
+                  "thread_cycles": 8817282676,
+                  "thread_cpu_ms": 3796.875
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.4015,
+                  "thread_cycles": 913074,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 343,
+                  "tokens": 21161,
+                  "milliseconds": 26.385,
+                  "thread_cycles": 56037427,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1183,
+                  "tokens": 73423,
+                  "milliseconds": 3764.3268,
+                  "thread_cycles": 8236094079,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 343,
+                  "tokens": 21609,
+                  "milliseconds": 5.8628,
+                  "thread_cycles": 11907065,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 87.3878,
+                  "thread_cycles": 189039515,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 136.4847,
+                  "thread_cycles": 292791390,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 0.8353,
+                  "thread_cycles": 1759343,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.0243,
+                  "thread_cycles": 49075,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 336,
+                  "tokens": 21168,
+                  "milliseconds": 9.0193,
+                  "thread_cycles": 18955235,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 201.1872,
+                  "thread_cycles": 441791080,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 34.6941,
+                  "thread_cycles": 73713471,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 32.3223,
+                  "thread_cycles": 72968844,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 200.748,
+                  "thread_cycles": 439233881,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1032.8923,
+                  "thread_cycles": 2266185154,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1037.657,
+                  "thread_cycles": 2261116784,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1020.0395,
+                  "thread_cycles": 2230312547,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 203.7345,
+                  "thread_cycles": 448707005,
+                  "thread_cpu_ms": 0
+                },
+                "pack_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 4.8994,
+                  "thread_cycles": 11005509,
+                  "thread_cpu_ms": 0
+                },
+                "pack_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 4.8209,
+                  "thread_cycles": 10791939,
+                  "thread_cpu_ms": 0
+                },
+                "pack_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 4.5549,
+                  "thread_cycles": 10252794,
+                  "thread_cpu_ms": 0
+                },
+                "pack_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 4.8215,
+                  "thread_cycles": 10573054,
+                  "thread_cpu_ms": 0
+                },
+                "pack_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 4.8121,
+                  "thread_cycles": 10048669,
+                  "thread_cpu_ms": 0
+                },
+                "pack_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 4.973,
+                  "thread_cycles": 10592866,
+                  "thread_cpu_ms": 0
+                },
+                "pack_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 35.3326,
+                  "thread_cycles": 77301285,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 195.8663,
+                  "thread_cycles": 429587021,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 29.596,
+                  "thread_cycles": 62193240,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 27.5135,
+                  "thread_cycles": 62045354,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 195.6127,
+                  "thread_cycles": 427711109,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1027.3251,
+                  "thread_cycles": 2253903450,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1031.9481,
+                  "thread_cycles": 2248531651,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 984.3434,
+                  "thread_cycles": 2151721021,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 202.3366,
+                  "thread_cycles": 445759038,
+                  "thread_cpu_ms": 0
+                }
+              },
+              "decode": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 774.2312,
+                  "thread_cycles": 1694456068,
+                  "thread_cpu_ms": 750
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0257,
+                  "thread_cycles": 45621,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 343,
+                  "tokens": 343,
+                  "milliseconds": 1.1735,
+                  "thread_cycles": 2338100,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1183,
+                  "tokens": 1183,
+                  "milliseconds": 752.5688,
+                  "thread_cycles": 1644739643,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 343,
+                  "tokens": 343,
+                  "milliseconds": 0.3887,
+                  "thread_cycles": 569088,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 14.6596,
+                  "thread_cycles": 33307090,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 2.8739,
+                  "thread_cycles": 6299371,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 0.174,
+                  "thread_cycles": 247218,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0073,
+                  "thread_cycles": 10597,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 336,
+                  "tokens": 336,
+                  "milliseconds": 0.3891,
+                  "thread_cycles": 572312,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 30.1883,
+                  "thread_cycles": 65810073,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.7508,
+                  "thread_cycles": 10212948,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.4803,
+                  "thread_cycles": 9982067,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 29.3472,
+                  "thread_cycles": 66212365,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 161.1081,
+                  "thread_cycles": 350776860,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 159.339,
+                  "thread_cycles": 350573885,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 148.7786,
+                  "thread_cycles": 324439821,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 213.4112,
+                  "thread_cycles": 464545610,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 29.8802,
+                  "thread_cycles": 65058968,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.465,
+                  "thread_cycles": 9588791,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.2196,
+                  "thread_cycles": 9413447,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 29.1231,
+                  "thread_cycles": 65664232,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 160.8559,
+                  "thread_cycles": 350049713,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 159.0868,
+                  "thread_cycles": 349853882,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 148.5087,
+                  "thread_cycles": 323685961,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 211.9515,
+                  "thread_cycles": 461163339,
+                  "thread_cpu_ms": 0
+                }
+              }
+            }
+          },
+          "windows_process_priority": "above_normal"
+        },
+        "power_before": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        },
+        "power_after": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        }
+      },
+      {
+        "stage": "after",
+        "raw": {
+          "avx2": true,
+          "vector_silu_gate_calls": 480,
+          "vector_silu_gate_enabled": true,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 1976158464,
+          "peak_rss_bytes": 1988370432,
+          "load_ms": 0.6896,
+          "prefill_p50_ms": 585.6785,
+          "decode_p50_ms": 111.6109,
+          "prefill_samples_ms": [
+            595.2308,
+            577.3926,
+            591.2105,
+            581.5967,
+            576.8084,
+            585.6785,
+            592.8282
+          ],
+          "decode_samples_ms": [
+            112.4175,
+            110.5648,
+            110.0856,
+            111.6109,
+            113.8898,
+            116.4824,
+            111.2866
+          ],
+          "generated_tokens": [],
+          "diagnostic_profile": {
+            "leaf_decoder_profile": 1,
+            "clock": "steady_clock",
+            "warm_only": true,
+            "skipped_forwards": 6,
+            "bucket_by": "forward_input_tokens",
+            "timings": {
+              "prefill": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 4100.2082,
+                  "thread_cycles": 8917603621,
+                  "thread_cpu_ms": 3781.25
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.386,
+                  "thread_cycles": 878055,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 343,
+                  "tokens": 21161,
+                  "milliseconds": 26.8792,
+                  "thread_cycles": 55385160,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1183,
+                  "tokens": 73423,
+                  "milliseconds": 3835.2482,
+                  "thread_cycles": 8341663069,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 343,
+                  "tokens": 21609,
+                  "milliseconds": 5.1838,
+                  "thread_cycles": 11540051,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 85.1169,
+                  "thread_cycles": 185763923,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 135.1344,
+                  "thread_cycles": 293078250,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 0.838,
+                  "thread_cycles": 1752644,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.0236,
+                  "thread_cycles": 47232,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 336,
+                  "tokens": 21168,
+                  "milliseconds": 8.4762,
+                  "thread_cycles": 17860147,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 205.8637,
+                  "thread_cycles": 448507490,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 28.6676,
+                  "thread_cycles": 64472128,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 28.7264,
+                  "thread_cycles": 64018452,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 200.9956,
+                  "thread_cycles": 444372700,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1068.3886,
+                  "thread_cycles": 2320882093,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1057.9255,
+                  "thread_cycles": 2308946238,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1037.828,
+                  "thread_cycles": 2243344883,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 205.5595,
+                  "thread_cycles": 445010462,
+                  "thread_cpu_ms": 0
+                },
+                "pack_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 2.6175,
+                  "thread_cycles": 5760696,
+                  "thread_cpu_ms": 0
+                },
+                "pack_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 2.4793,
+                  "thread_cycles": 5439056,
+                  "thread_cpu_ms": 0
+                },
+                "pack_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 2.5932,
+                  "thread_cycles": 5249897,
+                  "thread_cpu_ms": 0
+                },
+                "pack_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 21.2689,
+                  "thread_cycles": 46777181,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 202.7555,
+                  "thread_cycles": 441495484,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 28.165,
+                  "thread_cycles": 63856509,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 28.4909,
+                  "thread_cycles": 63493391,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 198.187,
+                  "thread_cycles": 437966665,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1065.0566,
+                  "thread_cycles": 2313624257,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1057.1769,
+                  "thread_cycles": 2307025395,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1015.9211,
+                  "thread_cycles": 2195321241,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 204.3451,
+                  "thread_cycles": 442189904,
+                  "thread_cpu_ms": 0
+                }
+              },
+              "decode": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 785.8407,
+                  "thread_cycles": 1700173843,
+                  "thread_cpu_ms": 718.75
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.017,
+                  "thread_cycles": 32487,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 343,
+                  "tokens": 343,
+                  "milliseconds": 1.1715,
+                  "thread_cycles": 2348018,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1183,
+                  "tokens": 1183,
+                  "milliseconds": 763.9388,
+                  "thread_cycles": 1650462049,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 343,
+                  "tokens": 343,
+                  "milliseconds": 0.4648,
+                  "thread_cycles": 567937,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 14.707,
+                  "thread_cycles": 33252476,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 2.9819,
+                  "thread_cycles": 6322399,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 0.1725,
+                  "thread_cycles": 241459,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0067,
+                  "thread_cycles": 8756,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 336,
+                  "tokens": 336,
+                  "milliseconds": 0.3901,
+                  "thread_cycles": 581529,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 29.844,
+                  "thread_cycles": 65854306,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 5.3456,
+                  "thread_cycles": 10139671,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 5.1994,
+                  "thread_cycles": 10062256,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 30.6166,
+                  "thread_cycles": 65904531,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 162.2075,
+                  "thread_cycles": 351340408,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 162.8542,
+                  "thread_cycles": 350722015,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 152.0247,
+                  "thread_cycles": 327162005,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 214.7194,
+                  "thread_cycles": 467088765,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 29.4661,
+                  "thread_cycles": 65097206,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 5.0723,
+                  "thread_cycles": 9545463,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.9417,
+                  "thread_cycles": 9501694,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 30.0408,
+                  "thread_cycles": 65313558,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 161.9377,
+                  "thread_cycles": 350629868,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 162.6039,
+                  "thread_cycles": 350013070,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 151.7602,
+                  "thread_cycles": 326401222,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 213.2434,
+                  "thread_cycles": 463676081,
+                  "thread_cpu_ms": 0
+                }
+              }
+            }
+          },
+          "windows_process_priority": "above_normal"
+        },
+        "power_before": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        },
+        "power_after": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        }
+      },
+      {
+        "stage": "after",
+        "raw": {
+          "avx2": true,
+          "vector_silu_gate_calls": 480,
+          "vector_silu_gate_enabled": true,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 1976158464,
+          "peak_rss_bytes": 1988366336,
+          "load_ms": 0.6528,
+          "prefill_p50_ms": 579.0762,
+          "decode_p50_ms": 112.5106,
+          "prefill_samples_ms": [
+            568.984,
+            579.0762,
+            582.7882,
+            577.4858,
+            576.3426,
+            590.4184,
+            582.3177
+          ],
+          "decode_samples_ms": [
+            106.0804,
+            110.3291,
+            113.6858,
+            114.1622,
+            111.9012,
+            120.0906,
+            112.5106
+          ],
+          "generated_tokens": [],
+          "diagnostic_profile": {
+            "leaf_decoder_profile": 1,
+            "clock": "steady_clock",
+            "warm_only": true,
+            "skipped_forwards": 6,
+            "bucket_by": "forward_input_tokens",
+            "timings": {
+              "prefill": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 4056.9613,
+                  "thread_cycles": 8919750066,
+                  "thread_cpu_ms": 3906.25
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.4029,
+                  "thread_cycles": 918376,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 343,
+                  "tokens": 21161,
+                  "milliseconds": 26.5148,
+                  "thread_cycles": 55550824,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1183,
+                  "tokens": 73423,
+                  "milliseconds": 3792.8959,
+                  "thread_cycles": 8343245245,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 343,
+                  "tokens": 21609,
+                  "milliseconds": 5.6093,
+                  "thread_cycles": 11626223,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 87.0517,
+                  "thread_cycles": 185510943,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 131.9586,
+                  "thread_cycles": 293110050,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 0.863,
+                  "thread_cycles": 1771084,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.0244,
+                  "thread_cycles": 49075,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 336,
+                  "tokens": 21168,
+                  "milliseconds": 8.678,
+                  "thread_cycles": 18455725,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 202.0971,
+                  "thread_cycles": 447203638,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 29.1551,
+                  "thread_cycles": 64480197,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 28.004,
+                  "thread_cycles": 63953292,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 201.9786,
+                  "thread_cycles": 445032801,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1057.4561,
+                  "thread_cycles": 2323178038,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1051.641,
+                  "thread_cycles": 2309823349,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1019.2581,
+                  "thread_cycles": 2248517336,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 202.253,
+                  "thread_cycles": 438965910,
+                  "thread_cpu_ms": 0
+                },
+                "pack_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 2.5621,
+                  "thread_cycles": 5601033,
+                  "thread_cpu_ms": 0
+                },
+                "pack_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 2.4597,
+                  "thread_cycles": 5363019,
+                  "thread_cpu_ms": 0
+                },
+                "pack_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 2.3267,
+                  "thread_cycles": 5198061,
+                  "thread_cpu_ms": 0
+                },
+                "pack_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 21.2594,
+                  "thread_cycles": 47843702,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 199.1116,
+                  "thread_cycles": 440379637,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 28.8875,
+                  "thread_cycles": 63868717,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 27.743,
+                  "thread_cycles": 63403084,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 198.6469,
+                  "thread_cycles": 438687587,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1054.0799,
+                  "thread_cycles": 2315977122,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1050.888,
+                  "thread_cycles": 2307923710,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 997.6307,
+                  "thread_cycles": 2199434771,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 201.1637,
+                  "thread_cycles": 436434967,
+                  "thread_cpu_ms": 0
+                }
+              },
+              "decode": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 788.245,
+                  "thread_cycles": 1699053019,
+                  "thread_cpu_ms": 703.125
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0175,
+                  "thread_cycles": 33407,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 343,
+                  "tokens": 343,
+                  "milliseconds": 1.2585,
+                  "thread_cycles": 2443164,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1183,
+                  "tokens": 1183,
+                  "milliseconds": 765.2122,
+                  "thread_cycles": 1649162401,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 343,
+                  "tokens": 343,
+                  "milliseconds": 0.3851,
+                  "thread_cycles": 545361,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 15.9248,
+                  "thread_cycles": 33357775,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 2.8227,
+                  "thread_cycles": 6276788,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 0.1715,
+                  "thread_cycles": 240082,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.007,
+                  "thread_cycles": 9216,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 336,
+                  "tokens": 336,
+                  "milliseconds": 0.3952,
+                  "thread_cycles": 589136,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 30.5277,
+                  "thread_cycles": 65866516,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.7131,
+                  "thread_cycles": 10257191,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.9535,
+                  "thread_cycles": 10046363,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 31.6891,
+                  "thread_cycles": 65910299,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 163.0654,
+                  "thread_cycles": 352091057,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 161.3526,
+                  "thread_cycles": 350469738,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 154.5455,
+                  "thread_cycles": 329093683,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 213.221,
+                  "thread_cycles": 463186710,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 30.2153,
+                  "thread_cycles": 65096984,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.4284,
+                  "thread_cycles": 9629571,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.6771,
+                  "thread_cycles": 9461603,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 31.411,
+                  "thread_cycles": 65327843,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 162.8114,
+                  "thread_cycles": 351355389,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 161.0685,
+                  "thread_cycles": 349701575,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 154.2688,
+                  "thread_cycles": 328322768,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 211.8747,
+                  "thread_cycles": 460071241,
+                  "thread_cpu_ms": 0
+                }
+              }
+            }
+          },
+          "windows_process_priority": "above_normal"
+        },
+        "power_before": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        },
+        "power_after": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        }
+      },
+      {
+        "stage": "before",
+        "raw": {
+          "avx2": true,
+          "vector_silu_gate_calls": 480,
+          "vector_silu_gate_enabled": true,
+          "optimized_fp32_active": true,
+          "vnni": false,
+          "activation_bits": 32,
+          "threads": 1,
+          "artifact_bytes": 1976158464,
+          "peak_rss_bytes": 1988317184,
+          "load_ms": 0.6423,
+          "prefill_p50_ms": 571.3045,
+          "decode_p50_ms": 111.3627,
+          "prefill_samples_ms": [
+            588.1598,
+            577.5049,
+            569.6566,
+            564.9817,
+            571.3045,
+            570.1817,
+            582.4783
+          ],
+          "decode_samples_ms": [
+            111.3627,
+            109.3468,
+            115.0832,
+            110.2577,
+            110.6399,
+            123.6874,
+            114.2992
+          ],
+          "generated_tokens": [],
+          "diagnostic_profile": {
+            "leaf_decoder_profile": 1,
+            "clock": "steady_clock",
+            "warm_only": true,
+            "skipped_forwards": 6,
+            "bucket_by": "forward_input_tokens",
+            "timings": {
+              "prefill": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 4023.721,
+                  "thread_cycles": 8810383521,
+                  "thread_cpu_ms": 3828.125
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.4188,
+                  "thread_cycles": 954085,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 343,
+                  "tokens": 21161,
+                  "milliseconds": 24.9878,
+                  "thread_cycles": 55860008,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1183,
+                  "tokens": 73423,
+                  "milliseconds": 3759.3733,
+                  "thread_cycles": 8231218966,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 343,
+                  "tokens": 21609,
+                  "milliseconds": 5.3717,
+                  "thread_cycles": 11454797,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 84.7746,
+                  "thread_cycles": 189050115,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 136.7724,
+                  "thread_cycles": 293044840,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 0.9344,
+                  "thread_cycles": 1726622,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 441,
+                  "milliseconds": 0.0244,
+                  "thread_cycles": 48846,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 336,
+                  "tokens": 21168,
+                  "milliseconds": 7.8248,
+                  "thread_cycles": 17508560,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 201.3975,
+                  "thread_cycles": 441764369,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 34.0945,
+                  "thread_cycles": 73746187,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 33.092,
+                  "thread_cycles": 73213288,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 204.8685,
+                  "thread_cycles": 440183582,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1034.4153,
+                  "thread_cycles": 2270309736,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1036.3892,
+                  "thread_cycles": 2264199984,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1006.6535,
+                  "thread_cycles": 2217639392,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 207.1748,
+                  "thread_cycles": 448065780,
+                  "thread_cpu_ms": 0
+                },
+                "pack_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 6.1843,
+                  "thread_cycles": 11059895,
+                  "thread_cpu_ms": 0
+                },
+                "pack_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 5.2571,
+                  "thread_cycles": 10749082,
+                  "thread_cpu_ms": 0
+                },
+                "pack_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 4.7016,
+                  "thread_cycles": 10352560,
+                  "thread_cpu_ms": 0
+                },
+                "pack_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 4.7473,
+                  "thread_cycles": 10678130,
+                  "thread_cpu_ms": 0
+                },
+                "pack_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 4.6843,
+                  "thread_cycles": 10154415,
+                  "thread_cpu_ms": 0
+                },
+                "pack_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 5.069,
+                  "thread_cycles": 10629727,
+                  "thread_cpu_ms": 0
+                },
+                "pack_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 33.7341,
+                  "thread_cycles": 74671936,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 194.8019,
+                  "thread_cycles": 429512843,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 28.5233,
+                  "thread_cycles": 62255690,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 28.1418,
+                  "thread_cycles": 62195785,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 168,
+                  "tokens": 10584,
+                  "milliseconds": 199.8025,
+                  "thread_cycles": 428542380,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1028.9585,
+                  "thread_cycles": 2257910536,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 1030.594,
+                  "thread_cycles": 2251602418,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 168,
+                  "tokens": 10360,
+                  "milliseconds": 972.5596,
+                  "thread_cycles": 2141753948,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 205.8281,
+                  "thread_cycles": 445223335,
+                  "thread_cpu_ms": 0
+                }
+              },
+              "decode": {
+                "forward": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 794.1359,
+                  "thread_cycles": 1717724625,
+                  "thread_cpu_ms": 734.375
+                },
+                "embedding": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0217,
+                  "thread_cycles": 44008,
+                  "thread_cpu_ms": 0
+                },
+                "rms_norm": {
+                  "calls": 343,
+                  "tokens": 343,
+                  "milliseconds": 1.1544,
+                  "thread_cycles": 2313918,
+                  "thread_cpu_ms": 0
+                },
+                "linear_fp32": {
+                  "calls": 1183,
+                  "tokens": 1183,
+                  "milliseconds": 770.9651,
+                  "thread_cycles": 1667902949,
+                  "thread_cpu_ms": 0
+                },
+                "rope": {
+                  "calls": 343,
+                  "tokens": 343,
+                  "milliseconds": 0.4029,
+                  "thread_cycles": 597890,
+                  "thread_cpu_ms": 0
+                },
+                "attention": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 15.241,
+                  "thread_cycles": 33341644,
+                  "thread_cpu_ms": 0
+                },
+                "activation": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 2.8635,
+                  "thread_cycles": 6330940,
+                  "thread_cpu_ms": 0
+                },
+                "kv_append": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 0.1659,
+                  "thread_cycles": 228549,
+                  "thread_cpu_ms": 0
+                },
+                "causal_mask": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 0.0067,
+                  "thread_cycles": 8755,
+                  "thread_cpu_ms": 0
+                },
+                "residual": {
+                  "calls": 336,
+                  "tokens": 336,
+                  "milliseconds": 0.9713,
+                  "thread_cycles": 629909,
+                  "thread_cpu_ms": 0
+                },
+                "projection_q": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 32.124,
+                  "thread_cycles": 65997871,
+                  "thread_cpu_ms": 0
+                },
+                "projection_k": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.7046,
+                  "thread_cycles": 10189431,
+                  "thread_cpu_ms": 0
+                },
+                "projection_v": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.7212,
+                  "thread_cycles": 10046594,
+                  "thread_cpu_ms": 0
+                },
+                "projection_o": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 30.7686,
+                  "thread_cycles": 66640672,
+                  "thread_cpu_ms": 0
+                },
+                "projection_up": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 166.1033,
+                  "thread_cycles": 354797118,
+                  "thread_cpu_ms": 0
+                },
+                "projection_gate": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 164.0252,
+                  "thread_cycles": 355415265,
+                  "thread_cpu_ms": 0
+                },
+                "projection_down": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 152.998,
+                  "thread_cycles": 329253336,
+                  "thread_cpu_ms": 0
+                },
+                "projection_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 214.3762,
+                  "thread_cycles": 473355644,
+                  "thread_cpu_ms": 0
+                },
+                "compute_q": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 31.8263,
+                  "thread_cycles": 65284541,
+                  "thread_cpu_ms": 0
+                },
+                "compute_k": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.4381,
+                  "thread_cycles": 9605833,
+                  "thread_cpu_ms": 0
+                },
+                "compute_v": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 4.4608,
+                  "thread_cycles": 9489022,
+                  "thread_cpu_ms": 0
+                },
+                "compute_o": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 30.541,
+                  "thread_cycles": 66096002,
+                  "thread_cpu_ms": 0
+                },
+                "compute_up": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 165.8607,
+                  "thread_cycles": 354100154,
+                  "thread_cpu_ms": 0
+                },
+                "compute_gate": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 163.7737,
+                  "thread_cycles": 354696883,
+                  "thread_cpu_ms": 0
+                },
+                "compute_down": {
+                  "calls": 168,
+                  "tokens": 168,
+                  "milliseconds": 152.7171,
+                  "thread_cycles": 328512384,
+                  "thread_cpu_ms": 0
+                },
+                "compute_head": {
+                  "calls": 7,
+                  "tokens": 7,
+                  "milliseconds": 212.7371,
+                  "thread_cycles": 469804948,
+                  "thread_cpu_ms": 0
+                }
+              }
+            }
+          },
+          "windows_process_priority": "above_normal"
+        },
+        "power_before": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        },
+        "power_after": {
+          "ac_line_status": 1,
+          "battery_saver": false
+        }
+      }
+    ]
+  }
+}

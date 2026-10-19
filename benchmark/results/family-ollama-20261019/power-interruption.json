@@ -1,0 +1,22 @@
+{
+  "recorded_utc": "2026-10-19T03:18:12.228949+00:00",
+  "user_report": "AC lost, balanced mode; then user reported AC restored. Correctness continued. No probe timing accepted during outage.",
+  "power_now": {
+    "ac_line_status": 1,
+    "battery_saver": false
+  },
+  "prior_comparisons": {
+    "smol": {
+      "complete": true,
+      "ollama_every_boundary_ac": true,
+      "leaf_every_sample_native_ac_check": true,
+      "timing_qualified_as_overall_speed_claim": false
+    },
+    "qwen": {
+      "complete": true,
+      "ollama_every_boundary_ac": true,
+      "leaf_every_sample_native_ac_check": true,
+      "timing_qualified_as_overall_speed_claim": false
+    }
+  }
+}

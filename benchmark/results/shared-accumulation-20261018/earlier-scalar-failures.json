@@ -1,0 +1,135 @@
+{
+  "complete": true,
+  "passed": false,
+  "acceptance_timing": false,
+  "atol": 0.0002,
+  "rtol": 0.0002,
+  "scope": "Retained trained-reference prefix/cache/thread/scalar checks and exact W8A8 exclusions",
+  "hashes": {
+    "build\\linear-accumulation-20261017-v2\\leaf_decoder.exe": "d099543ba60734ecd8e72a697a9e5e03d5f8a5f50878ae4af1cee839b2fa9390",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\release\\leaf_decoder.exe": "83db825956f5657c068a5699efbc35e088527fc34ac24a37122e7805f2ea2900",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\linear-accumulation\\check_cache_quality.py": "ec5b6936826bcdb656f70247a6071c0f2acb70a8397329133b46b688391c5647",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\898954fccee23671ea3da805\\decoder-32.leaf": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\smol-quality-8\\tokens.json": "1555203a81ad00cb7bfcc8e7f04aab2eccfc24e530e329471ad8d8046d959d9a",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\smol-block1-trace-v2\\expected\\logits.npy": "c325dc3974563e7fc2f10684364c775e89f15b825c3c26c0c4a70e081e054aba",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\smol-block1-trace-v2\\trace.json": "b96e98a2fb6953fc4ed65a73ebd8ce562fbc065d036421c4739ba1181e3967a9",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\70ec40010513210f83bb089b\\decoder-32.leaf": "f01b07a042ce3e3da824076802376e3f0f1864e3134b1036c5c4e4bd517d7de7",
+    "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\qwen-quality-8\\tokens.json": "5856ecd9964691c327eab1a71886ca5dc63c821b6fad71a96eee1a0b3a6a020b",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\qwen-block1-trace\\expected\\logits.npy": "de7de343619d23299f9315f30501e9b8365065e82ef3b3a614d7b1e7c77bb2f7",
+    "C:\\Users\\navaneeth\\leaf\\build\\numerics-20261017\\qwen-block1-trace\\trace.json": "71d79e052e3e87a7168a687bd4b3c4ad88124f455dbee796e3f3d592464c0c56",
+    "C:\\Users\\navaneeth\\leaf\\build\\gpt2_windows_fair\\decoder-32.leaf": "b47cb0f5f468ad52c40fa9046b0d347c9c69f225e1ecccc7f37358d0a1a838b8",
+    "C:\\Users\\navaneeth\\leaf\\build\\gpt2_windows_fair\\tokens.json": "3a45f2dbd949aa3d8a72d681fd8322b3a17626a1d81ffd47f581e19135c029d6",
+    "C:\\Users\\navaneeth\\leaf\\build\\gpt2_windows_fair\\reference.npy": "c9f5a7f75bb0c8023c94587c3f73e4ae43b273f29b3c7a90ffaabbaa3cfa8c19",
+    "C:\\Users\\navaneeth\\leaf\\build\\tinyllama_windows_fair\\decoder-32.leaf": "71b98b53ce204393478990887c7beab7074e34bffc76e5a00c4f9183631e060a",
+    "C:\\Users\\navaneeth\\leaf\\build\\tinyllama_windows_fair\\tokens.json": "537a2ed92d0dbe9b77ceb462e3ee09fe41d0bc29a7d638e7a1bc2cfdf4c327f5",
+    "C:\\Users\\navaneeth\\leaf\\build\\tinyllama_windows_fair\\reference.npy": "2ddde87d143287c6689e54bfde0a5f9bf8bac38c00a6fcc3311c73ea1699d183",
+    "C:\\Users\\navaneeth\\leaf\\build\\tinyllama_windows_fair\\decoder-8-smooth.leaf": "6a831e4a655f4fa00ccf82ad1bf317492aeaa76c85950a56ec464a7f3611ffc5"
+  },
+  "cases": [
+    {
+      "model": "smol",
+      "workload": "full",
+      "passed": true,
+      "violations": 0,
+      "max_abs_error": 0.00017452239990234375,
+      "max_tolerance_ratio": 0.45555350406405126,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "smol",
+      "workload": "chunk7",
+      "passed": true,
+      "violations": 0,
+      "max_abs_error": 9.1552734375e-05,
+      "max_tolerance_ratio": 0.2698459191689031,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "smol",
+      "workload": "tokenwise-threads2",
+      "passed": true,
+      "violations": 0,
+      "max_abs_error": 0.00014495849609375,
+      "max_tolerance_ratio": 0.40598550621252233,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "smol",
+      "workload": "scalar-tokenwise",
+      "passed": false,
+      "violations": 121,
+      "max_abs_error": 0.0006504058837890625,
+      "max_tolerance_ratio": 1.7112205563135916,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "qwen",
+      "workload": "full",
+      "passed": true,
+      "violations": 0,
+      "max_abs_error": 0.0001049041748046875,
+      "max_tolerance_ratio": 0.37884230425844834,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "qwen",
+      "workload": "chunk7",
+      "passed": true,
+      "violations": 0,
+      "max_abs_error": 0.00012636184692382812,
+      "max_tolerance_ratio": 0.45730026305596705,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "qwen",
+      "workload": "tokenwise-threads2",
+      "passed": true,
+      "violations": 0,
+      "max_abs_error": 4.297494888305664e-05,
+      "max_tolerance_ratio": 0.17290959642075587,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "qwen",
+      "workload": "scalar-tokenwise",
+      "passed": false,
+      "violations": 3,
+      "max_abs_error": 0.0002682209014892578,
+      "max_tolerance_ratio": 1.0800647722723067,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "gpt2",
+      "workload": "retained-trained-prefix",
+      "passed": true,
+      "violations": 0,
+      "max_abs_error": 0.00030517578125,
+      "max_tolerance_ratio": 0.008031980132093944,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "tinyllama",
+      "workload": "retained-trained-prefix",
+      "passed": true,
+      "violations": 0,
+      "max_abs_error": 4.2438507080078125e-05,
+      "max_tolerance_ratio": 0.1407706538308228,
+      "next_token_agreement": 1.0
+    },
+    {
+      "model": "tinyllama",
+      "workload": "w8a8-tokenwise",
+      "passed": true,
+      "logits_exact": true,
+      "generation_exact": true
+    },
+    {
+      "model": "tinyllama",
+      "workload": "w8a8-generation",
+      "passed": true,
+      "logits_exact": true,
+      "generation_exact": true
+    }
+  ],
+  "error": "One or more retained-reference checks failed"
+}

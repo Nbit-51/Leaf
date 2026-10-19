@@ -1,0 +1,155 @@
+{
+  "candidate": "6x16_k128_fp64_outer_sum",
+  "packing_included": true,
+  "synthetic": true,
+  "model_latency_measured": false,
+  "shapes": [
+    {
+      "m": 63,
+      "k": 960,
+      "n": 2560,
+      "strided": false,
+      "bias": true,
+      "scalar_fallback_bit_exact": true,
+      "row_reuse": {
+        "max_abs_error": 1.73956673577e-06,
+        "rmse": 1.7903746147e-07,
+        "max_tolerance_ratio": 0.00569988212859,
+        "violations": 0
+      },
+      "blocked_sum": {
+        "max_abs_error": 3.95014449261e-07,
+        "rmse": 6.59252345897e-08,
+        "max_tolerance_ratio": 0.00162094583756,
+        "violations": 0
+      },
+      "passes": [
+        {
+          "algorithm": "row_reuse",
+          "ms": [
+            3.3809,
+            3.3177,
+            3.2461,
+            3.2644,
+            3.5098,
+            3.2859,
+            3.2242
+          ]
+        },
+        {
+          "algorithm": "blocked_sum",
+          "ms": [
+            3.9279,
+            4.3639,
+            4.2334,
+            4.6096,
+            3.7218,
+            3.6292,
+            3.553
+          ]
+        },
+        {
+          "algorithm": "blocked_sum",
+          "ms": [
+            3.6877,
+            9.0865,
+            12.9559,
+            4.6487,
+            3.7631,
+            4.2003,
+            4.3547
+          ]
+        },
+        {
+          "algorithm": "row_reuse",
+          "ms": [
+            3.869,
+            3.4386,
+            3.7917,
+            3.2587,
+            4.1627,
+            3.3762,
+            3.3836
+          ]
+        }
+      ]
+    },
+    {
+      "m": 63,
+      "k": 896,
+      "n": 4864,
+      "strided": false,
+      "bias": true,
+      "scalar_fallback_bit_exact": true,
+      "row_reuse": {
+        "max_abs_error": 1.88169175852e-06,
+        "rmse": 1.67592960158e-07,
+        "max_tolerance_ratio": 0.00535650315814,
+        "violations": 0
+      },
+      "blocked_sum": {
+        "max_abs_error": 3.62476304649e-07,
+        "rmse": 6.43176213636e-08,
+        "max_tolerance_ratio": 0.00177346060721,
+        "violations": 0
+      },
+      "passes": [
+        {
+          "algorithm": "row_reuse",
+          "ms": [
+            6.5528,
+            5.9617,
+            6.1539,
+            5.9336,
+            5.901,
+            5.9901,
+            6.1249
+          ]
+        },
+        {
+          "algorithm": "blocked_sum",
+          "ms": [
+            6.7133,
+            6.5889,
+            6.885,
+            6.8306,
+            6.3195,
+            6.5308,
+            6.2504
+          ]
+        },
+        {
+          "algorithm": "blocked_sum",
+          "ms": [
+            6.2804,
+            6.5329,
+            6.2638,
+            7.2563,
+            6.3302,
+            6.2332,
+            6.2856
+          ]
+        },
+        {
+          "algorithm": "row_reuse",
+          "ms": [
+            6.1824,
+            5.772,
+            6.2806,
+            6.198,
+            5.8283,
+            7.3877,
+            5.8558
+          ]
+        }
+      ]
+    }
+  ],
+  "binary_sha256": "26f4faddfdae8307f7922a8994d6adaf988e8d1b4bdae1a71c63b0ee4637597c",
+  "acceptance_timing": false,
+  "full_model_speed_qualified": false,
+  "observed_child_affinity": [
+    2
+  ],
+  "pinned_cpu": 2
+}
