@@ -1,0 +1,107 @@
+diff --git a/engine/include/leaf/runtime/decoder.h b/engine/include/leaf/runtime/decoder.h
+index c40640b..d969a2f 100644
+--- a/engine/include/leaf/runtime/decoder.h
++++ b/engine/include/leaf/runtime/decoder.h
+@@ -32,6 +32,7 @@ public:
+     std::size_t silu_gate_vector_calls() const;
+     std::size_t source_bf16_tensors() const;
+     std::size_t source_bf16_linear_calls() const;
++    std::size_t tile_aligned_linear_calls() const;
+     bool uses_vnni() const;
+     unsigned activation_bits() const;
+ private:
+diff --git a/engine/include/leaf/runtime/host_support.h b/engine/include/leaf/runtime/host_support.h
+index 65dc32f..6a9c385 100644
+--- a/engine/include/leaf/runtime/host_support.h
++++ b/engine/include/leaf/runtime/host_support.h
+@@ -132,10 +132,13 @@ public:
+         { std::lock_guard<std::mutex> lock(mutex_); stop_ = true; }
+         ready_.notify_all(); for (auto& worker : workers_) worker.join();
+     }
+-    void run(std::size_t count, std::function<void(std::size_t, std::size_t)> task) {
++    unsigned thread_count() const noexcept { return threads_; }
++    void run(std::size_t count, std::function<void(std::size_t, std::size_t)> task,
++             std::size_t grain = 32) {
++        check(grain > 0 && grain <= std::numeric_limits<unsigned>::max(), "invalid worker grain");
+         if (threads_ == 1) { task(0, count); return; }
+         { std::lock_guard<std::mutex> lock(mutex_);
+-          task_ = std::move(task); count_ = count; next_ = 0; pending_ = threads_ - 1; ++epoch_; }
++          task_ = std::move(task); count_ = count; grain_ = static_cast<unsigned>(grain); next_ = 0; pending_ = threads_ - 1; ++epoch_; }
+         ready_.notify_all(); drain();
+         std::unique_lock<std::mutex> lock(mutex_);
+         finished_.wait(lock, [&] { return pending_ == 0; });
+@@ -143,12 +146,15 @@ public:
+ private:
+     void drain() {
+         for (;;) {
+-            const std::size_t first = next_.fetch_add(32, std::memory_order_relaxed);
++            const std::size_t first = next_.fetch_add(grain_, std::memory_order_relaxed);
+             if (first >= count_) return;
+-            task_(first, std::min(first + 32, count_));
++            task_(first, std::min(first + grain_, count_));
+         }
+     }
+     unsigned threads_;
++    // Use the old padding beside threads_, preserving the other member offsets
++    // and keeping this read-only job parameter away from next_'s atomic writes.
++    unsigned grain_ = 32;
+     std::vector<std::thread> workers_;
+     std::mutex mutex_;
+     std::condition_variable ready_, finished_;
+diff --git a/engine/src/decoder.cpp b/engine/src/decoder.cpp
+index abbde6a..102da53 100644
+--- a/engine/src/decoder.cpp
++++ b/engine/src/decoder.cpp
+@@ -653,6 +653,7 @@ struct Decoder::Impl {
+     bool avx = false;
+     bool float_tiles = false, optimized_fp32 = false, fp32_artifact = false;
+     std::size_t source_bf16_tensors = 0, source_bf16_linear_calls = 0;
++    std::size_t tile_aligned_linear_calls = 0;
+     bool vector_gelu = false, vector_attention = false, paired_gemv = false;
+     bool vector_silu_gate = false;
+     std::size_t vector_silu_gate_calls = 0;
+@@ -919,6 +920,15 @@ struct Decoder::Impl {
+         }
+         output.resize(tokens * weight.rows);
+         used_vnni = used_vnni || vnni_integer;
++        // Six-row GEMM tiles and 16-float cache lines share a 48-row boundary.
++        // Leave at least four jobs per worker; small matrices and GEMV retain
++        // their existing fine-grained scheduling. No arithmetic order changes.
++        std::size_t job_grain = 32;
++        if (packed_float && workers.thread_count() > 1) {
++            const auto rows_per_worker = weight.rows / workers.thread_count();
++            job_grain = rows_per_worker >= 384 ? 96 : rows_per_worker >= 192 ? 48 : 32;
++            if (job_grain != 32) ++tile_aligned_linear_calls;
++        }
+         workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
+             if (packed_float) {
+                 // Verification may request every vocabulary row for many tokens.
+@@ -1033,7 +1043,7 @@ struct Decoder::Impl {
+                         output[(token + t) * weight.rows + row] = result[t] + (bias ? bias->value(0, row) : 0);
+                 }
+             }
+-        });
++        }, job_grain);
+     }
+     void prepare_rotary_tables(std::size_t tokens, std::size_t position) {
+         if (position_kind != 0) return;
+@@ -1252,6 +1262,7 @@ bool Decoder::uses_vector_silu_gate() const { return impl_->vector_silu_gate; }
+ std::size_t Decoder::silu_gate_vector_calls() const { return impl_->vector_silu_gate_calls; }
+ std::size_t Decoder::source_bf16_tensors() const { return impl_->source_bf16_tensors; }
+ std::size_t Decoder::source_bf16_linear_calls() const { return impl_->source_bf16_linear_calls; }
++std::size_t Decoder::tile_aligned_linear_calls() const { return impl_->tile_aligned_linear_calls; }
+ bool Decoder::uses_vnni() const { return impl_->used_vnni; }
+ unsigned Decoder::activation_bits() const { return impl_->activation_precision; }
+ // Test-only access to the actual decoder dot kernels; absent from normal builds.
+diff --git a/engine/src/main_decoder.cpp b/engine/src/main_decoder.cpp
+index 56acbe8..bb95709 100644
+--- a/engine/src/main_decoder.cpp
++++ b/engine/src/main_decoder.cpp
+@@ -210,6 +210,7 @@ int main(int argc, char** argv) {
+                 << ",\"source_bf16_tensors\":" << decoder.source_bf16_tensors()
+                 << ",\"benchmark_ac_checked\":" << (require_ac ? "true" : "false")
+                 << ",\"source_bf16_linear_calls\":" << decoder.source_bf16_linear_calls()
++                << ",\"tile_aligned_linear_calls\":" << decoder.tile_aligned_linear_calls()
+                 << ",\"vector_silu_gate_enabled\":" << (decoder.uses_vector_silu_gate() ? "true" : "false")
+                 << ",\"optimized_fp32_active\":" << (decoder.uses_optimized_fp32() ? "true" : "false")
+                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")

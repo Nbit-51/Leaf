@@ -1,0 +1,259 @@
+{
+  "scope": "Unqualified kernel experiments and worker-placement diagnostics; not a release speed claim",
+  "files": {
+    "candidate/build.json": {
+      "sha256": "bd7297ba499391929f9f81f413364a8a7511cab57cdbe2b54ba935df50bf5268",
+      "source": "build\\mlp-unroll-20261020\\candidate\\build.json"
+    },
+    "candidate-final/build.json": {
+      "sha256": "169036867cbc4e99c000299d66393ad829a15bdc736e1da162c798add95ad697",
+      "source": "build\\mlp-unroll-20261020\\candidate-final\\build.json"
+    },
+    "full-model/model-quality.json": {
+      "sha256": "70d4e8a374c2938b219ca6f2778075f276fa3e6694bbf3dbe7cf0f447e4c328a",
+      "source": "build\\mlp-unroll-20261020\\full-model\\model-quality.json"
+    },
+    "model-first.py": {
+      "sha256": "2c5591c70c0446cdc479db20e2962d9bb39c2013e8f781428f3528e46d35674a",
+      "source": "build\\mlp-unroll-20261020\\model-first.py"
+    },
+    "full-model-v2/model-quality.json": {
+      "sha256": "00ecb7e8901b106712508f539d509c237893818ea7aa2e8f81a313bd65495518",
+      "source": "build\\mlp-unroll-20261020\\full-model-v2\\model-quality.json"
+    },
+    "full-model-v2/model-acceptance.json": {
+      "sha256": "1bec3fa23d43b6ef61c755fac6ed781b43d2f026fbbcc5d4c2f459347548727e",
+      "source": "build\\mlp-unroll-20261020\\full-model-v2\\model-acceptance.json"
+    },
+    "full-model-final/model-quality.json": {
+      "sha256": "1a083eed6ad510969db5c35740307666133e648551aa8904dfb5c786411b22dc",
+      "source": "build\\mlp-unroll-20261020\\full-model-final\\model-quality.json"
+    },
+    "full-model-final/model-acceptance.json": {
+      "sha256": "81cb602d2b781c94f7effac6bb256990ed24537b9a20220a8535a650a0d75307",
+      "source": "build\\mlp-unroll-20261020\\full-model-final\\model-acceptance.json"
+    },
+    "probe-v2/build.json": {
+      "sha256": "b95ee3687348595bbca683f9b0058ba17acd4c91c3e9c3eb16d903e0e1098b10",
+      "source": "build\\mlp-unroll-20261020\\probe-v2\\build.json"
+    },
+    "probe-v2/check.json": {
+      "sha256": "e0052ff0c0aa54420b3e4607f1f513f1e8c3ba873b4f823acbfc7ba5f845a651",
+      "source": "build\\mlp-unroll-20261020\\probe-v2\\check.json"
+    },
+    "probe-v2/timing.json": {
+      "sha256": "be8fdac8b6b3b6caeb14928fd4a54a230af943f5a5daf0cf1aed2e6ca41d7da9",
+      "source": "build\\mlp-unroll-20261020\\probe-v2\\timing.json"
+    },
+    "probe-v2/build-snapshot.py": {
+      "sha256": "b6860a2138a6c842b380d8420aa639fd2f20f7cb2845500bdbfa1df6eb4d2fec",
+      "source": "build\\mlp-unroll-20261020\\probe-v2\\build-snapshot.py"
+    },
+    "probe-v2/run-snapshot.py": {
+      "sha256": "a5f3ae95636b29be31d6d21afbdef6956818aa022716cf0b5ee25800dbd32554",
+      "source": "build\\mlp-unroll-20261020\\probe-v2\\run-snapshot.py"
+    },
+    "five-row/build.json": {
+      "sha256": "dceef126092ab1bbefe0bb7e7db99329d167574c2a919646fe1e3a705accae70",
+      "source": "build\\mlp-unroll-20261020\\five-row\\build.json"
+    },
+    "five-row/check.json": {
+      "sha256": "867aa469d502100d5e6e40fad9f3175221c9a98a21d93b29824b76ea7e37c6cb",
+      "source": "build\\mlp-unroll-20261020\\five-row\\check.json"
+    },
+    "five-row/timing.json": {
+      "sha256": "8461be21442fc2826db37b00f3c9bed3735a4fb11e70ef2cf9bc95c6d93a3fca",
+      "source": "build\\mlp-unroll-20261020\\five-row\\timing.json"
+    },
+    "queue/build.json": {
+      "sha256": "b230a1885c071ad457138e4618ae04cc6d697707565197f8b1ed87615cadd948",
+      "source": "build\\mlp-unroll-20261020\\queue\\build.json"
+    },
+    "queue/check.json": {
+      "sha256": "bef4bd29bab044320341693a88258938c8b16f626cc67a6a7cd5593d30930851",
+      "source": "build\\mlp-unroll-20261020\\queue\\check.json"
+    },
+    "queue/timing.json": {
+      "sha256": "239d4b35c6a5733001e33395253f98b432c5753b8c58258e858b01389a003f04",
+      "source": "build\\mlp-unroll-20261020\\queue\\timing.json"
+    },
+    "queue/build-snapshot.py": {
+      "sha256": "7666d84d414c0855f7adde4b9709c519e9135ecd79ef3cd97bc98775d579fd5f",
+      "source": "build\\mlp-unroll-20261020\\queue\\build-snapshot.py"
+    },
+    "queue/probe-snapshot.cpp": {
+      "sha256": "ef956e813b7770856c54f07afaa079a08dc741386f6f320b82d59540a6bf482e",
+      "source": "build\\mlp-unroll-20261020\\queue\\probe-snapshot.cpp"
+    },
+    "queue-balanced/build.json": {
+      "sha256": "b26ac007f17fbf45d974100075b1889d3ff34068758bc09bcb60f6c4033d57ee",
+      "source": "build\\mlp-unroll-20261020\\queue-balanced\\build.json"
+    },
+    "queue-balanced/check.json": {
+      "sha256": "19086ee3f9c4bd03ae5bbe849539869c57442f6ce8885fad6b27c4ca654b1c06",
+      "source": "build\\mlp-unroll-20261020\\queue-balanced\\check.json"
+    },
+    "queue-balanced/timing.json": {
+      "sha256": "af8dd629c72078d1c5d5c104d8e0cb50bf50b837af9a6791558e7719e7920b5e",
+      "source": "build\\mlp-unroll-20261020\\queue-balanced\\timing.json"
+    },
+    "process-diagnostic/build.json": {
+      "sha256": "97aa1e166214334fd5666dc50da2620e93ad290ade2ca6fa85c44dd7ecab05ce",
+      "source": "build\\mlp-unroll-20261020\\process-diagnostic\\build.json"
+    },
+    "process-diagnostic/smol-diagnostic.json": {
+      "sha256": "c62d863f94de907f095ed5440ab6f47bc9443e859f0d4794523e1287bb2ade67",
+      "source": "build\\mlp-unroll-20261020\\process-diagnostic\\smol-diagnostic.json"
+    },
+    "process-diagnostic/diagnose.py.snapshot": {
+      "sha256": "5272cf43721891343382dab891ad2ad19617c8f91b30c02667f4af90461963b0",
+      "source": "build\\mlp-unroll-20261020\\process-diagnostic\\diagnose.py.snapshot"
+    },
+    "process-diagnostic/process_probe.h.snapshot": {
+      "sha256": "d0979f83c1fb55da222eeba5a1a0e2e78ec102d6d084926d589b084394587d6b",
+      "source": "build\\mlp-unroll-20261020\\process-diagnostic\\process_probe.h.snapshot"
+    },
+    "placement-diagnostic/build.json": {
+      "sha256": "7434dd5d79a5358b2a2e2ab85190c7c4d2e2925e51a33108f7761a8ab95b1095",
+      "source": "build\\mlp-unroll-20261020\\placement-diagnostic\\build.json"
+    },
+    "placement-diagnostic/smol-placement-diagnostic.json": {
+      "sha256": "a1eb96d37ca5b9da8990e9b9c6c88d90fd272145362d342383934118be3a99c0",
+      "source": "build\\mlp-unroll-20261020\\placement-diagnostic\\smol-placement-diagnostic.json"
+    },
+    "placement-diagnostic/diagnose.py.snapshot": {
+      "sha256": "82d89ee2d81579dda4162e575fa9e7f3730391e1332be228b91863a35ba6a505",
+      "source": "build\\mlp-unroll-20261020\\placement-diagnostic\\diagnose.py.snapshot"
+    },
+    "placement-diagnostic/process_probe.h.snapshot": {
+      "sha256": "d0979f83c1fb55da222eeba5a1a0e2e78ec102d6d084926d589b084394587d6b",
+      "source": "build\\mlp-unroll-20261020\\placement-diagnostic\\process_probe.h.snapshot"
+    },
+    "placement-v2/build.json": {
+      "sha256": "b7b4abbd57d2cc0f3ecef84bc247a7f3f852b5f9db7e6c30b41f37f6a801d185",
+      "source": "build\\mlp-unroll-20261020\\placement-v2\\build.json"
+    },
+    "placement-v2/smol-placement-diagnostic.json": {
+      "sha256": "bd903e1f9dbf7e02a2697e9c7e315ee4170f3e572d46702368e709e002dfdfbb",
+      "source": "build\\mlp-unroll-20261020\\placement-v2\\smol-placement-diagnostic.json"
+    },
+    "placement-v2/qwen-placement-diagnostic.json": {
+      "sha256": "9886a1f5360adea2b4edca2f95343c6e6d489e1a628f3cbe52102d35c3f93890",
+      "source": "build\\mlp-unroll-20261020\\placement-v2\\qwen-placement-diagnostic.json"
+    },
+    "placement-v2/diagnose.py.snapshot": {
+      "sha256": "70d50a17563d53377696ca16e88fae16e4cefcef9645795a8c2fa5b4b6cffaf0",
+      "source": "build\\mlp-unroll-20261020\\placement-v2\\diagnose.py.snapshot"
+    },
+    "placement-v2/process_probe.h.snapshot": {
+      "sha256": "4961098a3eaef72c9b788606c74a41277bc8e007243e19b47ba6376c222ab673",
+      "source": "build\\mlp-unroll-20261020\\placement-v2\\process_probe.h.snapshot"
+    },
+    "architectures.json": {
+      "sha256": "0246c49820299add0342701c8bea432509779394d4d70ce476ba25dd84a5db08",
+      "source": "build\\mlp-unroll-20261020\\architectures.json"
+    },
+    "default-parity-final.json": {
+      "sha256": "de5b0918fb0731174e03cd46bfff8dd6004504588bf9d02845b1797e8039f5ef",
+      "source": "build\\mlp-unroll-20261020\\default-parity-final.json"
+    },
+    "unit-final-results.xml": {
+      "sha256": "c7a44c87b8771b9478c8d09a1ae4464762142c6cb752daf89cbdb168ba463145",
+      "source": "build\\mlp-unroll-20261020\\unit-final-results.xml"
+    },
+    "layout.json": {
+      "sha256": "a7fadd043a7722c2f82d26c7643fd1424f635533b20838571c8b52a3cf1c82e1",
+      "source": "build\\mlp-unroll-20261020\\layout.json"
+    },
+    "installed-check.json": {
+      "sha256": "fac538634b5358b98ba8fccbf4a7f39bd9b25c9882e335eb55e3af7ebf0fc98b",
+      "source": "build\\mlp-unroll-20261020\\installed-check.json"
+    },
+    "installed-metrics.json": {
+      "sha256": "aa0245897f3310b2725e118f79d4ae87b6fb1549c03201f5bf6a9d8193fb226d",
+      "source": "build\\mlp-unroll-20261020\\installed-metrics.json"
+    },
+    "diagnostic-reconstruction/build.json": {
+      "sha256": "54dffec5501927c692ab671f1eed3ce3f18ddb6b9cfdca04dd684cddfc25f3da",
+      "source": "build\\mlp-unroll-20261020\\diagnostic-reconstruction\\build.json"
+    },
+    "diagnostic-reconstruction/smoke.json": {
+      "sha256": "76c5d9d87f92d6fee711fcc87070bc194dbb49273b5afcea3df40a37fa086be0",
+      "source": "build\\mlp-unroll-20261020\\diagnostic-reconstruction\\smoke.json"
+    },
+    "queue-reconstruction-final/build.json": {
+      "sha256": "da180dfc6595557a649ea482f134e3bfdb95083b8ffd34d258dc8dd92f1936fb",
+      "source": "build\\mlp-unroll-20261020\\queue-reconstruction-final\\build.json"
+    },
+    "queue-reconstruction-final/check.json": {
+      "sha256": "073b3795f3a4edb81b0b4ac66c0e6a5d8a550b032c2ea18d2d3448e478cb166b",
+      "source": "build\\mlp-unroll-20261020\\queue-reconstruction-final\\check.json"
+    },
+    "source-snapshot/engine/CMakeLists.txt": {
+      "sha256": "251cfbfa3673a6cb6f27755366270af4c7a7fb55dbe3604f1e8d95377d99f31d",
+      "source": "build\\mlp-unroll-20261020\\source-snapshot\\engine\\CMakeLists.txt"
+    },
+    "source-snapshot/engine/src/decoder.cpp": {
+      "sha256": "9e2e8953829f489eea7b4fcca924cec259725870c5c4c6431985a725e83d90c4",
+      "source": "build\\mlp-unroll-20261020\\source-snapshot\\engine\\src\\decoder.cpp"
+    },
+    "source-snapshot/engine/src/main_decoder.cpp": {
+      "sha256": "586ebab76effc928326c783dea2264d057496d7706cca5db6ff38b77183a000c",
+      "source": "build\\mlp-unroll-20261020\\source-snapshot\\engine\\src\\main_decoder.cpp"
+    },
+    "source-snapshot/engine/include/leaf/runtime/decoder.h": {
+      "sha256": "741be909674bc31b0df6f32346aab4a4cdef4054edd82d25d38695106b338022",
+      "source": "build\\mlp-unroll-20261020\\source-snapshot\\engine\\include\\leaf\\runtime\\decoder.h"
+    },
+    "source-snapshot/engine/include/leaf/runtime/host_support.h": {
+      "sha256": "f3bf95336bb6e0963a478a1372bab3f70a1e86f138c9d9a7a22c4b6b1d75d8bb",
+      "source": "build\\mlp-unroll-20261020\\source-snapshot\\engine\\include\\leaf\\runtime\\host_support.h"
+    },
+    "source-snapshot/.github/workflows/cpu-validation.yml": {
+      "sha256": "64352131c264ae354e08d46e867516687027719f0ee5ce02f6b58dafd024df6d",
+      "source": "build\\mlp-unroll-20261020\\source-snapshot\\.github\\workflows\\cpu-validation.yml"
+    },
+    "reconstruction/candidate-build.json": {
+      "sha256": "cb267096a42ebab38ffe5db4d13577c9e552da22eea7434db0da0479c2a8ad40",
+      "source": "build\\mlp-schedule-reconstruction-20261020\\candidate-build.json"
+    },
+    "reconstruction/reconstruction-check.json": {
+      "sha256": "e40d3b657b486f964a27162601cafed8fdcf417e2140b13afebec69aa160d515",
+      "source": "build\\mlp-schedule-reconstruction-20261020\\reconstruction-check.json"
+    },
+    "reconstruction/accurate/build.json": {
+      "sha256": "f4fe7158bacee2cdb6e3b1a900c25e8b65255e7de6d10ce4130e2fa1fa2be178",
+      "source": "build\\mlp-schedule-reconstruction-20261020\\accurate\\build.json"
+    },
+    "placement-summary.json": {
+      "sha256": "820c2077fd50357fcff57d07eaca55f0be55f7ea363157b94e4d6d1c9c9deb79",
+      "source": "derived from retained placement-v2 raw records"
+    },
+    "host-support-before.h": {
+      "sha256": "7ceffefe8d7c6495857d5cc4b689b31bdceebffe34489fe997616e9c556af224",
+      "source": "build\\mlp-unroll-20261020\\host-support-before.h"
+    },
+    "host-support-first-candidate.h": {
+      "sha256": "9ab530d7f04f952ed00181197288f7e84d338de76e948e778bd39d652e074485",
+      "source": "build\\mlp-unroll-20261020\\host-support-first-candidate.h"
+    },
+    "model.py.snapshot": {
+      "sha256": "9860a2d5892faee06829d66c0a43b5452e365490758349105186296cb608a441",
+      "source": "benchmark\\experiments\\mlp-schedule\\model.py"
+    },
+    "queue/aligned_workers.h": {
+      "sha256": "2bc86e96f389d3daba8de498204b7b3345096ad02b8e7e35f334cd5c8cbf0c49",
+      "source": "build\\mlp-unroll-20261020\\queue\\aligned_workers.h"
+    },
+    "queue-balanced/aligned_workers.h": {
+      "sha256": "9bc2cdb47187f4c2dc60becedf8afb1124668953aded48f0c761f2ee028808c3",
+      "source": "build\\mlp-unroll-20261020\\queue-balanced\\aligned_workers.h"
+    }
+  },
+  "archive": {
+    "file": "evidence.zip",
+    "sha256": "07fd3a6f44283ffed155507bc115fc4b20b9de66c815d8fb59d27be9a28f595d",
+    "entry_count": 62,
+    "raw_bytes_preserved": true
+  }
+}

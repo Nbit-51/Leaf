@@ -54,6 +54,7 @@ should not be combined into a universal speedup claim.
 | Resume checkpoint | [Prefill checkpoint](prefill-checkpoint-2026-10-07.md) |
 | October 15–17 release work and next actions | [Current checkpoint](checkpoint-2026-10-15.md) |
 | October 20 source-preserving head storage, complete timing and resume state | [Storage checkpoint](checkpoint-2026-10-20-source-storage.md) |
+| October 20 rejected prefill scheduling and worker-placement diagnosis | [Prefill jobs checkpoint](checkpoint-2026-10-20-prefill-jobs.md) |
 | Pythia attention-score sensitivity and retained tolerance failures | [Numerical investigation](pythia-numerics-handoff.md) |
 | Matched Pythia-70M Leaf/llama.cpp baseline and next prefill experiment | [Runtime comparison](pythia-runtime-comparison.md) |
 
