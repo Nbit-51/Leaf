@@ -1,0 +1,40 @@
+{
+  "passed": true,
+  "scope": "Header moved outside Windows optimized guard; default Windows preprocessed source is identical",
+  "before_source_sha256": "cd9b4d99a9ec95f292ea40e6767828bc19d6d8d297935f7d366c8a3b19d897b6",
+  "after_source_sha256": "a07d0e05ebca79b52c080179d9e9def08b762d69ec69ce2b283ba6948a2621bd",
+  "preprocessed_sha256": [
+    "7c9dac0c26cc1840f30e81abb1f62e8ae8e2b9d4c29ed5f385fa537cbe4131cc",
+    "7c9dac0c26cc1840f30e81abb1f62e8ae8e2b9d4c29ed5f385fa537cbe4131cc"
+  ],
+  "commands": [
+    [
+      "C:/msys64/mingw64/bin/g++.exe",
+      "-std=c++17",
+      "-O3",
+      "-DNDEBUG",
+      "-pthread",
+      "-I",
+      "C:\\Users\\navaneeth\\leaf\\engine\\include",
+      "-E",
+      "-P",
+      "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\before-portability-decoder.cpp",
+      "-o",
+      "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\preprocessed-before.cpp"
+    ],
+    [
+      "C:/msys64/mingw64/bin/g++.exe",
+      "-std=c++17",
+      "-O3",
+      "-DNDEBUG",
+      "-pthread",
+      "-I",
+      "C:\\Users\\navaneeth\\leaf\\engine\\include",
+      "-E",
+      "-P",
+      "C:\\Users\\navaneeth\\leaf\\engine\\src\\decoder.cpp",
+      "-o",
+      "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\preprocessed-after.cpp"
+    ]
+  ]
+}

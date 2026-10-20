@@ -24,6 +24,7 @@
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ROW_REUSE)
 #include "leaf/kernels/row_reuse.h"
 #endif
+#include "leaf/kernels/source_bf16.h"
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ATTENTION_AVX2)
 #include "leaf/kernels/attention_vector.h"
 #endif
@@ -166,6 +167,7 @@ struct Weight {
     float value(std::size_t row, std::size_t col) const {
         const std::size_t index = row * cols + col;
         if (bits == 32) return reinterpret_cast<const float*>(data)[index];
+        if (bits == 16) return leaf::kernels::source_bf16_value(reinterpret_cast<const std::uint16_t*>(data)[index]);
         int quantized;
         if (bits == 8) quantized = reinterpret_cast<const std::int8_t*>(data)[index];
         else { quantized = (data[index / 2] >> ((index % 2) * 4)) & 15;
@@ -302,6 +304,35 @@ LEAF_AVX_TARGET void dot_avx(const Weight& w, std::size_t row, const float* inpu
         }
         for (std::size_t t = 0; t < tokens; ++t) result[t] += partial[t] * scale;
     }
+}
+LEAF_AVX_TARGET void dot_source_bf16_avx(const Weight& w, std::size_t row, const float* inputs,
+                                      std::size_t tokens, float* result) {
+    std::fill_n(result, tokens, 0.0f);
+    const auto* weights = reinterpret_cast<const std::uint16_t*>(w.data) + row * w.cols;
+    auto a = _mm256_setzero_ps(), b = a, c = a, d = a;
+    std::size_t col = 0;
+    if (tokens == 1) {
+        for (; col + 32 <= w.cols; col += 32) {
+            a = _mm256_fmadd_ps(leaf::kernels::source_bf16_detail::load8(weights + col), _mm256_loadu_ps(inputs + col), a);
+            b = _mm256_fmadd_ps(leaf::kernels::source_bf16_detail::load8(weights + col + 8), _mm256_loadu_ps(inputs + col + 8), b);
+            c = _mm256_fmadd_ps(leaf::kernels::source_bf16_detail::load8(weights + col + 16), _mm256_loadu_ps(inputs + col + 16), c);
+            d = _mm256_fmadd_ps(leaf::kernels::source_bf16_detail::load8(weights + col + 24), _mm256_loadu_ps(inputs + col + 24), d);
+        }
+        a = _mm256_add_ps(_mm256_add_ps(a, b), _mm256_add_ps(c, d));
+    }
+    for (; col + 8 <= w.cols; col += 8) {
+        const auto values = leaf::kernels::source_bf16_detail::load8(weights + col);
+        a = _mm256_fmadd_ps(values, _mm256_loadu_ps(inputs + col), a);
+        if (tokens > 1) b = _mm256_fmadd_ps(values, _mm256_loadu_ps(inputs + w.cols + col), b);
+        if (tokens > 2) c = _mm256_fmadd_ps(values, _mm256_loadu_ps(inputs + 2 * w.cols + col), c);
+        if (tokens > 3) d = _mm256_fmadd_ps(values, _mm256_loadu_ps(inputs + 3 * w.cols + col), d);
+    }
+    float partial[4] = {reduce(a), reduce(b), reduce(c), reduce(d)};
+    for (; col < w.cols; ++col) {
+        const float value = w.value(row, col);
+        for (std::size_t t = 0; t < tokens; ++t) partial[t] += value * inputs[t * w.cols + col];
+    }
+    for (std::size_t t = 0; t < tokens; ++t) result[t] += partial[t];
 }
 LEAF_AVX_TARGET void dot_specialized_avx(const Weight& w, std::size_t row, const float* inputs,
                                        std::size_t tokens, float* result) {
@@ -621,6 +652,7 @@ struct Decoder::Impl {
     float embedding_scale;
     bool avx = false;
     bool float_tiles = false, optimized_fp32 = false, fp32_artifact = false;
+    std::size_t source_bf16_tensors = 0, source_bf16_linear_calls = 0;
     bool vector_gelu = false, vector_attention = false, paired_gemv = false;
     bool vector_silu_gate = false;
     std::size_t vector_silu_gate_calls = 0;
@@ -658,14 +690,16 @@ struct Decoder::Impl {
         Reader reader{mapping}; reader.require(8);
         const bool window_format = std::memcmp(mapping.data, "LEAFDC03", 8) == 0;
         const bool multi_eos_format = std::memcmp(mapping.data, "LEAFDC04", 8) == 0;
-        check(multi_eos_format || window_format || std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
+        const bool source_bf16_format = std::memcmp(mapping.data, "LEAFDC05", 8) == 0;
+        check(source_bf16_format || multi_eos_format || window_format || std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
         reader.position = 8;
-        check(reader.u32() == (multi_eos_format ? 4u : window_format ? 3u : 2u), "unsupported decoder artifact version");
+        check(reader.u32() == (source_bf16_format ? 5u : multi_eos_format ? 4u : window_format ? 3u : 2u), "unsupported decoder artifact version");
+        check(!source_bf16_format || activation_bits == 32, "source BF16 storage requires FP32 activations");
         const auto count = reader.u32(); const auto base = reader.u64();
         h = reader.u32(); f = reader.u32(); heads = reader.u32(); kv_heads = reader.u32();
         layers = reader.u32(); vocab = reader.u32(); max_positions = reader.u32(); eos = reader.u32();
         dim = reader.u32(); sliding_window = reader.u32();
-        check(multi_eos_format || (window_format ? sliding_window > 0 : sliding_window == 0),
+        check(source_bf16_format || multi_eos_format || (window_format ? sliding_window > 0 : sliding_window == 0),
               "invalid sliding-window artifact configuration");
         theta = reader.f32(); epsilon = reader.f32();
         norm_kind = reader.u32(); activation = reader.u32(); position_kind = reader.u32();
@@ -684,9 +718,9 @@ struct Decoder::Impl {
         check(base % 64 == 0 && base <= mapping.size && count <= mapping.size / 56,
               "invalid tensor table");
         check(eos < vocab || eos == 0xffffffffu, "invalid EOS token");
-        if (multi_eos_format) {
+        if (multi_eos_format || source_bf16_format) {
             const auto eos_count = reader.u32();
-            check(eos_count >= 2 && eos_count <= 1024 && eos_count <= vocab &&
+            check((source_bf16_format || eos_count >= 2) && eos_count <= 1024 && eos_count <= vocab &&
                   reader.position <= base && eos_count <= (base - reader.position) / 4,
                   "invalid multi-EOS token count");
             for (std::uint32_t i = 0; i < eos_count; ++i) {
@@ -695,7 +729,7 @@ struct Decoder::Impl {
                       "invalid or duplicate EOS token");
                 eos_tokens.push_back(token);
             }
-            check(eos == eos_tokens.front(), "multi-EOS primary token mismatch");
+            check(eos_tokens.empty() ? eos == 0xffffffffu : eos == eos_tokens.front(), "multi-EOS primary token mismatch");
         } else if (eos < vocab) {
             eos_tokens.push_back(static_cast<std::uint32_t>(eos));
         }
@@ -706,13 +740,18 @@ struct Decoder::Impl {
             weight.group = reader.u32(); const auto offset = reader.u64(); const auto size = reader.u64();
             const auto scale_offset = reader.u64(); const auto scale_count = reader.u64();
             check(rank == 2 && weight.rows && weight.cols &&
-                  (weight.bits == 32 || weight.bits == 8 || weight.bits == 4), "invalid tensor " + name);
+                  (weight.bits == 32 || weight.bits == 8 || weight.bits == 4 ||
+                   (source_bf16_format && weight.bits == 16 &&
+                    (name == "lm_head.weight" || name == "model.embed_tokens.weight"))), "invalid tensor " + name);
+            if (source_bf16_format)
+                check(weight.bits == 32 || weight.bits == 16, "source BF16 storage cannot mix quantized weights");
+            if (weight.bits == 16) ++source_bf16_tensors;
             const std::uint64_t elements = std::uint64_t(weight.rows) * weight.cols;
             check(elements <= std::numeric_limits<std::size_t>::max() / 4 &&
                   (weight.bits != 4 || weight.cols % 2 == 0) && size == elements * weight.bits / 8 &&
                   offset % 64 == 0 && offset <= mapping.size - base && size <= mapping.size - base - offset,
                   "invalid tensor data range " + name);
-            if (weight.bits != 32) {
+            if (weight.bits == 8 || weight.bits == 4) {
                 check(weight.group && weight.cols % weight.group == 0 &&
                       (weight.bits != 4 || weight.group % 2 == 0) &&
                       scale_count == weight.rows * (weight.cols / weight.group) && scale_offset % 64 == 0 &&
@@ -737,6 +776,7 @@ struct Decoder::Impl {
             check(weights.emplace(name, weight).second, "duplicate tensor " + name);
         }
         check(reader.position <= base, "metadata overlaps tensor payload");
+        check(!source_bf16_format || source_bf16_tensors, "source BF16 artifact contains no BF16 tensors");
         require_weight("model.embed_tokens.weight", vocab, h);
         require_weight("lm_head.weight", vocab, h);
         if (final_norm) require_weight("model.norm.weight", 1, h);
@@ -759,10 +799,11 @@ struct Decoder::Impl {
             for (std::size_t i = 0; i < rotary_dim / 2; ++i)
                 rotary_frequencies[i] = 1.0f / std::pow(theta, static_cast<float>(2 * i) / rotary_dim);
         }
-        // Qualification is scoped to FP32 artifacts, not architecture names.
+        // Qualification is scoped to FP32 computation, not architecture names.
+        // v5 BF16 I/O retains exact source values; it does not quantize them.
         // Quantized/mixed artifacts keep their previously validated dispatch.
         fp32_artifact = activation_precision == 32 &&
-            std::all_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 32; });
+            std::all_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 32 || item.second.bits == 16; });
         optimized_fp32 = LEAF_OPTIMIZED_FP32 && avx && fp32_artifact;
         if (optimized_fp32) {
             float_tiles = true;
@@ -818,7 +859,7 @@ struct Decoder::Impl {
         leaf::diagnostics::Scope linear_detail(tokens, mlp_projection ? leaf::diagnostics::MlpTotal : leaf::diagnostics::OtherTotal);
 #endif
         const auto& weight = weights.at(name + ".weight");
-        const auto phase = weight.bits == 32 ? DecoderProfile::Phase::LinearFP32 :
+        const auto phase = (weight.bits == 32 || weight.bits == 16) ? DecoderProfile::Phase::LinearFP32 :
             weight.bits == 8 ? (activation_precision == 8 ? DecoderProfile::Phase::LinearW8A8 : DecoderProfile::Phase::LinearW8A32) :
                                (activation_precision == 8 ? DecoderProfile::Phase::LinearW4A8 : DecoderProfile::Phase::LinearW4A32);
         DecoderProfile::Scope scope(profile, phase, tokens);
@@ -837,7 +878,8 @@ struct Decoder::Impl {
                     transformed_input[t * weight.cols + col] = input[t * weight.cols + col] * factors[col];
             input = transformed_input.data();
         }
-        const bool integer = weight.bits != 32 && activation_precision == 8;
+        const bool integer = (weight.bits == 4 || weight.bits == 8) && activation_precision == 8;
+        if (weight.bits == 16) ++source_bf16_linear_calls;
         const bool vnni_integer = integer && vnni && tokens > 1 && weight.bits == 8 && weight.group <= 65536;
         if (integer) {
             check(weight.group <= 131000, "integer accumulation exceeds safe input width");
@@ -861,7 +903,7 @@ struct Decoder::Impl {
                         quant_input[t * weight.cols + col] = static_cast<std::int16_t>(std::max(-127L, std::min(127L, std::lrint(values[col] / quant_scales[t]))));
             }
         }
-        const bool packed_float = float_tiles && weight.bits == 32 && tokens >= 8 &&
+        const bool packed_float = float_tiles && (weight.bits == 32 || weight.bits == 16) && tokens >= 8 &&
                                   (!bias || bias->bits == 32);
         bool vector_pack = false;
 #ifdef LEAF_EXPERIMENTAL_MLP_PACK
@@ -879,18 +921,59 @@ struct Decoder::Impl {
         used_vnni = used_vnni || vnni_integer;
         workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
             if (packed_float) {
+                // Verification may request every vocabulary row for many tokens.
+                // Expand a bounded row block and reuse exactly the same FP32
+                // GEMM, including experimental reduction policies. Generation
+                // uses the direct BF16 GEMV below, with no expansion buffer.
+                const auto block = weight.bits == 16 ? std::min<std::size_t>(96, last - first) : last - first;
+                std::vector<float> expanded;
+                if (weight.bits == 16) expanded.resize(block * weight.cols);
+                for (std::size_t begin = first; begin < last; begin += block) {
+                    const auto live = std::min(block, last - begin);
+                    const float* panel_weights = nullptr;
+                    if (weight.bits == 16) {
+                        leaf::kernels::expand_source_bf16(reinterpret_cast<const std::uint16_t*>(weight.data) + begin * weight.cols,
+                                                        expanded.data(), live * weight.cols);
+                        panel_weights = expanded.data();
+                    } else panel_weights = reinterpret_cast<const float*>(weight.data) + begin * weight.cols;
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ROW_REUSE)
                 leaf::kernels::gemm_token_panels_f32_row_reuse(
 #else
                 leaf::kernels::gemm_token_panels_f32(
 #endif
-                    reinterpret_cast<const float*>(weight.data) + first * weight.cols,
-                    last - first, weight.cols, weight.cols, packed_float_input,
-                    output.data() + first, weight.rows,
-                    bias ? reinterpret_cast<const float*>(bias->data) + first : nullptr);
+                    panel_weights, live, weight.cols, weight.cols, packed_float_input,
+                    output.data() + begin, weight.rows,
+                    bias ? reinterpret_cast<const float*>(bias->data) + begin : nullptr);
+                }
                 return;
             }
             std::size_t row = first;
+            if (weight.bits == 16) {
+#if LEAF_DECODER_AVX
+                if (paired_gemv && tokens == 1 && weight.cols >= 8 && weight.cols % 8 == 0) {
+                    for (; last - row >= 2; row += 2) {
+                        leaf::kernels::gemv_pair_source_bf16(reinterpret_cast<const std::uint16_t*>(weight.data) + row * weight.cols,
+                                                           input, weight.cols, output.data() + row);
+                        output[row] += bias ? bias->value(0, row) : 0.0f;
+                        output[row + 1] += bias ? bias->value(0, row + 1) : 0.0f;
+                    }
+                }
+#endif
+                float result[4];
+                for (; row < last; ++row) {
+                    for (std::size_t token = 0; token < tokens; token += 4) {
+                        const auto count = std::min<std::size_t>(4, tokens - token);
+#if LEAF_DECODER_AVX
+                        if (avx) dot_source_bf16_avx(weight, row, input + token * weight.cols, count, result);
+                        else
+#endif
+                            dot(weight, row, input + token * weight.cols, count, result);
+                        for (std::size_t t = 0; t < count; ++t)
+                            output[(token + t) * weight.rows + row] = result[t] + (bias ? bias->value(0, row) : 0.0f);
+                    }
+                }
+                return;
+            }
 #if LEAF_DECODER_AVX && (LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_GEMV_PAIR))
             if (paired_gemv && weight.bits == 32 && tokens == 1 && weight.cols >= 8 && weight.cols % 8 == 0) {
                 for (; last - row >= 2; row += 2) {
@@ -1167,6 +1250,8 @@ bool Decoder::uses_avx2() const { return impl_->avx; }
 bool Decoder::uses_optimized_fp32() const { return impl_->optimized_fp32; }
 bool Decoder::uses_vector_silu_gate() const { return impl_->vector_silu_gate; }
 std::size_t Decoder::silu_gate_vector_calls() const { return impl_->vector_silu_gate_calls; }
+std::size_t Decoder::source_bf16_tensors() const { return impl_->source_bf16_tensors; }
+std::size_t Decoder::source_bf16_linear_calls() const { return impl_->source_bf16_linear_calls; }
 bool Decoder::uses_vnni() const { return impl_->used_vnni; }
 unsigned Decoder::activation_bits() const { return impl_->activation_precision; }
 // Test-only access to the actual decoder dot kernels; absent from normal builds.

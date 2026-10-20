@@ -1,0 +1,713 @@
+{
+  "complete": true,
+  "release_qualified": false,
+  "diagnostic_only": true,
+  "measured_at_utc": "2026-10-20T09:13:17.584963+00:00",
+  "cpu": 2,
+  "threads": 1,
+  "hashes": {
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\prepared.json": "b0eae15c81b57f9fa9703b05e42c0ced79c8b66f7cb0d883bbc82c278bc0f7a7",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\accurate-final\\leaf_decoder.exe": "d6f1ac75f27a156b429fc8030943a0f6c74bbac1b20aed87bf928c0493a51140",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\source-bf16\\integration.py": "ecf3255350c5a27e11707ef998e331a9a25ff601bfb0e1b0e63ebfce23df69bb",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\leaf_decoder.exe": "af65268c755564834ae9c1d25d591d1480f4120c04ea8a4d1a8138110dcca7be",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\quality.json": "7476bcda866712f64c3111c33e577b621da05a271106198004cf14f7ba190ef6"
+  },
+  "policy": {
+    "decode_ratio_limit": 0.98,
+    "prefill_ratio_limit": 1.02,
+    "max_p90_p10": 1.25,
+    "runs": 7,
+    "warmup": 3,
+    "pairs": 2
+  },
+  "models": {
+    "smol": {
+      "passes": [
+        {
+          "stage": "before",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1447312000,
+            "peak_rss_bytes": 1461370880,
+            "load_ms": 0.7254,
+            "prefill_p50_ms": 493.5181,
+            "decode_p50_ms": 79.9379,
+            "prefill_samples_ms": [
+              498.1691,
+              493.5181,
+              496.9507,
+              496.0637,
+              488.7495,
+              490.8399,
+              488.1206
+            ],
+            "decode_samples_ms": [
+              82.6385,
+              81.403,
+              83.5834,
+              79.9379,
+              79.1634,
+              79.7888,
+              79.1965
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 116,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "control",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "source_bf16_tensors": 0,
+            "benchmark_ac_checked": true,
+            "source_bf16_linear_calls": 0,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1447312000,
+            "peak_rss_bytes": 1461370880,
+            "load_ms": 0.6431,
+            "prefill_p50_ms": 493.9383,
+            "decode_p50_ms": 80.0765,
+            "prefill_samples_ms": [
+              493.2601,
+              490.6319,
+              493.9383,
+              497.5228,
+              486.8662,
+              498.1343,
+              494.3352
+            ],
+            "decode_samples_ms": [
+              82.5098,
+              79.932,
+              80.0765,
+              77.5191,
+              79.7806,
+              83.2568,
+              82.9718
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 98,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "after",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "source_bf16_tensors": 2,
+            "benchmark_ac_checked": true,
+            "source_bf16_linear_calls": 20,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1352940160,
+            "peak_rss_bytes": 1366982656,
+            "load_ms": 0.6359,
+            "prefill_p50_ms": 486.249,
+            "decode_p50_ms": 75.7524,
+            "prefill_samples_ms": [
+              485.9949,
+              486.5892,
+              486.249,
+              485.0227,
+              488.8879,
+              482.885,
+              496.7717
+            ],
+            "decode_samples_ms": [
+              74.8267,
+              75.7524,
+              74.4728,
+              76.8857,
+              75.6589,
+              76.6112,
+              79.001
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 115,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "after",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "source_bf16_tensors": 2,
+            "benchmark_ac_checked": true,
+            "source_bf16_linear_calls": 20,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1352940160,
+            "peak_rss_bytes": 1367003136,
+            "load_ms": 0.6541,
+            "prefill_p50_ms": 489.2666,
+            "decode_p50_ms": 76.0386,
+            "prefill_samples_ms": [
+              489.2666,
+              491.28,
+              499.4474,
+              487.0251,
+              483.8235,
+              484.1314,
+              489.617
+            ],
+            "decode_samples_ms": [
+              74.8713,
+              78.3701,
+              78.225,
+              76.0386,
+              80.1924,
+              73.9427,
+              75.4353
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 95,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "control",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "source_bf16_tensors": 0,
+            "benchmark_ac_checked": true,
+            "source_bf16_linear_calls": 0,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1447312000,
+            "peak_rss_bytes": 1461358592,
+            "load_ms": 0.6803,
+            "prefill_p50_ms": 497.391,
+            "decode_p50_ms": 79.4865,
+            "prefill_samples_ms": [
+              509.4043,
+              497.391,
+              490.3301,
+              487.7511,
+              497.857,
+              498.0233,
+              489.6269
+            ],
+            "decode_samples_ms": [
+              86.1705,
+              82.1662,
+              78.9077,
+              78.5809,
+              82.6466,
+              79.4865,
+              78.7269
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 96,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "before",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 640,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1447312000,
+            "peak_rss_bytes": 1461370880,
+            "load_ms": 0.628,
+            "prefill_p50_ms": 492.1356,
+            "decode_p50_ms": 80.2177,
+            "prefill_samples_ms": [
+              506.0835,
+              494.8998,
+              493.3481,
+              487.8718,
+              489.977,
+              488.9323,
+              492.1356
+            ],
+            "decode_samples_ms": [
+              85.0992,
+              79.6522,
+              80.2177,
+              81.9253,
+              78.704,
+              78.5175,
+              81.5759
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 98,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        }
+      ],
+      "summary": {
+        "prefill": {
+          "medians_ms": {
+            "before": 492.74185,
+            "after": 486.80715
+          },
+          "pooled_ratio": 0.9879557622312779,
+          "median_paired_ratio": 0.989720580104273,
+          "stable": true,
+          "passed": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 80.0778,
+            "after": 75.8955
+          },
+          "pooled_ratio": 0.9477720416894571,
+          "median_paired_ratio": 0.9477718124651076,
+          "stable": true,
+          "passed": true
+        }
+      }
+    },
+    "qwen": {
+      "passes": [
+        {
+          "stage": "before",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1976158464,
+            "peak_rss_bytes": 1988345856,
+            "load_ms": 0.8326,
+            "prefill_p50_ms": 568.7629,
+            "decode_p50_ms": 110.1257,
+            "prefill_samples_ms": [
+              568.3962,
+              576.5589,
+              572.6574,
+              568.2341,
+              568.6503,
+              571.6104,
+              568.7629
+            ],
+            "decode_samples_ms": [
+              110.293,
+              115.0776,
+              109.525,
+              110.1257,
+              112.5065,
+              108.6081,
+              109.9795
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 122,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "control",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "source_bf16_tensors": 0,
+            "benchmark_ac_checked": true,
+            "source_bf16_linear_calls": 0,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1976158464,
+            "peak_rss_bytes": 1988370432,
+            "load_ms": 0.629,
+            "prefill_p50_ms": 570.0903,
+            "decode_p50_ms": 110.2007,
+            "prefill_samples_ms": [
+              570.0903,
+              577.3011,
+              575.217,
+              565.7715,
+              568.1517,
+              570.5811,
+              565.2369
+            ],
+            "decode_samples_ms": [
+              109.3655,
+              114.1439,
+              113.0738,
+              108.72,
+              112.478,
+              110.0828,
+              110.2007
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 119,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "after",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "source_bf16_tensors": 2,
+            "benchmark_ac_checked": true,
+            "source_bf16_linear_calls": 20,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1703889152,
+            "peak_rss_bytes": 1716101120,
+            "load_ms": 0.8154,
+            "prefill_p50_ms": 556.6473,
+            "decode_p50_ms": 97.788,
+            "prefill_samples_ms": [
+              563.3759,
+              566.4558,
+              549.1235,
+              552.5754,
+              553.7246,
+              556.6473,
+              561.3215
+            ],
+            "decode_samples_ms": [
+              98.5015,
+              96.5738,
+              98.5341,
+              96.5684,
+              98.1172,
+              95.9518,
+              97.788
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 130,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "after",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "source_bf16_tensors": 2,
+            "benchmark_ac_checked": true,
+            "source_bf16_linear_calls": 20,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1703889152,
+            "peak_rss_bytes": 1716109312,
+            "load_ms": 0.6804,
+            "prefill_p50_ms": 553.0342,
+            "decode_p50_ms": 99.3218,
+            "prefill_samples_ms": [
+              552.0843,
+              569.1931,
+              553.0342,
+              578.3143,
+              549.1609,
+              553.2684,
+              548.3796
+            ],
+            "decode_samples_ms": [
+              100.1157,
+              102.8368,
+              96.6975,
+              99.9583,
+              98.9205,
+              99.3218,
+              96.6786
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 112,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "control",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "source_bf16_tensors": 0,
+            "benchmark_ac_checked": true,
+            "source_bf16_linear_calls": 0,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1976158464,
+            "peak_rss_bytes": 1988374528,
+            "load_ms": 0.6244,
+            "prefill_p50_ms": 576.196,
+            "decode_p50_ms": 112.6676,
+            "prefill_samples_ms": [
+              562.024,
+              577.2375,
+              576.196,
+              570.4621,
+              571.8533,
+              646.8895,
+              614.6179
+            ],
+            "decode_samples_ms": [
+              108.4928,
+              112.6772,
+              112.6676,
+              110.0562,
+              132.0767,
+              131.2697,
+              111.2295
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 118,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        },
+        {
+          "stage": "before",
+          "metrics": {
+            "avx2": true,
+            "vector_silu_gate_calls": 480,
+            "vector_silu_gate_enabled": true,
+            "optimized_fp32_active": true,
+            "vnni": false,
+            "activation_bits": 32,
+            "threads": 1,
+            "artifact_bytes": 1976158464,
+            "peak_rss_bytes": 1988358144,
+            "load_ms": 0.5984,
+            "prefill_p50_ms": 570.2112,
+            "decode_p50_ms": 111.8374,
+            "prefill_samples_ms": [
+              577.3835,
+              571.3464,
+              565.9046,
+              568.053,
+              565.8583,
+              570.2112,
+              575.5068
+            ],
+            "decode_samples_ms": [
+              119.1751,
+              108.6224,
+              111.8374,
+              112.1042,
+              110.0492,
+              116.847,
+              111.8374
+            ],
+            "experimental_accumulation_build": true,
+            "experimental_input_pack_reuse_build": true,
+            "generated_tokens": [],
+            "windows_process_priority": "above_normal"
+          },
+          "power": {
+            "polls": 116,
+            "failures": [],
+            "before": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            },
+            "after": {
+              "ac_line_status": 1,
+              "battery_saver": false
+            }
+          }
+        }
+      ],
+      "summary": {
+        "prefill": {
+          "medians_ms": {
+            "before": 569.48705,
+            "after": 553.4965
+          },
+          "pooled_ratio": 0.9719211349933243,
+          "median_paired_ratio": 0.974287201645926,
+          "stable": true,
+          "passed": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 111.0652,
+            "after": 98.30935
+          },
+          "pooled_ratio": 0.8851498939361744,
+          "median_paired_ratio": 0.8880291088175197,
+          "stable": true,
+          "passed": true
+        }
+      }
+    }
+  }
+}

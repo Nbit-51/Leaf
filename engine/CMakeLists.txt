@@ -184,6 +184,10 @@ if(NOT MSVC)
 endif()
 add_test(NAME leaf_silu_gate_tests COMMAND leaf_silu_gate_tests)
 
+add_executable(leaf_source_bf16_tests ../tests/native/test_source_bf16.cpp)
+target_include_directories(leaf_source_bf16_tests PRIVATE include)
+add_test(NAME leaf_source_bf16_tests COMMAND leaf_source_bf16_tests)
+
 add_executable(leaf_attention_vector_tests ../tests/native/test_attention_vector.cpp src/kernels/transformer.cpp)
 target_include_directories(leaf_attention_vector_tests PRIVATE include)
 add_test(NAME leaf_attention_vector_tests COMMAND leaf_attention_vector_tests)

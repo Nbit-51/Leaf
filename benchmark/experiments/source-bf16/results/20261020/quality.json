@@ -1,0 +1,467 @@
+{
+  "complete": true,
+  "passed": true,
+  "timing_qualified": false,
+  "scope": "All eight prior fully qualified blocks/model exactly rebound to native source-BF16; six reference generations/model; trained cache/scalar controls",
+  "hashes": {
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\prepared.json": "b0eae15c81b57f9fa9703b05e42c0ced79c8b66f7cb0d883bbc82c278bc0f7a7",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\accurate-final\\leaf_decoder.exe": "d6f1ac75f27a156b429fc8030943a0f6c74bbac1b20aed87bf928c0493a51140",
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\source-bf16\\integration.py": "ecf3255350c5a27e11707ef998e331a9a25ff601bfb0e1b0e63ebfce23df69bb",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\leaf_decoder.exe": "af65268c755564834ae9c1d25d591d1480f4120c04ea8a4d1a8138110dcca7be",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\full-quality-smol\\quality.json": "8bcbc99ce122181427a6bd981a74c98a710a0adf1facaf3854edb2f80e9a1f86",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\full-quality-smol\\tokens.json": "1555203a81ad00cb7bfcc8e7f04aab2eccfc24e530e329471ad8d8046d959d9a",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\full-quality-qwen\\quality.json": "ad0dda3588ca3cbfdb2f5734bc3b43a8a8849f085aa780de61003353e091e710",
+    "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\full-quality-qwen\\tokens.json": "5856ecd9964691c327eab1a71886ca5dc63c821b6fad71a96eee1a0b3a6a020b"
+  },
+  "models": {
+    "smol": {
+      "blocks": [
+        {
+          "index": 0,
+          "logits": 6291456,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 1,
+          "logits": 6291456,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 2,
+          "logits": 6291456,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 3,
+          "logits": 6291456,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 4,
+          "logits": 6291456,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 5,
+          "logits": 6291456,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 6,
+          "logits": 6291456,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 7,
+          "logits": 6291456,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        }
+      ],
+      "generations": [
+        {
+          "prompt": "The purpose of a computer is",
+          "exact": true,
+          "tokens": [
+            288,
+            980,
+            1096,
+            28,
+            284,
+            260,
+            2583,
+            506,
+            6277,
+            314,
+            260,
+            1157,
+            282,
+            624,
+            4611,
+            3439
+          ]
+        },
+        {
+          "prompt": "Once upon a time, a small robot found",
+          "exact": true,
+          "tokens": [
+            2581,
+            281,
+            253,
+            8463,
+            284,
+            14160,
+            905,
+            30,
+            378,
+            8085,
+            28,
+            527,
+            392,
+            3060,
+            946,
+            476
+          ]
+        },
+        {
+          "prompt": "Question: What is the capital of France?\nAnswer:",
+          "exact": true,
+          "tokens": [
+            2
+          ]
+        },
+        {
+          "prompt": "Two plus two equals",
+          "exact": true,
+          "tokens": [
+            1876,
+            30,
+            198,
+            198,
+            1348,
+            314,
+            253,
+            4959,
+            3501,
+            282,
+            20270,
+            28,
+            284,
+            357,
+            506,
+            1129
+          ]
+        },
+        {
+          "prompt": "def add(a, b):\n    return",
+          "exact": true,
+          "tokens": [
+            253,
+            1232,
+            278,
+            198,
+            198,
+            4917,
+            446,
+            803,
+            24,
+            37,
+            28,
+            216,
+            39,
+            25,
+            198,
+            3272
+          ]
+        },
+        {
+          "prompt": "Hello! Caf\u00e9, na\u00efve, and Unicode text:",
+          "exact": true,
+          "tokens": [
+            216,
+            198,
+            18,
+            19556,
+            28,
+            905,
+            6653,
+            198,
+            198,
+            1780,
+            314,
+            260,
+            34514,
+            2909,
+            1225,
+            282
+          ]
+        }
+      ],
+      "controls": [
+        {
+          "mode": "verify",
+          "scalar": true,
+          "threads": 1,
+          "exact": true
+        },
+        {
+          "mode": "chunked",
+          "scalar": false,
+          "threads": 2,
+          "exact": true
+        },
+        {
+          "mode": "chunked",
+          "scalar": true,
+          "threads": 1,
+          "exact": true
+        }
+      ],
+      "prior_summary": {
+        "evaluated_tokens": 1016,
+        "perplexity": 30.474659470369506,
+        "pytorch_perplexity": 30.47465775503838,
+        "perplexity_ratio": 1.0000000562871334,
+        "next_token_agreement": 1.0,
+        "leaf_next_token_accuracy": 0.4005905511811024,
+        "pytorch_next_token_accuracy": 0.4005905511811024,
+        "max_abs_logit_error": 0.0001430511474609375,
+        "all_logits_close": true,
+        "diagnostics": {
+          "logit_tolerance_violations": 0,
+          "max_probability_error": 1.0932365750115913e-05,
+          "max_total_variation": 1.0945093646242183e-05,
+          "max_kl_reference_to_leaf": 2.551506210815744e-10,
+          "mean_kl_reference_to_leaf": 6.6817575681090005e-12
+        }
+      }
+    },
+    "qwen": {
+      "blocks": [
+        {
+          "index": 0,
+          "logits": 19447808,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 1,
+          "logits": 19447808,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 2,
+          "logits": 19447808,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 3,
+          "logits": 19447808,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 4,
+          "logits": 19447808,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 5,
+          "logits": 19447808,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 6,
+          "logits": 19447808,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        },
+        {
+          "index": 7,
+          "logits": 19447808,
+          "exact": true,
+          "bf16_tensors": 2,
+          "bf16_linear_calls": 1
+        }
+      ],
+      "generations": [
+        {
+          "prompt": "The purpose of a computer is",
+          "exact": true,
+          "tokens": [
+            311,
+            1882,
+            1995,
+            13,
+            576,
+            6366,
+            374,
+            264,
+            3671,
+            429,
+            646,
+            2736,
+            28117,
+            323,
+            3553,
+            821
+          ]
+        },
+        {
+          "prompt": "Once upon a time, a small robot found",
+          "exact": true,
+          "tokens": [
+            264,
+            31626,
+            2415,
+            13,
+            576,
+            2415,
+            11508,
+            311,
+            264,
+            8177,
+            31626,
+            15138,
+            13,
+            576,
+            2415,
+            4933
+          ]
+        },
+        {
+          "prompt": "Question: What is the capital of France?\nAnswer:",
+          "exact": true,
+          "tokens": [
+            576,
+            6722,
+            315,
+            9625,
+            374,
+            12095,
+            13,
+            12095,
+            374,
+            279,
+            7772,
+            3283,
+            304,
+            9625,
+            323,
+            279
+          ]
+        },
+        {
+          "prompt": "Two plus two equals",
+          "exact": true,
+          "tokens": [
+            198,
+            16141,
+            78191,
+            25,
+            320,
+            32,
+            8,
+            220,
+            18,
+            320,
+            33,
+            8,
+            220,
+            19,
+            320,
+            34
+          ]
+        },
+        {
+          "prompt": "def add(a, b):\n    return",
+          "exact": true,
+          "tokens": [
+            264,
+            488,
+            293,
+            271,
+            750,
+            32256,
+            2877,
+            11,
+            293,
+            982,
+            262,
+            470,
+            264,
+            481,
+            293,
+            271
+          ]
+        },
+        {
+          "prompt": "Hello! Caf\u00e9, na\u00efve, and Unicode text:",
+          "exact": true,
+          "tokens": [
+            358,
+            2776,
+            264,
+            220,
+            17,
+            20,
+            4666,
+            6284,
+            11,
+            220,
+            20,
+            6,
+            16,
+            15,
+            497,
+            220
+          ]
+        }
+      ],
+      "controls": [
+        {
+          "mode": "verify",
+          "scalar": true,
+          "threads": 1,
+          "exact": true
+        },
+        {
+          "mode": "chunked",
+          "scalar": false,
+          "threads": 2,
+          "exact": true
+        },
+        {
+          "mode": "chunked",
+          "scalar": true,
+          "threads": 1,
+          "exact": true
+        }
+      ],
+      "prior_summary": {
+        "evaluated_tokens": 1016,
+        "perplexity": 30.78262532190413,
+        "pytorch_perplexity": 30.782619037144265,
+        "perplexity_ratio": 1.0000002041658593,
+        "next_token_agreement": 1.0,
+        "leaf_next_token_accuracy": 0.4094488188976378,
+        "pytorch_next_token_accuracy": 0.4094488188976378,
+        "max_abs_logit_error": 0.00022029876708984375,
+        "all_logits_close": true,
+        "diagnostics": {
+          "logit_tolerance_violations": 0,
+          "max_probability_error": 1.2551662589899149e-05,
+          "max_total_variation": 2.1050420893064027e-05,
+          "max_kl_reference_to_leaf": 1.6848546896670681e-09,
+          "mean_kl_reference_to_leaf": 1.9920624276538294e-11
+        }
+      }
+    }
+  }
+}

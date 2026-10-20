@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -26,6 +27,16 @@
 
 namespace {
 using Clock = std::chrono::steady_clock;
+void check_benchmark_power(bool required) {
+    if (!required) return;
+#ifdef _WIN32
+    SYSTEM_POWER_STATUS power{};
+    if (!GetSystemPowerStatus(&power) || power.ACLineStatus != 1)
+        throw std::runtime_error("AC power missing or unknown; timing stopped");
+#else
+    throw std::runtime_error("This benchmark AC guard requires Windows");
+#endif
+}
 double elapsed(Clock::time_point start) {
     return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
 }
@@ -64,7 +75,7 @@ template <class T> void array(std::ostream& output, const std::vector<T>& values
 
 int main(int argc, char** argv) {
     if (argc == 2 && std::string(argv[1]) == "--runtime-info") {
-        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4]"
+        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4,5],\"source_bf16_head_supported\":true,\"benchmark_power_guard\":true"
 #ifdef LEAF_DIAGNOSTIC_TIMING
                   << ",\"diagnostic_start_gate_supported\":true,\"diagnostic_counter_version\":4"
 #endif
@@ -89,6 +100,7 @@ int main(int argc, char** argv) {
         }
 #endif
         const std::string mode = argv[5];
+        const bool require_ac = mode == "bench" && std::getenv("LEAF_BENCHMARK_REQUIRE_AC");
         if (mode != "verify" && mode != "chunked" && mode != "bench" && mode != "generate")
             throw std::runtime_error("unknown decoder mode");
         const unsigned threads = argc > 6 ? std::stoul(argv[6]) : 1;
@@ -139,6 +151,7 @@ int main(int argc, char** argv) {
                 if (ids.size() < 2) throw std::runtime_error("benchmark requires a prefix and final token");
                 const std::vector<std::uint32_t> prefix(ids.begin(), ids.end() - 1), last{ids.back()};
                 for (unsigned iteration = 0; iteration < runs + warmup; ++iteration) {
+                    check_benchmark_power(require_ac);
 #ifdef LEAF_DIAGNOSTIC_TIMING
                     decoder.reset();
                     const auto cpu_start = leaf::diagnostics::stamp();
@@ -154,6 +167,7 @@ int main(int argc, char** argv) {
                     decoder.reset(); auto start = Clock::now(); decoder.forward(prefix); const double prefill = elapsed(start);
                     start = Clock::now(); decoder.forward(last); const double decode = elapsed(start);
 #endif
+                    check_benchmark_power(require_ac);
                     if (iteration >= warmup) { prefills.push_back(prefill); decodes.push_back(decode); }
                 }
             } else {
@@ -193,6 +207,9 @@ int main(int argc, char** argv) {
                 << ",\"experimental_silu_gate_build\":true"
 #endif
                 << ",\"vector_silu_gate_calls\":" << decoder.silu_gate_vector_calls()
+                << ",\"source_bf16_tensors\":" << decoder.source_bf16_tensors()
+                << ",\"benchmark_ac_checked\":" << (require_ac ? "true" : "false")
+                << ",\"source_bf16_linear_calls\":" << decoder.source_bf16_linear_calls()
                 << ",\"vector_silu_gate_enabled\":" << (decoder.uses_vector_silu_gate() ? "true" : "false")
                 << ",\"optimized_fp32_active\":" << (decoder.uses_optimized_fp32() ? "true" : "false")
                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")

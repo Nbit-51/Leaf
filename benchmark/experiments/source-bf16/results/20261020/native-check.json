@@ -1,0 +1,5 @@
+{
+  "passed": true,
+  "stdout": "Source BF16 correctness passed: exhaustive storage bits, vector expansion, paired GEMV tails and guards\n",
+  "binary_sha256": "b442cb5c8761bebbd7434dbd322ca786266f6eefe11d53992a91e0bbee5382cc"
+}

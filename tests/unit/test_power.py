@@ -70,6 +70,19 @@ def test_keep_awake_failure_does_not_run_benchmark(monkeypatch):
     assert calls == [0x80000001]
 
 
+@pytest.mark.parametrize('throws', [False, True])
+def test_explicit_display_guard_is_scoped_and_restored(monkeypatch, throws):
+    calls = fake_windows(monkeypatch, iter([0x80000001, 0x80000003]))
+    try:
+        with power.keep_awake(display=True):
+            assert calls == [0x80000003]
+            if throws:
+                raise ValueError('benchmark failed')
+    except ValueError:
+        assert throws
+    assert calls == [0x80000003, 0x80000001]
+
+
 class FakeHandle(int):
     closed = False
 
