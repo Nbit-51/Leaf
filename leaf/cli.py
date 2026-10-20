@@ -261,13 +261,22 @@ def select_configuration(directory: Path, runtime: Path, requested: str, threads
     return fallback
 
 
-def prepare(snapshot: Path, directory: Path, bits: int, plan: Path | None = None) -> Path:
-    artifact = directory / f"decoder-{bits}.leaf"
+def prepare(snapshot: Path, directory: Path, bits: int, plan: Path | None = None,
+            source_bf16_head: bool = False) -> Path:
+    if source_bf16_head and bits != 32:
+        raise ValueError("Source-preserving BF16 storage requires FP32 computation")
+    if source_bf16_head:
+        from tools.export_decoder import source_bf16_head_available
+        if not source_bf16_head_available(snapshot, plan):
+            return prepare(snapshot, directory, bits, plan)
+    suffix = "-source-bf16" if source_bf16_head else ""
+    artifact = directory / f"decoder-{bits}{suffix}.leaf"
     if not artifact.is_file():
         from tools.export_decoder import export_decoder
         print(f"Preparing {bits}-bit native artifact...", file=sys.stderr)
-        record = export_decoder(snapshot, artifact, bits, plan_path=plan)
-        (directory / f"decoder-{bits}.json").write_text(json.dumps(record, indent=2) + "\n")
+        options = {"source_bf16_head": True} if source_bf16_head else {}
+        record = export_decoder(snapshot, artifact, bits, plan_path=plan, **options)
+        artifact.with_suffix('.json').write_text(json.dumps(record, indent=2) + "\n")
     return artifact
 
 
@@ -340,18 +349,28 @@ def encode_prompt(snapshot: Path, prompt: str, raw: bool = False):
 def run(args):
     from leaf.affinity import pin_cpu
     pin_cpu(args.cpu)
+    source_storage = getattr(args, 'source_bf16_head', False)
+    if source_storage and (args.bits not in ('auto','32') or args.activation_bits not in ('auto','32')):
+        raise ValueError("--source-bf16-head requires FP32 weights and activations (auto or 32)")
     start = time.perf_counter()
     cache = cache_root()
     runtime = None
     def prepare_runtime():
         nonlocal runtime
         runtime = executable(cache)
+        if source_storage:
+            from leaf.runtime_check import check
+            check(runtime, 'leaf_decoder')
     # Reject unsupported metadata before building, and setup failures before weights.
     snapshot = resolve_model(args.model, cache, args.offline, args.plan,
                              before_weights=prepare_runtime)
     directory = model_directory(snapshot, cache, args.plan)
-    bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu)
-    artifact = selected or prepare(snapshot, directory, bits, args.plan)
+    if source_storage:
+        bits, activation_bits = 32, 32
+        artifact = prepare(snapshot, directory, bits, args.plan, source_bf16_head=True)
+    else:
+        bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu)
+        artifact = selected or prepare(snapshot, directory, bits, args.plan)
     prompt = args.prompt if args.prompt is not None else input("Prompt: ")
     tokenizer, ids = encode_prompt(snapshot, prompt, args.raw)
     tokens = []
@@ -389,7 +408,8 @@ def run(args):
     if args.metrics:
         args.metrics.parent.mkdir(parents=True, exist_ok=True)
         args.metrics.write_text(json.dumps(metrics, indent=2) + "\n")
-    print(f"Leaf: {bits}-bit, {len(tokens)} tokens, decode p50 {metrics['decode_p50_ms']:.2f} ms", file=sys.stderr)
+    precision = "FP32 compute, source BF16 storage" if metrics.get('source_bf16_tensors') else f"{bits}-bit"
+    print(f"Leaf: {precision}, {len(tokens)} tokens, decode p50 {metrics['decode_p50_ms']:.2f} ms", file=sys.stderr)
 
 
 def optimize(args):
@@ -475,6 +495,8 @@ def main():
     runner.add_argument("--bits", choices=("auto", "32", "8", "4"), default="auto")
     runner.add_argument("--activation-bits", choices=("auto", "8", "32"), default="auto",
                         help="dynamic INT8 or floating activations in quantized linear kernels")
+    runner.add_argument("--source-bf16-head", action="store_true",
+                        help="retain original BF16 output/tied embedding storage with FP32 compute; F32 sources stay F32")
     runner.add_argument("--raw", action="store_true", help="skip chat formatting")
     runner.add_argument("--offline", action="store_true")
     runner.add_argument("--plan", type=Path, help="custom decoder plan for a local snapshot")

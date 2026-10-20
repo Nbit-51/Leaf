@@ -1,0 +1,2989 @@
+{
+  "complete": true,
+  "hashes": {
+    "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\source-bf16\\integration.py": "ecf3255350c5a27e11707ef998e331a9a25ff601bfb0e1b0e63ebfce23df69bb"
+  },
+  "models": {
+    "smol": {
+      "snapshot": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951",
+      "before": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\898954fccee23671ea3da805\\decoder-32.leaf",
+      "after": "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\smol-source-bf16.leaf",
+      "before_sha256": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+      "after_sha256": "aa7deae60e8e5bfd7e7e0abe5b0c2913b37a0d43b54745283fea7a07d79ff441",
+      "before_bytes": 1447312000,
+      "after_bytes": 1352940160,
+      "export": {
+        "format": "leaf-decoder-v5",
+        "architecture": "llama",
+        "weight_bits": 32,
+        "group_size": null,
+        "int8_group_size": null,
+        "keep_fp32_tensors": [],
+        "tensor_count": 291,
+        "artifact_bytes": 1352940160,
+        "unique_payloads": 290,
+        "source": "a10cc1512eabd3dde888204e902eca88bddb4951",
+        "source_bf16_tensors": [
+          "lm_head.weight",
+          "model.embed_tokens.weight"
+        ],
+        "compute_bits": 32,
+        "eos_token_ids": [
+          2
+        ]
+      },
+      "tensor_checks": [
+        {
+          "name": "model.embed_tokens.weight",
+          "storage_bits": 16,
+          "exact": true
+        },
+        {
+          "name": "lm_head.weight",
+          "storage_bits": 16,
+          "exact": true
+        },
+        {
+          "name": "model.norm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.24.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.25.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.26.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.27.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.28.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.29.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.30.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.31.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        }
+      ],
+      "source_hashes": {
+        "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\config.json": "224f72354f10d617a359cc82ad15a3c96e866b9b2ffadb81997eeea9e88e22ee",
+        "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--HuggingFaceTB--SmolLM2-360M-Instruct\\snapshots\\a10cc1512eabd3dde888204e902eca88bddb4951\\model.safetensors": "e6bffe7435d7ddc10fd3b9a9efd429dafbacb1cb17015fb5562664e7532bf86e"
+      }
+    },
+    "qwen": {
+      "snapshot": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775",
+      "before": "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\70ec40010513210f83bb089b\\decoder-32.leaf",
+      "after": "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\qwen-source-bf16.leaf",
+      "before_sha256": "f01b07a042ce3e3da824076802376e3f0f1864e3134b1036c5c4e4bd517d7de7",
+      "after_sha256": "c2333d6d2d6a1bb09766773e54a3c66e5fc6b2846d21a4c59231e622ffb86a87",
+      "before_bytes": 1976158464,
+      "after_bytes": 1703889152,
+      "export": {
+        "format": "leaf-decoder-v5",
+        "architecture": "qwen2",
+        "weight_bits": 32,
+        "group_size": null,
+        "int8_group_size": null,
+        "keep_fp32_tensors": [],
+        "tensor_count": 291,
+        "artifact_bytes": 1703889152,
+        "unique_payloads": 290,
+        "source": "7ae557604adf67be50417f59c2c2f167def9a775",
+        "source_bf16_tensors": [
+          "lm_head.weight",
+          "model.embed_tokens.weight"
+        ],
+        "compute_bits": 32,
+        "eos_token_ids": [
+          151645,
+          151643
+        ]
+      },
+      "tensor_checks": [
+        {
+          "name": "model.embed_tokens.weight",
+          "storage_bits": 16,
+          "exact": true
+        },
+        {
+          "name": "lm_head.weight",
+          "storage_bits": 16,
+          "exact": true
+        },
+        {
+          "name": "model.norm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.input_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.post_attention_layernorm.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.q_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.k_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.v_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.o_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.mlp.up_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.mlp.down_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.mlp.gate_proj.weight",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.0.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.1.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.2.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.3.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.4.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.5.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.6.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.7.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.8.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.9.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.10.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.11.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.12.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.13.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.14.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.15.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.16.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.17.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.18.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.19.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.20.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.21.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.22.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.q_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.k_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        },
+        {
+          "name": "model.layers.23.self_attn.v_proj.bias",
+          "storage_bits": 32,
+          "exact": true
+        }
+      ],
+      "source_hashes": {
+        "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+        "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\hub\\models--Qwen--Qwen2.5-0.5B-Instruct\\snapshots\\7ae557604adf67be50417f59c2c2f167def9a775\\model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe"
+      }
+    }
+  }
+}

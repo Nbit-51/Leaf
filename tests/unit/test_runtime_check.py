@@ -17,9 +17,9 @@ def test_doctor_rejects_stale_wrong_and_broken_binaries(tmp_path, monkeypatch, s
 
 
 def test_doctor_accepts_matching_native_capabilities(tmp_path, monkeypatch):
-    info = dict(runtime="leaf_decoder", artifact_versions=[2, 3, 4])
+    info = dict(runtime="leaf_decoder", artifact_versions=[2, 3, 4, 5])
     monkeypatch.setattr(runtime_check.subprocess, "run", lambda *a, **k: SimpleNamespace(stdout=json.dumps(info), returncode=0))
-    assert runtime_check.check(tmp_path / "runtime", "leaf_decoder")["artifact_versions"] == [2, 3, 4]
+    assert runtime_check.check(tmp_path / "runtime", "leaf_decoder")["artifact_versions"] == [2, 3, 4, 5]
 
 
 def test_invalid_override_fails_before_model_download(tmp_path, monkeypatch):

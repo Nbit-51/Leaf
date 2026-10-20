@@ -60,6 +60,16 @@ leaf run ./models/decoder --offline --prompt "Explain CPU inference." --max-toke
 Chat templates are applied when supplied by the tokenizer configuration; use
 `--raw` for an unformatted prompt. Generation is currently greedy.
 
+For checkpoints with an original BF16 output head, optional compact storage keeps
+those source values while computing in FP32:
+
+```sh
+leaf run HuggingFaceTB/SmolLM2-360M-Instruct --bits 32 --source-bf16-head --prompt "Explain CPU inference." --max-tokens 32
+```
+
+FP32 source weights stay FP32. This uses a separate prepared cache; see
+[storage semantics, exact-output checks and measured scope](docs/source-bf16.md).
+
 For output checks without timing benchmarks, install `.[validation]` and run
 `leaf evaluate MODEL_ID --dataset heldout.jsonl --dataset-source "name/test split" --output build/quality-run`.
 It records perplexity, next-token agreement and paired continuations. See
@@ -105,7 +115,7 @@ native-loader limitation.
 | Embedding execution | FP32 EmbeddingGemma: bidirectional local/full attention, Q/K normalization, mean pooling, dense projections and L2-normalized output |
 | CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
 | Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
-| Precision | FP32, weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
+| Precision | FP32, optional source-preserving BF16 head storage with FP32 computation, weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
 | Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
@@ -145,11 +155,11 @@ flowchart TB
     N --> V["Mean pooling · dense projections · L2 normalization"]
     V --> F["Document/query vectors"]
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
-    P --> D["Native decoder artifact"]
+    P --> D["Native decoder artifact<br/>Optional original BF16 head/tied embedding storage"]
     G --> A["Native graph artifact"]
     D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
-    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · vector GELU<br/>Vector attention and softmax<br/>FP32 SiLU prefill + decode · W8A8 SiLU prefill"]
+    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · exact BF16-to-FP32 expansion<br/>Vector GELU, attention and softmax<br/>FP32 SiLU prefill + decode · W8A8 SiLU prefill"]
     K --> T["Tokens and logits"]
     E --> U["Graph outputs"]
 ```
@@ -263,6 +273,10 @@ is fixed before further kernel changes or model downloads.
 An isolated [shared accumulation candidate](docs/shared-accumulation.md) now
 passes the full SmolLM2/Qwen2.5 fidelity checks without relaxed tolerances.
 It remains outside the default runtime while its performance cost is evaluated.
+Optional [original BF16 head storage](docs/source-bf16.md) preserves FP32 compute
+and exact tested outputs. Against that accurate candidate's FP32 storage, it
+reduces paired decode latency **5.12% on SmolLM2** and **11.65% on Qwen2.5**,
+with stable timings and prefill non-regression. These are incremental Leaf results.
 Quantized vector attention and broader matched runtime comparisons remain open.
 
 Further work includes broader quality datasets, complete-command latency,

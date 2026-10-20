@@ -1,0 +1,19 @@
+{
+  "reason": "Modern Standby overlapped the complete timing attempt; retain all samples and repeat both models",
+  "events": [
+    {
+      "utc": "2026-10-20T09:24:45.0715974Z",
+      "Id": 507,
+      "RecordId": 571548,
+      "Message": "The system is exiting Modern Standby \r\n\r\nReason: Input Keyboard."
+    },
+    {
+      "utc": "2026-10-20T09:19:15.1739939Z",
+      "Id": 506,
+      "RecordId": 571546,
+      "Message": "The system is entering Modern Standby \r\n\r\nReason: Idle Timeout."
+    }
+  ],
+  "valid_for_release": false,
+  "timing_record": "acceptance.json"
+}

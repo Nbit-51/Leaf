@@ -30,6 +30,8 @@ public:
     bool uses_optimized_fp32() const;
     bool uses_vector_silu_gate() const;
     std::size_t silu_gate_vector_calls() const;
+    std::size_t source_bf16_tensors() const;
+    std::size_t source_bf16_linear_calls() const;
     bool uses_vnni() const;
     unsigned activation_bits() const;
 private:

@@ -61,11 +61,11 @@ def main():
     if args.precise_scalar:
         text = replace_once(text, 'void quant_dot_scalar(', '''void dot_scalar_precise(const Weight& w, std::size_t row, const float* inputs,
                         std::size_t tokens, float* result) {
-    const auto* values = reinterpret_cast<const float*>(w.data) + row * w.cols;
+    const auto* values = w.bits == 32 ? reinterpret_cast<const float*>(w.data) + row * w.cols : nullptr;
     for (std::size_t token = 0; token < tokens; ++token) {
         double total = 0.0;
         for (std::size_t col = 0; col < w.cols; ++col)
-            total += static_cast<double>(values[col]) * inputs[token * w.cols + col];
+            total += static_cast<double>(w.bits == 32 ? values[col] : w.value(row, col)) * inputs[token * w.cols + col];
         result[token] = static_cast<float>(total);
     }
 }
@@ -78,8 +78,8 @@ void quant_dot_scalar(''')
     kernel = 'gemm_tree_sum' if args.tree_outer else 'gemm_blocked_sum'
     text = replace_once(text, 'leaf::kernels::gemm_token_panels_f32_row_reuse(',
         '(fp32_artifact ? leaf::experiments::' + kernel + ' : leaf::kernels::gemm_token_panels_f32_row_reuse)(')
-    text = replace_once(text, 'bias ? reinterpret_cast<const float*>(bias->data) + first : nullptr);',
-                        'bias ? reinterpret_cast<const float*>(bias->data) + first : nullptr, true);')
+    text = replace_once(text, 'bias ? reinterpret_cast<const float*>(bias->data) + begin : nullptr);',
+                        'bias ? reinterpret_cast<const float*>(bias->data) + begin : nullptr, true);')
     if args.reuse_packing:
         text = replace_once(text, '    leaf::kernels::TokenPanelsF32 packed_float_input;',
             '''    leaf::kernels::TokenPanelsF32 packed_float_input;

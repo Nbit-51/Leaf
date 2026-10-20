@@ -107,11 +107,13 @@ def set_child_high_qos(process: subprocess.Popen) -> dict:
 
 
 @contextmanager
-def keep_awake():
+def keep_awake(*, display: bool = False):
     """Thread-scoped guard; never alter the user's persistent power plan.
 
-    Display sleep and explicit user-initiated sleep remain unaffected. Other
-    platforms are a no-op; their sleep policy must be managed by the caller.
+    Display sleep remains unaffected unless the benchmark explicitly requests
+    display=True (useful on Modern Standby hosts). Explicit user-initiated sleep
+    remains unaffected. Other platforms are a no-op; their sleep policy must be
+    managed by the caller.
     Windows automatically drops execution requests when the process exits.
     """
     if os.name != "nt":
@@ -121,7 +123,8 @@ def keep_awake():
     execution_state = kernel.SetThreadExecutionState
     execution_state.argtypes = [ctypes.c_uint32]
     execution_state.restype = ctypes.c_uint32
-    previous = execution_state(0x80000001)  # ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+    # ES_CONTINUOUS | ES_SYSTEM_REQUIRED, optionally ES_DISPLAY_REQUIRED.
+    previous = execution_state(0x80000001 | (0x2 if display else 0))
     if not previous:
         raise OSError(ctypes.get_last_error(), "Cannot prevent automatic sleep during the benchmark")
     try:

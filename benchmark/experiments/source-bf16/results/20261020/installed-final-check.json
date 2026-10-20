@@ -1,0 +1,64 @@
+{
+  "passed": true,
+  "compiler_path_removed": true,
+  "decoder_override_removed": true,
+  "isolated_installed_import": true,
+  "records": [
+    {
+      "arguments": [
+        "doctor"
+      ],
+      "stdout": "{\n  \"ready\": true,\n  \"cache\": \"C:\\\\Users\\\\navaneeth\\\\leaf\\\\build\\\\source-bf16-20261020\\\\installed-final-cache\",\n  \"runtimes\": {\n    \"generation\": {\n      \"path\": \"C:\\\\Users\\\\navaneeth\\\\leaf\\\\build\\\\source-bf16-20261020\\\\installed-final\\\\leaf\\\\bin\\\\leaf_decoder.exe\",\n      \"runtime\": \"leaf_decoder\",\n      \"artifact_versions\": [\n        2,\n        3,\n        4,\n        5\n      ],\n      \"source_bf16_head_supported\": true,\n      \"benchmark_power_guard\": true,\n      \"selection\": \"bundled\"\n    },\n    \"embedding\": {\n      \"path\": \"C:\\\\Users\\\\navaneeth\\\\leaf\\\\build\\\\source-bf16-20261020\\\\installed-final\\\\leaf\\\\bin\\\\leaf_embed.exe\",\n      \"runtime\": \"leaf_embed\",\n      \"artifact_versions\": [\n        1\n      ],\n      \"selection\": \"bundled\"\n    }\n  },\n  \"scope\": \"Runtime startup only; no model downloaded or evaluated.\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "arguments": [
+        "run",
+        "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\installed-final-model",
+        "--offline",
+        "--bits",
+        "32",
+        "--source-bf16-head",
+        "--raw",
+        "--prompt",
+        "tok5 tok6 tok7",
+        "--max-tokens",
+        "2",
+        "--metrics",
+        "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\installed-final-metrics.json"
+      ],
+      "stdout": "tok6 tok6\n",
+      "stderr": "Preparing 32-bit native artifact...\nLeaf: FP32 compute, source BF16 storage, 2 tokens, decode p50 0.10 ms\n"
+    }
+  ],
+  "metrics": {
+    "avx2": true,
+    "vector_silu_gate_calls": 1,
+    "source_bf16_tensors": 2,
+    "benchmark_ac_checked": false,
+    "source_bf16_linear_calls": 2,
+    "vector_silu_gate_enabled": true,
+    "optimized_fp32_active": true,
+    "vnni": false,
+    "activation_bits": 32,
+    "threads": 1,
+    "artifact_bytes": 14912,
+    "peak_rss_bytes": 4521984,
+    "load_ms": 13.0878,
+    "prefill_p50_ms": 0.095,
+    "decode_p50_ms": 0.097,
+    "prefill_samples_ms": [
+      0.095
+    ],
+    "decode_samples_ms": [
+      0.097
+    ],
+    "generated_tokens": [
+      6,
+      6
+    ],
+    "weight_bits": 32,
+    "time_to_first_token_ms": 335.23650000279304,
+    "end_to_end_ms": 349.9112999998033
+  }
+}

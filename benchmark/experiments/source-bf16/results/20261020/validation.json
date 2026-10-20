@@ -1,0 +1,120 @@
+{
+  "complete": true,
+  "storage_gate_passed": true,
+  "default_accumulation_changed": false,
+  "scope": "Original BF16 vocabulary storage, FP32 computation; accurate K=256 candidate; incremental Leaf comparison",
+  "unit_tests": 1125,
+  "conservative_native_backed_tests": 97,
+  "source_sha256": {
+    "engine\\src\\decoder.cpp": "a07d0e05ebca79b52c080179d9e9def08b762d69ec69ce2b283ba6948a2621bd",
+    "engine\\src\\main_decoder.cpp": "fe2fd8061e508d3744a19a06449343c1c3ccf1697cbc93864111bf86e369ee1c",
+    "engine\\src\\kv_cache.cpp": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3",
+    "engine\\src\\kernels\\transformer.cpp": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29",
+    "leaf\\cli.py": "29204de8194ac8b907b36159657af0bfcb337552fd8bb856601965e48c7c1aa2",
+    "leaf\\power.py": "4a30d0b6d6bad611802f17ed4c314a2471eef331f29db68c996ebb6152bc3ced",
+    "leaf\\runtime_check.py": "151865889ffab5187dcaee34ece6144fa5dc834474f27d80e85dfeeca858b1e3",
+    "tools\\export_decoder.py": "5246fe70133b46a24194f707b61c0753c5e2aa3a95c672f4b63eaddf3bd63685",
+    "tests\\unit\\test_source_bf16.py": "f69d3c9175b8f43ab6287a8ff963edaa7c626c21ed269009f183f11d06616930",
+    "tests\\native\\test_source_bf16.cpp": "e5a210bbc5d52651e02053fdda8399006e228404dc56ee6821247086dc9c5894",
+    "benchmark\\experiments\\source-bf16\\integration.py": "dbf87f6768b6f7953060168f15ffa7c8e135049e99062cc384446acabf88ab8e",
+    "benchmark\\experiments\\linear-accumulation\\build.py": "640160e3af2dd5f6b6207b4261a61024fe32f5641d2107ca453d77ce5d6bd5a4",
+    "engine\\include\\leaf\\graph_parser.h": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d",
+    "engine\\include\\leaf\\kernels\\attention_vector.h": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1",
+    "engine\\include\\leaf\\kernels\\conv.h": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba",
+    "engine\\include\\leaf\\kernels\\gelu.h": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc",
+    "engine\\include\\leaf\\kernels\\gelu_erf.h": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457",
+    "engine\\include\\leaf\\kernels\\gemm.h": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46",
+    "engine\\include\\leaf\\kernels\\gemv_pair.h": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef",
+    "engine\\include\\leaf\\kernels\\mlp_panel.h": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+    "engine\\include\\leaf\\kernels\\row_reuse.h": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569",
+    "engine\\include\\leaf\\kernels\\silu_gate.h": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926",
+    "engine\\include\\leaf\\kernels\\source_bf16.h": "69374b1f7ed67f766b916eadd15e77b54c36431a64f1e79cb78d4b4b986c1b91",
+    "engine\\include\\leaf\\kernels\\token_panel.h": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97",
+    "engine\\include\\leaf\\kernels\\transformer.h": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375",
+    "engine\\include\\leaf\\kernels\\unrolled_token.h": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4",
+    "engine\\include\\leaf\\kernels\\weight_panel.h": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2",
+    "engine\\include\\leaf\\kernels\\wide_token.h": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+    "engine\\include\\leaf\\runtime\\arena.h": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6",
+    "engine\\include\\leaf\\runtime\\decoder.h": "0ad59ae9913ef4cbe2ea065477cc43a42f89b9629d5698d33a64d48c8729945a",
+    "engine\\include\\leaf\\runtime\\decoder_config.h": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+    "engine\\include\\leaf\\runtime\\embedding.h": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de",
+    "engine\\include\\leaf\\runtime\\executor.h": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d",
+    "engine\\include\\leaf\\runtime\\host_support.h": "7ceffefe8d7c6495857d5cc4b689b31bdceebffe34489fe997616e9c556af224",
+    "engine\\include\\leaf\\runtime\\kv_cache.h": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315"
+  },
+  "artifacts": {
+    "prepared.json": "b0eae15c81b57f9fa9703b05e42c0ced79c8b66f7cb0d883bbc82c278bc0f7a7",
+    "quality.json": "7476bcda866712f64c3111c33e577b621da05a271106198004cf14f7ba190ef6",
+    "screen.json": "dbf3b643bbf6c152c4496f4a086930bb518d6fc3a9f1553658475debf3997e4c",
+    "acceptance.json": "59523023ae80c0b6c7f406b02745385d064e2133e9d5fa6fd9934b4abd66aaec",
+    "first-attempt-sleep-audit.json": "bf5b278623fedc426144fbd65f6a5c9042189fb95de266a881804ee0e9b99121",
+    "acceptance-awake.json": "a06fab3fc2f6f9b985aa5a78c4d8e03d65ef7c2229c94edd744f12af06deedc2",
+    "architectures.json": "128bc2af498404b24a1c76d1b63e630cf9f099402a9b90855d5b89ebb400a2b1",
+    "final-unit-results.xml": "5ef894e7eaccb2c41f8e0ac9a83b7a9fb7594229a4441eff2e7b79baca64af81",
+    "conservative-tests.xml": "c77ccec82ce2271b0a47867fad5888a7cf0eeca39c9f14d4f7e7c7f3e21d2132",
+    "include-provenance.json": "b72e0689d1e062efe751759213693ac30975596c53d4c67cf4092f8bf461fd32",
+    "installed-final-check.json": "0641f7562c0ebaea98a3f5867dfebee063edaa59b03a2f1c96197fb6a48fc0a5",
+    "native-check.json": "0afdecf76b37b74c4d04cf811738dcd86b6a0160919996b6d4de04df446000e0",
+    "integration-first-attempt.py": "ecf3255350c5a27e11707ef998e331a9a25ff601bfb0e1b0e63ebfce23df69bb",
+    "verify_installed.py": "870d88b53c1305069b8b922b4b44b1206ca17e5ac132391ee287bbd39336301a",
+    "verify_include_provenance.py": "8b03ccfae40d5b8c8d8af7c83cc3f965bc697bbc443b82f18a7e92f7a3665f5f",
+    "candidate-build.json": "2997160cd61b1cf2fb3da12561bee63740dfab6cfcf79734069d9ad7e2bcffe0",
+    "integration-awake.py": "dbf87f6768b6f7953060168f15ffa7c8e135049e99062cc384446acabf88ab8e",
+    "prior-smol-quality.json": "8bcbc99ce122181427a6bd981a74c98a710a0adf1facaf3854edb2f80e9a1f86",
+    "prior-smol-tokens.json": "1555203a81ad00cb7bfcc8e7f04aab2eccfc24e530e329471ad8d8046d959d9a",
+    "prior-qwen-quality.json": "ad0dda3588ca3cbfdb2f5734bc3b43a8a8849f085aa780de61003353e091e710",
+    "prior-qwen-tokens.json": "5856ecd9964691c327eab1a71886ca5dc63c821b6fad71a96eee1a0b3a6a020b"
+  },
+  "wheel_sha256": "4edd10d36b14d122ae3264839af627f2269642acc6a03ddcffd321a2c1d1da18",
+  "default_runtime_sha256": "8fd3003c405531dd2b05cfb2b80e0617af97b5f64a370341518b4cfc8900cd19",
+  "conservative_runtime_sha256": "6493064d998b8393f7403fb701a86b1e52d9cf705a5bb78648567d02d09fd263",
+  "installed_final_runtime_sha256": "cd09f10830c7aeee65da0e4b352efb989bdb3106ba143c490adedd6d846bb631",
+  "timing_summary": {
+    "smol": {
+      "prefill": {
+        "medians_ms": {
+          "before": 493.3874,
+          "after": 491.2688
+        },
+        "pooled_ratio": 0.995706011138509,
+        "median_paired_ratio": 0.995820682931833,
+        "stable": true,
+        "passed": true
+      },
+      "decode": {
+        "medians_ms": {
+          "before": 80.24445,
+          "after": 76.2024
+        },
+        "pooled_ratio": 0.9496282920501044,
+        "median_paired_ratio": 0.9487942743740587,
+        "stable": true,
+        "passed": true
+      }
+    },
+    "qwen": {
+      "prefill": {
+        "medians_ms": {
+          "before": 568.44785,
+          "after": 557.0787499999999
+        },
+        "pooled_ratio": 0.9799997484377853,
+        "median_paired_ratio": 0.9800633917890461,
+        "stable": true,
+        "passed": true
+      },
+      "decode": {
+        "medians_ms": {
+          "before": 110.504,
+          "after": 97.50815
+        },
+        "pooled_ratio": 0.8823947549409976,
+        "median_paired_ratio": 0.8834901114232887,
+        "stable": true,
+        "passed": true
+      }
+    }
+  },
+  "first_attempt_qualified": false,
+  "first_attempt_invalidation": "Recorded Modern Standby overlap; no samples removed"
+}
