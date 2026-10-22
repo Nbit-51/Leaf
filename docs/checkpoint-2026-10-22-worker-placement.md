@@ -128,7 +128,7 @@ without compiler/binary overrides or Torch/Transformers imports. The one-core
 ordinary non-regression guard is complete under `final-default-model/ordinary.json`
 and **fails stability**, despite all pooled/paired median ratios being within
 the 1.02 non-regression limits. Smol final-runtime pass 4 fails prefill/decode
-spread (1.56863 / 1.30003); Qwen final-runtime pass 4 fails decode (1.52603).
+spread (1.56863 / 1.30003); Qwen final-runtime pass 4 fails decode (1.52601).
 The corresponding pooled ratios are Smol 1.005915 / 1.000541 and Qwen
 0.999308 / 0.995908. No sleep overlap. Do not mark this guard passed.
 Keep the default's strict numerical failures separate from these regressions.
@@ -212,9 +212,7 @@ verdict before publication; preserve partial/failed attempts rather than overwri
 Retain compact evidence and commit locally. Publication is held because the
 ordinary one-core guard remains unqualified. Do not rerun unchanged A/B until it
 passes, waive the failed guard, or claim a root cause from stable diagnostics.
-The next attribution probe should retain work/output checks with only thread
-CPU time/cycle and actual-CPU boundaries, removing PDH and dispatch profiling
-to better match the uninstrumented launch. Keep all failed records. After the
+The less intrusive probe below is complete. Keep all failed records. After the
 release decision, use a PR and merge only after every CI check passes; remove
 only the confirmed merged branch.
 
@@ -229,3 +227,53 @@ Compact public-safe evidence is retained under
 Its 411-entry archive is verified against the accompanying manifest. Original
 process inventories and temporary unit fixtures stay local. No push, PR, merge
 or branch deletion has occurred for this work.
+
+## Minimal replay and required next action
+
+`minimal-work-v2/replay.json` completes the original twelve-pass ABBA pattern,
+with the unmodified old binary BEFORE and a minimal instrumented build AFTER.
+The latter has no PDH, EnableThreadProfiling or ReadThreadProfilingData imports
+(checked in its import table), and operator-timing scopes compile to no-ops.
+Thread CPU time/cycles, coarse GetTickCount64 wall time and actual CPUs remain.
+Two distinct 64-token prompts first match independent cold decoder references.
+All warmup/measured outputs subsequently match cold references exactly.
+
+Each measured AFTER prefill checks **actual packed-kernel tile coverage** against
+requested work: 19,896,729,600 padded multiply terms, in addition to 225 linear
+calls and 19,629,342,720 nominal linear terms. Pack token/column/panel shapes
+are checked before dispatch. This distinguishes requested work from visited
+tiles; it is not a hardware retired-instruction counter. Every coverage check
+passes and all AFTER spreads pass.
+
+The final **unchanged BEFORE** pass nevertheless reproduces instability:
+prefill p90/p10 **1.30303842**, including a 331.461-ms sample among roughly
+490–510-ms samples. It has no native CPU/work instrumentation. The minimal AFTER
+passes remain around 491–506 ms. The fast band was therefore reproduced in the
+original binary, not attributed by the added counters. This diagnostic does not
+supersede the failed ordinary release guard. No sleep overlap.
+
+No processor firmware-limit Event 37 is logged during the checked window; that
+does not rule out throttling or supply a temperature measurement. The previously
+requested administrator ETL is absent. This process is not elevated and lacks
+`SeSystemProfilePrivilege`, so kernel tracing requires the user's Administrator
+PowerShell. No recording is active.
+
+The concrete next probe is ready:
+
+```powershell
+cd C:\Users\navaneeth\leaf
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\trace_worker_spread.ps1
+```
+
+The script replays the **unmodified** binaries and same cached Smol workload,
+retaining owned PIDs/UTC windows for event attribution. Installed CPU.Light,
+Power.Light and Thermal.Light profiles are verified. It uses a random named WPR
+instance and only stops/cancels that instance; ownership is persisted before
+the replay. Existing recording/results are preserved. It checks AC, prevents
+display/system sleep, keeps all samples and saves the ETL locally in ignored
+`build/worker-placement-20261022/administrator-trace/`. Kernel tracing may alter
+timing; this is attribution, not promotion. Actual privileged start/stop remains
+untested here. Syntax and `-CheckOnly` preflight pass, with about 196 GiB free.
+While the user runs it, do not compile, test, load models, or run another benchmark.
+Keep the Administrator window open until it finishes. Do not publish its ETL or
+other-process inventory; publish an aggregate and raw-record hash instead.

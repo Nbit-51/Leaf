@@ -82,6 +82,8 @@ FP32 math and four assigned physical cores on both sides, decode medians fall
 non-regression. This is a local Leaf policy comparison, not a competitor result
 or a resolution of the ordinary default's numerical tolerance misses. The
 separate GEMM job-size experiment still has a failed joint gate.
+The final ordinary one-thread guard also remains timing-unqualified because of
+intermittent speed bands; publication is held while those are attributed.
 
 The implementation follows the Windows
 [thread-affinity contract](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadaffinitymask)

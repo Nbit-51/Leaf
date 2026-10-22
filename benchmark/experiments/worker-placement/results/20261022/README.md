@@ -33,3 +33,12 @@ failed; the manifest marks release readiness false. See the
 [checkpoint](../../../../../docs/checkpoint-2026-10-22-worker-placement.md)
 for the publication hold and exact next diagnostic, followed by the ordinary
 Smol/Qwen numerical-quality work.
+
+[`minimal-evidence.zip`](minimal-evidence.zip) and
+[`minimal-manifest.json`](minimal-manifest.json) append eighteen source/record
+entries without modifying the first archive. The twelve-pass minimal replay
+reproduces prefill spread failure in its final **unchanged baseline** pass.
+Instrumented passes retain exact cold-reference outputs and matching packed
+tile coverage. This still does not attribute the fast band. The administrator
+trace wrapper's syntax and artifact preflight pass; privileged recording has
+not started or been tested here.

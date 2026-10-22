@@ -1,0 +1,111 @@
+{
+  "base_archive_sha256": "ea4872ff5ef8fb903aabc0edb98c3be28b573ab226ee4ce02e2d5a905e2df850",
+  "release_ready": false,
+  "scope": "Diagnostic minimal replay; no speed promotion; public engine unchanged since base archive",
+  "firmware_events": {
+    "raw_sha256": "6c13247cc8b14e9a06682bd5ed0cf27eb6f7b7abaf6de291088e143c690669e2",
+    "count": 0,
+    "start_utc": "2026-10-22T12:09:52.9301310Z",
+    "end_utc": "2026-10-22T12:49:43.7018828Z",
+    "note": "No logged Event 37 does not rule out throttling; no temperature measurement"
+  },
+  "administrator_trace": {
+    "preflight_passed": true,
+    "actual_recording_not_started": true,
+    "app_elevated": false
+  },
+  "entries": {
+    "local/build_minimal_work.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\build_minimal_work.py",
+      "sha256": "9ed10ea5e15591e75ecab6a3083bf19ad1bf8f1abcdaa3a306c4bb7b327e481a",
+      "bytes": 4938
+    },
+    "local/collect_minimal.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\collect_minimal.py",
+      "sha256": "a94f5eb14ef4f0cad6e89e4e176a47635b5a91f9bf3cb2c5094711f6d9c7a63e",
+      "bytes": 3326
+    },
+    "local/minimal-work-v2/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work-v2\\build.json",
+      "sha256": "9063bdcaff33cd36af5051192eb8d08245f094a7795174ffdc7b05aa50ec79c7",
+      "bytes": 6810
+    },
+    "local/minimal-work-v2/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work-v2\\decoder.cpp",
+      "sha256": "51fd582cdcfe5adf9ca79e603fe8cc000723f6d6c645659592f7743f1c074a11",
+      "bytes": 73945
+    },
+    "local/minimal-work-v2/decoder_diagnostic.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work-v2\\decoder_diagnostic.h",
+      "sha256": "90c9e58c5b31704c5a89f0bd42527e7d1957ad42462b026858df857e2196b364",
+      "bytes": 4723
+    },
+    "local/minimal-work-v2/include/leaf/kernels/row_reuse.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work-v2\\include\\leaf\\kernels\\row_reuse.h",
+      "sha256": "ce42074c56aceb4ebc9640c5eabae7c06bdef13a46a05b28df6810642ade2a8b",
+      "bytes": 4910
+    },
+    "local/minimal-work-v2/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work-v2\\main_decoder.cpp",
+      "sha256": "0b95d919f7d49cdbbded716175824007eb10ab30e649aca0d5365285381e2111",
+      "bytes": 13514
+    },
+    "local/minimal-work-v2/replay.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work-v2\\replay.json",
+      "sha256": "ad39d46f17d15107ef2e4ecf312a27012522dd1af11768d85abfc9ad8a02183b",
+      "bytes": 114106
+    },
+    "local/minimal-work/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work\\build.json",
+      "sha256": "c3c72ea0495fdb7dceffafdacd001fc5d42249d7eb029832ff61d2a5ce471a68",
+      "bytes": 6489
+    },
+    "local/minimal-work/build_original.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work\\build_original.py",
+      "sha256": "504efd836249820be92a0eb0d889dbf3de5c722cc6af9912aa0e7b9ed7b385a8",
+      "bytes": 3020
+    },
+    "local/minimal-work/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work\\decoder.cpp",
+      "sha256": "e9740ddb62de640af1b21288eba4d27f784b11d69cde5d4136366d18e48b5511",
+      "bytes": 73613
+    },
+    "local/minimal-work/decoder_diagnostic.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work\\decoder_diagnostic.h",
+      "sha256": "a05a113086daab72af0a8b2224bd5fd6740cae6d7051ac00c2c7cebd447120ad",
+      "bytes": 3911
+    },
+    "local/minimal-work/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal-work\\main_decoder.cpp",
+      "sha256": "9ca453a6d7f34875d452685b57862568dfca4dd9b5456689bb1fa52b5b2ae001",
+      "bytes": 13388
+    },
+    "local/minimal_work_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\minimal_work_probe.h",
+      "sha256": "90c9e58c5b31704c5a89f0bd42527e7d1957ad42462b026858df857e2196b364",
+      "bytes": 4723
+    },
+    "local/run_minimal_work.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\run_minimal_work.py",
+      "sha256": "922c3fd3c27aaad04cad8b2105f5686650561cb4e8d6972722b7fa1fad9d2a3d",
+      "bytes": 5039
+    },
+    "local/trace-preflight.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\trace-preflight.txt",
+      "sha256": "52690d175f9221cbfe94250546879f862def98d5aec1ca459de3532f54dfa2da",
+      "bytes": 631
+    },
+    "repository/benchmark/experiments/worker-placement/replay_unmodified.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\worker-placement\\replay_unmodified.py",
+      "sha256": "332b318f04381644894183babbe159e422e6cd3d6698d3f5592ac10eefde11f8",
+      "bytes": 7196
+    },
+    "repository/scripts/trace_worker_spread.ps1": {
+      "source": "C:\\Users\\navaneeth\\leaf\\scripts\\trace_worker_spread.ps1",
+      "sha256": "791a7690970911260cf8170321d0065dd87c6c1e21e415dbd6249c91d2b57b93",
+      "bytes": 4630
+    }
+  },
+  "archive_sha256": "71a19c1535de23206382257ada4e2a640dfe2a97dc3a7afee401fbf75713bd36",
+  "archive_bytes": 73925
+}

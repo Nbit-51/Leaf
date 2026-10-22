@@ -13,6 +13,8 @@ one-thread execution remain blocking. No model IDs select this policy.
   placement source `31fff42`, without editing the current engine.
 - `diagnose.py`: private A/A process/barrier/dispatch diagnostics. Instrumented
   timing cannot promote a speed claim. Its CPU numbers describe the tested host.
+- `replay_unmodified.py`: PID/UTC attribution for an administrator CPU/power trace
+  of the original one-core binaries; `--check-only` performs no timed inference.
 
 The accurate K=256 arithmetic used for trained fidelity and scheduling comparisons
 remains separate from ordinary released FP32 math. Required local model artifacts
