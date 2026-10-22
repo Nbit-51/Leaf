@@ -32,6 +32,14 @@ operation and its previous affinity is restored afterward, including exceptional
 exits. Nested operations already bound to the requested CPU reuse that mask.
 Process affinity and system power settings are untouched.
 
+Explicitly assigned multi-thread pools poll for the next job/completion for a
+nominal 50 microseconds before sleeping on the existing condition variable.
+Polling uses pause instructions and periodic deadline checks, so this is a
+budget, not a hard wall-time guarantee under preemption. Unassigned and
+single-thread pools keep the blocking policy. This reduces wakeup delays at
+short projection boundaries at the cost of additional active CPU work; it is
+not an energy-saving setting. Metrics report `worker_spin_us` (zero when inactive).
+
 Worker task exceptions are collected and rethrown after the pool has finished
 the current operation. The pool can be reused after a failed task. A failed
 startup joins already-created workers before returning an error.
@@ -66,6 +74,14 @@ The [October 20 traces](checkpoint-2026-10-20-prefill-jobs.md) caught an intermi
 parked/idle allowed core. Affinity is a testable response to that finding, rather
 than a proven explanation for every historical timing spike. Full new timing
 criteria and results belong in the [current checkpoint](checkpoint-2026-10-22-worker-placement.md).
+
+On this Windows host, the matched six-pair synchronization comparison passes
+every individual and pooled spread check on both models. With accurate K=256
+FP32 math and four assigned physical cores on both sides, decode medians fall
+45.3642 → 42.8258 ms for Smol and 53.9541 → 50.78745 ms for Qwen. Prefill passes
+non-regression. This is a local Leaf policy comparison, not a competitor result
+or a resolution of the ordinary default's numerical tolerance misses. The
+separate GEMM job-size experiment still has a failed joint gate.
 
 The implementation follows the Windows
 [thread-affinity contract](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadaffinitymask)

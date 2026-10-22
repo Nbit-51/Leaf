@@ -18,7 +18,8 @@ Keep the pre-existing `docs/embedding.md` edit and unrelated image unstaged.
 
 ## Completed correctness
 
-- Final ordinary runtime passes **1,151 Python unit tests**.
+- The placement-only ordinary runtime passes **1,151 Python unit tests**;
+  the final bounded-wait runtime passes **1,155**, as recorded below.
 - Native worker test: **130** range, participation, binding/restoration, nested
   scope, task-exception/reuse and invalid-policy checks.
 - All **16 full trained logit blocks**, **12 reference continuations** and
@@ -31,7 +32,7 @@ Keep the pre-existing `docs/embedding.md` edit and unrelated image unstaged.
   Torch/Transformers imports.
 - Historical GEMM-schedule reconstruction builds and passes its 240 native cases.
 
-## Timing in progress
+## Controlled timing and remaining spread
 
 The placement stage is now complete: assigned workers pass every individual
 and pooled spread check on both models. The unassigned side fails several
@@ -40,8 +41,141 @@ assigned p90/p10: Smol prefill 1.04648 / decode 1.14235; Qwen prefill 1.04018 /
 decode 1.10580. All samples remain retained. This is a repeatability result,
 not a qualified claim that placement makes every workload faster.
 
-The one-core default non-regression stage is active. After it finishes, compare
-the isolated GEMM job-size candidate with the same assigned workers on both sides.
+The one-core **accurate-arithmetic/default-placement** non-regression stage
+passes both phases/models. Smol prefill 490.37065 → 490.97995 ms, decode
+76.5763 → 76.20775; Qwen prefill 557.97285 → 556.70695 ms, decode
+98.2324 → 97.5628. This is not the final ordinary installed-arithmetic guard.
+
+The new isolated job-size candidate retains a fixed-32 queue specialization for
+GEMV and changes only multi-token packed FP32 work. All sixteen full trained
+blocks, twelve reference continuations and ten controls match exactly. Twelve
+ordinary prefix/cache/generation regression cases also pass across Smol/Qwen
+FP32, GPT-2 FP32 and TinyLlama W8A8; these are not strict PyTorch qualification.
+
+Matched four-core placement on **both** binaries gives:
+
+| Model | Before / after prefill ms | Before / after decode ms | Verdict |
+|---|---:|---:|---|
+| Smol | 174.85225 / 168.91345 | 45.62010 / 45.72155 | Prefill passes; decode spread fails |
+| Qwen | 187.20755 / 183.06035 | 54.29260 / 54.14110 | Both phases pass |
+
+The joint gate remains **failed**. One Smol baseline decode pass has p90/p10
+1.25687626 against 1.25. All other individual and pooled checks pass. No sleep
+overlap was logged. Do not remove that pass, relax the limit, enable the job
+candidate, or retry unchanged to obtain a pass.
+
+At the user's request, hold publication and prioritize the remaining comparison
+spread. A new unchanged-binary A/A diagnostic uses the native explicit policy,
+process CPU time/cycles/faults and an external core monitor on CPU 27. It passes
+four Smol runs, with decode spreads 1.0706–1.1432, zero process faults in measured
+forwards and no sleep. Full 33-token logits match the uninstrumented binary.
+It does not reproduce or explain the failed burst. Decode cycle spreads are
+1.029–1.042; wall time varies more. Parking flags can coexist with substantial
+busy time here, so a flag alone does not establish that a core stopped executing.
+
+The caller-barrier/dispatch diagnostic in `queue-jitter/` reproduces a failed
+decode pass: p90/p10 **1.285**. Its fourth pass's fast/slow quartiles have median
+wall times **44.463 / 54.149 ms** and worker-barrier waits **3.531 / 10.357 ms**.
+Wall/wait Pearson correlation is 0.977 for that pass (0.797–0.977 across four).
+There are 225 pool calls/decode, typically 124–127 blocking completions. Fault
+deltas remain zero. This localizes much of the variability to synchronization
+waiting; it does not establish the responsible OS process or distinguish late
+worker dispatch from late caller wakeup/worker imbalance.
+
+`build_spin.py` constructs a private 50-us bounded spin-before-sleep candidate.
+Only explicitly assigned multi-thread pools use it; unassigned and one-thread
+execution remain blocking. Both the caller's completion wait and owned workers'
+next-job wait use release/acquire epoch notifications before falling back to the
+existing mutex/condition-variable protocol. A deadline check every 64 pauses
+bounds idle spinning, including shutdown. It changes no arithmetic. The native
+130-case affinity/range/exception test passes. Full trained checks are running
+under `spin-model/`; do not call the candidate a timing or stability fix yet.
+
+Its predeclared comparison is `synchronization`: same assigned cores and accurate
+math on both sides, prefill paired/pooled <=1.02, decode <=0.98, every individual
+and pooled p90/p10 <=1.25, unchanged AC/awake/sleep guards and no filtering.
+The bounded-spin comparison is now **complete/passing**: six balanced pairs per
+model, 31 samples and ten warmups/pass, with all individual and pooled spreads
+passing and no logged sleep overlap.
+
+| Model | Before / after prefill ms | Before / after decode ms | Paired decode ratio |
+|---|---:|---:|---:|
+| Smol | 175.4384 / 173.3760 | 45.3642 / 42.8258 | 0.94116106 |
+| Qwen | 186.54535 / 185.0512 | 53.9541 / 50.78745 | 0.93451649 |
+
+Pooled decode reductions are **5.60% / 5.87%**; prefill passes the declared
+non-regression criterion. This is accurate K=256 arithmetic with four explicit
+physical cores on this Windows host, not a competitor benchmark or an ordinary
+default strict-quality pass. Do not reclassify the failed job-size experiment.
+
+The diagnostic mechanism also changes as intended: blocking completions fall
+from approximately 125 to 2–3 per Smol decode; caller context switches fall from
+approximately 140 to 22–24. Four instrumented new-policy passes have decode
+spreads 1.094–1.128. Process cycles increase, consistent with additional active
+polling. These sequential diagnostic runs describe a mechanism and CPU tradeoff;
+the separate uninstrumented balanced comparison supplies the timing verdict.
+
+The policy is integrated into the public worker pool, restricted to explicit
+multi-thread placement. Actual metrics report `worker_spin_us` (50 or zero).
+Every engine source/header matches the qualified private tree byte-for-byte,
+except `main_decoder.cpp`'s outside-timing output/capability metadata.
+
+The final ordinary binary passes **1,155 units**, ten reduced architecture
+configurations and twelve trained prefix/cache/generation regressions across
+Smol/Qwen FP32, GPT-2 FP32 and TinyLlama W8A8. The new wheel passes isolated
+installed `doctor` and offline source-BF16 generation with two assigned workers,
+without compiler/binary overrides or Torch/Transformers imports. The one-core
+ordinary non-regression guard is complete under `final-default-model/ordinary.json`
+and **fails stability**, despite all pooled/paired median ratios being within
+the 1.02 non-regression limits. Smol final-runtime pass 4 fails prefill/decode
+spread (1.56863 / 1.30003); Qwen final-runtime pass 4 fails decode (1.52603).
+The corresponding pooled ratios are Smol 1.005915 / 1.000541 and Qwen
+0.999308 / 0.995908. No sleep overlap. Do not mark this guard passed.
+Keep the default's strict numerical failures separate from these regressions.
+
+The unstable Smol pass changes from approximately 500-ms prefill / 82-ms decode
+to 307–332 / 59–65 ms near its end; the next unchanged baseline also has a faster
+band before returning to approximately 490 ms. This is not established as a
+new-code slowdown or as thermal throttling. Worker spinning is inactive in this
+one-thread mode (`worker_spin_us=0`). Hold publication while diagnosing the
+separate execution-state change.
+
+`one-core-env/` contains a private version-4 dispatch diagnostic. Full 33-token
+logits match the final ordinary runtime. The completed four-pass Normal/HighQoS/
+HighQoS/Normal trace records actual CPU boundaries, dispatch counters, processor
+performance, SMT-sibling activity and faults. It uses the same Above Normal,
+AC and display/system-awake policy as acceptance. HighQoS is an experiment on
+owned child processes, not a proven remedy or a global power-plan change.
+Raw `environment-private.json` contains unrelated process telemetry: keep it
+local; publish only a privacy-preserving summary and its raw-record hash.
+
+All four monitored passes are stable, at approximately 493–498 ms prefill and
+81 ms decode. CPU boundaries match CPU 2, its SMT sibling is idle in all external
+samples, and busy-core performance readings stay approximately 149% of nominal.
+HighQoS does not establish a remedy; the faster band was not captured.
+
+`native-clock-v4/audit.json` also completes four passes without an external
+sampler. Every warmup/measured prefix and decode has bit-identical repeated
+logits. Every measured prefill records 225 linear calls and 19,629,342,720 scalar
+multiply terms; per-phase call/work counts are invariant. Native rate counters
+use >=1.1-second intervals and record cached-reading age, rather than pretending
+they refresh per operation. All four passes are stable around 491–495 ms /
+80.6–81.3 ms; the faster band remains uncaptured. No sleep overlap. This verifies
+repeated-work integrity in the observed state, not a cause for the earlier burst.
+
+Earlier private audit attempts are retained: a guarded source-anchor abort,
+a missing SDK-header compile failure, and `native-clock-v3/audit.json` rejecting
+invalid over-frequent rate-counter readings. That failed runner did not persist
+its first metrics before validation; v4 fixes this by saving raw metrics first.
+None of these attempts is acceptance evidence. The display-awake diagnostic CLI
+addition passes 68 focused diagnostics/power tests.
+
+`build_spin.py` now defaults to historical source `31fff42`, so the isolated
+experiment remains reconstructible after integration. Its originally executed
+builder is retained at `bounded-spin/build_spin-original.py`.
+The revised builder reconstructs both generated translation units and the
+worker header byte-for-byte and passes the 130 native cases again under
+`spin-reconstruction/`.
 
 `benchmark/experiments/worker-placement/validate.py` owns the predeclared gates.
 Outputs are under `build/worker-placement-20261022/model/`:
@@ -49,6 +183,11 @@ Outputs are under `build/worker-placement-20261022/model/`:
 - `quality.json`: complete/passing, bound to the new accurate binary.
 - `placement.json`: same new binary, four allowed P-cores 2/4/6/8, off/on ABBA.
 - `default.json`: old/new unbound, one P-core 2; run after placement finishes.
+
+Additional records: `jobs-model/{quality,jobs}.json`,
+`jobs-ordinary-regression.json`, `remaining-jitter/smol-diagnostic.json` and
+`remaining-jitter/diagnose-runner.py` (exact earlier runner bytes). The next
+private diagnostic is `queue-jitter/`; keep every attempt, including failures.
 
 Each stage uses six balanced pairs/model, 31 samples and ten warmups/pass. No
 filtering. All individual and pooled p90/p10 <=1.25. Placement requires paired
@@ -70,8 +209,23 @@ verdict before publication; preserve partial/failed attempts rather than overwri
 - `wheels/`, `installed/`, `installed-check.json`, `verify_installed.py`.
 - `historical-schedule/`: historical private rebuild; no current engine edits.
 
-Finish timing, retain compact evidence, update the usage/README/Mermaid and this
-checkpoint, then push through a PR. Merge only after all checks pass and remove
-the merged branch. The earlier performance failures remain failed. Next work
-compares job sizes using the same verified placement on both sides, before any
-new model/download or dataset expansion.
+Retain compact evidence and commit locally. Publication is held because the
+ordinary one-core guard remains unqualified. Do not rerun unchanged A/B until it
+passes, waive the failed guard, or claim a root cause from stable diagnostics.
+The next attribution probe should retain work/output checks with only thread
+CPU time/cycle and actual-CPU boundaries, removing PDH and dispatch profiling
+to better match the uninstrumented launch. Keep all failed records. After the
+release decision, use a PR and merge only after every CI check passes; remove
+only the confirmed merged branch.
+
+User steering: immediately after this worker/job work, fix the ordinary FP32
+Smol/Qwen strict logit-tolerance failures. The accurate K=256 candidate already
+passes full quality; its shared runtime policy and performance cost need a
+product solution. Do not describe placement as fixing those numerical errors.
+Keep dataset expansion deferred.
+
+Compact public-safe evidence is retained under
+[`worker-placement/results/20261022`](../benchmark/experiments/worker-placement/results/20261022).
+Its 411-entry archive is verified against the accompanying manifest. Original
+process inventories and temporary unit fixtures stay local. No push, PR, merge
+or branch deletion has occurred for this work.

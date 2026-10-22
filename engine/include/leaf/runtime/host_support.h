@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
+#include <chrono>
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_X64) || defined(_M_IX86)
+#include <immintrin.h>
+#endif
 #include <cstdint>
 #include <cstring>
 #include <functional>
@@ -149,8 +153,10 @@ public:
         if (threads_ == 1) { task(0, count); caller.restore(); return; }
         { std::lock_guard<std::mutex> lock(mutex_);
           task_ = std::move(task); task_error_ = nullptr;
-          count_ = count; next_ = 0; pending_ = threads_ - 1; ++epoch_; }
+          count_ = count; next_ = 0; pending_ = threads_ - 1; ++epoch_;
+          if (spins()) visible_epoch_.store(epoch_, std::memory_order_release); }
         ready_.notify_all(); drain();
+        if (spins()) spin_until(completed_epoch_, epoch_, true);
         std::unique_lock<std::mutex> lock(mutex_);
         finished_.wait(lock, [&] { return pending_ == 0; });
         const auto error = task_error_;
@@ -165,7 +171,26 @@ private:
             ready_.wait(lock, [&] { return stop_ || epoch_ != observed; });
             if (stop_) return;
             observed = epoch_; lock.unlock(); drain(); lock.lock();
-            if (--pending_ == 0) finished_.notify_one();
+            if (--pending_ == 0) {
+                if (spins()) completed_epoch_.store(observed, std::memory_order_release);
+                finished_.notify_one();
+            }
+            lock.unlock();
+            if (spins()) spin_until(visible_epoch_, observed, false);
+        }
+    }
+    bool spins() const noexcept { return caller_cpu_ != unbound_cpu && threads_ > 1; }
+    static void spin_until(const std::atomic<std::size_t>& counter, std::size_t target, bool equal) {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::microseconds(50);
+        unsigned checks = 0;
+        for (;;) {
+            if ((counter.load(std::memory_order_acquire) == target) == equal) return;
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_X64) || defined(_M_IX86)
+            _mm_pause();
+#else
+            std::atomic_signal_fence(std::memory_order_seq_cst);
+#endif
+            if ((++checks & 63) == 0 && std::chrono::steady_clock::now() >= deadline) return;
         }
     }
     void drain() {
@@ -191,6 +216,7 @@ private:
     std::atomic<std::size_t> next_{0};
     std::function<void(std::size_t, std::size_t)> task_;
     std::exception_ptr task_error_;
+    std::atomic<std::size_t> visible_epoch_{0}, completed_epoch_{0};
 };
 
 } // namespace leaf::runtime::detail

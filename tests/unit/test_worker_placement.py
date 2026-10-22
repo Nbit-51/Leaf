@@ -62,3 +62,26 @@ def test_real_native_rejects_malformed_cpu_csv_before_artifact_load(tmp_path,tex
     result=subprocess.run([configured,str(tmp_path/'missing.leaf'),'tokens','out','metrics',
         'verify','1','1','0','1','0','1','32',text],capture_output=True,text=True)
     assert result.returncode!=0 and 'cannot open artifact' not in result.stderr
+
+
+@pytest.mark.parametrize('threads,placed', [(1,False),(1,True),(2,False),(2,True)])
+def test_real_native_reports_wait_policy_and_preserves_logits(tmp_path,threads,placed):
+    import importlib.util
+    import subprocess
+    import psutil
+    configured=os.environ.get('LEAF_TEST_DECODER_BIN')
+    if not configured: pytest.skip('Set LEAF_TEST_DECODER_BIN for native policy checks')
+    info=json.loads(subprocess.check_output([configured,'--runtime-info'],text=True))
+    if placed and not info.get('worker_affinity_supported'):
+        pytest.skip('Explicit placement unsupported')
+    allowed=psutil.Process().cpu_affinity() if placed else []
+    if placed and len(allowed)<threads: pytest.skip('Insufficient allowed CPUs')
+    spec=importlib.util.spec_from_file_location('worker_policy_fixture',Path(__file__).with_name('test_source_bf16.py'))
+    fixture=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fixture)
+    artifact,_,_=fixture.fixture_model(tmp_path/'model')
+    reference,_=run_native(Path(configured),artifact,[[1,3,5]],threads=1)
+    cpus=allowed[:threads] if placed else None
+    result,metrics=run_native(Path(configured),artifact,[[1,3,5]],threads=threads,worker_cpus=cpus)
+    assert np.array_equal(reference.view('<u4'),result.view('<u4'))
+    assert metrics['worker_spin_us']==(50 if placed and threads>1 else 0)

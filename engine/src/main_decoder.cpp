@@ -95,6 +95,7 @@ int main(int argc, char** argv) {
     if (argc == 2 && std::string(argv[1]) == "--runtime-info") {
         std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4,5],\"source_bf16_head_supported\":true,\"benchmark_power_guard\":true"
                   << ",\"worker_affinity_supported\":" << (leaf::runtime::detail::worker_affinity_supported() ? "true" : "false")
+                  << ",\"worker_spin_limit_us\":50"
 #ifdef LEAF_DIAGNOSTIC_TIMING
                   << ",\"diagnostic_start_gate_supported\":true,\"diagnostic_counter_version\":4"
 #endif
@@ -240,6 +241,7 @@ int main(int argc, char** argv) {
                 << ",\"prefill_samples_ms\":"; array(metrics, prefills);
         metrics << ",\"decode_samples_ms\":"; array(metrics, decodes);
         metrics << ",\"worker_cpus\":"; array(metrics, worker_cpus);
+        metrics << ",\"worker_spin_us\":" << (worker_cpus.size() > 1 ? 50 : 0);
         metrics << ",\"generated_tokens\":"; array(metrics, generated);
 #ifdef LEAF_DIAGNOSTIC_TIMING
         leaf::diagnostics::emit(metrics, prefill_counters, decode_counters);

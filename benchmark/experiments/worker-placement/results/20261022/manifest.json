@@ -1,0 +1,2068 @@
+{
+  "scope": "Raw evidence, including failed controls; no weights/logits/binaries",
+  "release_ready": false,
+  "qualified_scope": "Assigned four-core synchronization comparison, accurate K=256 FP32, Windows",
+  "unresolved": [
+    "ordinary one-core spread guard",
+    "ordinary Smol/Qwen strict logit tolerance"
+  ],
+  "entries": {
+    "local/accurate-final/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\accurate-final\\build.json",
+      "sha256": "be20936ae9b1b283dcdb52dec8e0dbfc9d032f18972251c21063c4565bf362d9",
+      "bytes": 7335
+    },
+    "local/accurate-final/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\accurate-final\\decoder.cpp",
+      "sha256": "aeadedff0cd0bd7b73340d7d0f1d5cc7a1418d77e378b41641dab9d7a9c82994",
+      "bytes": 75072
+    },
+    "local/accurate-final/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\accurate-final\\main_decoder.cpp",
+      "sha256": "8b4c388e04a4e67b831f14adbf579ab8bbf02f1dac22fedc79a44997a2008350",
+      "bytes": 12681
+    },
+    "local/accurate/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\accurate\\build.json",
+      "sha256": "3e0c2b508c4bbf24cd38ba5f67df16d873b03bb79ef85383bd11ea98f90e26c1",
+      "bytes": 7299
+    },
+    "local/accurate/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\accurate\\decoder.cpp",
+      "sha256": "19452c1cccfd0be76354a6d8756a2f677971d52747c585a3d4e8ed1b7892f742",
+      "bytes": 74820
+    },
+    "local/accurate/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\accurate\\main_decoder.cpp",
+      "sha256": "8b4c388e04a4e67b831f14adbf579ab8bbf02f1dac22fedc79a44997a2008350",
+      "bytes": 12681
+    },
+    "local/architectures-final.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\architectures-final.json",
+      "sha256": "cadefc47888746ad26b156a1c20039f3c766c72953bced349bb1f82a09ba9c36",
+      "bytes": 19779
+    },
+    "local/before-jobs-source.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source.json",
+      "sha256": "82a2b2a1f0ff7c40319d01899d2913733970d5b853fb2b6621137ad6209b5691",
+      "bytes": 6503
+    },
+    "local/before-jobs-source/engine/include/leaf/graph_parser.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\graph_parser.h",
+      "sha256": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d",
+      "bytes": 3149
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/attention_vector.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\attention_vector.h",
+      "sha256": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1",
+      "bytes": 11700
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/conv.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\conv.h",
+      "sha256": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba",
+      "bytes": 2097
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/gelu.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\gelu.h",
+      "sha256": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc",
+      "bytes": 3818
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/gelu_erf.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\gelu_erf.h",
+      "sha256": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457",
+      "bytes": 6310
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\gemm.h",
+      "sha256": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46",
+      "bytes": 1299
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/gemv_pair.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\gemv_pair.h",
+      "sha256": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef",
+      "bytes": 2547
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/mlp_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\mlp_panel.h",
+      "sha256": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+      "bytes": 3958
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/row_reuse.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\row_reuse.h",
+      "sha256": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569",
+      "bytes": 4862
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/silu_gate.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\silu_gate.h",
+      "sha256": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926",
+      "bytes": 4937
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/source_bf16.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\source_bf16.h",
+      "sha256": "69374b1f7ed67f766b916eadd15e77b54c36431a64f1e79cb78d4b4b986c1b91",
+      "bytes": 2858
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/token_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\token_panel.h",
+      "sha256": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97",
+      "bytes": 21564
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/transformer.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\transformer.h",
+      "sha256": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375",
+      "bytes": 3174
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/unrolled_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\unrolled_token.h",
+      "sha256": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4",
+      "bytes": 6335
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/weight_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\weight_panel.h",
+      "sha256": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2",
+      "bytes": 12746
+    },
+    "local/before-jobs-source/engine/include/leaf/kernels/wide_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\kernels\\wide_token.h",
+      "sha256": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+      "bytes": 8105
+    },
+    "local/before-jobs-source/engine/include/leaf/runtime/arena.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\runtime\\arena.h",
+      "sha256": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6",
+      "bytes": 1250
+    },
+    "local/before-jobs-source/engine/include/leaf/runtime/decoder.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\runtime\\decoder.h",
+      "sha256": "22ce61e094432e6d4f78067a007b4f015b673c9a2cf9aa7f193cc18cbc986a75",
+      "bytes": 1535
+    },
+    "local/before-jobs-source/engine/include/leaf/runtime/decoder_config.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\runtime\\decoder_config.h",
+      "sha256": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+      "bytes": 1395
+    },
+    "local/before-jobs-source/engine/include/leaf/runtime/embedding.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\runtime\\embedding.h",
+      "sha256": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de",
+      "bytes": 694
+    },
+    "local/before-jobs-source/engine/include/leaf/runtime/executor.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\runtime\\executor.h",
+      "sha256": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d",
+      "bytes": 1821
+    },
+    "local/before-jobs-source/engine/include/leaf/runtime/host_support.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\runtime\\host_support.h",
+      "sha256": "83266e18de5ef61627f7e0a3c6999c86fcee8d26ee038a2f19cfed043ced86df",
+      "bytes": 7376
+    },
+    "local/before-jobs-source/engine/include/leaf/runtime/kv_cache.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\runtime\\kv_cache.h",
+      "sha256": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315",
+      "bytes": 1729
+    },
+    "local/before-jobs-source/engine/include/leaf/runtime/worker_affinity.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\include\\leaf\\runtime\\worker_affinity.h",
+      "sha256": "d438ec6fa264da051194c1b5adcc5a568e9888c42894ccec7a0604cb8b76c40e",
+      "bytes": 5440
+    },
+    "local/before-jobs-source/engine/src/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\src\\decoder.cpp",
+      "sha256": "794af8b6f5a4b2138c1488f735fea28fb790c1bf6a6fdec49202e9fd9f1fb216",
+      "bytes": 73483
+    },
+    "local/before-jobs-source/engine/src/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\before-jobs-source\\engine\\src\\main_decoder.cpp",
+      "sha256": "2f8e875dfc5bf5211e9a6e494d596bca92bd6ba9779de1a91ccf9201fcfbbbf4",
+      "bytes": 12549
+    },
+    "local/bounded-spin/accurate/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\accurate\\build.json",
+      "sha256": "af57c57d4d619b58cfd689a913c38c9df7d71b823f17b5b8edf5a51e5cab8931",
+      "bytes": 9175
+    },
+    "local/bounded-spin/accurate/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\accurate\\decoder.cpp",
+      "sha256": "aeadedff0cd0bd7b73340d7d0f1d5cc7a1418d77e378b41641dab9d7a9c82994",
+      "bytes": 75072
+    },
+    "local/bounded-spin/accurate/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\accurate\\main_decoder.cpp",
+      "sha256": "6f355eaaae2bb4d21c49ab23c1879853b396b1b4bc40bccb05c6216a7b269d4a",
+      "bytes": 12739
+    },
+    "local/bounded-spin/build_spin-original.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\build_spin-original.py",
+      "sha256": "be708d670a8c378062eab8220276a7e4501a17718b86fadf6f5093e9aed11117",
+      "bytes": 5883
+    },
+    "local/bounded-spin/candidate-build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\candidate-build.json",
+      "sha256": "7c50643adcd6f24e5a5e726287222a1d673384a9465ab3515715ce2e96b6e10d",
+      "bytes": 8221
+    },
+    "local/bounded-spin/ordinary-runtime.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\ordinary-runtime.txt",
+      "sha256": "757b7abd3e647bac86b07621deec2ee8c9cb66888f8a0c345016d46c0a571abc",
+      "bytes": 124
+    },
+    "local/bounded-spin/source/engine/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\CMakeLists.txt",
+      "sha256": "028a1d731cf4b7b46203e9ba0863f1b85e0e1d8f14f4c5bcc47c460f1eec9be4",
+      "bytes": 9749
+    },
+    "local/bounded-spin/source/engine/include/leaf/graph_parser.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\graph_parser.h",
+      "sha256": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d",
+      "bytes": 3149
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/attention_vector.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\attention_vector.h",
+      "sha256": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1",
+      "bytes": 11700
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/conv.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\conv.h",
+      "sha256": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba",
+      "bytes": 2097
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/gelu.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\gelu.h",
+      "sha256": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc",
+      "bytes": 3818
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/gelu_erf.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\gelu_erf.h",
+      "sha256": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457",
+      "bytes": 6310
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\gemm.h",
+      "sha256": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46",
+      "bytes": 1299
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/gemv_pair.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\gemv_pair.h",
+      "sha256": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef",
+      "bytes": 2547
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/mlp_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\mlp_panel.h",
+      "sha256": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+      "bytes": 3958
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/row_reuse.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\row_reuse.h",
+      "sha256": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569",
+      "bytes": 4862
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/silu_gate.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\silu_gate.h",
+      "sha256": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926",
+      "bytes": 4937
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/source_bf16.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\source_bf16.h",
+      "sha256": "69374b1f7ed67f766b916eadd15e77b54c36431a64f1e79cb78d4b4b986c1b91",
+      "bytes": 2858
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/token_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\token_panel.h",
+      "sha256": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97",
+      "bytes": 21564
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/transformer.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\transformer.h",
+      "sha256": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375",
+      "bytes": 3174
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/unrolled_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\unrolled_token.h",
+      "sha256": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4",
+      "bytes": 6335
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/weight_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\weight_panel.h",
+      "sha256": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2",
+      "bytes": 12746
+    },
+    "local/bounded-spin/source/engine/include/leaf/kernels/wide_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\kernels\\wide_token.h",
+      "sha256": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+      "bytes": 8105
+    },
+    "local/bounded-spin/source/engine/include/leaf/runtime/arena.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\runtime\\arena.h",
+      "sha256": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6",
+      "bytes": 1250
+    },
+    "local/bounded-spin/source/engine/include/leaf/runtime/decoder.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\runtime\\decoder.h",
+      "sha256": "22ce61e094432e6d4f78067a007b4f015b673c9a2cf9aa7f193cc18cbc986a75",
+      "bytes": 1535
+    },
+    "local/bounded-spin/source/engine/include/leaf/runtime/decoder_config.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\runtime\\decoder_config.h",
+      "sha256": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+      "bytes": 1395
+    },
+    "local/bounded-spin/source/engine/include/leaf/runtime/embedding.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\runtime\\embedding.h",
+      "sha256": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de",
+      "bytes": 694
+    },
+    "local/bounded-spin/source/engine/include/leaf/runtime/executor.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\runtime\\executor.h",
+      "sha256": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d",
+      "bytes": 1821
+    },
+    "local/bounded-spin/source/engine/include/leaf/runtime/host_support.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\runtime\\host_support.h",
+      "sha256": "916a8693d9735fa59299fb28ff938d62d1be8017661462075a10bbc392bcd292",
+      "bytes": 8657
+    },
+    "local/bounded-spin/source/engine/include/leaf/runtime/kv_cache.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\runtime\\kv_cache.h",
+      "sha256": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315",
+      "bytes": 1729
+    },
+    "local/bounded-spin/source/engine/include/leaf/runtime/worker_affinity.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\include\\leaf\\runtime\\worker_affinity.h",
+      "sha256": "d438ec6fa264da051194c1b5adcc5a568e9888c42894ccec7a0604cb8b76c40e",
+      "bytes": 5440
+    },
+    "local/bounded-spin/source/engine/kernels/conv2d.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\kernels\\conv2d.cpp",
+      "sha256": "056f969326add255d2dcbab33514a2301cbad158480e0e725b3963afd0dff556",
+      "bytes": 1723
+    },
+    "local/bounded-spin/source/engine/kernels/conv2d.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\kernels\\conv2d.h",
+      "sha256": "e7306ad079c59918c67444b1e33ab2b5eb1ab471962618ff8efcc87f60ee9d31",
+      "bytes": 829
+    },
+    "local/bounded-spin/source/engine/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\kernels\\gemm.cpp",
+      "sha256": "9fe37d790880eebeb3b3f664c883663a22954083a1a268f9a6dc77143c04dfc2",
+      "bytes": 4109
+    },
+    "local/bounded-spin/source/engine/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\kernels\\gemm.h",
+      "sha256": "cf3a45aa349872c1c10eba5a51a3f3d01d36ccfe553af0e5ad51811a310688d0",
+      "bytes": 500
+    },
+    "local/bounded-spin/source/engine/kernels/im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\kernels\\im2col.cpp",
+      "sha256": "106d5640df7fa0b124c691d28e7f141d7e91b75f8dc7307438b6ffa911aaccb3",
+      "bytes": 2857
+    },
+    "local/bounded-spin/source/engine/kernels/im2col.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\kernels\\im2col.h",
+      "sha256": "e2ae20e1bd96b92ec57d8f6c4f062d2dd7b3ec587b6d855078c5b4f65af49420",
+      "bytes": 1308
+    },
+    "local/bounded-spin/source/engine/src/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\decoder.cpp",
+      "sha256": "794af8b6f5a4b2138c1488f735fea28fb790c1bf6a6fdec49202e9fd9f1fb216",
+      "bytes": 73483
+    },
+    "local/bounded-spin/source/engine/src/embedding.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\embedding.cpp",
+      "sha256": "7defbd8a92af86d027d9aedfcc57d39df896a6fa67c19de7e44bb57c37c44d2e",
+      "bytes": 13453
+    },
+    "local/bounded-spin/source/engine/src/executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\executor.cpp",
+      "sha256": "ced47bf73b8d8136b65b14a124c23c378f813728d7ebd2e605a0566d38262b22",
+      "bytes": 50138
+    },
+    "local/bounded-spin/source/engine/src/graph_parser.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\graph_parser.cpp",
+      "sha256": "1dfbaecead2ce39d65a1df87af978fcbf4684de4fb2ce260720021f33817b60b",
+      "bytes": 13869
+    },
+    "local/bounded-spin/source/engine/src/kernels/conv.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\kernels\\conv.cpp",
+      "sha256": "f56dcb7a8c8e50ba096e6f1c1d281305523056d1a00011026cc40d1c9e66644d",
+      "bytes": 7584
+    },
+    "local/bounded-spin/source/engine/src/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\kernels\\gemm.cpp",
+      "sha256": "19a327db5334a706009f7c610a962e0ee7bebf07053d5344f34360964da75f2c",
+      "bytes": 6861
+    },
+    "local/bounded-spin/source/engine/src/kernels/transformer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\kernels\\transformer.cpp",
+      "sha256": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29",
+      "bytes": 10305
+    },
+    "local/bounded-spin/source/engine/src/kv_cache.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\kv_cache.cpp",
+      "sha256": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3",
+      "bytes": 4095
+    },
+    "local/bounded-spin/source/engine/src/main_bench.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\main_bench.cpp",
+      "sha256": "9f668e8c21652a9890c8a08c6badc962a2788ee6d894010be685cc00c7c6ca72",
+      "bytes": 4907
+    },
+    "local/bounded-spin/source/engine/src/main_dataset.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\main_dataset.cpp",
+      "sha256": "73b0f64ab320c87d4ce0a027393a60eb3a8585ee3c8087ce86afeacfb8c14a3e",
+      "bytes": 6084
+    },
+    "local/bounded-spin/source/engine/src/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\main_decoder.cpp",
+      "sha256": "e2c50f9116ba7bb3a64f01e312373f3760e85da103743e391fe64b712179eee4",
+      "bytes": 12607
+    },
+    "local/bounded-spin/source/engine/src/main_embed.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\main_embed.cpp",
+      "sha256": "9702093915f318700f22c20a0ccf3935961be1eda2477441a911de0c1d679d32",
+      "bytes": 2798
+    },
+    "local/bounded-spin/source/engine/src/main_infer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\main_infer.cpp",
+      "sha256": "cbe1c37e5653efe8641ac1d4df001cc7c0e1282ec2210aaed6b57c9fc5897869",
+      "bytes": 4545
+    },
+    "local/bounded-spin/source/engine/src/main_parse_info.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\src\\main_parse_info.cpp",
+      "sha256": "b1ec11f87e9af18d2b1381abea96e9c42e6ae7e62107f733255a4f9711ac44e3",
+      "bytes": 2495
+    },
+    "local/bounded-spin/source/engine/tests/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\tests\\CMakeLists.txt",
+      "sha256": "4b0f78ab7ea1caae9ecc5f028dff302c1386cc5b46b11f0771ca21fe7feb3a05",
+      "bytes": 1351
+    },
+    "local/bounded-spin/source/engine/tests/debug_conv_direct.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\tests\\debug_conv_direct.cpp",
+      "sha256": "5fd66b3616d41e93665ec7ca8b2d70c70feefdf907924aad789eca2342eaa757",
+      "bytes": 7897
+    },
+    "local/bounded-spin/source/engine/tests/test_executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\tests\\test_executor.cpp",
+      "sha256": "e5682f4b4307f5cc0643a4aba66902827bc50e5ab669a3c61a4006647a8812af",
+      "bytes": 4866
+    },
+    "local/bounded-spin/source/engine/tests/test_executor_buffer_pool.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\tests\\test_executor_buffer_pool.cpp",
+      "sha256": "1d69a2ce44f9ad9150a34236d8d1667b42da4d53f7bbd517682d54b6dc46f956",
+      "bytes": 8035
+    },
+    "local/bounded-spin/source/engine/tests/test_gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\tests\\test_gemm.cpp",
+      "sha256": "b4064ccf7391fef14defd165017c909d59a4c3fe417a230d5a691ddabe58954b",
+      "bytes": 3536
+    },
+    "local/bounded-spin/source/engine/tests/test_im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\tests\\test_im2col.cpp",
+      "sha256": "4042876084e618c85c73d6237744fbf82e7781fb05adecc1b692da4c80c04ada",
+      "bytes": 2855
+    },
+    "local/bounded-spin/source/engine/tests/verify_conv_vs_python.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\bounded-spin\\source\\engine\\tests\\verify_conv_vs_python.cpp",
+      "sha256": "e0ff37f12ea1fd1376174ca307631bfc47d998b37839a4eec08f1ce270fcedef",
+      "bytes": 4634
+    },
+    "local/build_native_clock.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\build_native_clock.py",
+      "sha256": "41cc5f01b6bff3af26e9424eb1dc2eca0c29dd4a411627f4820be3ea79e6a3b2",
+      "bytes": 7662
+    },
+    "local/build_onecore_diagnostic.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\build_onecore_diagnostic.py",
+      "sha256": "6110f0af60450a30063b5ca865e4cf097a42d04aafbfd6cfa53c9e4eb3cee85d",
+      "bytes": 2424
+    },
+    "local/collect_evidence.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\collect_evidence.py",
+      "sha256": "a1022d7a287b5dcd1b002a1f9bfba2acbfe15ea353430db0a4d8944eaff37a7b",
+      "bytes": 5223
+    },
+    "local/default-runtime.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\default-runtime.txt",
+      "sha256": "5ee1adc32f170c814fa38a32f3919a13d41c9e4cab605982157942d937eec5df",
+      "bytes": 116
+    },
+    "local/diagnose_windows_before_display.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\diagnose_windows_before_display.py",
+      "sha256": "57e31197e8d72da1f6c59b4526a6fa806a7134aac5eabdcb2bf55e5f5f7ffbd3",
+      "bytes": 18288
+    },
+    "local/diagnostic-cli.xml": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\diagnostic-cli.xml",
+      "sha256": "f185bcb42d58072993c635eb1d8f90c9fec25e66c5d064e3c317c689c6e34d28",
+      "bytes": 9484
+    },
+    "local/final-default-model/ordinary.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\final-default-model\\ordinary.json",
+      "sha256": "276041f164dd079ebcb1db3ddb46ca83028679ff117a2dcb712a15b49159fba6",
+      "bytes": 96289
+    },
+    "local/final-installed-check.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\final-installed-check.json",
+      "sha256": "a9f745337ff450d8a7504a8f7ee7f608809ba65c1010982a2d4b898aa4cb4320",
+      "bytes": 2839
+    },
+    "local/final-installed-metrics.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\final-installed-metrics.json",
+      "sha256": "482f9c5049e3a30c379ba21e1c1e5a5e45539c0debc6e8cf8b8472b7cad46ce8",
+      "bytes": 730
+    },
+    "local/final-ordinary-regression.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\final-ordinary-regression.json",
+      "sha256": "4ba136b39ab585064e88c005df2aaf6d4bd81264a4bf39a9099efd622ca84d3c",
+      "bytes": 4149
+    },
+    "local/final-runtime.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\final-runtime.txt",
+      "sha256": "80b0880500f52853fb337e49ebcbfb8c3c8c562602332b4483c05fd748494266",
+      "bytes": 108
+    },
+    "local/focused.xml": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\focused.xml",
+      "sha256": "0e47624296ebe6a62000ea1d08fd3b981ec40e79c52eb429569eecf61026a72d",
+      "bytes": 23219
+    },
+    "local/historical-schedule/accurate/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\accurate\\build.json",
+      "sha256": "dc209f33f091a8aa7ee257e35a77ad193478cef432b17cbccfcf47fa7359541f",
+      "bytes": 9224
+    },
+    "local/historical-schedule/accurate/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\accurate\\decoder.cpp",
+      "sha256": "bc8df146914fa870b5aefafb47f20db4c43a20db8dc0c3542034e6ae152dfce1",
+      "bytes": 75414
+    },
+    "local/historical-schedule/accurate/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\accurate\\main_decoder.cpp",
+      "sha256": "ea3eb9ea5cb8fdd4d2745a311422283ba27d1429e6ef90ad23dd69213f7480be",
+      "bytes": 11610
+    },
+    "local/historical-schedule/candidate-build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\candidate-build.json",
+      "sha256": "fae49014df36d373c5172b592e0a68647e235290a3732e058bf9bfd40a3ffd2f",
+      "bytes": 7032
+    },
+    "local/historical-schedule/source/engine/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\CMakeLists.txt",
+      "sha256": "170e6a5c4054c33bf094205c17401b135f7bbdd18224846030a3f2fbbd485b8f",
+      "bytes": 9441
+    },
+    "local/historical-schedule/source/engine/include/leaf/graph_parser.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\graph_parser.h",
+      "sha256": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d",
+      "bytes": 3149
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/attention_vector.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\attention_vector.h",
+      "sha256": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1",
+      "bytes": 11700
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/conv.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\conv.h",
+      "sha256": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba",
+      "bytes": 2097
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/gelu.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\gelu.h",
+      "sha256": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc",
+      "bytes": 3818
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/gelu_erf.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\gelu_erf.h",
+      "sha256": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457",
+      "bytes": 6310
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\gemm.h",
+      "sha256": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46",
+      "bytes": 1299
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/gemv_pair.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\gemv_pair.h",
+      "sha256": "7c7776b31366fcf78d91a4db818501cc51b28b50d79b8fddab6c8a0ab6d7cc5f",
+      "bytes": 2496
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/mlp_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\mlp_panel.h",
+      "sha256": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+      "bytes": 3958
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/row_reuse.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\row_reuse.h",
+      "sha256": "71513908c7388dc89c0123496ee5ac27b543d390f35567acb34bbcc6bbe03731",
+      "bytes": 4771
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/silu_gate.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\silu_gate.h",
+      "sha256": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926",
+      "bytes": 4937
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/source_bf16.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\source_bf16.h",
+      "sha256": "69374b1f7ed67f766b916eadd15e77b54c36431a64f1e79cb78d4b4b986c1b91",
+      "bytes": 2858
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/token_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\token_panel.h",
+      "sha256": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97",
+      "bytes": 21564
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/transformer.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\transformer.h",
+      "sha256": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375",
+      "bytes": 3174
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/unrolled_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\unrolled_token.h",
+      "sha256": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4",
+      "bytes": 6335
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/weight_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\weight_panel.h",
+      "sha256": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2",
+      "bytes": 12746
+    },
+    "local/historical-schedule/source/engine/include/leaf/kernels/wide_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\kernels\\wide_token.h",
+      "sha256": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+      "bytes": 8105
+    },
+    "local/historical-schedule/source/engine/include/leaf/runtime/arena.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\runtime\\arena.h",
+      "sha256": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6",
+      "bytes": 1250
+    },
+    "local/historical-schedule/source/engine/include/leaf/runtime/decoder.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\runtime\\decoder.h",
+      "sha256": "741be909674bc31b0df6f32346aab4a4cdef4054edd82d25d38695106b338022",
+      "bytes": 1539
+    },
+    "local/historical-schedule/source/engine/include/leaf/runtime/decoder_config.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\runtime\\decoder_config.h",
+      "sha256": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+      "bytes": 1395
+    },
+    "local/historical-schedule/source/engine/include/leaf/runtime/embedding.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\runtime\\embedding.h",
+      "sha256": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de",
+      "bytes": 694
+    },
+    "local/historical-schedule/source/engine/include/leaf/runtime/executor.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\runtime\\executor.h",
+      "sha256": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d",
+      "bytes": 1821
+    },
+    "local/historical-schedule/source/engine/include/leaf/runtime/host_support.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\runtime\\host_support.h",
+      "sha256": "8025751918fa2e35a15abb9223d3e8cf01e5d9089fac9905b11095038993957e",
+      "bytes": 6330
+    },
+    "local/historical-schedule/source/engine/include/leaf/runtime/kv_cache.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\include\\leaf\\runtime\\kv_cache.h",
+      "sha256": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315",
+      "bytes": 1729
+    },
+    "local/historical-schedule/source/engine/kernels/conv2d.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\kernels\\conv2d.cpp",
+      "sha256": "056f969326add255d2dcbab33514a2301cbad158480e0e725b3963afd0dff556",
+      "bytes": 1723
+    },
+    "local/historical-schedule/source/engine/kernels/conv2d.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\kernels\\conv2d.h",
+      "sha256": "e7306ad079c59918c67444b1e33ab2b5eb1ab471962618ff8efcc87f60ee9d31",
+      "bytes": 829
+    },
+    "local/historical-schedule/source/engine/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\kernels\\gemm.cpp",
+      "sha256": "9fe37d790880eebeb3b3f664c883663a22954083a1a268f9a6dc77143c04dfc2",
+      "bytes": 4109
+    },
+    "local/historical-schedule/source/engine/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\kernels\\gemm.h",
+      "sha256": "cf3a45aa349872c1c10eba5a51a3f3d01d36ccfe553af0e5ad51811a310688d0",
+      "bytes": 500
+    },
+    "local/historical-schedule/source/engine/kernels/im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\kernels\\im2col.cpp",
+      "sha256": "106d5640df7fa0b124c691d28e7f141d7e91b75f8dc7307438b6ffa911aaccb3",
+      "bytes": 2857
+    },
+    "local/historical-schedule/source/engine/kernels/im2col.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\kernels\\im2col.h",
+      "sha256": "e2ae20e1bd96b92ec57d8f6c4f062d2dd7b3ec587b6d855078c5b4f65af49420",
+      "bytes": 1308
+    },
+    "local/historical-schedule/source/engine/src/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\decoder.cpp",
+      "sha256": "9e2e8953829f489eea7b4fcca924cec259725870c5c4c6431985a725e83d90c4",
+      "bytes": 73825
+    },
+    "local/historical-schedule/source/engine/src/embedding.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\embedding.cpp",
+      "sha256": "7defbd8a92af86d027d9aedfcc57d39df896a6fa67c19de7e44bb57c37c44d2e",
+      "bytes": 13453
+    },
+    "local/historical-schedule/source/engine/src/executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\executor.cpp",
+      "sha256": "ced47bf73b8d8136b65b14a124c23c378f813728d7ebd2e605a0566d38262b22",
+      "bytes": 50138
+    },
+    "local/historical-schedule/source/engine/src/graph_parser.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\graph_parser.cpp",
+      "sha256": "1dfbaecead2ce39d65a1df87af978fcbf4684de4fb2ce260720021f33817b60b",
+      "bytes": 13869
+    },
+    "local/historical-schedule/source/engine/src/kernels/conv.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\kernels\\conv.cpp",
+      "sha256": "f56dcb7a8c8e50ba096e6f1c1d281305523056d1a00011026cc40d1c9e66644d",
+      "bytes": 7584
+    },
+    "local/historical-schedule/source/engine/src/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\kernels\\gemm.cpp",
+      "sha256": "19a327db5334a706009f7c610a962e0ee7bebf07053d5344f34360964da75f2c",
+      "bytes": 6861
+    },
+    "local/historical-schedule/source/engine/src/kernels/transformer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\kernels\\transformer.cpp",
+      "sha256": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29",
+      "bytes": 10305
+    },
+    "local/historical-schedule/source/engine/src/kv_cache.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\kv_cache.cpp",
+      "sha256": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3",
+      "bytes": 4095
+    },
+    "local/historical-schedule/source/engine/src/main_bench.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\main_bench.cpp",
+      "sha256": "9f668e8c21652a9890c8a08c6badc962a2788ee6d894010be685cc00c7c6ca72",
+      "bytes": 4907
+    },
+    "local/historical-schedule/source/engine/src/main_dataset.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\main_dataset.cpp",
+      "sha256": "73b0f64ab320c87d4ce0a027393a60eb3a8585ee3c8087ce86afeacfb8c14a3e",
+      "bytes": 6084
+    },
+    "local/historical-schedule/source/engine/src/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\main_decoder.cpp",
+      "sha256": "586ebab76effc928326c783dea2264d057496d7706cca5db6ff38b77183a000c",
+      "bytes": 11478
+    },
+    "local/historical-schedule/source/engine/src/main_embed.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\main_embed.cpp",
+      "sha256": "9702093915f318700f22c20a0ccf3935961be1eda2477441a911de0c1d679d32",
+      "bytes": 2798
+    },
+    "local/historical-schedule/source/engine/src/main_infer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\main_infer.cpp",
+      "sha256": "cbe1c37e5653efe8641ac1d4df001cc7c0e1282ec2210aaed6b57c9fc5897869",
+      "bytes": 4545
+    },
+    "local/historical-schedule/source/engine/src/main_parse_info.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\src\\main_parse_info.cpp",
+      "sha256": "b1ec11f87e9af18d2b1381abea96e9c42e6ae7e62107f733255a4f9711ac44e3",
+      "bytes": 2495
+    },
+    "local/historical-schedule/source/engine/tests/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\tests\\CMakeLists.txt",
+      "sha256": "4b0f78ab7ea1caae9ecc5f028dff302c1386cc5b46b11f0771ca21fe7feb3a05",
+      "bytes": 1351
+    },
+    "local/historical-schedule/source/engine/tests/debug_conv_direct.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\tests\\debug_conv_direct.cpp",
+      "sha256": "5fd66b3616d41e93665ec7ca8b2d70c70feefdf907924aad789eca2342eaa757",
+      "bytes": 7897
+    },
+    "local/historical-schedule/source/engine/tests/test_executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\tests\\test_executor.cpp",
+      "sha256": "e5682f4b4307f5cc0643a4aba66902827bc50e5ab669a3c61a4006647a8812af",
+      "bytes": 4866
+    },
+    "local/historical-schedule/source/engine/tests/test_executor_buffer_pool.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\tests\\test_executor_buffer_pool.cpp",
+      "sha256": "1d69a2ce44f9ad9150a34236d8d1667b42da4d53f7bbd517682d54b6dc46f956",
+      "bytes": 8035
+    },
+    "local/historical-schedule/source/engine/tests/test_gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\tests\\test_gemm.cpp",
+      "sha256": "b4064ccf7391fef14defd165017c909d59a4c3fe417a230d5a691ddabe58954b",
+      "bytes": 3536
+    },
+    "local/historical-schedule/source/engine/tests/test_im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\tests\\test_im2col.cpp",
+      "sha256": "4042876084e618c85c73d6237744fbf82e7781fb05adecc1b692da4c80c04ada",
+      "bytes": 2855
+    },
+    "local/historical-schedule/source/engine/tests/verify_conv_vs_python.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\historical-schedule\\source\\engine\\tests\\verify_conv_vs_python.cpp",
+      "sha256": "e0ff37f12ea1fd1376174ca307631bfc47d998b37839a4eec08f1ce270fcedef",
+      "bytes": 4634
+    },
+    "local/installed-check.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\installed-check.json",
+      "sha256": "db2b8000b85aaf92251f742c968acc961999c2a7cd791e98ba49e16a6521f878",
+      "bytes": 2744
+    },
+    "local/installed-metrics.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\installed-metrics.json",
+      "sha256": "bce636e81125d7da17151282dea9ad835486714b1a40cbf011582caa38501012",
+      "bytes": 704
+    },
+    "local/jobs-model/jobs.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\jobs-model\\jobs.json",
+      "sha256": "3f3b27f058085c7f6f1bf38d01de70e9575b91421df30c2bbf5d39b9f341b2a5",
+      "bytes": 103749
+    },
+    "local/jobs-model/quality.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\jobs-model\\quality.json",
+      "sha256": "189fe855931665da87cde77936b792c396fd81b21e03169bc6e98c2ffb7b4a41",
+      "bytes": 7896
+    },
+    "local/jobs-model/validate-runner.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\jobs-model\\validate-runner.py",
+      "sha256": "d0d2a0cb02834f4298642a32ad9913ec36e22f246344a80778382b54e299813a",
+      "bytes": 14716
+    },
+    "local/jobs-ordinary-regression.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\jobs-ordinary-regression.json",
+      "sha256": "e4229b8c055b3ddee09e7fecc348e1ad8a66c497adc3c383ff7a94de6c1acd90",
+      "bytes": 4165
+    },
+    "local/model/default.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\model\\default.json",
+      "sha256": "275aca8a2ffdf06a07b68cf211414f9cc469f3ccd3099a9cad93076f0606daac",
+      "bytes": 97753
+    },
+    "local/model/placement.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\model\\placement.json",
+      "sha256": "c09a3d13b713adcfe523c9f233eb90a9c107b986d6a80e377955aeabdaba3026",
+      "bytes": 100822
+    },
+    "local/model/quality.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\model\\quality.json",
+      "sha256": "50f92bdb734cc57fee080a99e5e6e017add7066f70265125f848b3937c2dadfe",
+      "bytes": 7553
+    },
+    "local/native-clock-v2/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v2\\build.json",
+      "sha256": "5e08836f4dde6072cc045cb5602b10781e282e2a9c78d575dc320c0c35c35538",
+      "bytes": 6638
+    },
+    "local/native-clock-v2/build_native_clock_failed.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v2\\build_native_clock_failed.py",
+      "sha256": "2d4862679b73c2d277575894f8d2e4a8063a393ff97e677cef43bb0e5cc76887",
+      "bytes": 7414
+    },
+    "local/native-clock-v2/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v2\\decoder.cpp",
+      "sha256": "e9740ddb62de640af1b21288eba4d27f784b11d69cde5d4136366d18e48b5511",
+      "bytes": 73613
+    },
+    "local/native-clock-v2/decoder_diagnostic.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v2\\decoder_diagnostic.h",
+      "sha256": "bcca9237d027921624a4d7efb8b0c0425b61099d8b93d683ea71ca2c698de53b",
+      "bytes": 7660
+    },
+    "local/native-clock-v2/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v2\\main_decoder.cpp",
+      "sha256": "a9599ee9997dae4164045f471d4260a49c28f4d34b7f15d3e029e5cd84aad51b",
+      "bytes": 13388
+    },
+    "local/native-clock-v2/native_clock_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v2\\native_clock_probe.h",
+      "sha256": "9a6b4f24ea074185f1e15f51c8b51848cbb9b0ad976c925e42d152c1c5c09330",
+      "bytes": 1632
+    },
+    "local/native-clock-v3/audit.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v3\\audit.json",
+      "sha256": "c07dd94e07c5945f2db66043139d04870872cf4c68ff8e7b6a797d00ddcc2dba",
+      "bytes": 1548
+    },
+    "local/native-clock-v3/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v3\\build.json",
+      "sha256": "5fe102a0b7d0f47b93b099a77b7c4404c6e175e4400941158356bfc8f9e141e1",
+      "bytes": 6785
+    },
+    "local/native-clock-v3/build_original.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v3\\build_original.py",
+      "sha256": "d94321b8df3ced70dc29c8fe000d72bfd71463ccc362307add0d1ab0eedde66f",
+      "bytes": 7414
+    },
+    "local/native-clock-v3/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v3\\decoder.cpp",
+      "sha256": "e9740ddb62de640af1b21288eba4d27f784b11d69cde5d4136366d18e48b5511",
+      "bytes": 73613
+    },
+    "local/native-clock-v3/decoder_diagnostic.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v3\\decoder_diagnostic.h",
+      "sha256": "bcca9237d027921624a4d7efb8b0c0425b61099d8b93d683ea71ca2c698de53b",
+      "bytes": 7660
+    },
+    "local/native-clock-v3/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v3\\main_decoder.cpp",
+      "sha256": "a9599ee9997dae4164045f471d4260a49c28f4d34b7f15d3e029e5cd84aad51b",
+      "bytes": 13388
+    },
+    "local/native-clock-v3/native_clock_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v3\\native_clock_probe.h",
+      "sha256": "c140bc93ef99c8eeee313b46c48dab9590e0d393eddd972de85423b4d7880e4e",
+      "bytes": 1652
+    },
+    "local/native-clock-v3/run_failed.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v3\\run_failed.py",
+      "sha256": "800464ac9f74f234afc32de4d270e472510944ceb5f3b908d66d8c5bbee897b3",
+      "bytes": 3758
+    },
+    "local/native-clock-v4/audit.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v4\\audit.json",
+      "sha256": "ce1203490cbd6237fb17ac7df58a5fab719c1c005b92ac7c77802bf8e40f927f",
+      "bytes": 81759
+    },
+    "local/native-clock-v4/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v4\\build.json",
+      "sha256": "cf1b12219b63c667ba8b84a465d0346c5012c76796dc4bfa9f4b55a2d5eac845",
+      "bytes": 6785
+    },
+    "local/native-clock-v4/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v4\\decoder.cpp",
+      "sha256": "e9740ddb62de640af1b21288eba4d27f784b11d69cde5d4136366d18e48b5511",
+      "bytes": 73613
+    },
+    "local/native-clock-v4/decoder_diagnostic.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v4\\decoder_diagnostic.h",
+      "sha256": "32debb89a4deb38fc54b83aa07f29f0cdce7572f5644a40acaa394a800e6e996",
+      "bytes": 7892
+    },
+    "local/native-clock-v4/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v4\\main_decoder.cpp",
+      "sha256": "a9599ee9997dae4164045f471d4260a49c28f4d34b7f15d3e029e5cd84aad51b",
+      "bytes": 13388
+    },
+    "local/native-clock-v4/native_clock_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock-v4\\native_clock_probe.h",
+      "sha256": "890e7005510e4b47c305b8bf0850cb86b36ed4b8ea102816a62a82ddc080c1f0",
+      "bytes": 2465
+    },
+    "local/native-clock/build_native_clock_failed.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock\\build_native_clock_failed.py",
+      "sha256": "8c7163fc59f113dab1b4d867f8e0669e59adb24520d2255dcb95e865d57ffd0c",
+      "bytes": 7348
+    },
+    "local/native-clock/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock\\decoder.cpp",
+      "sha256": "e9740ddb62de640af1b21288eba4d27f784b11d69cde5d4136366d18e48b5511",
+      "bytes": 73613
+    },
+    "local/native-clock/decoder_diagnostic.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock\\decoder_diagnostic.h",
+      "sha256": "bcca9237d027921624a4d7efb8b0c0425b61099d8b93d683ea71ca2c698de53b",
+      "bytes": 7660
+    },
+    "local/native-clock/native_clock_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native-clock\\native_clock_probe.h",
+      "sha256": "9a6b4f24ea074185f1e15f51c8b51848cbb9b0ad976c925e42d152c1c5c09330",
+      "bytes": 1632
+    },
+    "local/native_clock_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\native_clock_probe.h",
+      "sha256": "890e7005510e4b47c305b8bf0850cb86b36ed4b8ea102816a62a82ddc080c1f0",
+      "bytes": 2465
+    },
+    "local/one-core-env/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\one-core-env\\build.json",
+      "sha256": "fe8a3274473e95180e26e118d97fef62d304cfd3c571f7cea32f716f4ae3d5f7",
+      "bytes": 6598
+    },
+    "local/one-core-env/environment-summary.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\one-core-env\\environment-summary.json",
+      "sha256": "2fa586e174e5f3f796952bf085fe467d05258cc9134d99abeacd5b282afe4e84",
+      "bytes": 90816
+    },
+    "local/ordinary-parity.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\ordinary-parity.json",
+      "sha256": "fe224db7d8b9f5e4486a49b7c961cb3aadf25ace204b496879154778ebf66f69",
+      "bytes": 871
+    },
+    "local/placed-jobs/accurate/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\accurate\\build.json",
+      "sha256": "a6a702e1c6a01e807b458775dbf54f64fcfc350b8c7ddcfcb87dc00961dca36e",
+      "bytes": 9137
+    },
+    "local/placed-jobs/accurate/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\accurate\\decoder.cpp",
+      "sha256": "f86115394e6bf50da99339607f9727f3e03b888d22c5f4be98ea57d1013acd6d",
+      "bytes": 75563
+    },
+    "local/placed-jobs/accurate/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\accurate\\main_decoder.cpp",
+      "sha256": "4cbb4e31eeb7d3af6bbb82bce01d8dce2e31b78b65f3fc5e27e9829c86f75ca3",
+      "bytes": 12774
+    },
+    "local/placed-jobs/candidate-build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\candidate-build.json",
+      "sha256": "f469bb0ae87bbddd5d518cdee1575a99f4e46095027f97b9a6a604a93164dc8b",
+      "bytes": 8229
+    },
+    "local/placed-jobs/ordinary-runtime.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\ordinary-runtime.txt",
+      "sha256": "ad0fe42bc281aa086aa9c51c127f4576a1be9cae32b365197439ea1cdca389e0",
+      "bytes": 123
+    },
+    "local/placed-jobs/source/engine/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\CMakeLists.txt",
+      "sha256": "028a1d731cf4b7b46203e9ba0863f1b85e0e1d8f14f4c5bcc47c460f1eec9be4",
+      "bytes": 9749
+    },
+    "local/placed-jobs/source/engine/include/leaf/graph_parser.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\graph_parser.h",
+      "sha256": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d",
+      "bytes": 3149
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/attention_vector.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\attention_vector.h",
+      "sha256": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1",
+      "bytes": 11700
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/conv.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\conv.h",
+      "sha256": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba",
+      "bytes": 2097
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/gelu.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\gelu.h",
+      "sha256": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc",
+      "bytes": 3818
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/gelu_erf.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\gelu_erf.h",
+      "sha256": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457",
+      "bytes": 6310
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\gemm.h",
+      "sha256": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46",
+      "bytes": 1299
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/gemv_pair.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\gemv_pair.h",
+      "sha256": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef",
+      "bytes": 2547
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/mlp_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\mlp_panel.h",
+      "sha256": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+      "bytes": 3958
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/row_reuse.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\row_reuse.h",
+      "sha256": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569",
+      "bytes": 4862
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/silu_gate.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\silu_gate.h",
+      "sha256": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926",
+      "bytes": 4937
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/source_bf16.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\source_bf16.h",
+      "sha256": "69374b1f7ed67f766b916eadd15e77b54c36431a64f1e79cb78d4b4b986c1b91",
+      "bytes": 2858
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/token_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\token_panel.h",
+      "sha256": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97",
+      "bytes": 21564
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/transformer.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\transformer.h",
+      "sha256": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375",
+      "bytes": 3174
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/unrolled_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\unrolled_token.h",
+      "sha256": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4",
+      "bytes": 6335
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/weight_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\weight_panel.h",
+      "sha256": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2",
+      "bytes": 12746
+    },
+    "local/placed-jobs/source/engine/include/leaf/kernels/wide_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\kernels\\wide_token.h",
+      "sha256": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+      "bytes": 8105
+    },
+    "local/placed-jobs/source/engine/include/leaf/runtime/arena.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\runtime\\arena.h",
+      "sha256": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6",
+      "bytes": 1250
+    },
+    "local/placed-jobs/source/engine/include/leaf/runtime/decoder.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\runtime\\decoder.h",
+      "sha256": "8ac3bc2a71ebb69eb713a751f9631847b7f8b23a762ea4018441814737b20ead",
+      "bytes": 1586
+    },
+    "local/placed-jobs/source/engine/include/leaf/runtime/decoder_config.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\runtime\\decoder_config.h",
+      "sha256": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+      "bytes": 1395
+    },
+    "local/placed-jobs/source/engine/include/leaf/runtime/embedding.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\runtime\\embedding.h",
+      "sha256": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de",
+      "bytes": 694
+    },
+    "local/placed-jobs/source/engine/include/leaf/runtime/executor.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\runtime\\executor.h",
+      "sha256": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d",
+      "bytes": 1821
+    },
+    "local/placed-jobs/source/engine/include/leaf/runtime/host_support.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\runtime\\host_support.h",
+      "sha256": "b00050efb729ddbd82462754768dd2c3be60dfb14e55c481fcbe644a0506b6f9",
+      "bytes": 7829
+    },
+    "local/placed-jobs/source/engine/include/leaf/runtime/kv_cache.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\runtime\\kv_cache.h",
+      "sha256": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315",
+      "bytes": 1729
+    },
+    "local/placed-jobs/source/engine/include/leaf/runtime/worker_affinity.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\include\\leaf\\runtime\\worker_affinity.h",
+      "sha256": "d438ec6fa264da051194c1b5adcc5a568e9888c42894ccec7a0604cb8b76c40e",
+      "bytes": 5440
+    },
+    "local/placed-jobs/source/engine/kernels/conv2d.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\kernels\\conv2d.cpp",
+      "sha256": "056f969326add255d2dcbab33514a2301cbad158480e0e725b3963afd0dff556",
+      "bytes": 1723
+    },
+    "local/placed-jobs/source/engine/kernels/conv2d.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\kernels\\conv2d.h",
+      "sha256": "e7306ad079c59918c67444b1e33ab2b5eb1ab471962618ff8efcc87f60ee9d31",
+      "bytes": 829
+    },
+    "local/placed-jobs/source/engine/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\kernels\\gemm.cpp",
+      "sha256": "9fe37d790880eebeb3b3f664c883663a22954083a1a268f9a6dc77143c04dfc2",
+      "bytes": 4109
+    },
+    "local/placed-jobs/source/engine/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\kernels\\gemm.h",
+      "sha256": "cf3a45aa349872c1c10eba5a51a3f3d01d36ccfe553af0e5ad51811a310688d0",
+      "bytes": 500
+    },
+    "local/placed-jobs/source/engine/kernels/im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\kernels\\im2col.cpp",
+      "sha256": "106d5640df7fa0b124c691d28e7f141d7e91b75f8dc7307438b6ffa911aaccb3",
+      "bytes": 2857
+    },
+    "local/placed-jobs/source/engine/kernels/im2col.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\kernels\\im2col.h",
+      "sha256": "e2ae20e1bd96b92ec57d8f6c4f062d2dd7b3ec587b6d855078c5b4f65af49420",
+      "bytes": 1308
+    },
+    "local/placed-jobs/source/engine/src/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\decoder.cpp",
+      "sha256": "0627f62506404e1966ca0d8b47a51ad5a774771fde655bbea466ed6f5e84e22e",
+      "bytes": 73974
+    },
+    "local/placed-jobs/source/engine/src/embedding.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\embedding.cpp",
+      "sha256": "7defbd8a92af86d027d9aedfcc57d39df896a6fa67c19de7e44bb57c37c44d2e",
+      "bytes": 13453
+    },
+    "local/placed-jobs/source/engine/src/executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\executor.cpp",
+      "sha256": "ced47bf73b8d8136b65b14a124c23c378f813728d7ebd2e605a0566d38262b22",
+      "bytes": 50138
+    },
+    "local/placed-jobs/source/engine/src/graph_parser.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\graph_parser.cpp",
+      "sha256": "1dfbaecead2ce39d65a1df87af978fcbf4684de4fb2ce260720021f33817b60b",
+      "bytes": 13869
+    },
+    "local/placed-jobs/source/engine/src/kernels/conv.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\kernels\\conv.cpp",
+      "sha256": "f56dcb7a8c8e50ba096e6f1c1d281305523056d1a00011026cc40d1c9e66644d",
+      "bytes": 7584
+    },
+    "local/placed-jobs/source/engine/src/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\kernels\\gemm.cpp",
+      "sha256": "19a327db5334a706009f7c610a962e0ee7bebf07053d5344f34360964da75f2c",
+      "bytes": 6861
+    },
+    "local/placed-jobs/source/engine/src/kernels/transformer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\kernels\\transformer.cpp",
+      "sha256": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29",
+      "bytes": 10305
+    },
+    "local/placed-jobs/source/engine/src/kv_cache.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\kv_cache.cpp",
+      "sha256": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3",
+      "bytes": 4095
+    },
+    "local/placed-jobs/source/engine/src/main_bench.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\main_bench.cpp",
+      "sha256": "9f668e8c21652a9890c8a08c6badc962a2788ee6d894010be685cc00c7c6ca72",
+      "bytes": 4907
+    },
+    "local/placed-jobs/source/engine/src/main_dataset.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\main_dataset.cpp",
+      "sha256": "73b0f64ab320c87d4ce0a027393a60eb3a8585ee3c8087ce86afeacfb8c14a3e",
+      "bytes": 6084
+    },
+    "local/placed-jobs/source/engine/src/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\main_decoder.cpp",
+      "sha256": "fec0e2d32476a50f6b7540ee81b6ce0d9eeda1629ce8fe4a13eabfa4d107125b",
+      "bytes": 12642
+    },
+    "local/placed-jobs/source/engine/src/main_embed.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\main_embed.cpp",
+      "sha256": "9702093915f318700f22c20a0ccf3935961be1eda2477441a911de0c1d679d32",
+      "bytes": 2798
+    },
+    "local/placed-jobs/source/engine/src/main_infer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\main_infer.cpp",
+      "sha256": "cbe1c37e5653efe8641ac1d4df001cc7c0e1282ec2210aaed6b57c9fc5897869",
+      "bytes": 4545
+    },
+    "local/placed-jobs/source/engine/src/main_parse_info.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\src\\main_parse_info.cpp",
+      "sha256": "b1ec11f87e9af18d2b1381abea96e9c42e6ae7e62107f733255a4f9711ac44e3",
+      "bytes": 2495
+    },
+    "local/placed-jobs/source/engine/tests/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\tests\\CMakeLists.txt",
+      "sha256": "4b0f78ab7ea1caae9ecc5f028dff302c1386cc5b46b11f0771ca21fe7feb3a05",
+      "bytes": 1351
+    },
+    "local/placed-jobs/source/engine/tests/debug_conv_direct.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\tests\\debug_conv_direct.cpp",
+      "sha256": "5fd66b3616d41e93665ec7ca8b2d70c70feefdf907924aad789eca2342eaa757",
+      "bytes": 7897
+    },
+    "local/placed-jobs/source/engine/tests/test_executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\tests\\test_executor.cpp",
+      "sha256": "e5682f4b4307f5cc0643a4aba66902827bc50e5ab669a3c61a4006647a8812af",
+      "bytes": 4866
+    },
+    "local/placed-jobs/source/engine/tests/test_executor_buffer_pool.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\tests\\test_executor_buffer_pool.cpp",
+      "sha256": "1d69a2ce44f9ad9150a34236d8d1667b42da4d53f7bbd517682d54b6dc46f956",
+      "bytes": 8035
+    },
+    "local/placed-jobs/source/engine/tests/test_gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\tests\\test_gemm.cpp",
+      "sha256": "b4064ccf7391fef14defd165017c909d59a4c3fe417a230d5a691ddabe58954b",
+      "bytes": 3536
+    },
+    "local/placed-jobs/source/engine/tests/test_im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\tests\\test_im2col.cpp",
+      "sha256": "4042876084e618c85c73d6237744fbf82e7781fb05adecc1b692da4c80c04ada",
+      "bytes": 2855
+    },
+    "local/placed-jobs/source/engine/tests/verify_conv_vs_python.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\placed-jobs\\source\\engine\\tests\\verify_conv_vs_python.cpp",
+      "sha256": "e0ff37f12ea1fd1376174ca307631bfc47d998b37839a4eec08f1ce270fcedef",
+      "bytes": 4634
+    },
+    "local/queue-jitter/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\queue-jitter\\build.json",
+      "sha256": "ac96d04ffc761fc3739705f82a57ee4d128298ea0dc1b361c4a72618027ba718",
+      "bytes": 8296
+    },
+    "local/queue-jitter/diagnose-runner.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\queue-jitter\\diagnose-runner.py",
+      "sha256": "1e6040a429c0f24be011c360d515142971ea41e7e9faf44f659066ebfe43c10a",
+      "bytes": 16234
+    },
+    "local/queue-jitter/include/leaf/runtime/host_support.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\queue-jitter\\include\\leaf\\runtime\\host_support.h",
+      "sha256": "662f78d5a6c355d23e4678d328f9334c91a9a29cf32900d69575bada5f5a9465",
+      "bytes": 7706
+    },
+    "local/queue-jitter/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\queue-jitter\\main_decoder.cpp",
+      "sha256": "781650d42d42d0e142315af670a836a50c56397879c9b01748cc64289db9612d",
+      "bytes": 13874
+    },
+    "local/queue-jitter/process_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\queue-jitter\\process_probe.h",
+      "sha256": "9972a2ee9b9c26e070a3dff3feab2226de6a03bf6273a7a0b9b0832fa0947027",
+      "bytes": 4033
+    },
+    "local/queue-jitter/queue_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\queue-jitter\\queue_probe.h",
+      "sha256": "ac2cf45d89139109389b2f7fd720a632bec57e53b1e9decbf41f40963adf0c31",
+      "bytes": 169
+    },
+    "local/queue-jitter/smol-diagnostic.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\queue-jitter\\smol-diagnostic.json",
+      "sha256": "75ae066846bb042e5d635cec4d702785e043241ad204ca95ef24d1178c504896",
+      "bytes": 136907
+    },
+    "local/remaining-jitter/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\remaining-jitter\\build.json",
+      "sha256": "675fa1a81157039311854ff96eac2a5c7a51d3f1dce2663f940a969dec0a4844",
+      "bytes": 7362
+    },
+    "local/remaining-jitter/diagnose-runner.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\remaining-jitter\\diagnose-runner.py",
+      "sha256": "01d60d55f781ceb08b40855d03a2115bbecb3b9445e6b4c4ef2679993fcf3349",
+      "bytes": 11962
+    },
+    "local/remaining-jitter/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\remaining-jitter\\main_decoder.cpp",
+      "sha256": "de5d6cc385243b83b3bbf2f4fa5da6ecf2496f43666a399f84b134747db9a887",
+      "bytes": 13781
+    },
+    "local/remaining-jitter/smol-diagnostic.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\remaining-jitter\\smol-diagnostic.json",
+      "sha256": "934468856ee9bfb3be387c4d062a1a6dfb7b2a934161144887950f1776e3e630",
+      "bytes": 105442
+    },
+    "local/run_native_clock.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\run_native_clock.py",
+      "sha256": "00474ea93802262cdf46babcebb75b00a0d5929111fbd575dedf8ab9e3dca59b",
+      "bytes": 3830
+    },
+    "local/spin-jitter/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-jitter\\build.json",
+      "sha256": "22ff7a2f99a594ca47ca16f496ad51d3fca7b65dd5a31812528be9edfda13c09",
+      "bytes": 10072
+    },
+    "local/spin-jitter/include/leaf/runtime/host_support.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-jitter\\include\\leaf\\runtime\\host_support.h",
+      "sha256": "a68217c337e645c4225cbec17ad405c778b4190c6c0de7140a12ca9a28530c7b",
+      "bytes": 8988
+    },
+    "local/spin-jitter/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-jitter\\main_decoder.cpp",
+      "sha256": "6f7369f6c08088fc50bd144bbed7ea1ea1ebb7686400191119de5c0db0a4e1ea",
+      "bytes": 13932
+    },
+    "local/spin-jitter/process_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-jitter\\process_probe.h",
+      "sha256": "9972a2ee9b9c26e070a3dff3feab2226de6a03bf6273a7a0b9b0832fa0947027",
+      "bytes": 4033
+    },
+    "local/spin-jitter/queue_probe.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-jitter\\queue_probe.h",
+      "sha256": "ac2cf45d89139109389b2f7fd720a632bec57e53b1e9decbf41f40963adf0c31",
+      "bytes": 169
+    },
+    "local/spin-jitter/smol-diagnostic.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-jitter\\smol-diagnostic.json",
+      "sha256": "bc55d500f4e9284901da3bc3c5821c42feb029c33472e779855bc722001ab8e1",
+      "bytes": 133021
+    },
+    "local/spin-model/quality.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-model\\quality.json",
+      "sha256": "d0d2be5ff9b1eaa097c3cdc3b05b23e3e8aa0f97338caf242660f07f42a31e36",
+      "bytes": 7569
+    },
+    "local/spin-model/synchronization.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-model\\synchronization.json",
+      "sha256": "19093a672eab5e7c929879e706b883f5a1ab05f7c700b583d001c6f32d4ac3d8",
+      "bytes": 103780
+    },
+    "local/spin-ordinary-regression.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-ordinary-regression.json",
+      "sha256": "b8bb9010b081c3e537976d16a11f2ba1382e6700ad34aa2c0ad66946839ba11b",
+      "bytes": 4166
+    },
+    "local/spin-reconstruction/accurate/build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\accurate\\build.json",
+      "sha256": "f613f30551fc5c42dca8c9a81a1f12b4a9b0af934993c0c1ca619f913491b476",
+      "bytes": 9441
+    },
+    "local/spin-reconstruction/accurate/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\accurate\\decoder.cpp",
+      "sha256": "aeadedff0cd0bd7b73340d7d0f1d5cc7a1418d77e378b41641dab9d7a9c82994",
+      "bytes": 75072
+    },
+    "local/spin-reconstruction/accurate/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\accurate\\main_decoder.cpp",
+      "sha256": "6f355eaaae2bb4d21c49ab23c1879853b396b1b4bc40bccb05c6216a7b269d4a",
+      "bytes": 12739
+    },
+    "local/spin-reconstruction/candidate-build.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\candidate-build.json",
+      "sha256": "58e7ab5959efdd895ce3cc52a8305948e000220961b09d78a6e5a6c65a5c5f15",
+      "bytes": 8285
+    },
+    "local/spin-reconstruction/source/engine/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\CMakeLists.txt",
+      "sha256": "028a1d731cf4b7b46203e9ba0863f1b85e0e1d8f14f4c5bcc47c460f1eec9be4",
+      "bytes": 9749
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/graph_parser.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\graph_parser.h",
+      "sha256": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d",
+      "bytes": 3149
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/attention_vector.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\attention_vector.h",
+      "sha256": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1",
+      "bytes": 11700
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/conv.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\conv.h",
+      "sha256": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba",
+      "bytes": 2097
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/gelu.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\gelu.h",
+      "sha256": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc",
+      "bytes": 3818
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/gelu_erf.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\gelu_erf.h",
+      "sha256": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457",
+      "bytes": 6310
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\gemm.h",
+      "sha256": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46",
+      "bytes": 1299
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/gemv_pair.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\gemv_pair.h",
+      "sha256": "7c7776b31366fcf78d91a4db818501cc51b28b50d79b8fddab6c8a0ab6d7cc5f",
+      "bytes": 2496
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/mlp_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\mlp_panel.h",
+      "sha256": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+      "bytes": 3958
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/row_reuse.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\row_reuse.h",
+      "sha256": "71513908c7388dc89c0123496ee5ac27b543d390f35567acb34bbcc6bbe03731",
+      "bytes": 4771
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/silu_gate.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\silu_gate.h",
+      "sha256": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926",
+      "bytes": 4937
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/source_bf16.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\source_bf16.h",
+      "sha256": "69374b1f7ed67f766b916eadd15e77b54c36431a64f1e79cb78d4b4b986c1b91",
+      "bytes": 2858
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/token_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\token_panel.h",
+      "sha256": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97",
+      "bytes": 21564
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/transformer.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\transformer.h",
+      "sha256": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375",
+      "bytes": 3174
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/unrolled_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\unrolled_token.h",
+      "sha256": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4",
+      "bytes": 6335
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/weight_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\weight_panel.h",
+      "sha256": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2",
+      "bytes": 12746
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/kernels/wide_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\kernels\\wide_token.h",
+      "sha256": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+      "bytes": 8105
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/runtime/arena.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\runtime\\arena.h",
+      "sha256": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6",
+      "bytes": 1250
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/runtime/decoder.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\runtime\\decoder.h",
+      "sha256": "22ce61e094432e6d4f78067a007b4f015b673c9a2cf9aa7f193cc18cbc986a75",
+      "bytes": 1535
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/runtime/decoder_config.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\runtime\\decoder_config.h",
+      "sha256": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+      "bytes": 1395
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/runtime/embedding.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\runtime\\embedding.h",
+      "sha256": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de",
+      "bytes": 694
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/runtime/executor.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\runtime\\executor.h",
+      "sha256": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d",
+      "bytes": 1821
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/runtime/host_support.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\runtime\\host_support.h",
+      "sha256": "916a8693d9735fa59299fb28ff938d62d1be8017661462075a10bbc392bcd292",
+      "bytes": 8657
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/runtime/kv_cache.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\runtime\\kv_cache.h",
+      "sha256": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315",
+      "bytes": 1729
+    },
+    "local/spin-reconstruction/source/engine/include/leaf/runtime/worker_affinity.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\include\\leaf\\runtime\\worker_affinity.h",
+      "sha256": "d438ec6fa264da051194c1b5adcc5a568e9888c42894ccec7a0604cb8b76c40e",
+      "bytes": 5440
+    },
+    "local/spin-reconstruction/source/engine/kernels/conv2d.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\kernels\\conv2d.cpp",
+      "sha256": "056f969326add255d2dcbab33514a2301cbad158480e0e725b3963afd0dff556",
+      "bytes": 1723
+    },
+    "local/spin-reconstruction/source/engine/kernels/conv2d.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\kernels\\conv2d.h",
+      "sha256": "e7306ad079c59918c67444b1e33ab2b5eb1ab471962618ff8efcc87f60ee9d31",
+      "bytes": 829
+    },
+    "local/spin-reconstruction/source/engine/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\kernels\\gemm.cpp",
+      "sha256": "9fe37d790880eebeb3b3f664c883663a22954083a1a268f9a6dc77143c04dfc2",
+      "bytes": 4109
+    },
+    "local/spin-reconstruction/source/engine/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\kernels\\gemm.h",
+      "sha256": "cf3a45aa349872c1c10eba5a51a3f3d01d36ccfe553af0e5ad51811a310688d0",
+      "bytes": 500
+    },
+    "local/spin-reconstruction/source/engine/kernels/im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\kernels\\im2col.cpp",
+      "sha256": "106d5640df7fa0b124c691d28e7f141d7e91b75f8dc7307438b6ffa911aaccb3",
+      "bytes": 2857
+    },
+    "local/spin-reconstruction/source/engine/kernels/im2col.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\kernels\\im2col.h",
+      "sha256": "e2ae20e1bd96b92ec57d8f6c4f062d2dd7b3ec587b6d855078c5b4f65af49420",
+      "bytes": 1308
+    },
+    "local/spin-reconstruction/source/engine/src/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\decoder.cpp",
+      "sha256": "794af8b6f5a4b2138c1488f735fea28fb790c1bf6a6fdec49202e9fd9f1fb216",
+      "bytes": 73483
+    },
+    "local/spin-reconstruction/source/engine/src/embedding.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\embedding.cpp",
+      "sha256": "7defbd8a92af86d027d9aedfcc57d39df896a6fa67c19de7e44bb57c37c44d2e",
+      "bytes": 13453
+    },
+    "local/spin-reconstruction/source/engine/src/executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\executor.cpp",
+      "sha256": "ced47bf73b8d8136b65b14a124c23c378f813728d7ebd2e605a0566d38262b22",
+      "bytes": 50138
+    },
+    "local/spin-reconstruction/source/engine/src/graph_parser.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\graph_parser.cpp",
+      "sha256": "1dfbaecead2ce39d65a1df87af978fcbf4684de4fb2ce260720021f33817b60b",
+      "bytes": 13869
+    },
+    "local/spin-reconstruction/source/engine/src/kernels/conv.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\kernels\\conv.cpp",
+      "sha256": "f56dcb7a8c8e50ba096e6f1c1d281305523056d1a00011026cc40d1c9e66644d",
+      "bytes": 7584
+    },
+    "local/spin-reconstruction/source/engine/src/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\kernels\\gemm.cpp",
+      "sha256": "19a327db5334a706009f7c610a962e0ee7bebf07053d5344f34360964da75f2c",
+      "bytes": 6861
+    },
+    "local/spin-reconstruction/source/engine/src/kernels/transformer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\kernels\\transformer.cpp",
+      "sha256": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29",
+      "bytes": 10305
+    },
+    "local/spin-reconstruction/source/engine/src/kv_cache.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\kv_cache.cpp",
+      "sha256": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3",
+      "bytes": 4095
+    },
+    "local/spin-reconstruction/source/engine/src/main_bench.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\main_bench.cpp",
+      "sha256": "9f668e8c21652a9890c8a08c6badc962a2788ee6d894010be685cc00c7c6ca72",
+      "bytes": 4907
+    },
+    "local/spin-reconstruction/source/engine/src/main_dataset.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\main_dataset.cpp",
+      "sha256": "73b0f64ab320c87d4ce0a027393a60eb3a8585ee3c8087ce86afeacfb8c14a3e",
+      "bytes": 6084
+    },
+    "local/spin-reconstruction/source/engine/src/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\main_decoder.cpp",
+      "sha256": "e2c50f9116ba7bb3a64f01e312373f3760e85da103743e391fe64b712179eee4",
+      "bytes": 12607
+    },
+    "local/spin-reconstruction/source/engine/src/main_embed.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\main_embed.cpp",
+      "sha256": "9702093915f318700f22c20a0ccf3935961be1eda2477441a911de0c1d679d32",
+      "bytes": 2798
+    },
+    "local/spin-reconstruction/source/engine/src/main_infer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\main_infer.cpp",
+      "sha256": "cbe1c37e5653efe8641ac1d4df001cc7c0e1282ec2210aaed6b57c9fc5897869",
+      "bytes": 4545
+    },
+    "local/spin-reconstruction/source/engine/src/main_parse_info.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\src\\main_parse_info.cpp",
+      "sha256": "b1ec11f87e9af18d2b1381abea96e9c42e6ae7e62107f733255a4f9711ac44e3",
+      "bytes": 2495
+    },
+    "local/spin-reconstruction/source/engine/tests/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\tests\\CMakeLists.txt",
+      "sha256": "4b0f78ab7ea1caae9ecc5f028dff302c1386cc5b46b11f0771ca21fe7feb3a05",
+      "bytes": 1351
+    },
+    "local/spin-reconstruction/source/engine/tests/debug_conv_direct.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\tests\\debug_conv_direct.cpp",
+      "sha256": "5fd66b3616d41e93665ec7ca8b2d70c70feefdf907924aad789eca2342eaa757",
+      "bytes": 7897
+    },
+    "local/spin-reconstruction/source/engine/tests/test_executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\tests\\test_executor.cpp",
+      "sha256": "e5682f4b4307f5cc0643a4aba66902827bc50e5ab669a3c61a4006647a8812af",
+      "bytes": 4866
+    },
+    "local/spin-reconstruction/source/engine/tests/test_executor_buffer_pool.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\tests\\test_executor_buffer_pool.cpp",
+      "sha256": "1d69a2ce44f9ad9150a34236d8d1667b42da4d53f7bbd517682d54b6dc46f956",
+      "bytes": 8035
+    },
+    "local/spin-reconstruction/source/engine/tests/test_gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\tests\\test_gemm.cpp",
+      "sha256": "b4064ccf7391fef14defd165017c909d59a4c3fe417a230d5a691ddabe58954b",
+      "bytes": 3536
+    },
+    "local/spin-reconstruction/source/engine/tests/test_im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\tests\\test_im2col.cpp",
+      "sha256": "4042876084e618c85c73d6237744fbf82e7781fb05adecc1b692da4c80c04ada",
+      "bytes": 2855
+    },
+    "local/spin-reconstruction/source/engine/tests/verify_conv_vs_python.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\spin-reconstruction\\source\\engine\\tests\\verify_conv_vs_python.cpp",
+      "sha256": "e0ff37f12ea1fd1376174ca307631bfc47d998b37839a4eec08f1ce270fcedef",
+      "bytes": 4634
+    },
+    "local/units-final.xml": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\units-final.xml",
+      "sha256": "5d0193b915e211e946b2b599c272f1b5ccbbb0fa333cb11ee18b6e9b30090f2e",
+      "bytes": 168244
+    },
+    "local/units-spin-final.xml": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\units-spin-final.xml",
+      "sha256": "5bed18456a88e0b30b3e60200d519d3848c4e6603cf55ed674cb4d715202ee6d",
+      "bytes": 168818
+    },
+    "local/units.xml": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\units.xml",
+      "sha256": "f46c318b1aba93d413e750b338fb23ba8717a63928c8317e68f8e9d46551c0eb",
+      "bytes": 168244
+    },
+    "local/validate-worker-phase.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\validate-worker-phase.py",
+      "sha256": "b77cb558579177063b376726c9b342e353ee293902186e5a1051bfef270ff321",
+      "bytes": 11364
+    },
+    "local/verify_final_installed.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\verify_final_installed.py",
+      "sha256": "fb1ad4c9da077e12143343a3422f921c2ba696aab8005a5e249ef5228a4edd21",
+      "bytes": 2741
+    },
+    "local/verify_installed.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\worker-placement-20261022\\verify_installed.py",
+      "sha256": "53a4a44a2604c6a9b2f15361ebd493dac023dd704f33052239bef39d34d8cc90",
+      "bytes": 2665
+    },
+    "prior/full-quality-qwen/quality.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\full-quality-qwen\\quality.json",
+      "sha256": "ad0dda3588ca3cbfdb2f5734bc3b43a8a8849f085aa780de61003353e091e710",
+      "bytes": 18557
+    },
+    "prior/full-quality-qwen/tokens.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\full-quality-qwen\\tokens.json",
+      "sha256": "5856ecd9964691c327eab1a71886ca5dc63c821b6fad71a96eee1a0b3a6a020b",
+      "bytes": 13328
+    },
+    "prior/full-quality-smol/quality.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\full-quality-smol\\quality.json",
+      "sha256": "8bcbc99ce122181427a6bd981a74c98a710a0adf1facaf3854edb2f80e9a1f86",
+      "bytes": 18583
+    },
+    "prior/full-quality-smol/tokens.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\linear-accumulation-20261019-pipeline\\full-quality-smol\\tokens.json",
+      "sha256": "1555203a81ad00cb7bfcc8e7f04aab2eccfc24e530e329471ad8d8046d959d9a",
+      "bytes": 13243
+    },
+    "prior/source-bf16/prepared.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\prepared.json",
+      "sha256": "b0eae15c81b57f9fa9703b05e42c0ced79c8b66f7cb0d883bbc82c278bc0f7a7",
+      "bytes": 85351
+    },
+    "prior/source-bf16/quality.json": {
+      "source": "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-20261020\\quality.json",
+      "sha256": "7476bcda866712f64c3111c33e577b621da05a271106198004cf14f7ba190ef6",
+      "bytes": 11814
+    },
+    "repository/benchmark/experiments/worker-placement/build_jobs.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\worker-placement\\build_jobs.py",
+      "sha256": "0a419702fee42870d59836cfd5eaf0ee54b77678103e4219b10addcdca8d75f3",
+      "bytes": 6524
+    },
+    "repository/benchmark/experiments/worker-placement/build_spin.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\worker-placement\\build_spin.py",
+      "sha256": "02c18c2097f2f2673c4db50d828af357e7671f470988286f8aab3f23f6948bde",
+      "bytes": 6559
+    },
+    "repository/benchmark/experiments/worker-placement/check_ordinary.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\worker-placement\\check_ordinary.py",
+      "sha256": "a2919a30dab9f2eacd621b198b1f0a014e20511be9427d30bcb99ad0f39d08ba",
+      "bytes": 3737
+    },
+    "repository/benchmark/experiments/worker-placement/diagnose.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\worker-placement\\diagnose.py",
+      "sha256": "d9de5f1faf0b992dfc4fabffb5a7e34be500d544d28e13d3c6d91ecc650c2cab",
+      "bytes": 16532
+    },
+    "repository/benchmark/experiments/worker-placement/validate.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\benchmark\\experiments\\worker-placement\\validate.py",
+      "sha256": "ae4e9431320ea50d6f713d331636560dc29934943e215d152b71033fbfd7ec3e",
+      "bytes": 15283
+    },
+    "repository/engine/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\CMakeLists.txt",
+      "sha256": "028a1d731cf4b7b46203e9ba0863f1b85e0e1d8f14f4c5bcc47c460f1eec9be4",
+      "bytes": 9749
+    },
+    "repository/engine/include/leaf/graph_parser.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\graph_parser.h",
+      "sha256": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d",
+      "bytes": 3149
+    },
+    "repository/engine/include/leaf/kernels/attention_vector.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\attention_vector.h",
+      "sha256": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1",
+      "bytes": 11700
+    },
+    "repository/engine/include/leaf/kernels/conv.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\conv.h",
+      "sha256": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba",
+      "bytes": 2097
+    },
+    "repository/engine/include/leaf/kernels/gelu.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\gelu.h",
+      "sha256": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc",
+      "bytes": 3818
+    },
+    "repository/engine/include/leaf/kernels/gelu_erf.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\gelu_erf.h",
+      "sha256": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457",
+      "bytes": 6310
+    },
+    "repository/engine/include/leaf/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\gemm.h",
+      "sha256": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46",
+      "bytes": 1299
+    },
+    "repository/engine/include/leaf/kernels/gemv_pair.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\gemv_pair.h",
+      "sha256": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef",
+      "bytes": 2547
+    },
+    "repository/engine/include/leaf/kernels/mlp_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\mlp_panel.h",
+      "sha256": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601",
+      "bytes": 3958
+    },
+    "repository/engine/include/leaf/kernels/row_reuse.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\row_reuse.h",
+      "sha256": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569",
+      "bytes": 4862
+    },
+    "repository/engine/include/leaf/kernels/silu_gate.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\silu_gate.h",
+      "sha256": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926",
+      "bytes": 4937
+    },
+    "repository/engine/include/leaf/kernels/source_bf16.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\source_bf16.h",
+      "sha256": "69374b1f7ed67f766b916eadd15e77b54c36431a64f1e79cb78d4b4b986c1b91",
+      "bytes": 2858
+    },
+    "repository/engine/include/leaf/kernels/token_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\token_panel.h",
+      "sha256": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97",
+      "bytes": 21564
+    },
+    "repository/engine/include/leaf/kernels/transformer.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\transformer.h",
+      "sha256": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375",
+      "bytes": 3174
+    },
+    "repository/engine/include/leaf/kernels/unrolled_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\unrolled_token.h",
+      "sha256": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4",
+      "bytes": 6335
+    },
+    "repository/engine/include/leaf/kernels/weight_panel.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\weight_panel.h",
+      "sha256": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2",
+      "bytes": 12746
+    },
+    "repository/engine/include/leaf/kernels/wide_token.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\kernels\\wide_token.h",
+      "sha256": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834",
+      "bytes": 8105
+    },
+    "repository/engine/include/leaf/runtime/arena.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\arena.h",
+      "sha256": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6",
+      "bytes": 1250
+    },
+    "repository/engine/include/leaf/runtime/decoder.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\decoder.h",
+      "sha256": "22ce61e094432e6d4f78067a007b4f015b673c9a2cf9aa7f193cc18cbc986a75",
+      "bytes": 1535
+    },
+    "repository/engine/include/leaf/runtime/decoder_config.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\decoder_config.h",
+      "sha256": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b",
+      "bytes": 1395
+    },
+    "repository/engine/include/leaf/runtime/embedding.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\embedding.h",
+      "sha256": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de",
+      "bytes": 694
+    },
+    "repository/engine/include/leaf/runtime/executor.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\executor.h",
+      "sha256": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d",
+      "bytes": 1821
+    },
+    "repository/engine/include/leaf/runtime/host_support.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\host_support.h",
+      "sha256": "916a8693d9735fa59299fb28ff938d62d1be8017661462075a10bbc392bcd292",
+      "bytes": 8657
+    },
+    "repository/engine/include/leaf/runtime/kv_cache.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\kv_cache.h",
+      "sha256": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315",
+      "bytes": 1729
+    },
+    "repository/engine/include/leaf/runtime/worker_affinity.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\include\\leaf\\runtime\\worker_affinity.h",
+      "sha256": "d438ec6fa264da051194c1b5adcc5a568e9888c42894ccec7a0604cb8b76c40e",
+      "bytes": 5440
+    },
+    "repository/engine/kernels/conv2d.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\kernels\\conv2d.cpp",
+      "sha256": "056f969326add255d2dcbab33514a2301cbad158480e0e725b3963afd0dff556",
+      "bytes": 1723
+    },
+    "repository/engine/kernels/conv2d.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\kernels\\conv2d.h",
+      "sha256": "e7306ad079c59918c67444b1e33ab2b5eb1ab471962618ff8efcc87f60ee9d31",
+      "bytes": 829
+    },
+    "repository/engine/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\kernels\\gemm.cpp",
+      "sha256": "9fe37d790880eebeb3b3f664c883663a22954083a1a268f9a6dc77143c04dfc2",
+      "bytes": 4109
+    },
+    "repository/engine/kernels/gemm.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\kernels\\gemm.h",
+      "sha256": "cf3a45aa349872c1c10eba5a51a3f3d01d36ccfe553af0e5ad51811a310688d0",
+      "bytes": 500
+    },
+    "repository/engine/kernels/im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\kernels\\im2col.cpp",
+      "sha256": "106d5640df7fa0b124c691d28e7f141d7e91b75f8dc7307438b6ffa911aaccb3",
+      "bytes": 2857
+    },
+    "repository/engine/kernels/im2col.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\kernels\\im2col.h",
+      "sha256": "e2ae20e1bd96b92ec57d8f6c4f062d2dd7b3ec587b6d855078c5b4f65af49420",
+      "bytes": 1308
+    },
+    "repository/engine/src/decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\decoder.cpp",
+      "sha256": "794af8b6f5a4b2138c1488f735fea28fb790c1bf6a6fdec49202e9fd9f1fb216",
+      "bytes": 73483
+    },
+    "repository/engine/src/embedding.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\embedding.cpp",
+      "sha256": "7defbd8a92af86d027d9aedfcc57d39df896a6fa67c19de7e44bb57c37c44d2e",
+      "bytes": 13453
+    },
+    "repository/engine/src/executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\executor.cpp",
+      "sha256": "ced47bf73b8d8136b65b14a124c23c378f813728d7ebd2e605a0566d38262b22",
+      "bytes": 50138
+    },
+    "repository/engine/src/graph_parser.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\graph_parser.cpp",
+      "sha256": "1dfbaecead2ce39d65a1df87af978fcbf4684de4fb2ce260720021f33817b60b",
+      "bytes": 13869
+    },
+    "repository/engine/src/kernels/conv.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\kernels\\conv.cpp",
+      "sha256": "f56dcb7a8c8e50ba096e6f1c1d281305523056d1a00011026cc40d1c9e66644d",
+      "bytes": 7584
+    },
+    "repository/engine/src/kernels/gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\kernels\\gemm.cpp",
+      "sha256": "19a327db5334a706009f7c610a962e0ee7bebf07053d5344f34360964da75f2c",
+      "bytes": 6861
+    },
+    "repository/engine/src/kernels/transformer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\kernels\\transformer.cpp",
+      "sha256": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29",
+      "bytes": 10305
+    },
+    "repository/engine/src/kv_cache.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\kv_cache.cpp",
+      "sha256": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3",
+      "bytes": 4095
+    },
+    "repository/engine/src/main_bench.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_bench.cpp",
+      "sha256": "9f668e8c21652a9890c8a08c6badc962a2788ee6d894010be685cc00c7c6ca72",
+      "bytes": 4907
+    },
+    "repository/engine/src/main_dataset.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_dataset.cpp",
+      "sha256": "73b0f64ab320c87d4ce0a027393a60eb3a8585ee3c8087ce86afeacfb8c14a3e",
+      "bytes": 6084
+    },
+    "repository/engine/src/main_decoder.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_decoder.cpp",
+      "sha256": "2c8b48541ee1d8bd8e9c846533724f965a302c8b89c96457ee44e1744f2527da",
+      "bytes": 12681
+    },
+    "repository/engine/src/main_embed.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_embed.cpp",
+      "sha256": "9702093915f318700f22c20a0ccf3935961be1eda2477441a911de0c1d679d32",
+      "bytes": 2798
+    },
+    "repository/engine/src/main_infer.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_infer.cpp",
+      "sha256": "cbe1c37e5653efe8641ac1d4df001cc7c0e1282ec2210aaed6b57c9fc5897869",
+      "bytes": 4545
+    },
+    "repository/engine/src/main_parse_info.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\src\\main_parse_info.cpp",
+      "sha256": "b1ec11f87e9af18d2b1381abea96e9c42e6ae7e62107f733255a4f9711ac44e3",
+      "bytes": 2495
+    },
+    "repository/engine/tests/CMakeLists.txt": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\tests\\CMakeLists.txt",
+      "sha256": "4b0f78ab7ea1caae9ecc5f028dff302c1386cc5b46b11f0771ca21fe7feb3a05",
+      "bytes": 1351
+    },
+    "repository/engine/tests/debug_conv_direct.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\tests\\debug_conv_direct.cpp",
+      "sha256": "5fd66b3616d41e93665ec7ca8b2d70c70feefdf907924aad789eca2342eaa757",
+      "bytes": 7897
+    },
+    "repository/engine/tests/test_executor.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\tests\\test_executor.cpp",
+      "sha256": "e5682f4b4307f5cc0643a4aba66902827bc50e5ab669a3c61a4006647a8812af",
+      "bytes": 4866
+    },
+    "repository/engine/tests/test_executor_buffer_pool.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\tests\\test_executor_buffer_pool.cpp",
+      "sha256": "1d69a2ce44f9ad9150a34236d8d1667b42da4d53f7bbd517682d54b6dc46f956",
+      "bytes": 8035
+    },
+    "repository/engine/tests/test_gemm.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\tests\\test_gemm.cpp",
+      "sha256": "b4064ccf7391fef14defd165017c909d59a4c3fe417a230d5a691ddabe58954b",
+      "bytes": 3536
+    },
+    "repository/engine/tests/test_im2col.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\tests\\test_im2col.cpp",
+      "sha256": "4042876084e618c85c73d6237744fbf82e7781fb05adecc1b692da4c80c04ada",
+      "bytes": 2855
+    },
+    "repository/engine/tests/verify_conv_vs_python.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\engine\\tests\\verify_conv_vs_python.cpp",
+      "sha256": "e0ff37f12ea1fd1376174ca307631bfc47d998b37839a4eec08f1ce270fcedef",
+      "bytes": 4634
+    },
+    "repository/leaf/affinity.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\leaf\\affinity.py",
+      "sha256": "8271a4c49e4d48b241c0f31ff4e91f12a78f34dc5f6baeb2a9b45f5dc48c4dfd",
+      "bytes": 2824
+    },
+    "repository/leaf/cli.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\leaf\\cli.py",
+      "sha256": "06e29143ff92155f97c78f5ab980973a641ea10e89c76e839a136c9f76a32ccd",
+      "bytes": 34097
+    },
+    "repository/leaf/power.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\leaf\\power.py",
+      "sha256": "4a30d0b6d6bad611802f17ed4c314a2471eef331f29db68c996ebb6152bc3ced",
+      "bytes": 7115
+    },
+    "repository/pyproject.toml": {
+      "source": "C:\\Users\\navaneeth\\leaf\\pyproject.toml",
+      "sha256": "e331a5482f2460abf7ce698193580cd93e5b40f019686cdea7b53505fe1a0b48",
+      "bytes": 1711
+    },
+    "repository/setup.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\setup.py",
+      "sha256": "a641c2dd75de2ceb68dc05ed86a056d7ccb7bd425be45729b3b702cb13c213a0",
+      "bytes": 2447
+    },
+    "repository/tests/native/decoder_diagnostic.h": {
+      "source": "C:\\Users\\navaneeth\\leaf\\tests\\native\\decoder_diagnostic.h",
+      "sha256": "054a4f3e660ef4775354fe6b7d6e1c665f119d53dfa68c7ce9b9aa6b911c06e1",
+      "bytes": 6102
+    },
+    "repository/tests/native/test_worker_affinity.cpp": {
+      "source": "C:\\Users\\navaneeth\\leaf\\tests\\native\\test_worker_affinity.cpp",
+      "sha256": "fd9e3a0ece72a1553666b77596f28727108cefd82d7fac54d2000e278899dfe7",
+      "bytes": 6421
+    },
+    "repository/tests/unit/test_worker_placement.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\tests\\unit\\test_worker_placement.py",
+      "sha256": "657ba1585ba06c72a09b9bd9372ecad2e711eb664263fbc71a51d9883cf22a56",
+      "bytes": 4538
+    },
+    "repository/tools/benchmark_core_scaling.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\tools\\benchmark_core_scaling.py",
+      "sha256": "eb5d27a7abb8773a46d74367092c7a2d4202b92c6a0c0c559e985b8d6ba40c52",
+      "bytes": 10676
+    },
+    "repository/tools/decoder_validation.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\tools\\decoder_validation.py",
+      "sha256": "b6bbfe83f8312a13593698793393fb928d446312ec828b71f4df12ab6ecd6a4a",
+      "bytes": 12596
+    },
+    "repository/tools/diagnose_windows_benchmark.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\tools\\diagnose_windows_benchmark.py",
+      "sha256": "78b82b81c93f034c91d866a89a2bade8f76eccfc756a8d43604c054ce1f35189",
+      "bytes": 18489
+    },
+    "repository/tools/validate_decoder.py": {
+      "source": "C:\\Users\\navaneeth\\leaf\\tools\\validate_decoder.py",
+      "sha256": "e151ebeba1b42929f452e226f1aac70016e849591a93aa1a498f0cdcf47782a4",
+      "bytes": 37352
+    }
+  },
+  "archive_sha256": "ea4872ff5ef8fb903aabc0edb98c3be28b573ab226ee4ce02e2d5a905e2df850",
+  "archive_bytes": 1208226
+}
