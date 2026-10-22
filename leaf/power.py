@@ -3,6 +3,109 @@ from contextlib import contextmanager
 import ctypes
 import os
 import subprocess
+import threading
+import time
+
+
+WINDOWS_POWER_MODE_NAMES = (
+    "battery-saver", "better-battery", "balanced", "high-performance",
+    "max-performance", "game-mode", "mixed-reality",
+)
+_POWER_MODE_INITIAL_TIMEOUT_SECONDS = 3.0
+# A failed unregistration must not free an address Windows may still call.
+_POWER_MODE_ORPHANED_CALLBACKS = []
+
+
+@contextmanager
+def benchmark_power_mode_guard(record: dict, *, required_mode: str | None = None):
+    """Audit Windows' effective mode without changing the system power policy.
+
+    AC power and GetSystemPowerStatus's saver flag do not describe the effective
+    performance mode. Save into the caller's initially empty record even when
+    setup fails. Saving modes require an explicit matching required_mode;
+    unknown modes and *any* mode change invalidate the whole window, including
+    a change back to the starting mode. This is an additional
+    environmental guard, not proof of a fixed CPU frequency or PPM profile.
+    Correctness checks and ordinary inference should not use this timing guard.
+    """
+    if record:
+        raise ValueError("Power-mode audit requires a fresh empty record")
+    if required_mode is not None and required_mode not in WINDOWS_POWER_MODE_NAMES:
+        raise ValueError("Required benchmark mode must be a supported effective power mode")
+    record.update(api_version=2, passed=False, notifications=[], system_power_plan_changed=False,
+                  required_mode=required_mode, saving_mode_explicitly_selected=required_mode in WINDOWS_POWER_MODE_NAMES[:2])
+    if os.name != "nt":
+        raise RuntimeError("Effective benchmark power-mode auditing requires Windows")
+    try:
+        library = ctypes.WinDLL("powrprof", use_last_error=True)
+        register = library.PowerRegisterForEffectivePowerModeNotifications
+        unregister = library.PowerUnregisterFromEffectivePowerModeNotifications
+    except (AttributeError, OSError) as error:
+        raise RuntimeError("Windows effective power-mode notifications are unavailable") from error
+    callback_type = ctypes.WINFUNCTYPE(None, ctypes.c_int, ctypes.c_void_p)
+    register.argtypes = [ctypes.c_uint32, callback_type, ctypes.c_void_p, ctypes.POINTER(ctypes.c_void_p)]
+    register.restype = ctypes.c_int32
+    unregister.argtypes = [ctypes.c_void_p]
+    unregister.restype = ctypes.c_int32
+    ready, lock = threading.Event(), threading.Lock()
+    origin = time.monotonic()
+
+    @callback_type
+    def changed(mode, context):
+        number = int(mode)
+        name = WINDOWS_POWER_MODE_NAMES[number] if 0 <= number < len(WINDOWS_POWER_MODE_NAMES) else "unknown"
+        with lock:
+            record["notifications"].append(dict(mode=number, name=name, elapsed_seconds=time.monotonic()-origin))
+        ready.set()
+
+    handle = ctypes.c_void_p()
+    result = register(2, changed, None, ctypes.byref(handle))
+    if result:
+        record["register_hresult"] = int(result)
+        raise OSError(result, "Cannot register effective benchmark power-mode notifications")
+    if not handle.value:
+        _POWER_MODE_ORPHANED_CALLBACKS.append((library, changed, handle))
+        raise RuntimeError("Windows returned no effective power-mode registration handle")
+    body_failed = True
+
+    def validate():
+        with lock:
+            events = list(record["notifications"])
+        record["initial_mode"] = events[0]["name"] if events else None
+        record["final_mode"] = events[-1]["name"] if events else None
+        if not events or any(x["mode"] not in range(len(WINDOWS_POWER_MODE_NAMES)) for x in events):
+            return "Timing requires a known effective power mode; unknown mode observed"
+        if required_mode is None and any(x['mode'] < 2 for x in events):
+            return f"Timing requires a known performance power mode; saving/unknown mode observed: {record['final_mode']}"
+        if len({x["mode"] for x in events}) != 1:
+            return "Effective power mode changed during timing; no comparison accepted"
+        if required_mode is not None and events[0]["name"] != required_mode:
+            return f"Timing requires effective power mode {required_mode}; observed {events[0]['name']}"
+        return None
+
+    try:
+        if not ready.wait(_POWER_MODE_INITIAL_TIMEOUT_SECONDS):
+            raise RuntimeError("Windows supplied no initial effective power-mode notification")
+        error = validate()
+        if error:
+            record["error"] = error
+            raise RuntimeError(error)
+        yield record
+        body_failed = False
+    finally:
+        # Windows waits for outstanding callbacks here. Keep changed alive until
+        # unregistration completes; do not unregister from the callback itself.
+        result = unregister(handle)
+        if result:
+            _POWER_MODE_ORPHANED_CALLBACKS.append((library, changed, handle))
+            record["unregister_hresult"] = int(result)
+            raise OSError(result, "Cannot unregister effective benchmark power-mode notifications")
+        error = validate()
+        record["passed"] = not body_failed and error is None
+        if error:
+            record["error"] = error
+            if not body_failed:
+                raise RuntimeError(error)
 
 
 class _SystemPowerStatus(ctypes.Structure):

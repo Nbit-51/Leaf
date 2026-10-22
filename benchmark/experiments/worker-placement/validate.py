@@ -9,7 +9,10 @@ synchronization: same placement/arithmetic, prefill <=1.02, decode <=0.98.
 ordinary: released ordinary arithmetic vs final ordinary build, FP32 artifacts,
 one core, both ratios <=1.02; bound relative-regression quality is required.
 No samples filtered. Six pairs, 31 samples and ten warmups/pass. AC and awake
-guards plus a fail-closed sleep audit. Placement never becomes automatic.
+guards plus a fail-closed sleep audit. Windows effective power mode must remain
+unchanged; a saving mode requires explicit selection for this comparison.
+Startup settles before measuring. Neither guard establishes constant CPU
+frequency. Placement never becomes automatic.
 """
 import argparse
 import importlib.util
@@ -18,12 +21,14 @@ import os
 from pathlib import Path
 import statistics
 import sys
+import time
+import math
 
 import numpy as np
 
 ROOT=Path(__file__).resolve().parents[3]
 sys.path.insert(0,str(ROOT))
-from leaf.power import keep_awake
+from leaf.power import keep_awake, benchmark_power_mode_guard, WINDOWS_POWER_MODE_NAMES
 from tools.decoder_validation import run_native,latency_stability
 from tools.validate_decoder import digest,utc_now,write_record
 
@@ -132,7 +137,9 @@ def check(directory,binary,baseline=None,baseline_quality=None):
     finally:write_record(report,record)
 
 
-def timing(directory,binary,stage,baseline=None,baseline_quality=None):
+def timing(directory,binary,stage,baseline=None,baseline_quality=None,required_power_mode=None,settle_seconds=30.0):
+    if not math.isfinite(settle_seconds) or settle_seconds < 0:
+        raise ValueError('Settling duration must be finite and nonnegative')
     report=directory/(stage+'.json')
     if report.exists():raise ValueError('Retain previous timing; use fresh output')
     models,hashes=context(directory,binary,baseline,baseline_quality,ordinary=stage=='ordinary')
@@ -154,10 +161,15 @@ def timing(directory,binary,stage,baseline=None,baseline_quality=None):
         raise ValueError('Clear profiling and experimental environment first')
     record=dict(complete=False,passed=False,utc=utc_now(),stage=stage,criteria=__doc__,hashes=hashes,
                 threads=len(cores),cores=cores,topology=topology,default_placement_changed=False,
-                baseline=str(baseline) if baseline is not None else None,models={})
+                baseline=str(baseline) if baseline is not None else None,models={},power_mode={},
+                required_power_mode=required_power_mode,settle_seconds=settle_seconds)
     write_record(report,record)
     try:
-        with keep_awake(display=True):
+        with keep_awake(display=True), benchmark_power_mode_guard(record['power_mode'],required_mode=required_power_mode):
+            record['settle_started_at_utc']=utc_now();write_record(report,record)
+            print('Quiet startup settling',settle_seconds,'seconds; do not launch other work',flush=True)
+            time.sleep(settle_seconds)
+            record['settle_ended_at_utc']=utc_now();write_record(report,record)
             for name,row in models['models'].items():
                 tokens=ROOT/'build/numerics-20261017/decode-silu'/(name+'-work/tokens.json')
                 ids=json.loads(tokens.read_text())['benchmark_ids'];hashes[str(tokens)]=digest(tokens)
@@ -212,6 +224,8 @@ def main():
     parser.add_argument('--binary',type=Path,required=True)
     parser.add_argument('--baseline',type=Path)
     parser.add_argument('--baseline-quality',type=Path)
+    parser.add_argument('--required-power-mode',choices=WINDOWS_POWER_MODE_NAMES)
+    parser.add_argument('--settle-seconds',type=float,default=30.0)
     args=parser.parse_args();directory=args.directory.resolve();directory.mkdir(parents=True,exist_ok=True)
     if (args.baseline is None)!=(args.baseline_quality is None):parser.error('Provide baseline and its bound quality together')
     if args.stage in ('jobs','ordinary','synchronization') and args.baseline is None:parser.error('This stage requires a bound baseline')
@@ -219,7 +233,7 @@ def main():
     baseline=args.baseline.resolve() if args.baseline else None
     quality=args.baseline_quality.resolve() if args.baseline_quality else None
     if args.stage=='check':check(directory,args.binary.resolve(),baseline,quality)
-    else:timing(directory,args.binary.resolve(),args.stage,baseline,quality)
+    else:timing(directory,args.binary.resolve(),args.stage,baseline,quality,args.required_power_mode,args.settle_seconds)
 
 
 if __name__=='__main__':main()

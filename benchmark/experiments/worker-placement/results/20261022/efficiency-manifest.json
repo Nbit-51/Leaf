@@ -1,0 +1,23 @@
+{
+  "complete": false,
+  "release_ready": false,
+  "archive": "efficiency-evidence.zip",
+  "archive_sha256": "310c10ec072e99bbe1d2560d751f06b699c57fe981f6bd93130e7031d5a66b78",
+  "entries": {
+    "interrupted-ordinary.json": "4322e01ea3b55b2124aaa586211e565a2e6cf197f7f23ba8171a0620319a51d3",
+    "stop.json": "da82ce2c27f66190c34dcde99969699475fe5a9541a0bee3ed8e1079b5592f75",
+    "power-mode-preflight-matched.json": "6599e6429775a2af9f34d21aa417a90de7767d77fa66de655b3c630e6bbf9ade",
+    "power-modes-explicit-units.xml": "840ef9a16765d951f437605cb9f86c7ff56fa1f2d1572abb898e92a6990fe9c4",
+    "sources/power.py": "c0869ee80f0d126c20730aa91c46f36ed53faac7e94aa2fa83abaab61765b425",
+    "sources/test_effective_power_mode.py": "d90d5987713f79c1deaa2a3c178e8115219aeb5dcff929238c9c004f9cd4f561",
+    "sources/check_benchmark_power.py": "7a3b4e40602c1b3137942d5bce203764fccd3d580c270b9b2100e79505cd70c1",
+    "sources/validate.py": "c3ac6e7edad74805441871ffec9723b84a7491caea1ad99f61b83d720dff6fcb",
+    "sources/collect_efficiency.py": "e8617065c4b7860826c5df1a6620a61959b9f3303ddf21654aad0f08c10e132b"
+  },
+  "retained_passes": {
+    "smol": 12,
+    "qwen": 7
+  },
+  "scope": "User-requested checkpoint; Smol stability fails and Qwen is incomplete. No new speed claim.",
+  "trace_manifest_sha256": "ec68e273e1052ce76c8779a4e6d49926fb82e9cd1939aa139e785c2bb34f5d37"
+}

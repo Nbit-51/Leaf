@@ -83,7 +83,27 @@ non-regression. This is a local Leaf policy comparison, not a competitor result
 or a resolution of the ordinary default's numerical tolerance misses. The
 separate GEMM job-size experiment still has a failed joint gate.
 The final ordinary one-thread guard also remains timing-unqualified because of
-intermittent speed bands; publication is held while those are attributed.
+intermittent speed bands. A completed CPU/power trace now attributes a captured
+fast band to changed Windows processor power-management state, with the CPU
+still mostly scheduled. This does not attribute every historical failure or
+establish a successful remedy; publication remains held pending acceptance.
+
+For controlled Windows comparisons, AC status alone is insufficient. Inspect
+the effective mode without changing any settings:
+
+```powershell
+python tools/check_benchmark_power.py
+```
+
+The timing harness now watches effective-mode notifications and rejects mode
+changes, including a change back to the initial mode. Saving modes require an
+explicit matched comparison, for example `--required-power-mode better-battery`
+in `validate.py`; the read-only preflight uses `--required-mode better-battery`.
+This is useful when efficiency mode is the intended deployment condition. It
+does not lock frequency or observe every internal PPM subprofile. Keep the
+original spread/ratio checks, label the tested mode, allow startup activity to
+settle, and avoid launching monitoring applications during measured passes.
+The harness does not change the user's power plan or Energy saver setting.
 
 The implementation follows the Windows
 [thread-affinity contract](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadaffinitymask)

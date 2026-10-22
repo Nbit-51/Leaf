@@ -24,7 +24,13 @@ identities instead of substituting another model or relaxing tolerances.
 The six-pair assigned-worker synchronization comparison passes every spread
 check on both models and reduces decode medians by 5.6–5.9% on this Windows host.
 The job-size comparison and final ordinary one-thread guard have failed joint
-gates; they are retained as failures. The latter's intermittent speed bands
-remain under investigation. See the [checkpoint](../../../docs/checkpoint-2026-10-22-worker-placement.md)
+gates; they are retained as failures. A completed administrator trace now
+correlates a reproduced one-core fast band with a Windows PPM profile change
+and higher delivered processor performance. This attributes the captured event,
+not every historical outlier. Effective-mode auditing and a quiet startup period
+were checked with the user's existing efficiency mode explicitly selected;
+Smol still fails spread and Qwen is partial after the user requested a break.
+The original latency/spread limits remain unchanged.
+See the [checkpoint](../../../docs/checkpoint-2026-10-22-worker-placement.md)
 and [user-facing policy](../../../docs/worker-placement.md) for boundaries and
 local resume paths.

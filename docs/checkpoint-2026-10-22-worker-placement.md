@@ -3,6 +3,18 @@
 Continue on `codex/mlp-schedule`, starting from `c88595c`. Dataset work is deferred.
 Keep the pre-existing `docs/embedding.md` edit and unrelated image unstaged.
 
+**Latest:** the administrator trace is complete. It captures a PPM profile/
+delivered-performance change during the first unchanged-baseline speed burst.
+The new effective-mode guard passes 97 focused tests. The user explicitly chose
+to retain their Energy saver/Best Power Efficiency settings; do not change them.
+The fresh `efficiency-default-model/ordinary.json` comparison uses the same
+`better-battery` mode on both binaries, a 30-second quiet startup, no profiling,
+and unchanged gates. Smol's ratio checks pass but its spreads fail. At the user's
+request to push a checkpoint and take a break, testing stops with all twelve
+Smol passes and seven of twelve Qwen passes retained. No complete Qwen verdict,
+final mode-window verdict or sleep audit exists for this interrupted attempt.
+Do not retry unchanged or publish this as a successful remedy.
+
 ## Implemented
 
 - `worker_affinity.h`: validated Windows/Linux thread scopes, allowed-mask checks,
@@ -277,3 +289,69 @@ untested here. Syntax and `-CheckOnly` preflight pass, with about 196 GiB free.
 While the user runs it, do not compile, test, load models, or run another benchmark.
 Keep the Administrator window open until it finishes. Do not publish its ETL or
 other-process inventory; publish an aggregate and raw-record hash instead.
+
+## Completed administrator trace and explicit efficiency comparison
+
+The named recording starts/stops successfully and all twelve original Smol
+passes complete. Microsoft TraceEvent 4.0.0 decodes 17,431,184 events with zero
+reported loss. Context-switch chains on logical CPUs 2 and 3 have no mismatches.
+The first unchanged baseline fails prefill spread at 1.26983587. The other eleven
+passes have passing spreads; the diagnostic still is not acceptance timing.
+
+During first-pass seconds 7–9, delivered-performance event medians rise to
+248–254, coincident with `Constrained` → `LowLatency` → `Constrained` PPM
+transitions. Later steady passes report medians of 154. The first decoder gets
+97.10% scheduled CPU 2 time over its elapsed process window; the later decoders
+get 98.57–99.24%. This directly corroborates a CPU power-management contribution
+to the captured swing. It does not prove thermal throttling, identify the app
+that requested the profile, or explain every historical outlier. Values are
+decoded event distributions, not normalized acceptance scores.
+
+Post-trace, the documented effective-mode callback reports `better-battery`,
+while AC is online and the legacy `GetSystemPowerStatus` saver flag is false.
+The user's Settings screenshot independently shows Energy saver on and Best
+Power Efficiency locked. That mode was not continuously recorded in the earlier
+trace; do not retroactively assert its identity for every trace sample.
+
+`leaf.power.benchmark_power_mode_guard` now registers one read-only V2 callback,
+waits for the initial state, retains notifications, and unregisters synchronously.
+Unknown modes or any transition invalidate the window. Saving modes require an
+explicit exact `required_mode`, so intentional efficiency-mode comparisons are
+allowed without changing the user's configuration. An unconfirmed unregister
+retains callback ownership instead of freeing an address Windows might call.
+The guard does not lock frequency or replace the p90/p10 gate. Focused tests:
+`power-modes-explicit-units.xml`, 97 passed. Real unprivileged API preflight:
+`power-mode-preflight-matched.json`, passed with `better-battery` explicitly
+selected. The default preflight correctly rejects that mode when unselected.
+
+The fresh ordinary acceptance command is:
+
+```powershell
+python benchmark/experiments/worker-placement/validate.py ordinary --directory build/worker-placement-20261022/efficiency-default-model --binary build/worker-placement-20261022/final-cache/native/6ad3e278b798b3ae/leaf_decoder.exe --baseline build/source-bf16-20261020/default/leaf_decoder.exe --baseline-quality build/worker-placement-20261022/final-ordinary-regression.json --required-power-mode better-battery --settle-seconds 30
+```
+
+Do not rerun into that directory or overwrite its records. No builds, conversions,
+other tests or monitoring shells overlap this run; progress is read through the
+existing exec session. Smol's pooled/paired ratios pass non-regression, but two
+baseline passes slow to about 1,067 ms prefill, so its spread gates fail. Retain
+this failed attempt; settling plus effective-mode monitoring is not yet a proven
+stability fix. Testing was then stopped at the user's request, after seven Qwen
+passes. The raw record remains `complete:false, passed:false`; it is not edited
+to invent a completed run. No native decoder remains running. The operating
+system releases process-owned execution requests/notifications when the stopped
+process exits. The separate stop record retains the reason and counts. Keep all
+nineteen completed passes; five Qwen passes and the final sleep/mode audits were
+not completed. No power setting was changed.
+
+Curated `trace-evidence.zip` has sixteen entries, SHA-256
+`8bf0d22db3342295c63f25d9d39b040ff7bb42bec83987a1cd6b83b45d0630ee`.
+Its manifest and summary append earlier evidence. Raw ETL, decoded catalogues,
+other-process metadata and .NET packages are excluded. Reader/analysis sources
+and pinned parser dependency identities are retained for reconstruction. The
+initial archive records the 94-test guard snapshot; later explicit-mode changes
+and their 97-test proof are retained separately. The user now authorizes pushing
+the branch as a checkpoint; no merge is justified by these timings. Preserve
+the unrelated embedding edit and image. Resume with shared ordinary FP32
+Smol/Qwen accumulation-quality work; before another timing comparison, add
+clock/profile attribution for the retained efficiency mode instead of repeating
+an unchanged quiet-run hypothesis.

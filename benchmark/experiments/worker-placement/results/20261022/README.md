@@ -26,8 +26,8 @@ architectures, twelve ordinary trained prefix/cache/generation regressions and
 an isolated installed-wheel check. The accurate candidate matches all sixteen
 trained blocks, twelve reference continuations and ten controls exactly.
 
-One-core speed-band variation remains unattributed: monitored and native-loop
-diagnostics did not reproduce the fast burst. Repeated logits and linear work
+Initial monitored and native-loop diagnostics did not reproduce the one-core
+fast burst. Repeated logits and linear work
 stay identical in the recorded native audit. Failed/partial experiments remain
 failed; the manifest marks release readiness false. See the
 [checkpoint](../../../../../docs/checkpoint-2026-10-22-worker-placement.md)
@@ -40,5 +40,35 @@ entries without modifying the first archive. The twelve-pass minimal replay
 reproduces prefill spread failure in its final **unchanged baseline** pass.
 Instrumented passes retain exact cold-reference outputs and matching packed
 tile coverage. This still does not attribute the fast band. The administrator
-trace wrapper's syntax and artifact preflight pass; privileged recording has
-not started or been tested here.
+trace wrapper's syntax and artifact preflight pass preceded the recording below.
+
+[`trace-evidence.zip`](trace-evidence.zip), [`trace-manifest.json`](trace-manifest.json)
+and [`trace-summary.json`](trace-summary.json) retain the completed administrator
+replay, selected aggregates and diagnostic-reader sources. Microsoft TraceEvent
+decodes 17,431,184 events with zero reported loss; CPU 2/3 switch chains have no
+discontinuities. The first unchanged baseline fails prefill spread (1.26984);
+the other eleven passes have passing spreads. No samples are removed.
+
+The first process receives 97.10% of its elapsed window as scheduled CPU 2 time.
+Its fast interval overlaps a `Constrained` → `LowLatency` PPM transition and
+delivered-performance event medians of 248–254; later steady passes report 154.
+These are decoded event distributions, not normalized latency scores or proof
+of a thermal cause. A post-trace API check reports `better-battery` despite
+verified AC and a false legacy saver flag. The effective mode during the earlier
+trace was not continuously measured. The raw 995-MiB ETL and other-process
+inventories stay local; the summary binds the ETL by SHA-256.
+
+The archive contains the initial 94-test mode-guard snapshot. Later explicit
+matched-efficiency support is separate: the user chose to retain their power
+settings, so saving modes can be selected explicitly while all transitions and
+the original statistical gates still fail closed. Fresh acceptance remains
+required; no earlier failed gate becomes a pass.
+
+[`efficiency-evidence.zip`](efficiency-evidence.zip) and its
+[`manifest`](efficiency-manifest.json) append the final 97-test guard sources,
+real matched-mode preflight and the interrupted efficiency-mode attempt. All
+twelve Smol passes remain: pooled/paired latency ratios pass, but stability
+fails. Seven Qwen passes are retained without a complete verdict. The user
+requested stopping and pushing a checkpoint; the raw incomplete record is
+unchanged. Final mode-window/sleep audits did not finish, so this is not a
+qualified comparison. No system power setting was changed.
