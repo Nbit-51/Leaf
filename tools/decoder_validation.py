@@ -142,7 +142,8 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
                warmup: int = 1, generate: int = 16, scalar: bool = False,
                chunk: int = 1, activation_bits: int | None = None,
                high_qos: bool = False, capture_profile: bool = False,
-               windows_above_normal: bool = False) -> tuple[np.ndarray, dict]:
+               windows_above_normal: bool = False,
+               worker_cpus: list[int] | None = None) -> tuple[np.ndarray, dict]:
     if windows_above_normal and sys.platform != "win32":
         raise ValueError("Above-normal child priority requires Windows")
     with tempfile.TemporaryDirectory(prefix="leaf_decoder_") as temp:
@@ -156,8 +157,12 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
         command = [str(executable.resolve()), str(artifact.resolve()), str(request),
                    str(output), str(metrics), mode, str(threads), str(runs),
                    str(warmup), str(generate), str(int(scalar)), str(chunk)]
-        if activation_bits is not None:
-            command.append(str(activation_bits))
+        if activation_bits is not None or worker_cpus is not None:
+            command.append(str(activation_bits if activation_bits is not None else 32))
+        if worker_cpus is not None:
+            from leaf.affinity import validate_worker_cpus
+            selected = validate_worker_cpus(worker_cpus, threads)
+            command.append(','.join(map(str, selected)))
         policy = None
         if high_qos or windows_above_normal:
             from leaf.power import set_child_high_qos
@@ -182,6 +187,8 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
         if completed.returncode:
             raise RuntimeError(f"Native decoder failed ({completed.returncode}): {completed.stderr.strip()}")
         measured = json.loads(metrics.read_text())
+        if worker_cpus is not None and measured.get('worker_cpus') != list(worker_cpus):
+            raise ValueError('Native worker CPU policy differs from requested placement')
         if capture_profile:
             profiles = [json.loads(line) for line in completed.stderr.splitlines()
                         if line.startswith('{"leaf_decoder_profile":')]

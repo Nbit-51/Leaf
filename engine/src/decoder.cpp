@@ -669,8 +669,9 @@ struct Decoder::Impl {
     std::vector<float> hidden, normalized, q, k, v, q_heads, k_heads, v_heads,
                        attention, projected, attn_projected, gate, up, mask;
 
-    Impl(const std::string& path, unsigned threads, bool scalar, unsigned activation_bits)
-        : mapping(path), workers(threads), activation_precision(activation_bits) {
+    Impl(const std::string& path, unsigned threads, bool scalar, unsigned activation_bits,
+         const std::vector<unsigned>& worker_cpus)
+        : mapping(path), workers(threads, worker_cpus), activation_precision(activation_bits) {
         check(activation_bits == 8 || activation_bits == 32, "activation bits must be 8 or 32");
 #if LEAF_DECODER_AVX
         avx = !scalar && __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
@@ -1232,12 +1233,18 @@ struct Decoder::Impl {
     }
 };
 
-Decoder::Decoder(const std::string& path, unsigned threads, bool force_scalar, unsigned activation_bits)
-    : impl_(std::make_unique<Impl>(path, threads, force_scalar, activation_bits)) {}
+Decoder::Decoder(const std::string& path, unsigned threads, bool force_scalar, unsigned activation_bits,
+                 const std::vector<unsigned>& worker_cpus)
+    : impl_(std::make_unique<Impl>(path, threads, force_scalar, activation_bits, worker_cpus)) {}
 Decoder::~Decoder() = default;
 void Decoder::reset() { for (auto& cache : impl_->caches) cache.reset(); }
 std::vector<float> Decoder::forward(const std::vector<std::uint32_t>& tokens, bool all_logits) {
-    return impl_->forward(tokens, all_logits);
+    // One caller binding per forward; nested pool operations keep that mask
+    // rather than repeatedly setting/restoring it at every linear projection.
+    auto caller = impl_->workers.bind_caller();
+    auto result = impl_->forward(tokens, all_logits);
+    caller.restore();
+    return result;
 }
 std::uint32_t Decoder::vocabulary_size() const { return static_cast<std::uint32_t>(impl_->vocab); }
 std::uint32_t Decoder::eos_token() const { return static_cast<std::uint32_t>(impl_->eos); }

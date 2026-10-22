@@ -13,7 +13,7 @@ namespace leaf::runtime {
 class Decoder {
 public:
     Decoder(const std::string& artifact, unsigned threads = 1, bool force_scalar = false,
-            unsigned activation_bits = 32);
+            unsigned activation_bits = 32, const std::vector<unsigned>& worker_cpus = {});
     ~Decoder();
     Decoder(const Decoder&) = delete;
     Decoder& operator=(const Decoder&) = delete;

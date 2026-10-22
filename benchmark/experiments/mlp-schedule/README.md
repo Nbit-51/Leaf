@@ -7,6 +7,10 @@ worker-placement problem on this Windows host; see the
 [checkpoint](../../../docs/checkpoint-2026-10-20-prefill-jobs.md) and
 [retained evidence](results/20261020). Neither is a new competitor win.
 
+Reconstruction reads engine revision `880139d` from Git history, so subsequent
+runtime changes cannot silently alter this historical experiment. A full clone
+containing that commit is required; the current engine stays untouched.
+
 The decoder's existing workers dispatch 32 output rows at a time. Its FP32 GEMM
 uses six-row tiles, leaving a two-row tail in every full job. The candidate uses
 96-row jobs when there are at least four jobs/worker, 48-row jobs for smaller

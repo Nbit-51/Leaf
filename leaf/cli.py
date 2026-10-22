@@ -160,11 +160,14 @@ def validate_model_generation(snapshot: Path, plan: Path | None = None) -> None:
 
 
 def select_configuration(directory: Path, runtime: Path, requested: str, threads: int = 1,
-                         activation_bits: str = "auto", cpu: int | None = None) -> tuple[int, int, Path | None]:
+                         activation_bits: str = "auto", cpu: int | None = None,
+                         worker_cpus: list[int] | None = None) -> tuple[int, int, Path | None]:
     fallback = (32 if requested == "auto" else int(requested),
                 32 if activation_bits == "auto" else int(activation_bits), None)
     if requested != "auto":
         return fallback
+    if worker_cpus is not None:
+        return fallback  # Existing auto-selection profiles do not bind per-worker placement.
     if (not isinstance(threads, int) or isinstance(threads, bool) or not 1 <= threads <= 64 or
             (cpu is not None and (not isinstance(cpu, int) or isinstance(cpu, bool) or cpu < 0))):
         return fallback
@@ -347,7 +350,8 @@ def encode_prompt(snapshot: Path, prompt: str, raw: bool = False):
 
 
 def run(args):
-    from leaf.affinity import pin_cpu
+    from leaf.affinity import pin_cpu, validate_worker_cpus
+    worker_cpus = validate_worker_cpus(getattr(args, 'worker_cpus', None), getattr(args, 'threads', 1), args.cpu)
     pin_cpu(args.cpu)
     source_storage = getattr(args, 'source_bf16_head', False)
     if source_storage and (args.bits not in ('auto','32') or args.activation_bits not in ('auto','32')):
@@ -358,9 +362,11 @@ def run(args):
     def prepare_runtime():
         nonlocal runtime
         runtime = executable(cache)
-        if source_storage:
+        if source_storage or worker_cpus is not None:
             from leaf.runtime_check import check
-            check(runtime, 'leaf_decoder')
+            info = check(runtime, 'leaf_decoder')
+            if worker_cpus is not None and info.get('worker_affinity_supported') is not True:
+                raise RuntimeError('The selected native runtime does not support --worker-cpus; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
     # Reject unsupported metadata before building, and setup failures before weights.
     snapshot = resolve_model(args.model, cache, args.offline, args.plan,
                              before_weights=prepare_runtime)
@@ -369,7 +375,7 @@ def run(args):
         bits, activation_bits = 32, 32
         artifact = prepare(snapshot, directory, bits, args.plan, source_bf16_head=True)
     else:
-        bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu)
+        bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu, worker_cpus)
         artifact = selected or prepare(snapshot, directory, bits, args.plan)
     prompt = args.prompt if args.prompt is not None else input("Prompt: ")
     tokenizer, ids = encode_prompt(snapshot, prompt, args.raw)
@@ -384,6 +390,8 @@ def run(args):
         command = [str(runtime), str(artifact), str(request), str(folder / "logits.bin"),
                    str(folder / "metrics.json"), "generate", str(args.threads), "1", "0", str(args.max_tokens),
                    "0", "1", str(activation_bits)]
+        if worker_cpus is not None:
+            command.append(','.join(map(str, worker_cpus)))
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
         first_token_ms = None
         for line in process.stdout:
@@ -492,6 +500,8 @@ def main():
     runner.add_argument("--max-tokens", type=int, default=64)
     runner.add_argument("--threads", type=int, default=1)
     runner.add_argument("--cpu", type=int, help="optional logical CPU pin matching a validation profile")
+    runner.add_argument("--worker-cpus", type=int, nargs='+',
+                        help="optional distinct logical CPU per thread, in thread order; Windows/Linux")
     runner.add_argument("--bits", choices=("auto", "32", "8", "4"), default="auto")
     runner.add_argument("--activation-bits", choices=("auto", "8", "32"), default="auto",
                         help="dynamic INT8 or floating activations in quantized linear kernels")

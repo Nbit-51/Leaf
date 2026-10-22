@@ -104,6 +104,8 @@ workload. Explicit `--bits 8` or `--bits 4` overrides are experimental.
 
 See the [usage reference](docs/project-reference.md#2-install-and-run-with-one-command)
 for aliases, cache controls, metrics, CPU pinning and custom decoder plans.
+For controlled multi-core runs, [explicit worker placement](docs/worker-placement.md)
+assigns a distinct allowed CPU to each decoder thread on Windows/Linux.
 On Windows, use ASCII cache/artifact paths; arbitrary Unicode paths are a known
 native-loader limitation.
 
@@ -115,6 +117,7 @@ native-loader limitation.
 | Embedding execution | FP32 EmbeddingGemma: bidirectional local/full attention, Q/K normalization, mean pooling, dense projections and L2-normalized output |
 | CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
 | Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
+| Threading | Persistent workers; optional per-thread CPU placement with caller-affinity restoration on Windows/Linux |
 | Precision | FP32, optional source-preserving BF16 head storage with FP32 computation, weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
 | Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
@@ -157,7 +160,7 @@ flowchart TB
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
     P --> D["Native decoder artifact<br/>Optional original BF16 head/tied embedding storage"]
     G --> A["Native graph artifact"]
-    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection"]
+    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional per-thread placement"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
     R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · exact BF16-to-FP32 expansion<br/>Vector GELU, attention and softmax<br/>FP32 SiLU prefill + decode · W8A8 SiLU prefill"]
     K --> T["Tokens and logits"]

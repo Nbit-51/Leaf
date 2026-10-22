@@ -142,6 +142,12 @@ def test_missing_legacy_native_policy_means_default_flags(profile_files):
     assert cli.select_configuration(case.directory, case.runtime, "auto") == (8, 32, artifact)
 
 
+def test_worker_placement_does_not_reuse_unbound_speed_profile(profile_files):
+    case=profile_files
+    case.candidate();case.save()
+    assert cli.select_configuration(case.directory,case.runtime,'auto',worker_cpus=[0])==(32,32,None)
+
+
 @pytest.mark.parametrize("flag", ["LEAF_EXPERIMENTAL_FLOAT_TILES", "LEAF_EXPERIMENTAL_FLOAT_GEMV"])
 def test_explicit_precision_override_remains_explicit_with_experimental_flag(tmp_path, monkeypatch, flag):
     monkeypatch.setenv(flag, "1")

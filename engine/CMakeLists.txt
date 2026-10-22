@@ -188,6 +188,11 @@ add_executable(leaf_source_bf16_tests ../tests/native/test_source_bf16.cpp)
 target_include_directories(leaf_source_bf16_tests PRIVATE include)
 add_test(NAME leaf_source_bf16_tests COMMAND leaf_source_bf16_tests)
 
+add_executable(leaf_worker_affinity_tests ../tests/native/test_worker_affinity.cpp)
+target_include_directories(leaf_worker_affinity_tests PRIVATE include)
+target_link_libraries(leaf_worker_affinity_tests PRIVATE Threads::Threads)
+add_test(NAME leaf_worker_affinity_tests COMMAND leaf_worker_affinity_tests)
+
 add_executable(leaf_attention_vector_tests ../tests/native/test_attention_vector.cpp src/kernels/transformer.cpp)
 target_include_directories(leaf_attention_vector_tests PRIVATE include)
 add_test(NAME leaf_attention_vector_tests COMMAND leaf_attention_vector_tests)

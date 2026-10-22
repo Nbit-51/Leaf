@@ -1,4 +1,5 @@
 #include "leaf/runtime/decoder.h"
+#include "leaf/runtime/worker_affinity.h"
 #ifdef LEAF_DIAGNOSTIC_TIMING
 #include "../../tests/native/decoder_diagnostic.h"
 #include <cstdlib>
@@ -40,6 +41,23 @@ void check_benchmark_power(bool required) {
 double elapsed(Clock::time_point start) {
     return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
 }
+std::vector<unsigned> parse_worker_cpus(const std::string& text) {
+    std::vector<unsigned> cpus;
+    std::size_t first = 0;
+    do {
+        const auto end = text.find(',', first);
+        const auto item = text.substr(first, end == std::string::npos ? end : end-first);
+        if (item.empty() || item.find_first_not_of("0123456789") != std::string::npos)
+            throw std::runtime_error("worker CPUs must be comma-separated unsigned indices");
+        const auto cpu = std::stoull(item);
+        if (cpu > std::numeric_limits<unsigned>::max())
+            throw std::runtime_error("worker CPU index is too large");
+        cpus.push_back(static_cast<unsigned>(cpu));
+        if (end == std::string::npos) break;
+        first = end+1;
+    } while (true);
+    return cpus;
+}
 std::uint32_t read_u32(std::istream& stream) {
     unsigned char bytes[4];
     if (!stream.read(reinterpret_cast<char*>(bytes), 4)) throw std::runtime_error("truncated token request");
@@ -76,15 +94,16 @@ template <class T> void array(std::ostream& output, const std::vector<T>& values
 int main(int argc, char** argv) {
     if (argc == 2 && std::string(argv[1]) == "--runtime-info") {
         std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4,5],\"source_bf16_head_supported\":true,\"benchmark_power_guard\":true"
+                  << ",\"worker_affinity_supported\":" << (leaf::runtime::detail::worker_affinity_supported() ? "true" : "false")
 #ifdef LEAF_DIAGNOSTIC_TIMING
                   << ",\"diagnostic_start_gate_supported\":true,\"diagnostic_counter_version\":4"
 #endif
                   << "}\n";
         return 0;
     }
-    if (argc < 6 || argc > 13) {
+    if (argc < 6 || argc > 14) {
         std::cerr << "Usage: leaf_decoder artifact.leaf tokens.bin logits.bin metrics.json mode"
-                     " [threads=1] [runs=3] [warmup=1] [generate=16] [scalar=0] [chunk=1] [activation-bits=32]\n";
+                     " [threads=1] [runs=3] [warmup=1] [generate=16] [scalar=0] [chunk=1] [activation-bits=32] [worker-cpus=comma-list]\n";
         return 1;
     }
     try {
@@ -110,6 +129,7 @@ int main(int argc, char** argv) {
         const bool scalar = argc > 10 && std::stoi(argv[10]) != 0;
         const unsigned chunk = argc > 11 ? std::stoul(argv[11]) : 1;
         const unsigned activation_bits = argc > 12 ? std::stoul(argv[12]) : 32;
+        const auto worker_cpus = argc > 13 ? parse_worker_cpus(argv[13]) : std::vector<unsigned>{};
         if (!runs || !chunk) throw std::runtime_error("runs and chunk must be positive");
         std::ifstream input(argv[2], std::ios::binary);
         if (!input) throw std::runtime_error("cannot open token request");
@@ -125,7 +145,7 @@ int main(int argc, char** argv) {
         }
         if (input.peek() != std::char_traits<char>::eof()) throw std::runtime_error("trailing token request bytes");
         const auto load_start = Clock::now();
-        leaf::runtime::Decoder decoder(argv[1], threads, scalar, activation_bits);
+        leaf::runtime::Decoder decoder(argv[1], threads, scalar, activation_bits, worker_cpus);
         const double load_ms = elapsed(load_start);
         std::ofstream outputs(argv[3], std::ios::binary);
         if (!outputs) throw std::runtime_error("cannot open logits output");
@@ -219,6 +239,7 @@ int main(int argc, char** argv) {
                 << ",\"prefill_p50_ms\":" << median(prefills) << ",\"decode_p50_ms\":" << median(decodes)
                 << ",\"prefill_samples_ms\":"; array(metrics, prefills);
         metrics << ",\"decode_samples_ms\":"; array(metrics, decodes);
+        metrics << ",\"worker_cpus\":"; array(metrics, worker_cpus);
         metrics << ",\"generated_tokens\":"; array(metrics, generated);
 #ifdef LEAF_DIAGNOSTIC_TIMING
         leaf::diagnostics::emit(metrics, prefill_counters, decode_counters);

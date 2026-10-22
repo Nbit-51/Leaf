@@ -5,10 +5,11 @@ saved patch must apply cleanly; changed anchors fail instead of approximating.
 """
 import argparse
 import importlib.util
+import io
 from pathlib import Path
-import shutil
 import subprocess
 import sys
+import tarfile
 
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
@@ -19,17 +20,29 @@ from tools.validate_decoder import digest, write_record
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--base-ref',default='880139d',help='historical engine revision to which the retained patch applies')
     args = parser.parse_args()
     output = args.output.resolve()
     if not output.is_relative_to((ROOT/'build').resolve()):
         parser.error('Private candidates must stay under this repository build/ directory')
     output.mkdir(parents=True,exist_ok=False)
     source = output/'source'
-    shutil.copytree(ROOT/'engine',source/'engine')
+    revision=subprocess.check_output(['git','rev-parse',args.base_ref+'^{commit}'],cwd=ROOT,text=True).strip()
+    archive=subprocess.check_output(['git','archive',revision,'engine'],cwd=ROOT)
+    with tarfile.open(fileobj=io.BytesIO(archive)) as saved:
+        for item in saved.getmembers():
+            target=(source/item.name).resolve()
+            if not target.is_relative_to(source.resolve()) or not (item.isdir() or item.isfile()):
+                raise ValueError('Unexpected historical source archive entry')
+            if item.isdir():target.mkdir(parents=True,exist_ok=True)
+            else:
+                target.parent.mkdir(parents=True,exist_ok=True)
+                target.write_bytes(saved.extractfile(item).read())
     patch = HERE/'candidate.patch'
     original = {str(p.relative_to(ROOT)):digest(p) for p in (ROOT/'engine').rglob('*') if p.is_file()}
     record = dict(complete=False,release_default_changed=False,performance_qualified=False,
-                  base_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+                  base_commit=revision,
+                  checkout_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
                   original_engine=original,inputs={str(p):digest(p) for p in
                     [Path(__file__),patch,HERE/'worker_grain_test.cpp']})
     report = output/'candidate-build.json'
