@@ -75,6 +75,10 @@ add_executable(leaf_native_tests ../tests/native/test_kernels.cpp)
 target_link_libraries(leaf_native_tests PRIVATE leaf_optimized_kernels)
 add_test(NAME leaf_native_tests COMMAND leaf_native_tests)
 
+add_executable(leaf_accurate_fp32_test ../tests/native/test_accurate_fp32.cpp)
+target_include_directories(leaf_accurate_fp32_test PRIVATE include)
+add_test(NAME leaf_accurate_fp32_test COMMAND leaf_accurate_fp32_test)
+
 add_executable(leaf_kernel_bench ../benchmark/native_benchmark.cpp)
 target_link_libraries(leaf_kernel_bench PRIVATE leaf_optimized_kernels)
 

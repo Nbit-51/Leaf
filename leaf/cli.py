@@ -354,6 +354,11 @@ def run(args):
     worker_cpus = validate_worker_cpus(getattr(args, 'worker_cpus', None), getattr(args, 'threads', 1), args.cpu)
     pin_cpu(args.cpu)
     source_storage = getattr(args, 'source_bf16_head', False)
+    fp32_math = getattr(args, 'fp32_math', 'fast')
+    if fp32_math not in ('fast', 'accurate'):
+        raise ValueError('--fp32-math must be fast or accurate')
+    if fp32_math == 'accurate' and (args.bits not in ('auto','32') or args.activation_bits not in ('auto','32')):
+        raise ValueError('--fp32-math accurate requires unquantized weights and FP32 activations (auto or 32)')
     if source_storage and (args.bits not in ('auto','32') or args.activation_bits not in ('auto','32')):
         raise ValueError("--source-bf16-head requires FP32 weights and activations (auto or 32)")
     start = time.perf_counter()
@@ -362,11 +367,14 @@ def run(args):
     def prepare_runtime():
         nonlocal runtime
         runtime = executable(cache)
-        if source_storage or worker_cpus is not None:
+        if source_storage or worker_cpus is not None or fp32_math == 'accurate':
             from leaf.runtime_check import check
             info = check(runtime, 'leaf_decoder')
             if worker_cpus is not None and info.get('worker_affinity_supported') is not True:
                 raise RuntimeError('The selected native runtime does not support --worker-cpus; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
+            modes = info.get('fp32_math_modes')
+            if fp32_math == 'accurate' and (not isinstance(modes, list) or 'accurate' not in modes):
+                raise RuntimeError('The selected native runtime does not support --fp32-math accurate; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
     # Reject unsupported metadata before building, and setup failures before weights.
     snapshot = resolve_model(args.model, cache, args.offline, args.plan,
                              before_weights=prepare_runtime)
@@ -374,6 +382,10 @@ def run(args):
     if source_storage:
         bits, activation_bits = 32, 32
         artifact = prepare(snapshot, directory, bits, args.plan, source_bf16_head=True)
+    elif fp32_math == 'accurate':
+        # Existing auto-quantization profiles do not qualify this math policy.
+        bits, activation_bits = 32, 32
+        artifact = prepare(snapshot, directory, bits, args.plan)
     else:
         bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu, worker_cpus)
         artifact = selected or prepare(snapshot, directory, bits, args.plan)
@@ -392,6 +404,8 @@ def run(args):
                    "0", "1", str(activation_bits)]
         if worker_cpus is not None:
             command.append(','.join(map(str, worker_cpus)))
+        if fp32_math == 'accurate':
+            command.append('--fp32-math=accurate')
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
         first_token_ms = None
         for line in process.stdout:
@@ -407,6 +421,8 @@ def run(args):
         if process.wait():
             raise RuntimeError(error.strip())
         metrics = json.loads((folder / "metrics.json").read_text())
+        if fp32_math == 'accurate' and metrics.get('fp32_math') != 'accurate':
+            raise RuntimeError('Native FP32 math policy differs from the requested accurate execution')
         final_text = tokenizer.decode(tokens, skip_special_tokens=True)
         if final_text.startswith(rendered):
             print(final_text[len(rendered):], end="", flush=True)
@@ -477,6 +493,8 @@ def main():
     evaluator.add_argument("--sequence-length", type=int, default=128)
     evaluator.add_argument("--generate", type=int, default=16)
     evaluator.add_argument("--threads", type=int, default=1)
+    evaluator.add_argument("--fp32-math", choices=("fast", "accurate"), default="fast",
+                           help="native FP32 accumulation policy to evaluate against the same reference")
     evaluator.add_argument("--offline", action="store_true")
     evaluator.add_argument("--output", type=Path, required=True, help="fresh results directory; partial progress is retained")
     inspector = commands.add_parser("inspect", help="check decoder configuration and FP32 weight size without downloading weights")
@@ -503,6 +521,8 @@ def main():
     runner.add_argument("--worker-cpus", type=int, nargs='+',
                         help="optional distinct logical CPU per thread, in thread order; Windows/Linux")
     runner.add_argument("--bits", choices=("auto", "32", "8", "4"), default="auto")
+    runner.add_argument("--fp32-math", choices=("fast", "accurate"), default="fast",
+                        help="accurate uses bounded FP32 projection sums and a wider RMS reduction; requires unquantized FP32 compute")
     runner.add_argument("--activation-bits", choices=("auto", "8", "32"), default="auto",
                         help="dynamic INT8 or floating activations in quantized linear kernels")
     runner.add_argument("--source-bf16-head", action="store_true",

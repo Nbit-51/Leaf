@@ -98,6 +98,17 @@ include the failed first attempt and exact original runner. The regular default
 arithmetic remains unchanged; these gains are scoped to the tested accurate
 candidate and original BF16 checkpoints.
 
+## Native accurate math compatibility
+
+The October 26 native accurate-math option composes with this storage format:
+`leaf run MODEL --bits 32 --source-bf16-head --fp32-math accurate --prompt "Hello"`.
+Storage retains original source values; accumulation controls computation.
+The combined offline installed-wheel path passes without compiler or binary
+overrides. [Accurate-policy migration checks](shared-accumulation.md#native-accuracy-option--october-26-2026)
+preserve the trained outputs. No fresh storage speedup is inferred from those
+correctness checks. BF16 storage still covers the output head and tied embedding,
+not arbitrary interior projection tensors.
+
 ## Benchmark sleep controls
 
 The first October 20 timing attempt overlapped Windows Modern Standby from

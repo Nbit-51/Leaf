@@ -96,15 +96,16 @@ int main(int argc, char** argv) {
         std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4,5],\"source_bf16_head_supported\":true,\"benchmark_power_guard\":true"
                   << ",\"worker_affinity_supported\":" << (leaf::runtime::detail::worker_affinity_supported() ? "true" : "false")
                   << ",\"worker_spin_limit_us\":50"
+                  << ",\"fp32_math_modes\":[\"fast\",\"accurate\"],\"fp32_math_default\":\"fast\""
 #ifdef LEAF_DIAGNOSTIC_TIMING
                   << ",\"diagnostic_start_gate_supported\":true,\"diagnostic_counter_version\":4"
 #endif
                   << "}\n";
         return 0;
     }
-    if (argc < 6 || argc > 14) {
+    if (argc < 6 || argc > 15) {
         std::cerr << "Usage: leaf_decoder artifact.leaf tokens.bin logits.bin metrics.json mode"
-                     " [threads=1] [runs=3] [warmup=1] [generate=16] [scalar=0] [chunk=1] [activation-bits=32] [worker-cpus=comma-list]\n";
+                     " [threads=1] [runs=3] [warmup=1] [generate=16] [scalar=0] [chunk=1] [activation-bits=32] [worker-cpus=comma-list] [--fp32-math=fast|accurate]\n";
         return 1;
     }
     try {
@@ -130,7 +131,23 @@ int main(int argc, char** argv) {
         const bool scalar = argc > 10 && std::stoi(argv[10]) != 0;
         const unsigned chunk = argc > 11 ? std::stoul(argv[11]) : 1;
         const unsigned activation_bits = argc > 12 ? std::stoul(argv[12]) : 32;
-        const auto worker_cpus = argc > 13 ? parse_worker_cpus(argv[13]) : std::vector<unsigned>{};
+        std::vector<unsigned> worker_cpus;
+        auto fp32_math = leaf::runtime::FP32Math::Fast;
+        bool math_seen = false, cpus_seen = false;
+        for (int i = 13; i < argc; ++i) {
+            const std::string value = argv[i];
+            if (value.rfind("--fp32-math=", 0) == 0) {
+                if (math_seen) throw std::runtime_error("duplicate FP32 math policy");
+                math_seen = true;
+                const auto policy = value.substr(12);
+                if (policy == "accurate") fp32_math = leaf::runtime::FP32Math::Accurate;
+                else if (policy != "fast") throw std::runtime_error("FP32 math must be fast or accurate");
+            } else {
+                if (cpus_seen || math_seen) throw std::runtime_error("worker CPU list must precede FP32 math policy");
+                cpus_seen = true;
+                worker_cpus = parse_worker_cpus(value);
+            }
+        }
         if (!runs || !chunk) throw std::runtime_error("runs and chunk must be positive");
         std::ifstream input(argv[2], std::ios::binary);
         if (!input) throw std::runtime_error("cannot open token request");
@@ -146,7 +163,7 @@ int main(int argc, char** argv) {
         }
         if (input.peek() != std::char_traits<char>::eof()) throw std::runtime_error("trailing token request bytes");
         const auto load_start = Clock::now();
-        leaf::runtime::Decoder decoder(argv[1], threads, scalar, activation_bits, worker_cpus);
+        leaf::runtime::Decoder decoder(argv[1], threads, scalar, activation_bits, worker_cpus, fp32_math);
         const double load_ms = elapsed(load_start);
         std::ofstream outputs(argv[3], std::ios::binary);
         if (!outputs) throw std::runtime_error("cannot open logits output");
@@ -233,6 +250,7 @@ int main(int argc, char** argv) {
                 << ",\"source_bf16_linear_calls\":" << decoder.source_bf16_linear_calls()
                 << ",\"vector_silu_gate_enabled\":" << (decoder.uses_vector_silu_gate() ? "true" : "false")
                 << ",\"optimized_fp32_active\":" << (decoder.uses_optimized_fp32() ? "true" : "false")
+                << ",\"fp32_math\":\"" << (decoder.uses_accurate_fp32() ? "accurate" : "fast") << '"'
                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")
                 << ",\"activation_bits\":" << decoder.activation_bits()
                 << ",\"threads\":" << threads << ",\"artifact_bytes\":" << decoder.weight_bytes()

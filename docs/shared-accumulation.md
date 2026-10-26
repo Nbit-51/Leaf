@@ -1,5 +1,52 @@
 # Shared FP32 accumulation accuracy — October 18, 2026
 
+## Native accuracy option — October 26, 2026
+
+The qualified K=256 balanced reduction is now a shared native kernel selected
+by `--fp32-math accurate`, rather than a source-patched build. The existing
+`fast` policy remains the default; the older timing failures below are retained.
+This integration establishes output fidelity, not a new latency gain.
+
+```sh
+leaf run HuggingFaceTB/SmolLM2-360M-Instruct --bits 32 --source-bf16-head --fp32-math accurate --prompt "Explain CPU inference."
+leaf evaluate MODEL_ID --fp32-math accurate --dataset heldout.jsonl --dataset-source "name/test split" --blocks 8 --output build/accurate-quality
+```
+
+The accurate policy shortens each AVX2 projection sum to 256 columns and merges
+partials with a balanced FP32 tree. RMSNorm keeps FP32 squares and scale
+semantics but sums the squares in FP64. Forced scalar execution uses FP64 dot
+reductions. Explicit unchanged-input promises reuse packing within Q/K/V and
+MLP up/gate groups. Model names do not choose this policy. Quantized requests
+are rejected; original BF16 head/tied-embedding storage remains compatible.
+`--bits auto` cannot reuse quantized speed profiles under this math policy.
+
+Final Windows validation rebinds **all sixteen complete trained logit blocks**
+and **twelve reference continuations** to the earlier qualified accurate build.
+All match exactly. Ten scalar/cache/thread/storage controls also match, and
+eight trained fast-policy regressions preserve the preceding ordinary outputs.
+This uses retained PyTorch qualification; it is not a fresh independent oracle
+run or a claim of task/reasoning accuracy. Original tolerances are unchanged.
+
+The native kernel passes **43,456 output checks**, including exact AVX agreement
+with the historical K=256 kernel, an independent FP64 oracle, portable fallback
+and output padding checks. **1,204 unit tests pass** (two optional cases skip),
+and ten reduced architecture configurations retain bit-exact default outputs.
+An isolated installed wheel runs accurate math with compact BF16 storage and
+two assigned workers, offline, with compiler paths and binary overrides removed
+and without importing Torch/Transformers. Its `.text`, `.rdata` and `.data`
+sections match the fully qualified native binary. Historical accumulation builds
+remain reconstructible from the pre-integration engine revision `a78fa51`.
+
+[Checkpoint and reproduction](checkpoint-2026-10-26-fp32-math.md) ·
+[Retained migration evidence](../benchmark/validation/fp32-math/20261026/manifest.json)
+
+The records below describe the earlier isolated experiments. Their performance
+verdicts remain unchanged. Floating-point summation order can change results
+even for mathematically equivalent operations; see
+[PyTorch's numerical-accuracy guidance](https://docs.pytorch.org/docs/main/notes/numerical_accuracy.html).
+
+## Original isolated experiment
+
 The isolated accumulation candidate passes the previously failing trained
 SmolLM2 and Qwen2.5 fidelity checks without relaxing tolerances. Its complete
 Smol timing comparison is stable but slower, so **it is not enabled in the

@@ -137,6 +137,12 @@ def evaluate(args):
     from tools.decoder_plan import generation_policy_identity, greedy_reference_tokens, load_snapshot_plan
     from tools.decoder_validation import quality, run_native
     from tools.validate_decoder import GATES, digest, utc_now
+    fp32_math = getattr(args, 'fp32_math', 'fast')
+    if fp32_math not in ('fast', 'accurate'):
+        raise ValueError('FP32 math must be fast or accurate')
+    native_options = dict(threads=args.threads)
+    if fp32_math == 'accurate':
+        native_options['fp32_math'] = fp32_math
     try:
         import torch
         import transformers
@@ -155,6 +161,7 @@ def evaluate(args):
                   scope="Deterministic corpus prefix in independent fixed-length blocks; raw greedy prompts. "
                         "Measures model likelihood and runtime fidelity, not factual/chat task accuracy or speed.",
                   requested_blocks=args.blocks, sequence_length=args.sequence_length, threads=args.threads,
+                  fp32_math=fp32_math,
                   dataset_source=args.dataset_source, dataset_sha256=digest(args.dataset), text_column=args.text_column,
                   torch=torch.__version__, transformers=transformers.__version__,
                   evaluator_sha256=digest(Path(__file__)),
@@ -165,6 +172,11 @@ def evaluate(args):
         torch.set_num_threads(args.threads)
         cache = cli.cache_root()
         runtime = cli.executable(cache)
+        if fp32_math == 'accurate':
+            from leaf.runtime_check import check
+            modes = check(runtime, 'leaf_decoder').get('fp32_math_modes')
+            if not isinstance(modes, list) or 'accurate' not in modes:
+                raise RuntimeError('The selected native runtime does not support --fp32-math accurate')
         snapshot = cli.resolve_model(args.model, cache, args.offline)
         cli.validate_model_generation(snapshot)
         plan = load_snapshot_plan(snapshot)
@@ -190,7 +202,7 @@ def evaluate(args):
         with torch.inference_mode():
             for index, row in enumerate(sequences):
                 expected = model(torch.tensor([row]), use_cache=False).logits[0].numpy().copy()
-                actual, _ = run_native(runtime, artifact, [row], threads=args.threads)
+                actual, _ = run_native(runtime, artifact, [row], **native_options)
                 actual = actual.reshape(expected.shape)
                 measured = quality(actual, expected, [row])
                 targets = np.asarray(row[1:])
@@ -210,7 +222,7 @@ def evaluate(args):
                 if len(prompt_ids) + args.generate - 1 > config["max_positions"]:
                     raise ValueError("Generation check exceeds model context")
                 expected = greedy_reference_tokens(model, prompt_ids, plan, args.generate)
-                _, metrics = run_native(runtime, artifact, [prompt_ids], mode="generate", generate=args.generate, threads=args.threads)
+                _, metrics = run_native(runtime, artifact, [prompt_ids], mode="generate", generate=args.generate, **native_options)
                 compared = generation_comparison(expected, metrics["generated_tokens"])
                 record["generations"].append(dict(prompt=prompt, input_ids=prompt_ids, **compared,
                                                  reference_text=tokenizer.decode(expected),

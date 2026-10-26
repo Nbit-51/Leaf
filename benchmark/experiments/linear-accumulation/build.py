@@ -1,9 +1,11 @@
-"""Build an isolated candidate from current sources; never edits release code."""
+"""Reconstruct isolated accumulation candidates without editing release code."""
 import argparse
 import hashlib
 import json
+import io
 from pathlib import Path
 import subprocess
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
@@ -19,6 +21,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--compiler', default='C:/msys64/mingw64/bin/g++.exe')
+    parser.add_argument('--source-ref', help='historical engine revision; auto-freezes to a78fa51 after native math-policy integration')
     parser.add_argument('--inline-partial', action='store_true',
                         help='eliminate the partial-call boundary without changing arithmetic')
     parser.add_argument('--cache-blocked', action='store_true',
@@ -42,7 +45,22 @@ def main():
         parser.error('--tree-cache requires --tree-outer')
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    original = ROOT / 'engine/src/decoder.cpp'
+    source_root = ROOT
+    source_ref = args.source_ref
+    if source_ref is None and 'FP32Math' in (ROOT / 'engine/src/decoder.cpp').read_text():
+        source_ref = 'a78fa51'
+    source_commit = None
+    if source_ref is not None:
+        source_commit = subprocess.check_output(['git','rev-parse',source_ref+'^{commit}'],cwd=ROOT,text=True).strip()
+        archive = subprocess.check_output(['git','archive','--format=zip',source_commit,'engine'],cwd=ROOT)
+        source_root = output / 'source'
+        source_root.mkdir()
+        with zipfile.ZipFile(io.BytesIO(archive)) as saved:
+            for item in saved.infolist():
+                if not item.filename.startswith('engine/') or not (source_root/item.filename).resolve().is_relative_to(source_root):
+                    raise ValueError('Historical source archive escapes the isolated build')
+            saved.extractall(source_root)
+    original = source_root / 'engine/src/decoder.cpp'
     text = original.read_text()
     header = 'tree_sum.h' if args.tree_outer else 'blocked_sum.h'
     text = replace_once(text, '#include "leaf/kernels/row_reuse.h"', '#include "' + header + '"')
@@ -108,7 +126,7 @@ void quant_dot_scalar(''')
             'linear(normalized.data(), mlp_tokens, prefix + "mlp.gate_proj", gate, true, true);')
     generated = output / 'decoder.cpp'
     generated.write_text(text, newline='\n')
-    main_source = (ROOT / 'engine/src/main_decoder.cpp').read_text()
+    main_source = (source_root / 'engine/src/main_decoder.cpp').read_text()
     anchor = '        metrics << ",\\\"generated_tokens\\\":"; array(metrics, generated);'
     main_source = replace_once(main_source, anchor,
         '        metrics << ",\\\"experimental_accumulation_build\\\":true";\n' + anchor)
@@ -118,7 +136,7 @@ void quant_dot_scalar(''')
     generated_main = output / 'main_decoder.cpp'
     generated_main.write_text(main_source, newline='\n')
     common = [args.compiler, '-std=c++17', '-O3', '-DNDEBUG', '-pthread',
-              '-static', '-static-libgcc', '-static-libstdc++', '-I', str(ROOT / 'engine/include'), '-I', str(HERE)]
+              '-static', '-static-libgcc', '-static-libstdc++', '-I', str(source_root / 'engine/include'), '-I', str(HERE)]
     if args.inline_partial or args.cache_blocked or args.tree_outer:
         common.append('-DLEAF_ACCUMULATION_INLINE_PARTIAL=1')
     if args.cache_blocked:
@@ -128,23 +146,24 @@ void quant_dot_scalar(''')
         common.append('-DLEAF_ACCUMULATION_TREE_CHUNK=' + str(args.tree_chunk_size))
     if args.tree_cache:
         common.append('-DLEAF_ACCUMULATION_TREE_CACHE=1')
-    jobs = [common + [str(generated), str(generated_main), str(ROOT / 'engine/src/kv_cache.cpp'),
-                     str(ROOT / 'engine/src/kernels/transformer.cpp'), '-o', str(output / 'leaf_decoder.exe'), '-lpsapi'],
+    jobs = [common + [str(generated), str(generated_main), str(source_root / 'engine/src/kv_cache.cpp'),
+                     str(source_root / 'engine/src/kernels/transformer.cpp'), '-o', str(output / 'leaf_decoder.exe'), '-lpsapi'],
             common + [str(HERE / 'probe.cpp'), '-o', str(output / 'probe.exe')]]
-    sources = [original, ROOT / 'engine/src/main_decoder.cpp', ROOT / 'engine/include/leaf/kernels/token_panel.h',
-               ROOT / 'engine/include/leaf/kernels/row_reuse.h', HERE / 'blocked_sum.h', HERE / 'probe.cpp',
+    sources = [original, source_root / 'engine/src/main_decoder.cpp', source_root / 'engine/include/leaf/kernels/token_panel.h',
+               source_root / 'engine/include/leaf/kernels/row_reuse.h', HERE / 'blocked_sum.h', HERE / 'probe.cpp',
                Path(__file__), generated, generated_main]
     if args.tree_outer:
         sources.append(HERE / 'tree_sum.h')
     # The decoder includes activation, attention and runtime headers as well.
     # Retain all engine headers and translation units so a kernel-only change
     # cannot produce an apparently identical build manifest.
-    sources.extend([ROOT / 'engine/src/kv_cache.cpp', ROOT / 'engine/src/kernels/transformer.cpp'])
-    sources.extend(sorted((ROOT / 'engine/include').rglob('*.h')))
+    sources.extend([source_root / 'engine/src/kv_cache.cpp', source_root / 'engine/src/kernels/transformer.cpp'])
+    sources.extend(sorted((source_root / 'engine/include').rglob('*.h')))
     sources = list(dict.fromkeys(sources))
     hashes = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
     manifest = dict(complete=False, release_default_changed=False, acceptance_timing=False,
         base_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+        source_commit=source_commit,
         source_sha256=hashes, commands=jobs,
         inline_partial=args.inline_partial or args.cache_blocked or args.tree_outer,
         cache_blocked=args.cache_blocked, precise_scalar=args.precise_scalar, tree_outer=args.tree_outer,

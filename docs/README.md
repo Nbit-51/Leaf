@@ -9,6 +9,7 @@ architecture, current results and scope. Use this index for details and evidence
 |---|---|
 | Model onboarding, runtime setup and quality-only evaluation | [Model and output checks](model-onboarding.md) |
 | Original BF16 output-head storage with FP32 computation | [Source-preserving storage](source-bf16.md) |
+| Explicit accurate FP32 execution and its trained-output checks | [Accumulation policy](shared-accumulation.md#native-accuracy-option--october-26-2026) |
 | Optional per-thread CPU placement, cleanup and validation | [Worker placement](worker-placement.md) |
 | Installation, local/Hub models, quantization and cache controls | [Usage](project-reference.md#2-install-and-run-with-one-command) |
 | Native document embeddings, JSONL inference and numerical validation | [Embeddings](embedding.md) |

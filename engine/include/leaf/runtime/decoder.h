@@ -7,13 +7,16 @@
 
 namespace leaf::runtime {
 
+enum class FP32Math { Fast, Accurate };
+
 // Executes a serialized decoder plan: normalization, positional encoding,
 // attention geometry, residual topology and feed-forward semantics are data.
 // Mapped immutable weights can be shared; each instance owns its KV state.
 class Decoder {
 public:
     Decoder(const std::string& artifact, unsigned threads = 1, bool force_scalar = false,
-            unsigned activation_bits = 32, const std::vector<unsigned>& worker_cpus = {});
+            unsigned activation_bits = 32, const std::vector<unsigned>& worker_cpus = {},
+            FP32Math fp32_math = FP32Math::Fast);
     ~Decoder();
     Decoder(const Decoder&) = delete;
     Decoder& operator=(const Decoder&) = delete;
@@ -28,6 +31,7 @@ public:
     std::uint64_t weight_bytes() const;
     bool uses_avx2() const;
     bool uses_optimized_fp32() const;
+    bool uses_accurate_fp32() const;
     bool uses_vector_silu_gate() const;
     std::size_t silu_gate_vector_calls() const;
     std::size_t source_bf16_tensors() const;

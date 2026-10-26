@@ -9,6 +9,7 @@
 #define LEAF_TRACE(name, values) ((void)0)
 #endif
 #include "leaf/kernels/token_panel.h"
+#include "leaf/kernels/accurate_fp32.h"
 #ifdef LEAF_EXPERIMENTAL_GELU_ERF
 #include "leaf/kernels/gelu_erf.h"
 #endif
@@ -184,6 +185,16 @@ void dot_scalar(const Weight& w, std::size_t row, const float* inputs, std::size
     for (std::size_t col = 0; col < w.cols; ++col) {
         const float value = w.value(row, col);
         for (std::size_t t = 0; t < tokens; ++t) result[t] += value * inputs[t * w.cols + col];
+    }
+}
+
+void dot_scalar_precise(const Weight& w, std::size_t row, const float* inputs,
+                        std::size_t tokens, float* result) {
+    for (std::size_t token = 0; token < tokens; ++token) {
+        double total = 0.0;
+        for (std::size_t col = 0; col < w.cols; ++col)
+            total += static_cast<double>(w.value(row, col)) * inputs[token * w.cols + col];
+        result[token] = static_cast<float>(total);
     }
 }
 
@@ -620,7 +631,7 @@ LEAF_VNNI_TARGET void quant_vnni_tile(const Weight& w, std::size_t row, std::siz
 #endif
 
 void norm(const std::vector<float>& input, const Weight& weight, const Weight* bias,
-          float epsilon, unsigned kind, std::vector<float>& output, std::size_t width) {
+          float epsilon, unsigned kind, std::vector<float>& output, std::size_t width, bool accurate) {
     output.resize(input.size());
     for (std::size_t row = 0; row < input.size() / width; ++row) {
         float mean = 0, square = 0;
@@ -628,8 +639,12 @@ void norm(const std::vector<float>& input, const Weight& weight, const Weight* b
             for (std::size_t col = 0; col < width; ++col) mean += input[row * width + col];
             mean /= static_cast<float>(width);
         }
-        for (std::size_t col = 0; col < width; ++col) {
-            const float value = input[row * width + col] - mean; square += value * value;
+        if (kind == 0 && accurate) {
+            square = leaf::kernels::accurate_rms_square_sum(input.data() + row * width, width);
+        } else {
+            for (std::size_t col = 0; col < width; ++col) {
+                const float value = input[row * width + col] - mean; square += value * value;
+            }
         }
         const float scale = 1.0f / std::sqrt(square / static_cast<float>(width) + epsilon);
         for (std::size_t col = 0; col < width; ++col)
@@ -652,6 +667,7 @@ struct Decoder::Impl {
     float embedding_scale;
     bool avx = false;
     bool float_tiles = false, optimized_fp32 = false, fp32_artifact = false;
+    bool accurate_fp32 = false;
     std::size_t source_bf16_tensors = 0, source_bf16_linear_calls = 0;
     bool vector_gelu = false, vector_attention = false, paired_gemv = false;
     bool vector_silu_gate = false;
@@ -665,14 +681,17 @@ struct Decoder::Impl {
     std::vector<float> quant_scales;
     std::vector<float> transformed_input;
     leaf::kernels::TokenPanelsF32 packed_float_input;
+    const float* packed_source = nullptr;
+    std::size_t packed_tokens = 0, packed_columns = 0;
     std::vector<float> rotary_frequencies, rotary_cosines, rotary_sines;
     std::vector<float> hidden, normalized, q, k, v, q_heads, k_heads, v_heads,
                        attention, projected, attn_projected, gate, up, mask;
 
     Impl(const std::string& path, unsigned threads, bool scalar, unsigned activation_bits,
-         const std::vector<unsigned>& worker_cpus)
+         const std::vector<unsigned>& worker_cpus, FP32Math fp32_math)
         : mapping(path), workers(threads, worker_cpus), activation_precision(activation_bits) {
         check(activation_bits == 8 || activation_bits == 32, "activation bits must be 8 or 32");
+        check(fp32_math == FP32Math::Fast || fp32_math == FP32Math::Accurate, "invalid FP32 math policy");
 #if LEAF_DECODER_AVX
         avx = !scalar && __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
         if (avx) { dot = dot_avx; quant_dot = quant_dot_avx; }
@@ -805,11 +824,15 @@ struct Decoder::Impl {
         // Quantized/mixed artifacts keep their previously validated dispatch.
         fp32_artifact = activation_precision == 32 &&
             std::all_of(weights.begin(), weights.end(), [](const auto& item) { return item.second.bits == 32 || item.second.bits == 16; });
+        accurate_fp32 = fp32_math == FP32Math::Accurate;
+        check(!accurate_fp32 || fp32_artifact, "accurate FP32 math requires FP32 compute and unquantized weights");
+        if (accurate_fp32 && !avx) dot = dot_scalar_precise;
         optimized_fp32 = LEAF_OPTIMIZED_FP32 && avx && fp32_artifact;
         if (optimized_fp32) {
             float_tiles = true;
             vector_gelu = vector_attention = paired_gemv = true;
         }
+        if (accurate_fp32 && avx) float_tiles = true;
 #if LEAF_OPTIMIZED_SILU_W8A8
         // Permit FP32-protected tensors within W8A8, but not INT4 or all-FP32
         // artifacts. Activation buffers remain FP32 regardless of weight bits.
@@ -840,7 +863,7 @@ struct Decoder::Impl {
         const auto found = weights.find(name + ".bias");
         const Weight* bias = found == weights.end() ? nullptr : &found->second;
         if (bias) check(bias->rows == 1 && bias->cols == h, "incompatible normalization bias");
-        norm(input, weights.at(name + ".weight"), bias, epsilon, norm_kind, output, h);
+        norm(input, weights.at(name + ".weight"), bias, epsilon, norm_kind, output, h, accurate_fp32);
     }
     float activate(float x) const {
         if (activation == 0) return x / (1.0f + std::exp(-x));
@@ -855,7 +878,7 @@ struct Decoder::Impl {
         return found->second;
     }
     void linear(const float* input, std::size_t tokens, const std::string& name, std::vector<float>& output,
-                bool mlp_projection = false) {
+                bool mlp_projection = false, bool reuse_packed = false) {
 #ifdef LEAF_DIAGNOSTIC_TIMING
         leaf::diagnostics::Scope linear_detail(tokens, mlp_projection ? leaf::diagnostics::MlpTotal : leaf::diagnostics::OtherTotal);
 #endif
@@ -912,11 +935,20 @@ struct Decoder::Impl {
 #else
         (void)mlp_projection;
 #endif
+        if (accurate_fp32) vector_pack = optimized_fp32 && avx;
         if (packed_float) {
 #ifdef LEAF_DIAGNOSTIC_TIMING
             leaf::diagnostics::Scope pack_detail(tokens, mlp_projection ? leaf::diagnostics::MlpPack : leaf::diagnostics::OtherPack);
 #endif
-            packed_float_input.pack(input, tokens, weight.cols, weight.cols, vector_pack);
+            // Reuse requires an explicit unchanged-input promise within this
+            // projection group; equal addresses alone are insufficient.
+            const bool plain = accurate_fp32 && avx && scaling == weights.end();
+            const bool reuse = plain && reuse_packed && packed_source == input &&
+                               packed_tokens == tokens && packed_columns == weight.cols;
+            if (!reuse) packed_float_input.pack(input, tokens, weight.cols, weight.cols, vector_pack);
+            packed_source = plain ? input : nullptr;
+            packed_tokens = tokens;
+            packed_columns = weight.cols;
         }
         output.resize(tokens * weight.rows);
         used_vnni = used_vnni || vnni_integer;
@@ -937,14 +969,21 @@ struct Decoder::Impl {
                                                         expanded.data(), live * weight.cols);
                         panel_weights = expanded.data();
                     } else panel_weights = reinterpret_cast<const float*>(weight.data) + begin * weight.cols;
+                    if (accurate_fp32) {
+                        leaf::kernels::gemm_token_panels_f32_accurate(
+                            panel_weights, live, weight.cols, weight.cols, packed_float_input,
+                            output.data() + begin, weight.rows,
+                            bias ? reinterpret_cast<const float*>(bias->data) + begin : nullptr);
+                    } else {
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ROW_REUSE)
-                leaf::kernels::gemm_token_panels_f32_row_reuse(
+                        leaf::kernels::gemm_token_panels_f32_row_reuse(
 #else
-                leaf::kernels::gemm_token_panels_f32(
+                        leaf::kernels::gemm_token_panels_f32(
 #endif
-                    panel_weights, live, weight.cols, weight.cols, packed_float_input,
-                    output.data() + begin, weight.rows,
-                    bias ? reinterpret_cast<const float*>(bias->data) + begin : nullptr);
+                            panel_weights, live, weight.cols, weight.cols, packed_float_input,
+                            output.data() + begin, weight.rows,
+                            bias ? reinterpret_cast<const float*>(bias->data) + begin : nullptr);
+                    }
                 }
                 return;
             }
@@ -1124,8 +1163,8 @@ struct Decoder::Impl {
             normalize(hidden, prefix + "input_layernorm", normalized);
             LEAF_TRACE(prefix + "input_norm", normalized);
             linear(normalized.data(), tokens, prefix + "self_attn.q_proj", q);
-            linear(normalized.data(), tokens, prefix + "self_attn.k_proj", k);
-            linear(normalized.data(), tokens, prefix + "self_attn.v_proj", v);
+            linear(normalized.data(), tokens, prefix + "self_attn.k_proj", k, false, true);
+            linear(normalized.data(), tokens, prefix + "self_attn.v_proj", v, false, true);
             LEAF_TRACE(prefix + "q", q);
             LEAF_TRACE(prefix + "k", k);
             LEAF_TRACE(prefix + "v", v);
@@ -1181,7 +1220,7 @@ struct Decoder::Impl {
             linear(normalized.data(), mlp_tokens, prefix + "mlp.up_proj", up, true);
             LEAF_TRACE(prefix + "up", up);
             if (gated) {
-                linear(normalized.data(), mlp_tokens, prefix + "mlp.gate_proj", gate, true);
+                linear(normalized.data(), mlp_tokens, prefix + "mlp.gate_proj", gate, true, true);
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Activation, mlp_tokens);
 #ifdef LEAF_EXPERIMENTAL_GELU_ERF
                 if (fp32_artifact && avx && mlp_tokens >= 8 && activation == 1) {
@@ -1234,8 +1273,8 @@ struct Decoder::Impl {
 };
 
 Decoder::Decoder(const std::string& path, unsigned threads, bool force_scalar, unsigned activation_bits,
-                 const std::vector<unsigned>& worker_cpus)
-    : impl_(std::make_unique<Impl>(path, threads, force_scalar, activation_bits, worker_cpus)) {}
+                 const std::vector<unsigned>& worker_cpus, FP32Math fp32_math)
+    : impl_(std::make_unique<Impl>(path, threads, force_scalar, activation_bits, worker_cpus, fp32_math)) {}
 Decoder::~Decoder() = default;
 void Decoder::reset() { for (auto& cache : impl_->caches) cache.reset(); }
 std::vector<float> Decoder::forward(const std::vector<std::uint32_t>& tokens, bool all_logits) {
@@ -1255,6 +1294,7 @@ std::size_t Decoder::cache_tokens() const { return impl_->caches[0].length(); }
 std::uint64_t Decoder::weight_bytes() const { return impl_->mapping.size; }
 bool Decoder::uses_avx2() const { return impl_->avx; }
 bool Decoder::uses_optimized_fp32() const { return impl_->optimized_fp32; }
+bool Decoder::uses_accurate_fp32() const { return impl_->accurate_fp32; }
 bool Decoder::uses_vector_silu_gate() const { return impl_->vector_silu_gate; }
 std::size_t Decoder::silu_gate_vector_calls() const { return impl_->vector_silu_gate_calls; }
 std::size_t Decoder::source_bf16_tensors() const { return impl_->source_bf16_tensors; }

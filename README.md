@@ -70,6 +70,11 @@ leaf run HuggingFaceTB/SmolLM2-360M-Instruct --bits 32 --source-bf16-head --prom
 FP32 source weights stay FP32. This uses a separate prepared cache; see
 [storage semantics, exact-output checks and measured scope](docs/source-bf16.md).
 
+For the explicit accurate FP32 accumulation policy, add `--fp32-math accurate`
+to `leaf run` or `leaf evaluate`. It can be combined with `--source-bf16-head`;
+weights remain unquantized and `--bits auto` selects FP32. The default math
+policy is unchanged. See [accuracy checks and scope](docs/shared-accumulation.md#native-accuracy-option--october-26-2026).
+
 For output checks without timing benchmarks, install `.[validation]` and run
 `leaf evaluate MODEL_ID --dataset heldout.jsonl --dataset-source "name/test split" --output build/quality-run`.
 It records perplexity, next-token agreement and paired continuations. See
@@ -118,7 +123,7 @@ native-loader limitation.
 | CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
 | Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
 | Threading | Persistent workers; optional CPU placement with bounded waits and caller-affinity restoration on Windows/Linux |
-| Precision | FP32, optional source-preserving BF16 head storage with FP32 computation, weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
+| Precision | FP32 with optional accurate accumulation; original BF16 head storage with FP32 computation; weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
 | Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
@@ -162,7 +167,8 @@ flowchart TB
     G --> A["Native graph artifact"]
     D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
-    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · exact BF16-to-FP32 expansion<br/>Vector GELU, attention and softmax<br/>FP32 SiLU prefill + decode · W8A8 SiLU prefill"]
+    R --> M["Compute policy<br/>FP32: fast default or accurate opt-in<br/>INT8/INT4: existing dispatch"]
+    M --> K["CPU-dispatched kernels<br/>Tiled GEMM · optional balanced FP32 sums and wider RMS<br/>Paired GEMV · exact BF16-to-FP32 expansion<br/>Vector GELU, attention, softmax and SiLU"]
     K --> T["Tokens and logits"]
     E --> U["Graph outputs"]
 ```
@@ -275,7 +281,8 @@ default; its probability tolerance miss remains open. A reproduced
 is fixed before further kernel changes or model downloads.
 An isolated [shared accumulation candidate](docs/shared-accumulation.md) now
 passes the full SmolLM2/Qwen2.5 fidelity checks without relaxed tolerances.
-It remains outside the default runtime while its performance cost is evaluated.
+It is available through `--fp32-math accurate`; it remains outside the default
+math policy while its performance cost is evaluated.
 Optional [original BF16 head storage](docs/source-bf16.md) preserves FP32 compute
 and exact tested outputs. Against that accurate candidate's FP32 storage, it
 reduces paired decode latency **5.12% on SmolLM2** and **11.65% on Qwen2.5**,
