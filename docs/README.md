@@ -11,6 +11,7 @@ architecture, current results and scope. Use this index for details and evidence
 | Original BF16 output-head storage with FP32 computation | [Source-preserving storage](source-bf16.md) |
 | Explicit accurate FP32 execution and its trained-output checks | [Accumulation policy](shared-accumulation.md#native-accuracy-option--october-26-2026) |
 | Optional per-thread CPU placement, cleanup and validation | [Worker placement](worker-placement.md) |
+| Optional Windows CPU-work counters and paired math diagnostics | [Benchmark accounting](benchmark-counters.md) |
 | Installation, local/Hub models, quantization and cache controls | [Usage](project-reference.md#2-install-and-run-with-one-command) |
 | Native document embeddings, JSONL inference and numerical validation | [Embeddings](embedding.md) |
 | Supported decoder configurations and graph operators | [Compatibility](project-reference.md#3-coverage-and-explicit-boundaries) |
@@ -18,6 +19,7 @@ architecture, current results and scope. Use this index for details and evidence
 | Building, tests and trained-model reproduction | [Validation guide](project-reference.md#6-reproduce-validation-and-benchmarks) |
 | Native formats and artifact trust boundary | [Artifacts](project-reference.md#10-artifact-formats-and-trust-boundary) |
 | Buffer liveness and memory reuse | [Memory plan](project-reference.md#11-memory-plan-format-and-runtime-reuse) |
+| Caller-owned C++ logits buffers and generation reuse | [Output storage](output-buffers.md) |
 | Repository layout | [Source map](project-reference.md#12-repository-map) |
 | Benchmark runners, datasets and retained evidence | [Benchmark directory](../benchmark/README.md) |
 
@@ -58,6 +60,7 @@ should not be combined into a universal speedup claim.
 | October 20 source-preserving head storage, complete timing and resume state | [Storage checkpoint](checkpoint-2026-10-20-source-storage.md) |
 | October 20 rejected prefill scheduling and worker-placement diagnosis | [Prefill jobs checkpoint](checkpoint-2026-10-20-prefill-jobs.md) |
 | October 22 explicit worker placement and validation | [Worker placement checkpoint](checkpoint-2026-10-22-worker-placement.md) |
+| October 27 benchmark accounting and output-buffer reuse | [Current runtime checkpoint](checkpoint-2026-10-27-output-buffers.md) |
 | Pythia attention-score sensitivity and retained tolerance failures | [Numerical investigation](pythia-numerics-handoff.md) |
 | Matched Pythia-70M Leaf/llama.cpp baseline and next prefill experiment | [Runtime comparison](pythia-runtime-comparison.md) |
 

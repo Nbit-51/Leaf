@@ -1,5 +1,6 @@
 #include "leaf/runtime/decoder.h"
 #include "leaf/runtime/worker_affinity.h"
+#include "leaf/runtime/benchmark_counters.h"
 #ifdef LEAF_DIAGNOSTIC_TIMING
 #include "../../tests/native/decoder_diagnostic.h"
 #include <cstdlib>
@@ -97,15 +98,22 @@ int main(int argc, char** argv) {
                   << ",\"worker_affinity_supported\":" << (leaf::runtime::detail::worker_affinity_supported() ? "true" : "false")
                   << ",\"worker_spin_limit_us\":50"
                   << ",\"fp32_math_modes\":[\"fast\",\"accurate\"],\"fp32_math_default\":\"fast\""
+                  << ",\"reusable_logits_supported\":true"
+#ifdef LEAF_DIAGNOSTIC_TIMING
+                  << ",\"benchmark_counters_supported\":false"
+#else
+                  << ",\"benchmark_counters_supported\":" << (leaf::runtime::benchmark::supported() ? "true" : "false")
+#endif
+                  << ",\"benchmark_counter_version\":1"
 #ifdef LEAF_DIAGNOSTIC_TIMING
                   << ",\"diagnostic_start_gate_supported\":true,\"diagnostic_counter_version\":4"
 #endif
                   << "}\n";
         return 0;
     }
-    if (argc < 6 || argc > 15) {
+    if (argc < 6 || argc > 16) {
         std::cerr << "Usage: leaf_decoder artifact.leaf tokens.bin logits.bin metrics.json mode"
-                     " [threads=1] [runs=3] [warmup=1] [generate=16] [scalar=0] [chunk=1] [activation-bits=32] [worker-cpus=comma-list] [--fp32-math=fast|accurate]\n";
+                     " [threads=1] [runs=3] [warmup=1] [generate=16] [scalar=0] [chunk=1] [activation-bits=32] [worker-cpus=comma-list] [--fp32-math=fast|accurate] [--benchmark-counters]\n";
         return 1;
     }
     try {
@@ -133,7 +141,7 @@ int main(int argc, char** argv) {
         const unsigned activation_bits = argc > 12 ? std::stoul(argv[12]) : 32;
         std::vector<unsigned> worker_cpus;
         auto fp32_math = leaf::runtime::FP32Math::Fast;
-        bool math_seen = false, cpus_seen = false;
+        bool math_seen = false, cpus_seen = false, benchmark_counters = false;
         for (int i = 13; i < argc; ++i) {
             const std::string value = argv[i];
             if (value.rfind("--fp32-math=", 0) == 0) {
@@ -142,12 +150,25 @@ int main(int argc, char** argv) {
                 const auto policy = value.substr(12);
                 if (policy == "accurate") fp32_math = leaf::runtime::FP32Math::Accurate;
                 else if (policy != "fast") throw std::runtime_error("FP32 math must be fast or accurate");
+            } else if (value == "--benchmark-counters") {
+                if (benchmark_counters) throw std::runtime_error("duplicate benchmark counters flag");
+                benchmark_counters = true;
             } else {
-                if (cpus_seen || math_seen) throw std::runtime_error("worker CPU list must precede FP32 math policy");
+                if (value.rfind("--", 0) == 0) throw std::runtime_error("unknown decoder option: " + value);
+                if (cpus_seen || math_seen || benchmark_counters)
+                    throw std::runtime_error("worker CPU list must precede named decoder options");
                 cpus_seen = true;
                 worker_cpus = parse_worker_cpus(value);
             }
         }
+        if (benchmark_counters && mode != "bench")
+            throw std::runtime_error("benchmark counters require bench mode");
+        if (benchmark_counters && !leaf::runtime::benchmark::supported())
+            throw std::runtime_error("requested benchmark counters require Windows");
+#ifdef LEAF_DIAGNOSTIC_TIMING
+        if (benchmark_counters)
+            throw std::runtime_error("benchmark counters cannot be combined with legacy thread-counter builds");
+#endif
         if (!runs || !chunk) throw std::runtime_error("runs and chunk must be positive");
         std::ifstream input(argv[2], std::ios::binary);
         if (!input) throw std::runtime_error("cannot open token request");
@@ -168,6 +189,12 @@ int main(int argc, char** argv) {
         std::ofstream outputs(argv[3], std::ios::binary);
         if (!outputs) throw std::runtime_error("cannot open logits output");
         std::vector<double> prefills, decodes;
+        std::vector<float> logits;
+        leaf::runtime::benchmark::Samples work_prefill, work_decode;
+        if (benchmark_counters) {
+            work_prefill.reserve(std::size_t(runs) * requests.size());
+            work_decode.reserve(std::size_t(runs) * requests.size());
+        }
 #ifdef LEAF_DIAGNOSTIC_TIMING
         if (threads != 1) throw std::runtime_error("Thread-counter diagnostics require one inference thread");
         leaf::diagnostics::Samples prefill_counters, decode_counters;
@@ -182,7 +209,7 @@ int main(int argc, char** argv) {
                 const auto step = mode == "verify" ? ids.size() : std::size_t(chunk);
                 for (std::size_t pos = 0; pos < ids.size(); pos += step) {
                     std::vector<std::uint32_t> next(ids.begin() + pos, ids.begin() + std::min(ids.size(), pos + step));
-                    const auto logits = decoder.forward(next, true);
+                    decoder.forward_into(next, logits, true);
                     outputs.write(reinterpret_cast<const char*>(logits.data()), logits.size() * sizeof(float));
                 }
             } else if (mode == "bench") {
@@ -193,30 +220,43 @@ int main(int argc, char** argv) {
 #ifdef LEAF_DIAGNOSTIC_TIMING
                     decoder.reset();
                     const auto cpu_start = leaf::diagnostics::stamp();
-                    auto start = Clock::now(); decoder.forward(prefix); const double prefill = elapsed(start);
+                    auto start = Clock::now(); decoder.forward_into(prefix, logits); const double prefill = elapsed(start);
                     const auto cpu_middle = leaf::diagnostics::stamp();
-                    start = Clock::now(); decoder.forward(last); const double decode = elapsed(start);
+                    start = Clock::now(); decoder.forward_into(last, logits); const double decode = elapsed(start);
                     const auto cpu_end = leaf::diagnostics::stamp();
                     if (iteration >= warmup) {
                         prefill_counters.add(cpu_start, cpu_middle);
                         decode_counters.add(cpu_middle, cpu_end);
                     }
 #else
-                    decoder.reset(); auto start = Clock::now(); decoder.forward(prefix); const double prefill = elapsed(start);
-                    start = Clock::now(); decoder.forward(last); const double decode = elapsed(start);
+                    double prefill, decode;
+                    if (benchmark_counters) {
+                        decoder.reset();
+                        const auto before = leaf::runtime::benchmark::stamp();
+                        auto start = Clock::now(); decoder.forward_into(prefix, logits); prefill = elapsed(start);
+                        const auto middle = leaf::runtime::benchmark::stamp();
+                        start = Clock::now(); decoder.forward_into(last, logits); decode = elapsed(start);
+                        const auto after = leaf::runtime::benchmark::stamp();
+                        if (iteration >= warmup) {
+                            work_prefill.add(before, middle); work_decode.add(middle, after);
+                        }
+                    } else {
+                        decoder.reset(); auto start = Clock::now(); decoder.forward_into(prefix, logits); prefill = elapsed(start);
+                        start = Clock::now(); decoder.forward_into(last, logits); decode = elapsed(start);
+                    }
 #endif
                     check_benchmark_power(require_ac);
                     if (iteration >= warmup) { prefills.push_back(prefill); decodes.push_back(decode); }
                 }
             } else {
-                auto start = Clock::now(); auto logits = decoder.forward(ids); prefills.push_back(elapsed(start));
+                auto start = Clock::now(); decoder.forward_into(ids, logits); prefills.push_back(elapsed(start));
                 for (unsigned token = 0; token < generate; ++token) {
                     const auto id = static_cast<std::uint32_t>(std::max_element(logits.begin(), logits.end()) - logits.begin());
                     generated.push_back(id);
                     std::cout << "TOKEN " << id << '\n' << std::flush;
                     if (decoder.is_eos_token(id)) break;
                     if (token + 1 < generate) {
-                        start = Clock::now(); logits = decoder.forward({id}); decodes.push_back(elapsed(start));
+                        start = Clock::now(); decoder.forward_into({id}, logits); decodes.push_back(elapsed(start));
                     }
                 }
             }
@@ -251,6 +291,7 @@ int main(int argc, char** argv) {
                 << ",\"vector_silu_gate_enabled\":" << (decoder.uses_vector_silu_gate() ? "true" : "false")
                 << ",\"optimized_fp32_active\":" << (decoder.uses_optimized_fp32() ? "true" : "false")
                 << ",\"fp32_math\":\"" << (decoder.uses_accurate_fp32() ? "accurate" : "fast") << '"'
+                << ",\"reusable_logits\":true"
                 << ",\"vnni\":" << (decoder.uses_vnni() ? "true" : "false")
                 << ",\"activation_bits\":" << decoder.activation_bits()
                 << ",\"threads\":" << threads << ",\"artifact_bytes\":" << decoder.weight_bytes()
@@ -261,6 +302,7 @@ int main(int argc, char** argv) {
         metrics << ",\"worker_cpus\":"; array(metrics, worker_cpus);
         metrics << ",\"worker_spin_us\":" << (worker_cpus.size() > 1 ? 50 : 0);
         metrics << ",\"generated_tokens\":"; array(metrics, generated);
+        if (benchmark_counters) leaf::runtime::benchmark::emit(metrics, work_prefill, work_decode);
 #ifdef LEAF_DIAGNOSTIC_TIMING
         leaf::diagnostics::emit(metrics, prefill_counters, decode_counters);
 #endif

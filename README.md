@@ -121,7 +121,7 @@ native-loader limitation.
 | Decoder execution | Full native prefill, single-token decode, chunked evaluation and greedy generation with all declared end tokens |
 | Embedding execution | FP32 EmbeddingGemma: bidirectional local/full attention, Q/K normalization, mean pooling, dense projections and L2-normalized output |
 | CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
-| Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
+| Memory | Memory-mapped weights, reusable activation/logit buffers, per-session KV caches with dynamic growth and reset/reuse |
 | Threading | Persistent workers; optional CPU placement with bounded waits and caller-affinity restoration on Windows/Linux |
 | Precision | FP32 with optional accurate accumulation; original BF16 head storage with FP32 computation; weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
 | Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
@@ -165,7 +165,7 @@ flowchart TB
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
     P --> D["Native decoder artifact<br/>Optional original BF16 head/tied embedding storage"]
     G --> A["Native graph artifact"]
-    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
+    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
     R --> M["Compute policy<br/>FP32: fast default or accurate opt-in<br/>INT8/INT4: existing dispatch"]
     M --> K["CPU-dispatched kernels<br/>Tiled GEMM · optional balanced FP32 sums and wider RMS<br/>Paired GEMV · exact BF16-to-FP32 expansion<br/>Vector GELU, attention, softmax and SiLU"]

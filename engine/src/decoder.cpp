@@ -1123,7 +1123,7 @@ struct Decoder::Impl {
             }
         }
     }
-    std::vector<float> forward(const std::vector<std::uint32_t>& ids, bool all_logits) {
+    void forward_into(const std::vector<std::uint32_t>& ids, bool all_logits, std::vector<float>& logits) {
 #ifdef LEAF_DIAGNOSTIC_TRACE
         DecoderTrace trace;
 #endif
@@ -1264,11 +1264,9 @@ struct Decoder::Impl {
         if (final_norm) normalize(hidden, "model.norm", normalized);
         else normalized = hidden;
         LEAF_TRACE("final_norm", normalized);
-        std::vector<float> logits;
         linear(normalized.data() + (all_logits ? 0 : normalized.size() - h), all_logits ? tokens : 1,
                "lm_head", logits);
         LEAF_TRACE("logits", logits);
-        return logits;
     }
 };
 
@@ -1278,12 +1276,16 @@ Decoder::Decoder(const std::string& path, unsigned threads, bool force_scalar, u
 Decoder::~Decoder() = default;
 void Decoder::reset() { for (auto& cache : impl_->caches) cache.reset(); }
 std::vector<float> Decoder::forward(const std::vector<std::uint32_t>& tokens, bool all_logits) {
+    std::vector<float> result;
+    forward_into(tokens, result, all_logits);
+    return result;
+}
+void Decoder::forward_into(const std::vector<std::uint32_t>& tokens, std::vector<float>& logits, bool all_logits) {
     // One caller binding per forward; nested pool operations keep that mask
     // rather than repeatedly setting/restoring it at every linear projection.
     auto caller = impl_->workers.bind_caller();
-    auto result = impl_->forward(tokens, all_logits);
+    impl_->forward_into(tokens, all_logits, logits);
     caller.restore();
-    return result;
 }
 std::uint32_t Decoder::vocabulary_size() const { return static_cast<std::uint32_t>(impl_->vocab); }
 std::uint32_t Decoder::eos_token() const { return static_cast<std::uint32_t>(impl_->eos); }

@@ -1,0 +1,232 @@
+{
+  "format": "leaf-benchmark-accounting-and-output-reuse-v1",
+  "accuracy_scope": "Exact rebinding to prior qualified trained Leaf reference; not a new independent PyTorch evaluation.",
+  "timing_qualified": false,
+  "acceptance_timing": false,
+  "system_power_settings_changed": false,
+  "fp32_default_changed": false,
+  "storage_format_changed": false,
+  "unit_tests_passed": 1350,
+  "unit_tests_skipped": 2,
+  "trained_blocks": 16,
+  "reference_continuations": 12,
+  "trained_controls": 10,
+  "default_regressions": 8,
+  "api_probe": {
+    "complete": true,
+    "passed": true,
+    "binary_sha256": "cc53a80087daf0815fbc3ce0724b5c97ef0ebe0d6f5b5c5ee3ca6bdf15a37b79",
+    "cases": [
+      {
+        "name": "fixture",
+        "artifact_sha256": "9effac503c715358b3f09fceea9c94d38977f34e3a0012a1a73357c6091624aa",
+        "command": [
+          "C:\\Users\\navaneeth\\leaf\\build\\benchmark-counters-20261027\\test_decoder_output_buffer.exe",
+          "C:\\Users\\navaneeth\\leaf\\build\\benchmark-counters-20261027\\output-buffer-fixture\\decoder.leaf"
+        ],
+        "returncode": 0,
+        "stdout": "PASS output buffer: math=fast threads=1 scalar=0 comparisons=13\nPASS output buffer: math=accurate threads=1 scalar=0 comparisons=13\nPASS output buffer: math=fast threads=1 scalar=1 comparisons=13\nPASS output buffer: math=accurate threads=1 scalar=1 comparisons=13\nPASS output buffer: math=fast threads=2 scalar=0 comparisons=13\nPASS output buffer: math=accurate threads=2 scalar=0 comparisons=13\nPASS output buffer: math=fast threads=2 scalar=1 comparisons=13\nPASS output buffer: math=accurate threads=2 scalar=1 comparisons=13\n{\"passed\":true,\"cases\":8,\"comparisons\":104}\n",
+        "stderr": ""
+      },
+      {
+        "name": "smol",
+        "artifact_sha256": "8a982b57edb9de345faddfcc63c7d1a4c92ad4aa85bdb49eaa5741c0e7ff91d9",
+        "command": [
+          "C:\\Users\\navaneeth\\leaf\\build\\benchmark-counters-20261027\\test_decoder_output_buffer.exe",
+          "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\898954fccee23671ea3da805\\decoder-32.leaf",
+          "--threads=2",
+          "--scalar=0",
+          "--math=accurate",
+          "--worker-cpus=2,4"
+        ],
+        "returncode": 0,
+        "stdout": "PASS output buffer: math=accurate threads=2 scalar=0 comparisons=13\n{\"passed\":true,\"cases\":1,\"comparisons\":13}\n",
+        "stderr": ""
+      },
+      {
+        "name": "qwen",
+        "artifact_sha256": "f01b07a042ce3e3da824076802376e3f0f1864e3134b1036c5c4e4bd517d7de7",
+        "command": [
+          "C:\\Users\\navaneeth\\leaf\\build\\benchmark-counters-20261027\\test_decoder_output_buffer.exe",
+          "C:\\Users\\navaneeth\\leaf\\build\\family-models-20261017\\cache\\models\\70ec40010513210f83bb089b\\decoder-32.leaf",
+          "--threads=2",
+          "--scalar=0",
+          "--math=accurate",
+          "--worker-cpus=2,4"
+        ],
+        "returncode": 0,
+        "stdout": "PASS output buffer: math=accurate threads=2 scalar=0 comparisons=13\n{\"passed\":true,\"cases\":1,\"comparisons\":13}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "binaries": {
+    "counter_baseline_sha256": "69817b52cd394e7b6f79334520d57cc1ce8c50850f58ba267294230594af8e73",
+    "output_reuse_sha256": "2de997d0fd4292f7f4ab533a815616054a1e93b2d27903001ed8de56f428a2a3"
+  },
+  "policy_cost": {
+    "smol": {
+      "summary": {
+        "prefill": {
+          "medians_ms": {
+            "before": 480.2054,
+            "after": 483.88945
+          },
+          "pooled_ratio": 1.007671821266483,
+          "median_paired_ratio": 1.0076725406639748,
+          "stable": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 77.55175,
+            "after": 77.64775
+          },
+          "pooled_ratio": 1.0012378830909683,
+          "median_paired_ratio": 1.0074194335608062,
+          "stable": true
+        }
+      },
+      "page_faults_per_sample": {
+        "prefill": {
+          "before": [
+            0
+          ],
+          "after": [
+            0
+          ]
+        },
+        "decode": {
+          "before": [
+            0
+          ],
+          "after": [
+            0
+          ]
+        }
+      }
+    },
+    "qwen": {
+      "summary": {
+        "prefill": {
+          "medians_ms": {
+            "before": 551.5473999999999,
+            "after": 563.4235
+          },
+          "pooled_ratio": 1.021532328862397,
+          "median_paired_ratio": 1.0192494840042388,
+          "stable": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 107.46975,
+            "after": 107.61125
+          },
+          "pooled_ratio": 1.0013166495688322,
+          "median_paired_ratio": 1.0008086220227181,
+          "stable": true
+        }
+      },
+      "page_faults_per_sample": {
+        "prefill": {
+          "before": [
+            148
+          ],
+          "after": [
+            148
+          ]
+        },
+        "decode": {
+          "before": [
+            148
+          ],
+          "after": [
+            148
+          ]
+        }
+      }
+    }
+  },
+  "output_reuse": {
+    "smol": {
+      "summary": {
+        "prefill": {
+          "medians_ms": {
+            "before": 483.40155000000004,
+            "after": 485.0331
+          },
+          "pooled_ratio": 1.0033751443287675,
+          "median_paired_ratio": 1.0011635308864733,
+          "stable": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 78.5667,
+            "after": 78.48435
+          },
+          "pooled_ratio": 0.9989518460110964,
+          "median_paired_ratio": 0.9955210619410375,
+          "stable": true
+        }
+      },
+      "page_faults_per_sample": {
+        "prefill": {
+          "before": [
+            0
+          ],
+          "after": [
+            0
+          ]
+        },
+        "decode": {
+          "before": [
+            0
+          ],
+          "after": [
+            0
+          ]
+        }
+      }
+    },
+    "qwen": {
+      "summary": {
+        "prefill": {
+          "medians_ms": {
+            "before": 557.8043,
+            "after": 556.2280499999999
+          },
+          "pooled_ratio": 0.9971741881516509,
+          "median_paired_ratio": 0.995685311301388,
+          "stable": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 107.261,
+            "after": 107.23915
+          },
+          "pooled_ratio": 0.9997962912894715,
+          "median_paired_ratio": 0.9962841378885429,
+          "stable": true
+        }
+      },
+      "page_faults_per_sample": {
+        "prefill": {
+          "before": [
+            148
+          ],
+          "after": [
+            0
+          ]
+        },
+        "decode": {
+          "before": [
+            148
+          ],
+          "after": [
+            0
+          ]
+        }
+      }
+    }
+  },
+  "conclusion": "Caller buffer reuse removes the repeated148 faults per Qwen phase in this short paired screen. Pooled timing medians move under0.4%, so no material latency improvement or release acceptance is claimed. Shared linear computation remains the next profiling target."
+}

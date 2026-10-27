@@ -1,0 +1,351 @@
+{
+  "format": "leaf-validation-evidence-v1",
+  "archive": "evidence.zip",
+  "archive_sha256": "f88bc8f90d17db4e0799540838855511bfac69262a4c9af6f0a023bfaa1b9166",
+  "archive_bytes": 247901,
+  "entries": {
+    "checks/all-units.xml": {
+      "bytes": 198300,
+      "sha256": "93011fcc955f9642a324ed122a3516e74780137a888e1c80a02c4fd2bc22d516"
+    },
+    "checks/bind_installed.py": {
+      "bytes": 1764,
+      "sha256": "e521d54142692870dbd1835cfba86565570ccc766f2e012b740338428839ce69"
+    },
+    "checks/installed-check.json": {
+      "bytes": 3254,
+      "sha256": "3b22802ac51406736b9c32ab43e88b6795200c8be2c8a9409ce14c0b7bea350e"
+    },
+    "checks/installed-code-binding.json": {
+      "bytes": 1128,
+      "sha256": "f5e00a75a11d01db340a1f5b696d09c05cc99e4d787d91c214800b9721ee7835"
+    },
+    "checks/native-counter-check.json": {
+      "bytes": 402,
+      "sha256": "f5b2725efae4599e5a79feb46636d29b088e03d8cc1fce0e7d292b8781f2bffc"
+    },
+    "checks/output-buffer-api.json": {
+      "bytes": 2557,
+      "sha256": "fa17ee2bd1cb9bc2b346e7dc05153d9e1a567c374a7e3b7fe08fbaf676b09b4c"
+    },
+    "checks/output-reuse-trained/quality.json": {
+      "bytes": 10925,
+      "sha256": "55e01c13106be73229bb8260005532ad4fd8240a67068fdb812b6c914b347709"
+    },
+    "checks/output-reuse-units.xml": {
+      "bytes": 198567,
+      "sha256": "f7bf009b4a949379451b7998edc7aec0062fe20d60a58155f4a09b804b8af0b7"
+    },
+    "checks/qwen-output-reuse/comparison.json": {
+      "bytes": 42526,
+      "sha256": "df3a2f643ee6ff9e973b203a74f49c4db26eb6bda63e8813ff570be0da7f5271"
+    },
+    "checks/qwen-policy-cost/comparison.json": {
+      "bytes": 41858,
+      "sha256": "e0ad158d2326dfe1b9bb0a8ddadc64f625563a3b81170ecc01421405d11e9554"
+    },
+    "checks/smol-output-reuse/comparison.json": {
+      "bytes": 42278,
+      "sha256": "6fb85e7e04ca4951462d8c9fde5a06cda8c8190f5250ac4202c6492859e0619e"
+    },
+    "checks/smol-policy-cost/comparison.json": {
+      "bytes": 41526,
+      "sha256": "d40bfb59d72f4f90bf586401e23846c405ce65db543729da224d2de0b66f09ec"
+    },
+    "checks/trained/quality.json": {
+      "bytes": 10925,
+      "sha256": "e8324ba3a2d17220cc418c40735f0d23bc7db904f2a64a2e547ad87e70cb03d6"
+    },
+    "checks/verify_installed.py": {
+      "bytes": 3149,
+      "sha256": "5a534426f0f497fe5b5fdc8977d38406c467892022b48f16f980df436f0ee3fb"
+    },
+    "counter-baseline-source/engine/CMakeLists.txt": {
+      "bytes": 10298,
+      "sha256": "409f1c4c9fe4ccf082955babac5b38c00d7cf89f81e981bee9543f0867ee7a2c"
+    },
+    "counter-baseline-source/engine/include/leaf/graph_parser.h": {
+      "bytes": 3149,
+      "sha256": "8c24fb7b3f17c3ff37a5ef8ef05f759b67fb138ca58c22cdb3e7533db963a40d"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/accurate_fp32.h": {
+      "bytes": 5601,
+      "sha256": "8403917025df3144f94daeff8c3d69e8942dfdd4364bd32c2ec187b07c5d07e6"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/attention_vector.h": {
+      "bytes": 11700,
+      "sha256": "39bc94565fac9ef6c9dac9e8e15423870bbd03f66511bf85e7a4607179add5b1"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/conv.h": {
+      "bytes": 2097,
+      "sha256": "bd9e79e2c355053b29cd3ab589271f1aa1c8fdcbe07c4ce56228d0fdb58142ba"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/gelu.h": {
+      "bytes": 3818,
+      "sha256": "763bd850d1c17f35b4761c1864c45e47b1a1e16533d35e48fca3fc570c9f9bcc"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/gelu_erf.h": {
+      "bytes": 6310,
+      "sha256": "4018f0716985c4bd3c4c08922d7f318e096a3117d12fbfaf05b50d384af4e457"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/gemm.h": {
+      "bytes": 1299,
+      "sha256": "c3f1b98c11595c55c80940460bc251c062adfacbdec42bea3b689234caf35d46"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/gemv_pair.h": {
+      "bytes": 2547,
+      "sha256": "c2e711bdac52d4fc6e7ad49d789c566b3dae0565d982b70747ea3241d0d4d5ef"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/mlp_panel.h": {
+      "bytes": 3958,
+      "sha256": "fdb2b4e5db74666e6aad36dd91a21c40e5f033ff76f3195dbae83c87fcd68601"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/row_reuse.h": {
+      "bytes": 4862,
+      "sha256": "a6b8d0f11da1c5e975d5c759e3a770857dcb0742569a70d09726ad93de320569"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/silu_gate.h": {
+      "bytes": 4937,
+      "sha256": "8ec5a8492f9f5862c7ea04c8aeac17abe194eb4ced877f65a75ab37bfa84f926"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/source_bf16.h": {
+      "bytes": 2858,
+      "sha256": "69374b1f7ed67f766b916eadd15e77b54c36431a64f1e79cb78d4b4b986c1b91"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/token_panel.h": {
+      "bytes": 21564,
+      "sha256": "6ce626d7c2525fd2f547d21381b0878bb96f5d500a4aa74709c59f73ca385c97"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/transformer.h": {
+      "bytes": 3174,
+      "sha256": "cfa8211527d01c00f54caf326748cd310fddaed02319bce21dcc32fb86726375"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/unrolled_token.h": {
+      "bytes": 6335,
+      "sha256": "fdc75b368ddac5782cc3e3397fda1aa50acc2be27c059f8b8157f97b90f43da4"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/weight_panel.h": {
+      "bytes": 12746,
+      "sha256": "bed2a79653d605ed1c8d47e341d4dec205d14a785be8a0edf82276c73dcb81c2"
+    },
+    "counter-baseline-source/engine/include/leaf/kernels/wide_token.h": {
+      "bytes": 8105,
+      "sha256": "882aa624742e2562c0a0b7c77971bfc20e643d3a6cfc404d554bb3204bf17834"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/arena.h": {
+      "bytes": 1250,
+      "sha256": "33b86e2fd404b28227291b9e581c47931661ca056e20bbe4ce6c7368a54c9ed6"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/benchmark_counters.h": {
+      "bytes": 6510,
+      "sha256": "1ac150f48022467b6746c5187fcde69d963c2cac56df1de8d952a48214add007"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/decoder.h": {
+      "bytes": 1662,
+      "sha256": "0c61fd92c78565d5ece1ee865696beee72d1006ff16677a2b98d100a1458afc4"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/decoder_config.h": {
+      "bytes": 1395,
+      "sha256": "0f8c35fefa163e3032a6251df0aeec1c7fc9de1aa16058608fcb69fd539dc74b"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/embedding.h": {
+      "bytes": 694,
+      "sha256": "11b6e0b3b72d5bf5b9392f0e810b815fc3cd178f4bf9b8c634ab5e6d883269de"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/executor.h": {
+      "bytes": 1821,
+      "sha256": "d5ce61316843a8f14f91d517e20f081db3af7f1ae644b477fd401dae41b6298d"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/host_support.h": {
+      "bytes": 8657,
+      "sha256": "916a8693d9735fa59299fb28ff938d62d1be8017661462075a10bbc392bcd292"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/kv_cache.h": {
+      "bytes": 1729,
+      "sha256": "d22314dab3e3e9004a1e3adabd87aae760658efdbe3b11efa06937fa38608315"
+    },
+    "counter-baseline-source/engine/include/leaf/runtime/worker_affinity.h": {
+      "bytes": 5440,
+      "sha256": "d438ec6fa264da051194c1b5adcc5a568e9888c42894ccec7a0604cb8b76c40e"
+    },
+    "counter-baseline-source/engine/kernels/conv2d.cpp": {
+      "bytes": 1723,
+      "sha256": "056f969326add255d2dcbab33514a2301cbad158480e0e725b3963afd0dff556"
+    },
+    "counter-baseline-source/engine/kernels/conv2d.h": {
+      "bytes": 829,
+      "sha256": "e7306ad079c59918c67444b1e33ab2b5eb1ab471962618ff8efcc87f60ee9d31"
+    },
+    "counter-baseline-source/engine/kernels/gemm.cpp": {
+      "bytes": 4109,
+      "sha256": "9fe37d790880eebeb3b3f664c883663a22954083a1a268f9a6dc77143c04dfc2"
+    },
+    "counter-baseline-source/engine/kernels/gemm.h": {
+      "bytes": 500,
+      "sha256": "cf3a45aa349872c1c10eba5a51a3f3d01d36ccfe553af0e5ad51811a310688d0"
+    },
+    "counter-baseline-source/engine/kernels/im2col.cpp": {
+      "bytes": 2857,
+      "sha256": "106d5640df7fa0b124c691d28e7f141d7e91b75f8dc7307438b6ffa911aaccb3"
+    },
+    "counter-baseline-source/engine/kernels/im2col.h": {
+      "bytes": 1308,
+      "sha256": "e2ae20e1bd96b92ec57d8f6c4f062d2dd7b3ec587b6d855078c5b4f65af49420"
+    },
+    "counter-baseline-source/engine/src/decoder.cpp": {
+      "bytes": 75937,
+      "sha256": "9f878d9c2ac4fb2e7b60633bd36bfda0339035c3595195d30ca17ed630720f2f"
+    },
+    "counter-baseline-source/engine/src/embedding.cpp": {
+      "bytes": 13453,
+      "sha256": "7defbd8a92af86d027d9aedfcc57d39df896a6fa67c19de7e44bb57c37c44d2e"
+    },
+    "counter-baseline-source/engine/src/executor.cpp": {
+      "bytes": 50138,
+      "sha256": "ced47bf73b8d8136b65b14a124c23c378f813728d7ebd2e605a0566d38262b22"
+    },
+    "counter-baseline-source/engine/src/graph_parser.cpp": {
+      "bytes": 13869,
+      "sha256": "1dfbaecead2ce39d65a1df87af978fcbf4684de4fb2ce260720021f33817b60b"
+    },
+    "counter-baseline-source/engine/src/kernels/conv.cpp": {
+      "bytes": 7584,
+      "sha256": "f56dcb7a8c8e50ba096e6f1c1d281305523056d1a00011026cc40d1c9e66644d"
+    },
+    "counter-baseline-source/engine/src/kernels/gemm.cpp": {
+      "bytes": 6861,
+      "sha256": "19a327db5334a706009f7c610a962e0ee7bebf07053d5344f34360964da75f2c"
+    },
+    "counter-baseline-source/engine/src/kernels/transformer.cpp": {
+      "bytes": 10305,
+      "sha256": "554a7cc7c0ea585124ad94f0e4b97ce0ac2746aa37b5fd8cc49eb8e625344a29"
+    },
+    "counter-baseline-source/engine/src/kv_cache.cpp": {
+      "bytes": 4095,
+      "sha256": "0055f46f96a75607082f87c2e1dc98c621f75c730360550fa3d6be96c2b99ad3"
+    },
+    "counter-baseline-source/engine/src/main_bench.cpp": {
+      "bytes": 4907,
+      "sha256": "9f668e8c21652a9890c8a08c6badc962a2788ee6d894010be685cc00c7c6ca72"
+    },
+    "counter-baseline-source/engine/src/main_dataset.cpp": {
+      "bytes": 6084,
+      "sha256": "73b0f64ab320c87d4ce0a027393a60eb3a8585ee3c8087ce86afeacfb8c14a3e"
+    },
+    "counter-baseline-source/engine/src/main_decoder.cpp": {
+      "bytes": 16071,
+      "sha256": "95eecdddc1ace8003cde5d7ca35fc01f7856c1dac4f2f591e71ede109c6815f1"
+    },
+    "counter-baseline-source/engine/src/main_embed.cpp": {
+      "bytes": 2798,
+      "sha256": "9702093915f318700f22c20a0ccf3935961be1eda2477441a911de0c1d679d32"
+    },
+    "counter-baseline-source/engine/src/main_infer.cpp": {
+      "bytes": 4545,
+      "sha256": "cbe1c37e5653efe8641ac1d4df001cc7c0e1282ec2210aaed6b57c9fc5897869"
+    },
+    "counter-baseline-source/engine/src/main_parse_info.cpp": {
+      "bytes": 2495,
+      "sha256": "b1ec11f87e9af18d2b1381abea96e9c42e6ae7e62107f733255a4f9711ac44e3"
+    },
+    "counter-baseline-source/engine/tests/CMakeLists.txt": {
+      "bytes": 1351,
+      "sha256": "4b0f78ab7ea1caae9ecc5f028dff302c1386cc5b46b11f0771ca21fe7feb3a05"
+    },
+    "counter-baseline-source/engine/tests/debug_conv_direct.cpp": {
+      "bytes": 7897,
+      "sha256": "5fd66b3616d41e93665ec7ca8b2d70c70feefdf907924aad789eca2342eaa757"
+    },
+    "counter-baseline-source/engine/tests/test_executor.cpp": {
+      "bytes": 4866,
+      "sha256": "e5682f4b4307f5cc0643a4aba66902827bc50e5ab669a3c61a4006647a8812af"
+    },
+    "counter-baseline-source/engine/tests/test_executor_buffer_pool.cpp": {
+      "bytes": 8035,
+      "sha256": "1d69a2ce44f9ad9150a34236d8d1667b42da4d53f7bbd517682d54b6dc46f956"
+    },
+    "counter-baseline-source/engine/tests/test_gemm.cpp": {
+      "bytes": 3536,
+      "sha256": "b4064ccf7391fef14defd165017c909d59a4c3fe417a230d5a691ddabe58954b"
+    },
+    "counter-baseline-source/engine/tests/test_im2col.cpp": {
+      "bytes": 2855,
+      "sha256": "4042876084e618c85c73d6237744fbf82e7781fb05adecc1b692da4c80c04ada"
+    },
+    "counter-baseline-source/engine/tests/verify_conv_vs_python.cpp": {
+      "bytes": 4634,
+      "sha256": "e0ff37f12ea1fd1376174ca307631bfc47d998b37839a4eec08f1ce270fcedef"
+    },
+    "counter-baseline-source/sources.json": {
+      "bytes": 6002,
+      "sha256": "9812b2e0ceedf1595ece2605a41b3c38b6186add883a3b98f3d990c2fb41059b"
+    },
+    "source/engine/CMakeLists.txt": {
+      "bytes": 10989,
+      "sha256": "3ffe7235f7281dcb62025f3c2ab3130194ba4585cd69caf08cda28401cb058b2"
+    },
+    "source/engine/include/leaf/runtime/benchmark_counters.h": {
+      "bytes": 6510,
+      "sha256": "1ac150f48022467b6746c5187fcde69d963c2cac56df1de8d952a48214add007"
+    },
+    "source/engine/include/leaf/runtime/decoder.h": {
+      "bytes": 2110,
+      "sha256": "060b2057641b56c325dc08346b065eaeea2ee7863de13813ee21aae270eb5525"
+    },
+    "source/engine/src/decoder.cpp": {
+      "bytes": 76092,
+      "sha256": "bf08951431cf76eb68f8af034a3e59053b084f229866c4cdb2929d9ad730b2a9"
+    },
+    "source/engine/src/main_decoder.cpp": {
+      "bytes": 16286,
+      "sha256": "ab0c93d61221329039ba970d496688df40bf65df9f682b0eb4c85780179be2a0"
+    },
+    "source/leaf/cli.py": {
+      "bytes": 35742,
+      "sha256": "8b37d554f1f34e57739f8c97ac5f883098cc1a9bf6704213b038e9195a6373d2"
+    },
+    "source/pyproject.toml": {
+      "bytes": 1810,
+      "sha256": "59ccf268ae1d9d7661c604cd05031b772e38f079dabd7a64dbf10a4f469281bb"
+    },
+    "source/tests/native/test_benchmark_counters.cpp": {
+      "bytes": 5372,
+      "sha256": "fdaeb476667c2e57604dfe2cadf3e339bc08f11f6ecd0cb73daccab2458a6f82"
+    },
+    "source/tests/native/test_decoder_output_buffer.cpp": {
+      "bytes": 10298,
+      "sha256": "f713db2e9c7a5a4b4f922be3786033a99818ff4979862b668b1839c9437a416a"
+    },
+    "source/tests/unit/test_benchmark_counters.py": {
+      "bytes": 6250,
+      "sha256": "3c6606561ba1b212756dc97626d644008e007d6738d2e1944f7807fede411a5d"
+    },
+    "source/tests/unit/test_fp32_math_benchmark.py": {
+      "bytes": 12127,
+      "sha256": "ff21d8f3e91c49ec84473a93859227bb75a9e887a773b053011a20ee4bd173b0"
+    },
+    "source/tools/benchmark_counters.py": {
+      "bytes": 6262,
+      "sha256": "a780c27c844fb4f87f79be3e0b163e115d08efc23ef5c9d4b072c77626666e8b"
+    },
+    "source/tools/benchmark_fp32_math.py": {
+      "bytes": 13322,
+      "sha256": "74c3a54ba9d36d1019ef4abdc37513ed75a4ac818b86c0b65fc658fd149bb708"
+    },
+    "source/tools/decoder_validation.py": {
+      "bytes": 13631,
+      "sha256": "6ef464302e950b5ca6272f72db3fadd85a821ba2a7987411b4e807adfb35f02d"
+    },
+    "checks/policy-cost-harness.py": {
+      "bytes": 12258,
+      "sha256": "3c7f9225c918671cf348931b0a7f7f91b77566e48f31b37c7b79ac0da8adc984"
+    }
+  },
+  "omitted": [
+    "model weights",
+    "raw logits",
+    "executables",
+    "installed packages",
+    "wheel binaries"
+  ]
+}

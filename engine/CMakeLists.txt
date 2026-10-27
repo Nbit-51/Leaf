@@ -79,6 +79,13 @@ add_executable(leaf_accurate_fp32_test ../tests/native/test_accurate_fp32.cpp)
 target_include_directories(leaf_accurate_fp32_test PRIVATE include)
 add_test(NAME leaf_accurate_fp32_test COMMAND leaf_accurate_fp32_test)
 
+add_executable(leaf_benchmark_counters_test ../tests/native/test_benchmark_counters.cpp)
+target_include_directories(leaf_benchmark_counters_test PRIVATE include)
+if(WIN32)
+  target_link_libraries(leaf_benchmark_counters_test PRIVATE psapi)
+endif()
+add_test(NAME leaf_benchmark_counters_test COMMAND leaf_benchmark_counters_test)
+
 add_executable(leaf_kernel_bench ../benchmark/native_benchmark.cpp)
 target_link_libraries(leaf_kernel_bench PRIVATE leaf_optimized_kernels)
 
@@ -148,6 +155,19 @@ if(NOT MSVC AND LEAF_ENABLE_AVX2)
 endif()
 if(WIN32)
   target_link_libraries(leaf_decoder_final_rows_tests PRIVATE psapi)
+endif()
+
+# Artifact-backed API check, invoked explicitly with a local decoder fixture.
+# It is not a fixture-free CTest; no model is downloaded by the test target.
+add_executable(leaf_decoder_output_buffer_tests ../tests/native/test_decoder_output_buffer.cpp
+  src/decoder.cpp src/kv_cache.cpp src/kernels/transformer.cpp)
+target_include_directories(leaf_decoder_output_buffer_tests PRIVATE include)
+target_link_libraries(leaf_decoder_output_buffer_tests PRIVATE Threads::Threads)
+if(NOT MSVC AND LEAF_ENABLE_AVX2)
+  target_compile_options(leaf_decoder_output_buffer_tests PRIVATE -mno-avx2 -mno-fma)
+endif()
+if(WIN32)
+  target_link_libraries(leaf_decoder_output_buffer_tests PRIVATE psapi)
 endif()
 
 # Header-only token-panel primitive exercises portable scalar execution and

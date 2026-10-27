@@ -144,7 +144,10 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
                high_qos: bool = False, capture_profile: bool = False,
                windows_above_normal: bool = False,
                worker_cpus: list[int] | None = None,
-               fp32_math: str = 'fast') -> tuple[np.ndarray, dict]:
+               fp32_math: str = 'fast',
+               benchmark_counters: bool = False) -> tuple[np.ndarray, dict]:
+    if benchmark_counters and mode != 'bench':
+        raise ValueError('Benchmark counters require bench mode')
     if fp32_math not in ('fast', 'accurate'):
         raise ValueError('FP32 math must be fast or accurate')
     if fp32_math == 'accurate' and activation_bits not in (None, 32):
@@ -162,7 +165,7 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
         command = [str(executable.resolve()), str(artifact.resolve()), str(request),
                    str(output), str(metrics), mode, str(threads), str(runs),
                    str(warmup), str(generate), str(int(scalar)), str(chunk)]
-        if activation_bits is not None or worker_cpus is not None or fp32_math == 'accurate':
+        if activation_bits is not None or worker_cpus is not None or fp32_math == 'accurate' or benchmark_counters:
             command.append(str(activation_bits if activation_bits is not None else 32))
         if worker_cpus is not None:
             from leaf.affinity import validate_worker_cpus
@@ -170,6 +173,8 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
             command.append(','.join(map(str, selected)))
         if fp32_math == 'accurate':
             command.append('--fp32-math=accurate')
+        if benchmark_counters:
+            command.append('--benchmark-counters')
         policy = None
         if high_qos or windows_above_normal:
             from leaf.power import set_child_high_qos
@@ -194,6 +199,9 @@ def run_native(executable: Path, artifact: Path, sequences: list[list[int]],
         if completed.returncode:
             raise RuntimeError(f"Native decoder failed ({completed.returncode}): {completed.stderr.strip()}")
         measured = json.loads(metrics.read_text())
+        if benchmark_counters:
+            from tools.benchmark_counters import validate_benchmark_counters
+            validate_benchmark_counters(measured, runs * len(sequences))
         if fp32_math == 'accurate' and measured.get('fp32_math') != 'accurate':
             raise ValueError('Native FP32 math policy differs from the requested accurate execution')
         if worker_cpus is not None and measured.get('worker_cpus') != list(worker_cpus):

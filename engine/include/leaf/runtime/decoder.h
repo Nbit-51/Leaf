@@ -24,6 +24,12 @@ public:
     // Append tokens to this session; logits are [tokens, vocab] when all_logits
     // is true, or only [vocab] for generation/latency measurements.
     std::vector<float> forward(const std::vector<std::uint32_t>& tokens, bool all_logits = false);
+    // Append tokens and write the same logits into caller-owned storage. The
+    // buffer is resized/overwritten on every call; keeping its capacity avoids
+    // repeated output allocation. Its contents after an error are unspecified.
+    // Like forward(), this mutates the session and is not reentrant.
+    void forward_into(const std::vector<std::uint32_t>& tokens, std::vector<float>& logits,
+                      bool all_logits = false);
     std::uint32_t vocabulary_size() const;
     std::uint32_t eos_token() const;
     bool is_eos_token(std::uint32_t token) const;
