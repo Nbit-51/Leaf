@@ -228,5 +228,5 @@
       }
     }
   },
-  "conclusion": "Caller buffer reuse removes the repeated148 faults per Qwen phase in this short paired screen. Pooled timing medians move under0.4%, so no material latency improvement or release acceptance is claimed. Shared linear computation remains the next profiling target."
+  "conclusion": "Caller buffer reuse removes the repeated 148 faults per Qwen phase in this short paired screen. Pooled timing medians move under 0.4%, so no material latency improvement or release acceptance is claimed. Shared linear computation remains the next profiling target."
 }
