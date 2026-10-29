@@ -119,6 +119,34 @@ public:
         std::size_t tokens_;
         Clock::time_point start_{};
     };
+    // Nested projection roles are reported separately from the nonoverlapping
+    // phase breakdown. Disabled diagnostics never read the clock or aggregate.
+    class LinearScope {
+    public:
+        LinearScope(DecoderProfile& profile, bool mlp, bool packing, std::size_t tokens)
+            : profile_(profile.enabled_ ? &profile : nullptr),
+              part_((packing ? 2u : 0u) + (mlp ? 0u : 1u)), tokens_(tokens) {
+            if (profile_) start_ = Clock::now();
+        }
+        ~LinearScope() {
+            if (profile_) {
+                auto& total = profile_->linear_details_[profile_->bucket_][part_];
+                ++total.calls; total.tokens += tokens_;
+                total.milliseconds += std::chrono::duration<double, std::milli>(Clock::now() - start_).count();
+            }
+        }
+        LinearScope(const LinearScope&) = delete;
+        LinearScope& operator=(const LinearScope&) = delete;
+    private:
+        using Clock = std::chrono::steady_clock;
+        DecoderProfile* profile_;
+        unsigned part_;
+        std::size_t tokens_;
+        Clock::time_point start_{};
+    };
+    void packed_input(bool reused) noexcept {
+        if (enabled_) ++(reused ? reuses_[bucket_] : packs_[bucket_]);
+    }
     void emit() const noexcept {
         if (!enabled_) return;
         // Destruction must not turn a successful inference into a failure if
@@ -145,6 +173,18 @@ public:
                 }
                 output << '}';
             }
+            output << "},\"linear_details\":{";
+            static const char* linear_names[] = {"mlp_total", "other_total", "mlp_pack", "other_pack"};
+            for (std::size_t bucket = 0; bucket < linear_details_.size(); ++bucket) {
+                output << (bucket ? ",\"decode\":{" : "\"prefill\":{");
+                for (std::size_t part = 0; part < 4; ++part) {
+                    const auto& total = linear_details_[bucket][part];
+                    output << (part ? "," : "") << '\"' << linear_names[part]
+                           << "\":{\"calls\":" << total.calls << ",\"tokens\":" << total.tokens
+                           << ",\"milliseconds\":" << total.milliseconds << '}';
+                }
+                output << ",\"packs\":" << packs_[bucket] << ",\"reuses\":" << reuses_[bucket] << '}';
+            }
             output << "}}\n"; std::cerr << output.str();
         } catch (...) {}
     }
@@ -152,6 +192,8 @@ private:
     struct Total { std::uint64_t calls = 0, tokens = 0; double milliseconds = 0; };
     static constexpr auto names_count = static_cast<std::size_t>(Phase::Count);
     std::array<std::array<Total, names_count>, 2> totals_{};
+    std::array<std::array<Total, 4>, 2> linear_details_{};
+    std::array<std::uint64_t, 2> packs_{}, reuses_{};
     bool enabled_ = false;
     std::size_t bucket_ = 0;
 };
@@ -879,6 +921,7 @@ struct Decoder::Impl {
     }
     void linear(const float* input, std::size_t tokens, const std::string& name, std::vector<float>& output,
                 bool mlp_projection = false, bool reuse_packed = false) {
+        DecoderProfile::LinearScope role_scope(profile, mlp_projection, false, tokens);
 #ifdef LEAF_DIAGNOSTIC_TIMING
         leaf::diagnostics::Scope linear_detail(tokens, mlp_projection ? leaf::diagnostics::MlpTotal : leaf::diagnostics::OtherTotal);
 #endif
@@ -929,26 +972,31 @@ struct Decoder::Impl {
         }
         const bool packed_float = float_tiles && (weight.bits == 32 || weight.bits == 16) && tokens >= 8 &&
                                   (!bias || bias->bits == 32);
-        bool vector_pack = false;
+        bool vector_pack = optimized_fp32 && avx;
 #ifdef LEAF_EXPERIMENTAL_MLP_PACK
-        vector_pack = mlp_projection && avx;
+        vector_pack = vector_pack || (mlp_projection && avx);
 #else
         (void)mlp_projection;
 #endif
         if (accurate_fp32) vector_pack = optimized_fp32 && avx;
         if (packed_float) {
+            DecoderProfile::LinearScope packing_scope(profile, mlp_projection, true, tokens);
 #ifdef LEAF_DIAGNOSTIC_TIMING
             leaf::diagnostics::Scope pack_detail(tokens, mlp_projection ? leaf::diagnostics::MlpPack : leaf::diagnostics::OtherPack);
 #endif
             // Reuse requires an explicit unchanged-input promise within this
             // projection group; equal addresses alone are insufficient.
-            const bool plain = accurate_fp32 && avx && scaling == weights.end();
+            const bool plain = (accurate_fp32 || optimized_fp32) && avx && scaling == weights.end();
             const bool reuse = plain && reuse_packed && packed_source == input &&
                                packed_tokens == tokens && packed_columns == weight.cols;
             if (!reuse) packed_float_input.pack(input, tokens, weight.cols, weight.cols, vector_pack);
+            profile.packed_input(reuse);
             packed_source = plain ? input : nullptr;
             packed_tokens = tokens;
             packed_columns = weight.cols;
+        } else {
+            // An intervening nonpacked projection ends any reusable group.
+            packed_source = nullptr;
         }
         output.resize(tokens * weight.rows);
         used_vnni = used_vnni || vnni_integer;

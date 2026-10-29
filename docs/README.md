@@ -10,6 +10,7 @@ architecture, current results and scope. Use this index for details and evidence
 | Model onboarding, runtime setup and quality-only evaluation | [Model and output checks](model-onboarding.md) |
 | Original BF16 output-head storage with FP32 computation | [Source-preserving storage](source-bf16.md) |
 | Explicit accurate FP32 execution and its trained-output checks | [Accumulation policy](shared-accumulation.md#native-accuracy-option--october-26-2026) |
+| Shared FP32 input packing, safeguards and measured scope | [Input packing](shared-input-packing.md) |
 | Optional per-thread CPU placement, cleanup and validation | [Worker placement](worker-placement.md) |
 | Optional Windows CPU-work counters and paired math diagnostics | [Benchmark accounting](benchmark-counters.md) |
 | Installation, local/Hub models, quantization and cache controls | [Usage](project-reference.md#2-install-and-run-with-one-command) |
@@ -61,6 +62,7 @@ should not be combined into a universal speedup claim.
 | October 20 rejected prefill scheduling and worker-placement diagnosis | [Prefill jobs checkpoint](checkpoint-2026-10-20-prefill-jobs.md) |
 | October 22 explicit worker placement and validation | [Worker placement checkpoint](checkpoint-2026-10-22-worker-placement.md) |
 | October 27 benchmark accounting and output-buffer reuse | [Current runtime checkpoint](checkpoint-2026-10-27-output-buffers.md) |
+| October 29 shared input packing, quality controls and profile | [Packing checkpoint](checkpoint-2026-10-29-shared-packing.md) |
 | Pythia attention-score sensitivity and retained tolerance failures | [Numerical investigation](pythia-numerics-handoff.md) |
 | Matched Pythia-70M Leaf/llama.cpp baseline and next prefill experiment | [Runtime comparison](pythia-runtime-comparison.md) |
 

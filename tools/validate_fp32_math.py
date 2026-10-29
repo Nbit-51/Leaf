@@ -22,7 +22,11 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary',type=Path,required=True)
     parser.add_argument('--directory',type=Path,required=True)
+    parser.add_argument('--full-fast-reference',type=Path)
+    parser.add_argument('--full-fast-quality',type=Path)
     args=parser.parse_args()
+    if (args.full_fast_reference is None)!=(args.full_fast_quality is None):
+        parser.error('Provide the fast reference and its bound quality report together')
     output=args.directory.resolve()
     if not output.is_relative_to((ROOT/'build').resolve()) or output==(ROOT/'build').resolve():
         parser.error('Use a fresh directory inside build/')
@@ -48,11 +52,21 @@ def main():
             raise ValueError('Incomplete trained reference qualification')
         if proof['hashes'][str(reference)]!=digest(reference) or proof['hashes'][str(prepared)]!=digest(prepared):
             raise ValueError('Qualified reference identity changed')
+        fast_reference=args.full_fast_reference.resolve() if args.full_fast_reference else ordinary
+        fast_proof=None
         paths=[binary,reference,ordinary,qualified,prepared,source_quality,Path(__file__),ROOT/'tools/decoder_validation.py']
+        if args.full_fast_quality:
+            fast_proof=json.loads(args.full_fast_quality.read_text())
+            if not (fast_proof.get('complete') is True and fast_proof.get('passed') is True and
+                    fast_proof.get('hashes',{}).get(str(fast_reference))==digest(fast_reference)):
+                raise ValueError('Require complete bound fast-reference qualification')
+            paths.extend([fast_reference,args.full_fast_quality.resolve()])
+            record['full_fast_reference']=str(fast_reference)
+            record['fast_scope']='Exact regression to previous ordinary Leaf; does not resolve its existing PyTorch tolerance misses'
         record['hashes']={str(p):digest(p) for p in paths}
 
         def compare(artifact,ids,*,policy='accurate',**kwargs):
-            prior=reference if policy=='accurate' else ordinary
+            prior=reference if policy=='accurate' else fast_reference
             a,_=run_native(prior,artifact,[ids],**kwargs)
             b,metrics=run_native(binary,artifact,[ids],fp32_math=policy,**kwargs)
             exact=bool(np.array_equal(a.view('<u4'),b.view('<u4')))
@@ -61,6 +75,8 @@ def main():
         for name,row in models['models'].items():
             artifact=Path(row['before'])
             if digest(artifact)!=row['before_sha256']:raise ValueError('FP32 artifact changed')
+            if fast_proof and fast_proof['hashes'].get(str(artifact))!=digest(artifact):
+                raise ValueError('Fast-reference artifact differs from its qualified proof')
             # Qualification also proved source-preserving storage exact. Audit
             # actual FP32 and source-BF16 inputs rather than assuming interchange.
             stored=Path(row['after'])
@@ -78,6 +94,21 @@ def main():
                 cases['blocks'].append(dict(index=index,**item));write_record(report,record)
                 print(name,'block',index+1,'exact',item['exact'],flush=True)
                 if not item['exact']:raise ValueError('Full trained logits differ from the qualified accurate reference')
+            if fast_proof:
+                cases['full_fast_blocks']=[]
+                for index,ids in enumerate(sequences):
+                    item=compare(artifact,ids,policy='fast')
+                    cases['full_fast_blocks'].append(dict(index=index,**item));write_record(report,record)
+                    print(name,'fast regression block',index+1,'exact',item['exact'],flush=True)
+                    if not item['exact']:raise ValueError('Full ordinary FP32 logits changed')
+                cases['fast_generations']=[]
+                for case in gold['generations']:
+                    _,a=run_native(fast_reference,artifact,[case['input_ids']],mode='generate',generate=16)
+                    _,b=run_native(binary,artifact,[case['input_ids']],mode='generate',generate=16)
+                    exact=a['generated_tokens']==b['generated_tokens']
+                    cases['fast_generations'].append(dict(prompt=case['prompt'],exact=exact))
+                    if not exact:raise ValueError('Ordinary generation changed')
+                write_record(report,record)
             for case in gold['generations']:
                 _,metrics=run_native(binary,artifact,[case['input_ids']],mode='generate',generate=16,fp32_math='accurate')
                 exact=metrics['generated_tokens']==case['reference_tokens']

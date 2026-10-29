@@ -184,6 +184,15 @@ if(NOT MSVC)
 endif()
 add_test(NAME leaf_token_panel_tests COMMAND leaf_token_panel_tests)
 
+# Packing is a bit-preserving transpose, including FP32 payloads that are not
+# valid arithmetic inputs. Keep SIMD runtime-dispatched in this standalone test.
+add_executable(leaf_token_pack_reuse_tests ../tests/native/test_token_pack_reuse.cpp)
+target_include_directories(leaf_token_pack_reuse_tests PRIVATE include)
+if(NOT MSVC AND LEAF_ENABLE_AVX2)
+  target_compile_options(leaf_token_pack_reuse_tests PRIVATE -mno-avx2 -mno-fma)
+endif()
+add_test(NAME leaf_token_pack_reuse_tests COMMAND leaf_token_pack_reuse_tests)
+
 add_executable(leaf_gelu_tests ../tests/native/test_gelu.cpp)
 target_include_directories(leaf_gelu_tests PRIVATE include)
 if(NOT MSVC AND LEAF_ENABLE_AVX2)
