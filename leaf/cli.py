@@ -265,21 +265,25 @@ def select_configuration(directory: Path, runtime: Path, requested: str, threads
 
 
 def prepare(snapshot: Path, directory: Path, bits: int, plan: Path | None = None,
-            source_bf16_head: bool = False) -> Path:
-    if source_bf16_head and bits != 32:
+            source_bf16_head: bool = False, source_bf16: bool = False) -> Path:
+    if source_bf16 and source_bf16_head:
+        raise ValueError("Select one source BF16 storage scope")
+    if (source_bf16_head or source_bf16) and bits != 32:
         raise ValueError("Source-preserving BF16 storage requires FP32 computation")
-    if source_bf16_head:
-        from tools.export_decoder import source_bf16_head_available
-        if not source_bf16_head_available(snapshot, plan):
+    if source_bf16 or source_bf16_head:
+        from tools.export_decoder import source_bf16_available, source_bf16_head_available
+        available = source_bf16_available if source_bf16 else source_bf16_head_available
+        if not available(snapshot, plan):
             return prepare(snapshot, directory, bits, plan)
-    suffix = "-source-bf16" if source_bf16_head else ""
+    suffix = "-source-bf16-matrices" if source_bf16 else "-source-bf16" if source_bf16_head else ""
     artifact = directory / f"decoder-{bits}{suffix}.leaf"
     if not artifact.is_file():
         from tools.export_decoder import export_decoder
         print(f"Preparing {bits}-bit native artifact...", file=sys.stderr)
-        options = {"source_bf16_head": True} if source_bf16_head else {}
+        options = ({"source_bf16": True} if source_bf16 else
+                   {"source_bf16_head": True} if source_bf16_head else {})
         record = export_decoder(snapshot, artifact, bits, plan_path=plan, **options)
-        artifact.with_suffix('.json').write_text(json.dumps(record, indent=2) + "\n")
+        artifact.with_suffix('.json').write_text(json.dumps(record, indent=2) + "\n", encoding='utf-8')
     return artifact
 
 
@@ -353,14 +357,18 @@ def run(args):
     from leaf.affinity import pin_cpu, validate_worker_cpus
     worker_cpus = validate_worker_cpus(getattr(args, 'worker_cpus', None), getattr(args, 'threads', 1), args.cpu)
     pin_cpu(args.cpu)
-    source_storage = getattr(args, 'source_bf16_head', False)
+    source_matrices = getattr(args, 'source_bf16', False)
+    source_head = getattr(args, 'source_bf16_head', False)
+    if source_matrices and source_head:
+        raise ValueError('Select one source BF16 storage scope')
+    source_storage = source_matrices or source_head
     fp32_math = getattr(args, 'fp32_math', 'fast')
     if fp32_math not in ('fast', 'accurate'):
         raise ValueError('--fp32-math must be fast or accurate')
     if fp32_math == 'accurate' and (args.bits not in ('auto','32') or args.activation_bits not in ('auto','32')):
         raise ValueError('--fp32-math accurate requires unquantized weights and FP32 activations (auto or 32)')
     if source_storage and (args.bits not in ('auto','32') or args.activation_bits not in ('auto','32')):
-        raise ValueError("--source-bf16-head requires FP32 weights and activations (auto or 32)")
+        raise ValueError("Source BF16 storage requires FP32 weights and activations (auto or 32)")
     start = time.perf_counter()
     cache = cache_root()
     runtime = None
@@ -372,6 +380,9 @@ def run(args):
             info = check(runtime, 'leaf_decoder')
             if worker_cpus is not None and info.get('worker_affinity_supported') is not True:
                 raise RuntimeError('The selected native runtime does not support --worker-cpus; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
+            if source_matrices and (info.get('source_bf16_matrices_supported') is not True or
+                                    6 not in info.get('artifact_versions', [])):
+                raise RuntimeError('The selected native runtime does not support --source-bf16; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
             modes = info.get('fp32_math_modes')
             if fp32_math == 'accurate' and (not isinstance(modes, list) or 'accurate' not in modes):
                 raise RuntimeError('The selected native runtime does not support --fp32-math accurate; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
@@ -381,7 +392,7 @@ def run(args):
     directory = model_directory(snapshot, cache, args.plan)
     if source_storage:
         bits, activation_bits = 32, 32
-        artifact = prepare(snapshot, directory, bits, args.plan, source_bf16_head=True)
+        artifact = prepare(snapshot, directory, bits, args.plan, source_bf16_head=source_head, source_bf16=source_matrices)
     elif fp32_math == 'accurate':
         # Existing auto-quantization profiles do not qualify this math policy.
         bits, activation_bits = 32, 32
@@ -525,7 +536,10 @@ def main():
                         help="accurate uses bounded FP32 projection sums and a wider RMS reduction; requires unquantized FP32 compute")
     runner.add_argument("--activation-bits", choices=("auto", "8", "32"), default="auto",
                         help="dynamic INT8 or floating activations in quantized linear kernels")
-    runner.add_argument("--source-bf16-head", action="store_true",
+    storage = runner.add_mutually_exclusive_group()
+    storage.add_argument("--source-bf16", action="store_true",
+                         help="retain original BF16 matrix weights with FP32 compute; F32/F16 sources stay F32")
+    storage.add_argument("--source-bf16-head", action="store_true",
                         help="retain original BF16 output/tied embedding storage with FP32 compute; F32 sources stay F32")
     runner.add_argument("--raw", action="store_true", help="skip chat formatting")
     runner.add_argument("--offline", action="store_true")

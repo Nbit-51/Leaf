@@ -1,0 +1,437 @@
+{
+  "complete": true,
+  "scope": "Correctness-qualified optional original BF16 matrix storage; final six-row latency pending.",
+  "timing_qualified": false,
+  "acceptance_timing": false,
+  "source_value_bits_preserved": true,
+  "trained_passed": true,
+  "final_binary": "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-matrices-20261030\\cache\\native\\84ef3bff71eeb111\\leaf_decoder.exe",
+  "full_units_initial_96_rows": {
+    "passed": 1513,
+    "skipped": 2
+  },
+  "focused_final_6_rows": {
+    "passed": 176,
+    "skipped": 1
+  },
+  "trained_full_logit_values": 411828224,
+  "model_artifact_bytes": {
+    "smol": {
+      "before_bytes": 1447312000,
+      "after_bytes": 723794560,
+      "bytes_ratio": 0.5000957360956034
+    },
+    "qwen": {
+      "before_bytes": 1976158464,
+      "after_bytes": 988236032,
+      "bytes_ratio": 0.5000793458636321
+    }
+  },
+  "installed_final_passed": true,
+  "initial_96_rows_timing_tradeoff": {
+    "smol": {
+      "prefill": {
+        "medians_ms": {
+          "before": 490.59235,
+          "after": 533.5753
+        },
+        "pooled_ratio": 1.0876143910519598,
+        "median_paired_ratio": 1.088723179757401,
+        "stability": {
+          "before": {
+            "pooled": {
+              "passed": true,
+              "sample_count": 14,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 482.8832,
+              "p90_ms": 502.99796000000003,
+              "p90_p10_ratio": 1.0416555390620341,
+              "reason": "passed"
+            },
+            "individual": [
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 481.74791999999997,
+                "p90_ms": 499.52804,
+                "p90_p10_ratio": 1.036907517940088,
+                "reason": "passed",
+                "reported_median_ms": 487.6639,
+                "samples_median_ms": 487.6639,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              },
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 490.34318,
+                "p90_ms": 500.89322000000004,
+                "p90_p10_ratio": 1.0215156250363266,
+                "reason": "passed",
+                "reported_median_ms": 492.4651,
+                "samples_median_ms": 492.4651,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              }
+            ]
+          },
+          "after": {
+            "pooled": {
+              "passed": true,
+              "sample_count": 14,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 529.64954,
+              "p90_ms": 541.90021,
+              "p90_p10_ratio": 1.0231297661468752,
+              "reason": "passed"
+            },
+            "individual": [
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 531.21374,
+                "p90_ms": 539.5545999999999,
+                "p90_p10_ratio": 1.015701514045928,
+                "reason": "passed",
+                "reported_median_ms": 533.8828,
+                "samples_median_ms": 533.8828,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              },
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 529.5829200000001,
+                "p90_ms": 541.68874,
+                "p90_p10_ratio": 1.0228591586752835,
+                "reason": "passed",
+                "reported_median_ms": 533.1773,
+                "samples_median_ms": 533.1773,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              }
+            ]
+          }
+        },
+        "stable": true
+      },
+      "decode": {
+        "medians_ms": {
+          "before": 76.0154,
+          "after": 48.46885
+        },
+        "pooled_ratio": 0.6376188246065929,
+        "median_paired_ratio": 0.6360783557739196,
+        "stability": {
+          "before": {
+            "pooled": {
+              "passed": true,
+              "sample_count": 14,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 74.25511999999999,
+              "p90_ms": 78.51177,
+              "p90_p10_ratio": 1.0573246666357823,
+              "reason": "passed"
+            },
+            "individual": [
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 73.65777999999999,
+                "p90_ms": 77.31252,
+                "p90_p10_ratio": 1.0496178407766297,
+                "reason": "passed",
+                "reported_median_ms": 75.5751,
+                "samples_median_ms": 75.5751,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              },
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 74.98393999999999,
+                "p90_ms": 79.12335999999999,
+                "p90_p10_ratio": 1.05520408770198,
+                "reason": "passed",
+                "reported_median_ms": 76.509,
+                "samples_median_ms": 76.509,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              }
+            ]
+          },
+          "after": {
+            "pooled": {
+              "passed": true,
+              "sample_count": 14,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 47.653439999999996,
+              "p90_ms": 49.82443,
+              "p90_p10_ratio": 1.0455578862722188,
+              "reason": "passed"
+            },
+            "individual": [
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 47.8914,
+                "p90_ms": 49.9223,
+                "p90_p10_ratio": 1.0424063610585617,
+                "reason": "passed",
+                "reported_median_ms": 48.6385,
+                "samples_median_ms": 48.6385,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              },
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 47.77338,
+                "p90_ms": 49.33042,
+                "p90_p10_ratio": 1.0325922093014979,
+                "reason": "passed",
+                "reported_median_ms": 48.0919,
+                "samples_median_ms": 48.0919,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              }
+            ]
+          }
+        },
+        "stable": true
+      }
+    },
+    "qwen": {
+      "prefill": {
+        "medians_ms": {
+          "before": 556.91155,
+          "after": 623.58215
+        },
+        "pooled_ratio": 1.1197148811153224,
+        "median_paired_ratio": 1.117321247483586,
+        "stability": {
+          "before": {
+            "pooled": {
+              "passed": true,
+              "sample_count": 14,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 552.1701800000001,
+              "p90_ms": 563.35984,
+              "p90_p10_ratio": 1.020264875586001,
+              "reason": "passed"
+            },
+            "individual": [
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 552.86048,
+                "p90_ms": 563.61604,
+                "p90_p10_ratio": 1.0194543838619103,
+                "reason": "passed",
+                "reported_median_ms": 561.5509,
+                "samples_median_ms": 561.5509,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              },
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 551.8372400000001,
+                "p90_ms": 558.77002,
+                "p90_p10_ratio": 1.0125630883482963,
+                "reason": "passed",
+                "reported_median_ms": 554.3379,
+                "samples_median_ms": 554.3379,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              }
+            ]
+          },
+          "after": {
+            "pooled": {
+              "passed": true,
+              "sample_count": 14,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 618.7328,
+              "p90_ms": 630.16058,
+              "p90_p10_ratio": 1.018469652812975,
+              "reason": "passed"
+            },
+            "individual": [
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 618.73656,
+                "p90_ms": 625.4901199999999,
+                "p90_p10_ratio": 1.0109150815332455,
+                "reason": "passed",
+                "reported_median_ms": 623.1535,
+                "samples_median_ms": 623.1535,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              },
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 619.17422,
+                "p90_ms": 638.44366,
+                "p90_p10_ratio": 1.0311211923519685,
+                "reason": "passed",
+                "reported_median_ms": 623.5978,
+                "samples_median_ms": 623.5978,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              }
+            ]
+          }
+        },
+        "stable": true
+      },
+      "decode": {
+        "medians_ms": {
+          "before": 97.3535,
+          "after": 65.2521
+        },
+        "pooled_ratio": 0.6702594154293374,
+        "median_paired_ratio": 0.6700043281958881,
+        "stability": {
+          "before": {
+            "pooled": {
+              "passed": true,
+              "sample_count": 14,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 94.59539,
+              "p90_ms": 100.3913,
+              "p90_p10_ratio": 1.0612705333737722,
+              "reason": "passed"
+            },
+            "individual": [
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 94.73378,
+                "p90_ms": 99.43632,
+                "p90_p10_ratio": 1.0496395266820346,
+                "reason": "passed",
+                "reported_median_ms": 96.7584,
+                "samples_median_ms": 96.7584,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              },
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 94.90162,
+                "p90_ms": 101.60668000000001,
+                "p90_p10_ratio": 1.0706527454431234,
+                "reason": "passed",
+                "reported_median_ms": 98.0303,
+                "samples_median_ms": 98.0303,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              }
+            ]
+          },
+          "after": {
+            "pooled": {
+              "passed": true,
+              "sample_count": 14,
+              "required_samples": 5,
+              "max_p90_p10_ratio": 1.25,
+              "p10_ms": 63.76181,
+              "p90_ms": 66.68076,
+              "p90_p10_ratio": 1.0457789702017557,
+              "reason": "passed"
+            },
+            "individual": [
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 63.486979999999996,
+                "p90_ms": 67.89168,
+                "p90_p10_ratio": 1.0693795798760628,
+                "reason": "passed",
+                "reported_median_ms": 65.2144,
+                "samples_median_ms": 65.2144,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              },
+              {
+                "passed": true,
+                "sample_count": 7,
+                "required_samples": 5,
+                "max_p90_p10_ratio": 1.25,
+                "p10_ms": 64.51384,
+                "p90_ms": 65.89196000000001,
+                "p90_p10_ratio": 1.0213616179102036,
+                "reason": "passed",
+                "reported_median_ms": 65.2898,
+                "samples_median_ms": 65.2898,
+                "median_consistent": true,
+                "median_relative_tolerance": 1e-05,
+                "median_absolute_tolerance_ms": 1e-06
+              }
+            ]
+          }
+        },
+        "stable": true
+      }
+    }
+  },
+  "final_6_rows_timing_pending": true,
+  "alignment_allocator_change_rejected": true,
+  "system_power_settings_changed": false,
+  "main_merged": false
+}

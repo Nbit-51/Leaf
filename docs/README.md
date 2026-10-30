@@ -8,7 +8,7 @@ architecture, current results and scope. Use this index for details and evidence
 | Topic | Reference |
 |---|---|
 | Model onboarding, runtime setup and quality-only evaluation | [Model and output checks](model-onboarding.md) |
-| Original BF16 output-head storage with FP32 computation | [Source-preserving storage](source-bf16.md) |
+| Original BF16 matrix/output-head storage with FP32 computation | [Source-preserving storage](source-bf16.md) |
 | Explicit accurate FP32 execution and its trained-output checks | [Accumulation policy](shared-accumulation.md#native-accuracy-option--october-26-2026) |
 | Shared FP32 input packing, safeguards and measured scope | [Input packing](shared-input-packing.md) |
 | Optional per-thread CPU placement, cleanup and validation | [Worker placement](worker-placement.md) |
@@ -63,6 +63,7 @@ should not be combined into a universal speedup claim.
 | October 22 explicit worker placement and validation | [Worker placement checkpoint](checkpoint-2026-10-22-worker-placement.md) |
 | October 27 benchmark accounting and output-buffer reuse | [Current runtime checkpoint](checkpoint-2026-10-27-output-buffers.md) |
 | October 29 shared input packing, quality controls and profile | [Packing checkpoint](checkpoint-2026-10-29-shared-packing.md) |
+| October 30 MLP alignment investigation and broader source storage | [Runtime checkpoint](checkpoint-2026-10-30-gemm-alignment.md) |
 | Pythia attention-score sensitivity and retained tolerance failures | [Numerical investigation](pythia-numerics-handoff.md) |
 | Matched Pythia-70M Leaf/llama.cpp baseline and next prefill experiment | [Runtime comparison](pythia-runtime-comparison.md) |
 

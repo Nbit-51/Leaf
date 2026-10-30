@@ -94,7 +94,7 @@ template <class T> void array(std::ostream& output, const std::vector<T>& values
 
 int main(int argc, char** argv) {
     if (argc == 2 && std::string(argv[1]) == "--runtime-info") {
-        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4,5],\"source_bf16_head_supported\":true,\"benchmark_power_guard\":true"
+        std::cout << "{\"runtime\":\"leaf_decoder\",\"artifact_versions\":[2,3,4,5,6],\"source_bf16_head_supported\":true,\"source_bf16_matrices_supported\":true,\"benchmark_power_guard\":true"
                   << ",\"worker_affinity_supported\":" << (leaf::runtime::detail::worker_affinity_supported() ? "true" : "false")
                   << ",\"worker_spin_limit_us\":50"
                   << ",\"fp32_math_modes\":[\"fast\",\"accurate\"],\"fp32_math_default\":\"fast\""

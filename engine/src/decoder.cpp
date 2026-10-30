@@ -83,6 +83,33 @@ void check(bool valid, const std::string& message) {
     if (!valid) throw std::runtime_error("Leaf decoder: " + message);
 }
 
+// v6 extends original-source BF16 storage to canonical matrices only. Norms,
+// biases and calibration vectors keep FP32 storage; a shape alone does not
+// authorize a new tensor role. v5 retains its narrower historical I/O policy.
+bool source_bf16_matrix(const std::string& name, std::size_t rows, std::size_t layers) {
+    if (rows <= 1) return false;
+    if (name == "lm_head.weight" || name == "model.embed_tokens.weight" ||
+        name == "model.position_embeddings.weight") return true;
+    const std::string prefix = "model.layers.";
+    if (name.compare(0, prefix.size(), prefix) != 0) return false;
+    const auto end = name.find('.', prefix.size());
+    if (end == std::string::npos || end == prefix.size() ||
+        (end > prefix.size() + 1 && name[prefix.size()] == '0')) return false;
+    std::size_t layer = 0;
+    for (auto i = prefix.size(); i < end; ++i) {
+        if (name[i] < '0' || name[i] > '9') return false;
+        const auto digit = static_cast<std::size_t>(name[i] - '0');
+        if (layer > (std::numeric_limits<std::size_t>::max() - digit) / 10) return false;
+        layer = layer * 10 + digit;
+    }
+    if (layer >= layers) return false;
+    const auto role = name.substr(end + 1);
+    return role == "self_attn.q_proj.weight" || role == "self_attn.k_proj.weight" ||
+           role == "self_attn.v_proj.weight" || role == "self_attn.o_proj.weight" ||
+           role == "mlp.up_proj.weight" || role == "mlp.gate_proj.weight" ||
+           role == "mlp.down_proj.weight";
+}
+
 // Optional diagnostics only: fixed operation classes keep profiling independent
 // of import-adapter names. A disabled scope never reads the clock or aggregates.
 class DecoderProfile {
@@ -752,10 +779,13 @@ struct Decoder::Impl {
         Reader reader{mapping}; reader.require(8);
         const bool window_format = std::memcmp(mapping.data, "LEAFDC03", 8) == 0;
         const bool multi_eos_format = std::memcmp(mapping.data, "LEAFDC04", 8) == 0;
-        const bool source_bf16_format = std::memcmp(mapping.data, "LEAFDC05", 8) == 0;
+        const bool source_bf16_io_format = std::memcmp(mapping.data, "LEAFDC05", 8) == 0;
+        const bool source_bf16_matrix_format = std::memcmp(mapping.data, "LEAFDC06", 8) == 0;
+        const bool source_bf16_format = source_bf16_io_format || source_bf16_matrix_format;
         check(source_bf16_format || multi_eos_format || window_format || std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
         reader.position = 8;
-        check(reader.u32() == (source_bf16_format ? 5u : multi_eos_format ? 4u : window_format ? 3u : 2u), "unsupported decoder artifact version");
+        check(reader.u32() == (source_bf16_matrix_format ? 6u : source_bf16_io_format ? 5u :
+                              multi_eos_format ? 4u : window_format ? 3u : 2u), "unsupported decoder artifact version");
         check(!source_bf16_format || activation_bits == 32, "source BF16 storage requires FP32 activations");
         const auto count = reader.u32(); const auto base = reader.u64();
         h = reader.u32(); f = reader.u32(); heads = reader.u32(); kv_heads = reader.u32();
@@ -804,9 +834,13 @@ struct Decoder::Impl {
             check(rank == 2 && weight.rows && weight.cols &&
                   (weight.bits == 32 || weight.bits == 8 || weight.bits == 4 ||
                    (source_bf16_format && weight.bits == 16 &&
-                    (name == "lm_head.weight" || name == "model.embed_tokens.weight"))), "invalid tensor " + name);
+                    (source_bf16_matrix_format ? source_bf16_matrix(name, weight.rows, layers) :
+                     name == "lm_head.weight" || name == "model.embed_tokens.weight"))), "invalid tensor " + name);
             if (source_bf16_format)
                 check(weight.bits == 32 || weight.bits == 16, "source BF16 storage cannot mix quantized weights");
+            if (source_bf16_matrix_format)
+                check(scale_count == 0 && weight.group == 0,
+                      "source BF16 matrix storage cannot contain quantization metadata");
             if (weight.bits == 16) ++source_bf16_tensors;
             const std::uint64_t elements = std::uint64_t(weight.rows) * weight.cols;
             check(elements <= std::numeric_limits<std::size_t>::max() / 4 &&
@@ -830,6 +864,7 @@ struct Decoder::Impl {
                 prepare_signed_sums(weight);
 #endif
             if (name.size() >= 12 && name.compare(name.size() - 12, 12, ".input_scale") == 0) {
+                check(!source_bf16_matrix_format, "source BF16 matrix storage cannot contain calibrated input scales");
                 check(weight.bits == 32 && weight.rows == 1, "invalid calibrated input scale tensor");
                 const auto* factors = reinterpret_cast<const float*>(weight.data);
                 for (std::size_t j = 0; j < weight.cols; ++j)
@@ -1006,7 +1041,9 @@ struct Decoder::Impl {
                 // Expand a bounded row block and reuse exactly the same FP32
                 // GEMM, including experimental reduction policies. Generation
                 // uses the direct BF16 GEMV below, with no expansion buffer.
-                const auto block = weight.bits == 16 ? std::min<std::size_t>(96, last - first) : last - first;
+                // Match one six-row output tile so converted weights stay near the
+                // active input panel instead of competing with it for L2 capacity.
+                const auto block = weight.bits == 16 ? std::min<std::size_t>(6, last - first) : last - first;
                 std::vector<float> expanded;
                 if (weight.bits == 16) expanded.resize(block * weight.cols);
                 for (std::size_t begin = first; begin < last; begin += block) {

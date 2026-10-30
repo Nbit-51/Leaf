@@ -83,6 +83,8 @@ def parse_args():
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--before-binary', type=Path, help='Optional prior runtime for an isolated implementation comparison')
     parser.add_argument('--before-quality-report', type=Path)
+    parser.add_argument('--before-artifact', type=Path,
+                        help='Optional bound prior storage artifact for an exact source-value comparison')
     parser.add_argument('--before-math', choices=('fast', 'accurate'), default='fast')
     parser.add_argument('--after-math', choices=('fast', 'accurate'), default='accurate')
     parser.add_argument('--threads', type=int, default=1)
@@ -97,6 +99,8 @@ def parse_args():
     args = parser.parse_args()
     if (args.before_binary is None) != (args.before_quality_report is None):
         parser.error('Provide prior binary and its bound trained quality together')
+    if args.before_artifact is not None and args.before_binary is None:
+        parser.error('Provide prior binary and its bound quality for a different storage artifact')
     if sys.platform != 'win32':
         parser.error('This power-audited diagnostic currently requires Windows')
     if (args.pairs < 2 or args.pairs % 2 or args.runs < 5 or args.warmup < 1 or
@@ -132,14 +136,17 @@ def main():
             raise ValueError('Clear inherited experiment, profiling and diagnostic policies')
         binary, artifact = args.binary.resolve(), args.artifact.resolve()
         validate_quality_binding(json.loads(args.quality_report.read_text()), binary, artifact)
+        before_artifact = getattr(args, 'before_artifact', None)
+        before_artifact = before_artifact.resolve() if before_artifact else artifact
         before_binary = getattr(args, 'before_binary', None)
         before_proof = getattr(args, 'before_quality_report', None)
         if before_binary is not None:
             before_binary = before_binary.resolve()
-            validate_quality_binding(json.loads(before_proof.read_text()), before_binary, artifact)
+            validate_quality_binding(json.loads(before_proof.read_text()), before_binary, before_artifact)
         else:
             before_binary = binary
         record['binaries'] = dict(before=str(before_binary), after=str(binary))
+        record['artifacts'] = dict(before=str(before_artifact), after=str(artifact))
         for executable in {binary, before_binary}:
             info = json.loads(subprocess.check_output([str(executable), '--runtime-info'], text=True))
             if not {'fast', 'accurate'}.issubset(info.get('fp32_math_modes', [])):
@@ -167,7 +174,7 @@ def main():
                  Path(__file__), ROOT/'tools/decoder_validation.py',
                  ROOT/'tools/benchmark_counters.py', ROOT/'leaf/power.py']
         if before_proof is not None:
-            paths.extend([before_binary, before_proof.resolve()])
+            paths.extend([before_binary, before_proof.resolve(), before_artifact])
         record['hashes'] = {str(path): digest(path) for path in paths}
         record['request'] = dict(token_count=len(ids), prefill_tokens=len(ids)-1,
                                  decode_tokens=1, reset_each_sample=True, all_token_logits=False)
@@ -184,7 +191,8 @@ def main():
                     write_record(report, record)
                     item['ac_before'] = require_benchmark_ac()
                     executable = before_binary if stage == 'before' else binary
-                    _, metrics = run_native(executable, artifact, [ids], mode='bench',
+                    selected_artifact = before_artifact if stage == 'before' else artifact
+                    _, metrics = run_native(executable, selected_artifact, [ids], mode='bench',
                         threads=args.threads, worker_cpus=args.worker_cpus,
                         runs=args.runs, warmup=args.warmup, activation_bits=32,
                         windows_above_normal=True, fp32_math=policy,

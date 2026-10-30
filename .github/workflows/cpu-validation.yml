@@ -29,13 +29,13 @@ jobs:
       - name: Configure portable build
         run: cmake -S engine -B build/ci -DCMAKE_BUILD_TYPE=Release -DLEAF_ENABLE_AVX2=OFF
       - name: Build native decoder and primitive tests
-        run: cmake --build build/ci --config Release --target leaf_decoder leaf_embed leaf_token_panel_tests leaf_attention_vector_tests leaf_silu_gate_tests leaf_source_bf16_tests leaf_worker_affinity_tests leaf_gelu_erf_tests leaf_decoder_final_rows_tests
-      - name: Token-panel, attention, SiLU, source storage and GELU correctness
-        run: ctest --test-dir build/ci -C Release --output-on-failure -R '^leaf_(token_panel|attention_vector|silu_gate|source_bf16|worker_affinity|gelu_erf)_tests$'
+        run: cmake --build build/ci --config Release --target leaf_decoder leaf_embed leaf_token_panel_tests leaf_token_pack_reuse_tests leaf_attention_vector_tests leaf_silu_gate_tests leaf_source_bf16_tests leaf_worker_affinity_tests leaf_gelu_erf_tests leaf_decoder_final_rows_tests
+      - name: Token panels, input packing, attention, SiLU, source storage and GELU correctness
+        run: ctest --test-dir build/ci -C Release --output-on-failure -R '^leaf_(token_panel|token_pack_reuse|attention_vector|silu_gate|source_bf16|worker_affinity|gelu_erf)_tests$'
       - name: Python decoder, CLI and dataset tests
         run: python -m pytest tests/unit/test_decoder_plan.py tests/unit/test_generation_policy.py tests/unit/test_decoder_precision_policy.py tests/unit/test_decoder_export_provenance.py tests/unit/test_decoder_latency_phases.py tests/unit/test_decoder_comparison.py tests/unit/test_core_scaling.py tests/unit/test_prefill_diagnostics.py tests/unit/test_datasets.py tests/unit/test_cli.py tests/unit/test_tokenizer_parity.py tests/unit/test_decoder_quality.py tests/unit/test_silu_gate_experiment.py tests/unit/test_affinity.py tests/unit/test_power.py tests/unit/test_packaging.py tests/unit/test_package_runtime.py tests/unit/test_benchmark_cli.py -q
       - name: Diagnostic telemetry contracts
-        run: python -m pytest tests/unit/test_windows_benchmark_diagnostics.py tests/unit/test_silu_release.py tests/unit/test_default_abba_target.py tests/unit/test_decoder_trace.py tests/unit/test_accumulation_acceptance.py tests/unit/test_model_inspection.py tests/unit/test_output_evaluation.py tests/unit/test_runtime_check.py tests/unit/test_ollama_validation.py -q
+        run: python -m pytest tests/unit/test_windows_benchmark_diagnostics.py tests/unit/test_gemm_alignment_diagnostic.py tests/unit/test_silu_release.py tests/unit/test_default_abba_target.py tests/unit/test_decoder_trace.py tests/unit/test_accumulation_acceptance.py tests/unit/test_model_inspection.py tests/unit/test_output_evaluation.py tests/unit/test_runtime_check.py tests/unit/test_ollama_validation.py -q
       - name: Embedding import and numerical contracts
         run: python -m pytest tests/unit/test_embedding_export.py tests/unit/test_embedding_reference.py tests/unit/test_embedding_cli.py tests/unit/test_embedding_download.py tests/unit/test_embedding_comparison.py tests/unit/test_embedding_diagnostics.py -q
       - name: Reduced bidirectional embedding validation
@@ -61,7 +61,7 @@ jobs:
         run: |
           runtime=build/ci/leaf_decoder
           if [ "${{ runner.os }}" = "Windows" ]; then runtime=build/ci/Release/leaf_decoder.exe; fi
-          LEAF_TEST_DECODER_BIN="$runtime" python -m pytest tests/unit/test_decoder_generation_format.py tests/unit/test_source_bf16.py tests/unit/test_worker_placement.py -q
+          LEAF_TEST_DECODER_BIN="$runtime" python -m pytest tests/unit/test_decoder_generation_format.py tests/unit/test_source_bf16.py tests/unit/test_source_bf16_matrices.py tests/unit/test_source_bf16_matrix_validation.py tests/unit/test_source_bf16_cli.py tests/unit/test_worker_placement.py -q
       - name: Final-layer last-logit and cache validation
         shell: bash
         run: |

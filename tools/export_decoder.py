@@ -52,6 +52,19 @@ def read_tensor(filename: Path, base: int, entry: dict) -> np.ndarray:
     return array.astype(np.float32, copy=False)
 
 
+def read_source_bf16(filename: Path, base: int, entry: dict) -> np.ndarray:
+    """Map original BF16 bits; never derive this storage by rounding F32."""
+    if entry["dtype"] != "BF16":
+        raise ValueError("Source-preserving BF16 payload requires an original BF16 tensor")
+    shape = tuple(entry["shape"])
+    start, end = entry["data_offsets"]
+    if (any(not isinstance(d, int) or d <= 0 for d in shape) or
+            start < 0 or end < start or end + base > filename.stat().st_size or
+            end - start != int(np.prod(shape)) * 2):
+        raise ValueError("Invalid safetensors tensor range")
+    return np.memmap(filename, dtype="<u2", mode="r", offset=base + start, shape=shape)
+
+
 def transform_array(array: np.ndarray, operations: list[dict]) -> np.ndarray:
     for operation in operations:
         if set(operation) == {"reshape"}:
@@ -135,33 +148,10 @@ def source_bf16_head_available(snapshot: Path, plan_path: Path | None = None) ->
     return entries[name]['dtype'] == 'BF16'
 
 
-def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int = 64,
-                   plan_path: Path | None = None, calibration_path: Path | None = None,
-                   alpha: float = 0.5, keep_fp32_tensors=None, int8_group_size: int = 0,
-                   source_bf16_head: bool = False) -> dict:
-    if bits not in (32, 8, 4):
-        raise ValueError("Precision must be 32, 8, or 4 bits")
-    if not isinstance(source_bf16_head, bool) or (source_bf16_head and (bits != 32 or calibration_path)):
-        raise ValueError("Source BF16 head storage requires unsmoothed FP32 computation")
-    if group_size <= 0 or group_size % 2:
-        raise ValueError("Group size must be positive and even")
-    if (not isinstance(int8_group_size, int) or isinstance(int8_group_size, bool) or
-            int8_group_size < 0 or int8_group_size % 2):
-        raise ValueError("INT8 group size must be zero (per row) or positive and even")
-    plan = load_snapshot_plan(snapshot, plan_path)
-    kept_fp32 = validate_fp32_tensors(plan, keep_fp32_tensors)
-    values = config_values(plan["config"])
-    # Old readers must reject new semantics rather than run full attention.
-    eos_tokens = eos_token_ids(plan["config"])
-    version = 4 if len(eos_tokens) > 1 else 3 if plan["config"].get("sliding_window", 0) else 2
-    magic = f"LEAFDC0{version}".encode("ascii")
-    generation_metadata = (struct.pack(f"<{len(eos_tokens) + 1}I", len(eos_tokens), *eos_tokens)
-                           if version == 4 else b"")
-    files = sorted(snapshot.glob("*.safetensors"))
-    if not files:
-        raise FileNotFoundError("Snapshot has no safetensors weights")
+def _source_catalog(snapshot: Path, plan: dict) -> dict:
+    """Resolve physical sources/declared aliases without reading weight payloads."""
     sources = {}
-    for filename in files:
+    for filename in sorted(snapshot.glob("*.safetensors")):
         base, entries = tensor_index(filename)
         for name, entry in entries.items():
             if name in sources:
@@ -179,7 +169,69 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
                 if source in sources and sources[source] != resolved:
                     raise ValueError(f"Conflicting source mappings for {source}")
                 sources[source] = resolved
+    return sources
+
+
+def _bf16_matrix_candidates(plan: dict, sources: dict, kept_fp32=()) -> tuple[set[str], dict]:
+    """Select original BF16 matrices and protect identical transformed aliases."""
+    shapes = tensor_shapes(plan["config"])
+    identities = {}
+    for name, specification in plan["tensors"].items():
+        source = sources.get(specification["source"])
+        if source is None:
+            continue
+        filename, base, entry = source
+        identities[name] = (str(filename), base, entry["dtype"], tuple(entry["shape"]),
+                            tuple(entry["data_offsets"]),
+                            json.dumps(specification.get("transforms", []), sort_keys=True),
+                            shapes.get(name))
+    protected = {identities[name] for name in kept_fp32 if name in identities}
+    compact = {name for name, shape in shapes.items()
+               if name.endswith(".weight") and shape[0] > 1 and name in identities and
+               sources[plan["tensors"][name]["source"]][2]["dtype"] == "BF16" and
+               identities[name] not in protected}
+    return compact, identities
+
+
+def source_bf16_available(snapshot: Path, plan_path: Path | None = None) -> bool:
+    """Metadata-only matrix eligibility; this does not verify source weight values."""
+    plan = load_snapshot_plan(snapshot, plan_path)
+    compact, _ = _bf16_matrix_candidates(plan, _source_catalog(snapshot, plan))
+    return bool(compact)
+
+def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int = 64,
+                   plan_path: Path | None = None, calibration_path: Path | None = None,
+                   alpha: float = 0.5, keep_fp32_tensors=None, int8_group_size: int = 0,
+                   source_bf16_head: bool = False, source_bf16: bool = False) -> dict:
+    if bits not in (32, 8, 4):
+        raise ValueError("Precision must be 32, 8, or 4 bits")
+    if not isinstance(source_bf16_head, bool) or (source_bf16_head and (bits != 32 or calibration_path)):
+        raise ValueError("Source BF16 head storage requires unsmoothed FP32 computation")
+    if (not isinstance(source_bf16, bool) or (source_bf16 and
+            (bits != 32 or calibration_path or source_bf16_head))):
+        raise ValueError("Source BF16 matrix storage requires unsmoothed FP32 computation and one storage scope")
+    if group_size <= 0 or group_size % 2:
+        raise ValueError("Group size must be positive and even")
+    if (not isinstance(int8_group_size, int) or isinstance(int8_group_size, bool) or
+            int8_group_size < 0 or int8_group_size % 2):
+        raise ValueError("INT8 group size must be zero (per row) or positive and even")
+    plan = load_snapshot_plan(snapshot, plan_path)
+    kept_fp32 = validate_fp32_tensors(plan, keep_fp32_tensors)
+    values = config_values(plan["config"])
+    # Old readers must reject new semantics rather than run full attention.
+    eos_tokens = eos_token_ids(plan["config"])
+    version = 4 if len(eos_tokens) > 1 else 3 if plan["config"].get("sliding_window", 0) else 2
+    magic = f"LEAFDC0{version}".encode("ascii")
+    generation_metadata = (struct.pack(f"<{len(eos_tokens) + 1}I", len(eos_tokens), *eos_tokens)
+                           if version == 4 else b"")
+    files = sorted(snapshot.glob("*.safetensors"))
+    if not files:
+        raise FileNotFoundError("Snapshot has no safetensors weights")
+    sources = _source_catalog(snapshot, plan)
     compact = set()
+    compact_identities = {}
+    if source_bf16:
+        compact, compact_identities = _bf16_matrix_candidates(plan, sources, kept_fp32)
     if source_bf16_head:
         head = plan["tensors"]["lm_head.weight"]
         head_source = sources.get(head["source"])
@@ -192,8 +244,9 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
             if not aliases.intersection(kept_fp32):
                 compact = aliases
     if compact:
-        version, magic = 5, b"LEAFDC05"
-        # v5 explicitly represents zero, one or multiple EOS tokens.
+        version = 6 if compact - {"lm_head.weight", "model.embed_tokens.weight"} else 5
+        magic = f"LEAFDC0{version}".encode("ascii")
+        # Both source-storage versions explicitly encode the complete EOS set.
         generation_metadata = struct.pack(f"<{len(eos_tokens) + 1}I", len(eos_tokens), *eos_tokens)
     expected = tensor_shapes(plan["config"])
     calibration = {}
@@ -238,14 +291,15 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
             raise ValueError(f"Missing tensor mapping/source for {name}")
         precision = bits if name.endswith(".weight") and rows > 1 and name not in kept_fp32 else 32
         if name in compact:
-            precision = 16  # v5: source-preserving BF16 storage, FP32 arithmetic.
+            precision = 16  # Original source values; arithmetic remains FP32.
         group = (int8_group_size or cols) if precision == 8 else min(group_size, cols) if precision == 4 else 0
         if precision == 8 and cols % group:
             raise ValueError(f"INT8 group {group} must divide input width {cols}")
         if precision == 4 and (cols % group or group % 2):
             raise ValueError(f"INT4 group {group} must divide even input width {cols}")
         identity = None if name.endswith(".input_scale") else (
-            head["source"] if name in compact else specification["source"],
+            (compact_identities[name] if source_bf16 else head["source"])
+            if name in compact else specification["source"],
             json.dumps(specification.get("transforms", []), sort_keys=True),
             rows, cols, precision, group, name if name in calibration else None)
         if identity in shared_payloads:
@@ -282,6 +336,19 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
                 if (start, scale_start) in written:
                     continue
                 written.add((start, scale_start))
+                if precision == 16:
+                    specification = plan["tensors"][name]
+                    raw = read_source_bf16(*sources[specification["source"]])
+                    raw = transform_array(raw, specification.get("transforms", []))
+                    if raw.shape not in ((rows, cols), (cols,) if rows == 1 else ()):
+                        raise ValueError(f"Incompatible transformed tensor {name}: {raw.shape}, expected {(rows, cols)}")
+                    if np.any((raw & 0x7f80) == 0x7f80):
+                        raise ValueError(f"Non-finite source tensor for {name}")
+                    payload = np.ascontiguousarray(raw.reshape(rows, cols), dtype="<u2")
+                    stream.seek(data_base + start)
+                    stream.write(payload.tobytes())
+                    del raw, payload
+                    continue
                 if name.endswith(".input_scale"):
                     array = input_scales[name]
                 else:
@@ -303,13 +370,7 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
                     input_scales[name.removesuffix(".weight") + ".input_scale"] = 1.0 / factors
                 if not np.isfinite(array).all():
                     raise ValueError(f"Non-finite export tensor {name}")
-                if precision == 16:
-                    raw = array.astype("<f4", copy=False).view("<u4")
-                    if np.any(raw & 0xffff):
-                        raise ValueError(f"Source-preserving BF16 storage would round {name}")
-                    payload, scale_array = (raw >> 16).astype("<u2"), None
-                else:
-                    payload, scale_array = (array.astype("<f4", copy=False), None) if precision == 32 else quantize(array, precision, group)
+                payload, scale_array = (array.astype("<f4", copy=False), None) if precision == 32 else quantize(array, precision, group)
                 stream.seek(data_base + start)
                 stream.write(payload.tobytes())
                 if scales:
@@ -327,9 +388,11 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
               "tensor_count": len(descriptors), "artifact_bytes": output.stat().st_size,
               "unique_payloads": len(written),
               "source": snapshot.name}
-    if source_bf16_head:
+    if source_bf16_head or source_bf16:
         record["source_bf16_tensors"] = sorted(compact)
         record["compute_bits"] = 32
+        if source_bf16:
+            record["source_bf16_scope"] = "matrices"
     if version >= 4:
         record["eos_token_ids"] = eos_tokens
     if calibration_metadata:
@@ -350,12 +413,15 @@ def main():
     parser.add_argument("--plan", type=Path, help="custom architecture-independent decoder plan")
     parser.add_argument("--calibration", type=Path, help="independently collected input-channel maxima")
     parser.add_argument("--alpha", type=float, default=0.5)
-    parser.add_argument("--source-bf16-head", action="store_true",
-                        help="retain original BF16 output/tied embedding storage; compute in FP32; F32 sources stay F32")
+    storage = parser.add_mutually_exclusive_group()
+    storage.add_argument("--source-bf16-head", action="store_true",
+                         help="retain original BF16 output/tied embedding storage; compute in FP32; F32 sources stay F32")
+    storage.add_argument("--source-bf16", action="store_true",
+                         help="retain original BF16 matrix storage, including interior projections; compute in FP32; F32/F16 sources stay F32")
     args = parser.parse_args()
     print(json.dumps(export_decoder(args.model, args.output, args.bits, args.group_size, args.plan,
                                     args.calibration, args.alpha, args.keep_fp32_tensors, args.int8_group_size,
-                                    args.source_bf16_head), indent=2))
+                                    args.source_bf16_head, args.source_bf16), indent=2))
 
 
 if __name__ == "__main__":

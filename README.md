@@ -60,18 +60,19 @@ leaf run ./models/decoder --offline --prompt "Explain CPU inference." --max-toke
 Chat templates are applied when supplied by the tokenizer configuration; use
 `--raw` for an unformatted prompt. Generation is currently greedy.
 
-For checkpoints with an original BF16 output head, optional compact storage keeps
+For checkpoints originally stored in BF16, optional matrix storage keeps
 those source values while computing in FP32:
 
 ```sh
-leaf run HuggingFaceTB/SmolLM2-360M-Instruct --bits 32 --source-bf16-head --prompt "Explain CPU inference." --max-tokens 32
+leaf run HuggingFaceTB/SmolLM2-360M-Instruct --bits 32 --source-bf16 --prompt "Explain CPU inference." --max-tokens 32
 ```
 
 FP32 source weights stay FP32. This uses a separate prepared cache; see
 [storage semantics, exact-output checks and measured scope](docs/source-bf16.md).
 
 For the explicit accurate FP32 accumulation policy, add `--fp32-math accurate`
-to `leaf run` or `leaf evaluate`. It can be combined with `--source-bf16-head`;
+to `leaf run` or `leaf evaluate`. For `leaf run`, it can be combined with
+`--source-bf16` or `--source-bf16-head`;
 weights remain unquantized and `--bits auto` selects FP32. The default math
 policy is unchanged. See [accuracy checks and scope](docs/shared-accumulation.md#native-accuracy-option--october-26-2026).
 
@@ -123,7 +124,7 @@ native-loader limitation.
 | CPU kernels | Windows FP32 packed GEMM with shared SIMD input panels and row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
 | Memory | Memory-mapped weights, reusable activation/logit buffers, per-session KV caches with dynamic growth and reset/reuse |
 | Threading | Persistent workers; optional CPU placement with bounded waits and caller-affinity restoration on Windows/Linux |
-| Precision | FP32 with optional accurate accumulation; original BF16 head storage with FP32 computation; weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
+| Precision | FP32 with optional accurate accumulation; original BF16 matrix storage with FP32 computation; weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
 | Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
@@ -163,7 +164,7 @@ flowchart TB
     N --> V["Mean pooling · dense projections · L2 normalization"]
     V --> F["Document/query vectors"]
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
-    P --> D["Native decoder artifact<br/>Optional original BF16 head/tied embedding storage"]
+    P --> D["Native decoder artifact<br/>Optional original BF16 matrix storage"]
     G --> A["Native graph artifact"]
     D --> R["C++ decoder · causal full/windowed attention<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]

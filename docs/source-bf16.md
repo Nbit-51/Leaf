@@ -2,7 +2,7 @@
 
 `leaf run --source-bf16-head` retains the checkpoint's original BF16 vocabulary
 projection weights, plus the embedding when tied to the same source tensor.
-All other weights remain FP32. This is an optional storage policy, not a change
+In this head-only mode, all other weights remain FP32. This is an optional storage policy, not a change
 to the model's computation precision or an automatic quantization profile.
 
 ```sh
@@ -25,7 +25,7 @@ The existing FP32 artifact and precision-selection profiles remain separate.
 
 BF16 values expand into FP32 by shifting their bits; no source information is
 discarded. AVX2 paired GEMV preserves the FP32 kernel's accumulator and reduction
-order. Multi-token projection expands bounded 96-row blocks for the existing
+order. Multi-token projection expands bounded row blocks for the existing
 FP32 GEMM. Scalar and column-tail paths preserve their corresponding arithmetic.
 CPU feature checks still select the portable fallback where needed.
 
@@ -106,8 +106,8 @@ Storage retains original source values; accumulation controls computation.
 The combined offline installed-wheel path passes without compiler or binary
 overrides. [Accurate-policy migration checks](shared-accumulation.md#native-accuracy-option--october-26-2026)
 preserve the trained outputs. No fresh storage speedup is inferred from those
-correctness checks. BF16 storage still covers the output head and tied embedding,
-not arbitrary interior projection tensors.
+correctness checks. These October 26 checks cover the output head and tied embedding; the broader
+optional matrix policy is described below.
 
 ## Benchmark sleep controls
 
@@ -123,3 +123,54 @@ does not request this display policy. The requests use Microsoft's documented
 [SetThreadExecutionState flags](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadexecutionstate)
 and do not change the persistent power plan. Manual sleep can still override
 the request and would invalidate a timing run.
+
+
+## Broader matrix storage (October 30, 2026)
+
+`leaf run MODEL --bits 32 --source-bf16 --fp32-math accurate --prompt "Hello"`
+retains eligible attention, MLP and embedding matrix weights that were originally
+stored in BF16. Norms and biases remain FP32. The existing `--source-bf16-head`
+option keeps its narrower behavior; select one scope. Both are opt-in. Ordinary
+FP32 preparation and automatic quantization profiles retain their existing policy.
+
+The exporter reads original BF16 payloads as unsigned 16-bit values and applies
+layout transforms without rounding. It checks source/transformed finite values
+and shares identical transformed aliases; protecting one identical alias protects
+the entire group. F32/F16 sources stay FP32 even when numerically representable
+in BF16. If there is no eligible matrix, normal FP32 preparation is reused.
+
+Interior BF16 matrices require artifact version 6. Older readers reject its magic;
+the CLI verifies native capability before downloading weights. The new cache is
+`decoder-32-source-bf16-matrices.leaf`, separate from FP32 and head-only caches.
+Existing versions 2-5 remain readable. Integer activations, mixed quantized weights,
+calibration vectors, BF16 norms/biases and quantization metadata are rejected.
+
+Computation remains the selected FP32 policy. Single-token projection converts
+original BF16 values directly into FP32 registers and uses the existing reduction.
+Prefill expands six-row blocks into FP32 before the existing GEMM. It does
+not retain a full FP32 weight copy. Conversion and scratch-buffer costs can affect
+prefill; a smaller artifact does not itself establish a latency improvement.
+
+`leaf evaluate` currently prepares ordinary FP32 artifacts. The separate developer
+`tools/validate_source_bf16_matrices.py` audits the new storage against a bound,
+previously qualified FP32 runtime/artifact, including all tensor bits, full trained
+logits, generation and cache/scalar/thread controls. This is an exact regression
+check, not a fresh PyTorch oracle or a relaxed accuracy gate. Ordinary fast math's
+previous strict-reference tolerance misses remain open.
+
+
+Current broader-storage validation: **1,513 unit checks** pass on the initial
+96-row version; **176 focused checks** and the complete trained audit pass on
+the selected six-row version. Both SmolLM2-360M and Qwen2.5-0.5B preserve all
+trained logit bits in fast/accurate policies, generation and cache/scalar/thread
+controls. Their artifacts occupy about half their original FP32 file sizes.
+The installed six-row wheel also passes compiler-free offline execution.
+
+The initial 96-row implementation's short, stable head-only-vs-matrix screens
+show 33-36% lower decode time with 9-12% higher prefill time. These are **initial
+candidate diagnostics**, not timing evidence for the selected six-row version.
+The smaller buffer's latency measurement is pending. No new default, competitor
+speed claim or full release timing qualification follows from these checks.
+
+[Source, raw diagnostics, test reports and qualification identities](../benchmark/validation/source-bf16-matrices/20261030/manifest.json)
+are retained with the [session checkpoint](checkpoint-2026-10-30-gemm-alignment.md).

@@ -260,3 +260,32 @@ def test_failed_native_launch_retains_the_attempted_pass(monkeypatch, tmp_path):
     assert record["current_pass"]["stage"] == "before"
     assert record["current_pass"]["fp32_math"] == "fast"
     assert record["current_pass"]["pair"] == 0
+
+
+def test_distinct_storage_artifacts_are_bound_and_forwarded_per_stage(monkeypatch, tmp_path):
+    benchmark, report = mock_main_setup(monkeypatch, tmp_path)
+    args = benchmark.parse_args()
+    args.before_binary, args.before_artifact = tmp_path/'before.exe', tmp_path/'before.leaf'
+    args.before_quality_report = tmp_path/'before-quality.json'
+    args.before_binary.write_bytes(b'prior runtime')
+    args.before_artifact.write_bytes(b'original source values')
+    args.before_quality_report.write_text('{}')
+    bound, invoked = [], []
+    monkeypatch.setattr(benchmark, 'validate_quality_binding', lambda proof, binary, artifact:
+                        bound.append((binary, artifact)))
+    monkeypatch.setattr(benchmark, 'require_benchmark_ac', lambda: dict(ac_line_status=1))
+    def run(binary, artifact, sequences, **kwargs):
+        invoked.append((binary, artifact))
+        return np.array([]), dict(fp32_math=kwargs['fp32_math'], threads=1,
+            activation_bits=32, benchmark_ac_checked=True,
+            prefill_samples_ms=[10.0]*5, decode_samples_ms=[5.0]*5,
+            prefill_p50_ms=10.0, decode_p50_ms=5.0)
+    monkeypatch.setattr(benchmark, 'run_native', run)
+    benchmark.main()
+    before, after = (args.before_binary, args.before_artifact), (args.binary, args.artifact)
+    assert bound == [after, before]
+    assert invoked == [before, after, after, before]
+    result = json.loads(report.read_text())
+    assert result['artifacts'] == dict(before=str(args.before_artifact), after=str(args.artifact))
+    assert result['hashes'][str(args.before_artifact)] == benchmark.digest(args.before_artifact)
+    assert result['complete'] is True and result['timing_qualified'] is False

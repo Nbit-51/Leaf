@@ -70,7 +70,7 @@ def native_decoder():
         pytest.skip("Set LEAF_TEST_DECODER_BIN to exercise the native artifact reader and generation")
     runtime = Path(configured).resolve()
     result = subprocess.run([str(runtime), "--runtime-info"], capture_output=True, text=True, check=True)
-    assert json.loads(result.stdout)["artifact_versions"] == [2, 3, 4, 5]
+    assert json.loads(result.stdout)["artifact_versions"] == [2, 3, 4, 5, 6]
     return runtime
 
 

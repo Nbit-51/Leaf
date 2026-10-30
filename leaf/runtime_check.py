@@ -13,8 +13,8 @@ def check(runtime: Path, name: str) -> dict:
         raise RuntimeError(f"Runtime startup timed out: {runtime}") from error
     try:
         info = json.loads(result.stdout)
-        expected = [2, 3, 4, 5] if name == "leaf_decoder" else [1]
-        if result.returncode or info.get("runtime") != name or info.get("artifact_versions") != expected:
+        expected = ([2, 3, 4, 5], [2, 3, 4, 5, 6]) if name == "leaf_decoder" else ([1],)
+        if result.returncode or info.get("runtime") != name or info.get("artifact_versions") not in expected:
             raise ValueError("Unexpected runtime identity or artifact support")
     except (ValueError, AttributeError) as error:
         raise RuntimeError(f"Runtime check failed for {runtime}. Reinstall a current platform wheel "
