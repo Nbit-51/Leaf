@@ -1,0 +1,20 @@
+{
+  "format": "leaf-post-run-power-review-v1",
+  "reported_date": "2026-11-08",
+  "timezone": "Asia/Calcutta",
+  "affected_workload": "qwen-acceptance: final AVX2 versus previous six-row BF16 implementation",
+  "report": "Owner confirmed unplugging or mains power loss during Qwen; exact interruption time is unknown.",
+  "run_started_utc": "2026-11-08T02:29:03.614566+00:00",
+  "run_finished_utc": "2026-11-08T02:34:35.631921+00:00",
+  "saved_ac_boundary_checks_passed": true,
+  "native_iteration_ac_guard_reported": true,
+  "effective_mode_guard_passed": true,
+  "existing_windows_power_event_lookup": "No matching Kernel-Power105/42/506/507 events found around the run.",
+  "timing_status": "provisional_power_interruption_reported",
+  "timing_eligible_for_claims": false,
+  "handling": "Preserve every raw sample and original mechanical gate result; do not select supposedly unaffected passes without interruption timestamps.",
+  "correctness_affected": false,
+  "smol_timing_review_changed": false,
+  "next_step": "Only when work resumes and AC is confirmed stable, perform a fresh Qwen timing confirmation before using its latency or non-regression result. No rerun now.",
+  "original_archive_sha256": "4e9b1685b1e63db26b8ac9a987610111d184b4da6060c9acc4990f94054ecafd"
+}

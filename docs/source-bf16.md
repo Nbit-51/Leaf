@@ -211,10 +211,17 @@ AC/effective-mode audits pass and every sample is retained.
 | Model | Prefill before->AVX2 | Observed reduction | Decode before->AVX2 |
 |---|---:|---:|---:|
 | SmolLM2-360M |521.22455->513.15220ms|1.55%|49.04615->48.82465ms|
-| Qwen2.5-0.5B |590.55420->587.68990ms|0.49%|63.91170->63.88160ms|
+| Qwen2.5-0.5B (provisional) |590.55420->587.68990ms|0.49% raw observation|63.91170->63.88160ms|
 
-Both miss the declared 2% prefill improvement threshold; decode passes
-non-regression. The guarded SIMD expansion is retained with the verified
+The original calculations miss the declared 2% prefill improvement threshold
+and pass the numerical decode non-regression threshold. Qwen timing is now
+**provisional**: after publication, the owner confirmed unplugging or mains
+power loss during its run. The exact interruption time is unknown. Saved
+checks reported AC throughout, but this does not override that report. Do not
+use Qwen latency or non-regression as qualified evidence until a fresh controlled
+confirmation. Smol timing and all correctness results retain their prior status.
+The [power follow-up](../benchmark/validation/bf16-expansion/20261108/power-followup.json)
+preserves this amendment without changing the raw archive. The guarded SIMD expansion is retained with the verified
 operator-level scope. No qualified 2% whole-model or competitor win is claimed.
 The default storage policy remains opt-in; do not mix these incremental results
 with head-only or other-runtime measurements.

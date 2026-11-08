@@ -57,7 +57,10 @@
           "median_paired_ratio": 0.992235180728338
         }
       },
-      "samples_per_runtime_per_phase": 186
+      "samples_per_runtime_per_phase": 186,
+      "timing_status": "provisional_power_interruption_reported",
+      "timing_eligible_for_claims": false,
+      "power_followup": "power-followup.json"
     }
   },
   "hashes": {
@@ -75,5 +78,9 @@
   "installed_wheel_and_code_binding_passed": true,
   "implementation_retained_scope": "Guarded bit-preserving operator improvement; both full model prefill gains remain below2%.",
   "source_cache_key": "5647d6c4f8000528",
-  "system_power_settings_changed": false
+  "system_power_settings_changed": false,
+  "post_run_power_review": {
+    "path": "power-followup.json",
+    "scope": "Qwen timing is provisional; original distributions/gate calculations and correctness records are preserved."
+  }
 }

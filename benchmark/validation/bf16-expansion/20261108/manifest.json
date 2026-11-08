@@ -299,5 +299,12 @@
       "sha256": "64256ff5603d2d4ab3f5cd9060bfb6a8cd4dec7df0fc4b7ab4dff5d575417ddb"
     }
   ],
-  "excluded": "No model weights, raw logits, executables or wheels."
+  "excluded": "No model weights, raw logits, executables or wheels.",
+  "amendments": [
+    {
+      "path": "power-followup.json",
+      "sha256": "b66f5e294e566427185979666763c91ae8962bd2b7bfadb52859bcf55f9bfece",
+      "scope": "Post-publication environment review supersedes Qwen timing eligibility; original archive remains unchanged."
+    }
+  ]
 }

@@ -105,3 +105,25 @@ Neither follow-up authorizes a new model or cross-runtime speed claim now.
 Do not repeat unchanged full correctness, rebuild the same source, reopen the
 alignment allocator idea, or merge/delete this branch. Preserve the unrelated
 embedding document and image. The user's efficiency mode remains unchanged.
+
+
+## Post-run power clarification: supersedes Qwen timing eligibility
+
+After the push, the owner confirmed unplugging or mains power loss during
+Qwen. The exact interruption time is unknown. Its final run covered
+07:59:03-08:04:35 IST. All saved boundary AC checks and the native per-iteration
+guard reported success; the effective-mode guard passed. A read-only lookup
+found no matching Windows Kernel-Power source/sleep events around the run.
+These observations cannot override the reported interruption.
+
+Treat the entire final Qwen latency/non-regression result as provisional.
+Preserve raw samples, stability calculations and the original archive unchanged;
+do not select supposedly unaffected passes. The public `power-followup.json`
+and summary annotation record this correction. Correctness, installed-wheel
+and operator-bit tests remain valid. Smol's timing status is unchanged.
+
+No new benchmark or correctness test was started. Stop after this documentation
+correction is pushed. At the next user-authorized session, a fresh Qwen timing
+confirmation under verified stable AC is justified by this new environmental
+information. This supersedes the earlier instruction against repeating an
+unchanged run merely to seek a threshold pass.
