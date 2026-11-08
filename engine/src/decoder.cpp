@@ -1051,7 +1051,7 @@ struct Decoder::Impl {
                     const float* panel_weights = nullptr;
                     if (weight.bits == 16) {
                         leaf::kernels::expand_source_bf16(reinterpret_cast<const std::uint16_t*>(weight.data) + begin * weight.cols,
-                                                        expanded.data(), live * weight.cols);
+                                                        expanded.data(), live * weight.cols, avx);
                         panel_weights = expanded.data();
                     } else panel_weights = reinterpret_cast<const float*>(weight.data) + begin * weight.cols;
                     if (accurate_fp32) {

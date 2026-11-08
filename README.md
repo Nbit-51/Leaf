@@ -169,7 +169,7 @@ flowchart TB
     D --> R["C++ decoder · causal full/windowed attention<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
     R --> M["Compute policy<br/>FP32: fast default or accurate opt-in<br/>INT8/INT4: existing dispatch"]
-    M --> K["CPU-dispatched kernels<br/>Tiled GEMM · shared input panels<br/>Optional balanced FP32 sums and wider RMS<br/>Paired GEMV · exact BF16-to-FP32 expansion<br/>Vector GELU, attention, softmax and SiLU"]
+    M --> K["CPU-dispatched kernels<br/>Tiled GEMM · shared input panels<br/>Optional balanced FP32 sums and wider RMS<br/>Paired GEMV · SIMD BF16-to-FP32 expansion<br/>Vector GELU, attention, softmax and SiLU"]
     K --> T["Tokens and logits"]
     E --> U["Graph outputs"]
 ```

@@ -64,6 +64,7 @@ should not be combined into a universal speedup claim.
 | October 27 benchmark accounting and output-buffer reuse | [Current runtime checkpoint](checkpoint-2026-10-27-output-buffers.md) |
 | October 29 shared input packing, quality controls and profile | [Packing checkpoint](checkpoint-2026-10-29-shared-packing.md) |
 | October 30 MLP alignment investigation and broader source storage | [Runtime checkpoint](checkpoint-2026-10-30-gemm-alignment.md) |
+| November 8 BF16 conversion, CPU accounting and full timing result | [Expansion checkpoint](checkpoint-2026-11-08-bf16-expansion.md) |
 | Pythia attention-score sensitivity and retained tolerance failures | [Numerical investigation](pythia-numerics-handoff.md) |
 | Matched Pythia-70M Leaf/llama.cpp baseline and next prefill experiment | [Runtime comparison](pythia-runtime-comparison.md) |
 

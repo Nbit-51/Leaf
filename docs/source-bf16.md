@@ -174,3 +174,51 @@ speed claim or full release timing qualification follows from these checks.
 
 [Source, raw diagnostics, test reports and qualification identities](../benchmark/validation/source-bf16-matrices/20261030/manifest.json)
 are retained with the [session checkpoint](checkpoint-2026-10-30-gemm-alignment.md).
+
+
+## November 8: prefill expansion follow-up
+
+The explicit BF16 storage path now uses guarded AVX2/FMA bulk expansion where
+available; the original portable function remains available and forced-scalar
+execution retains its policy. Eight original BF16 values widen by integer
+operations, shift into the FP32 bit layout and store without rounding.
+Single-token GEMV and the storage format are unchanged.
+
+The resumed six-row-versus-head-only screen passes stability on both models:
+Smol prefill 506.06->551.28ms/decode 76.40->51.09ms; Qwen 568.06->597.89ms/
+96.06->65.27ms. These short results describe the prior six-row implementation,
+not the subsequent AVX2 update. Smaller storage helps decode while conversion
+and GEMM still cost prefill time.
+
+Matched 96-row-versus 6-row accounting records approximately 7,700-14,900 process
+page faults per prefill sample for the large temporary and zero for the small
+one. These include soft/allocation faults; disk paging is not established.
+The generated portable expansion uses SSE2. Isolated production-layout AVX2
+checks lower copy time for 5,376/5,760/15,360 values, while 29,184 is neutral.
+
+For the actual AVX2 update, all native bit/guard checks pass (**4,292,253**),
+the full Python suite passes (**1,513**, two optional legacy skips), and the
+complete trained audit preserves **411,828,224** logit values across fast and
+accurate policies. Generation, cache/scalar/thread checks and actual installed
+wheel execution also pass. This preserves prior qualification, rather than
+constituting a new independent PyTorch reference run.
+
+A full serial comparison against the previous six-row implementation uses
+accurate/accurate math, identical BF16 values, CPU2, one thread, six balanced
+pairs, 31samples and 10warmups/pass. All individual and pooled phases are stable;
+AC/effective-mode audits pass and every sample is retained.
+
+| Model | Prefill before->AVX2 | Observed reduction | Decode before->AVX2 |
+|---|---:|---:|---:|
+| SmolLM2-360M |521.22455->513.15220ms|1.55%|49.04615->48.82465ms|
+| Qwen2.5-0.5B |590.55420->587.68990ms|0.49%|63.91170->63.88160ms|
+
+Both miss the declared 2% prefill improvement threshold; decode passes
+non-regression. The guarded SIMD expansion is retained with the verified
+operator-level scope. No qualified 2% whole-model or competitor win is claimed.
+The default storage policy remains opt-in; do not mix these incremental results
+with head-only or other-runtime measurements.
+
+[Raw records, sources, tests and hashes](../benchmark/validation/bf16-expansion/20261108/manifest.json)
+and the [resume checkpoint](checkpoint-2026-11-08-bf16-expansion.md) preserve the
+complete evidence. No unchanged acceptance run was repeated to seek a pass.

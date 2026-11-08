@@ -21,6 +21,14 @@ __attribute__((target("avx2,fma"), always_inline)) inline __m256 load8(const std
     return _mm256_castsi256_ps(_mm256_slli_epi32(
         _mm256_cvtepu16_epi32(_mm_loadu_si128(reinterpret_cast<const __m128i*>(values))), 16));
 }
+
+// Widen original storage bits directly; no floating-point operations or rounding.
+__attribute__((target("avx2,fma"))) inline void expand(
+        const std::uint16_t* source, float* output, std::size_t count) {
+    std::size_t i = 0;
+    for (; count - i >= 8; i += 8) _mm256_storeu_ps(output + i, load8(source + i));
+    for (; i < count; ++i) output[i] = source_bf16_value(source[i]);
+}
 }
 
 // Same accumulator lanes, FMA sequence, reduction and signed-zero addition as
@@ -57,4 +65,19 @@ __attribute__((target("avx2,fma"))) inline void gemv_pair_source_bf16(
     output[1] = 0.0f + gemv_pair_detail::reduce(a1);
 }
 #endif
+
+// Explicit policy keeps forced-scalar callers on their original portable path.
+inline void expand_source_bf16(const std::uint16_t* source, float* output,
+                               std::size_t count, bool use_avx2) {
+    if (!count) return;
+#if (defined(__x86_64__) || defined(__i386__)) && defined(__GNUC__)
+    if (use_avx2 && __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma")) {
+        source_bf16_detail::expand(source, output, count);
+        return;
+    }
+#else
+    (void)use_avx2;
+#endif
+    expand_source_bf16(source, output, count);
+}
 }
