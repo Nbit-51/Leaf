@@ -1,8 +1,8 @@
 {
   "archive": "evidence.zip",
-  "bytes": 48381,
-  "sha256": "39b6010cbb49c97870aa2510e671bbaf803c09628c2c0252fad882ff4fe17b01",
-  "scope": "Native generation, cached CLI, startup A/B, Windows counters and package smoke. JSON serialization and absolute checkout paths are normalized; sample values are preserved.",
+  "bytes": 65149,
+  "sha256": "3aebc253e2a4f5b2da430650cd2a82648e84d190b3abb6a99594180532374883",
+  "scope": "Native generation, cached CLI, startup A/B, Windows counters package smoke and matched llama.cpp CLI diagnostics. JSON serialization and absolute checkout paths are normalized; sample values are preserved.",
   "windows_unit_suite": {
     "passed": 1499,
     "skipped": 21
@@ -97,6 +97,30 @@
       "bytes": 1950,
       "sha256": "24af103b88776819a7bf9e7412f5df4f1753c3829504f150c3b0f7319546776b",
       "original_sha256": "71db2b875f146b4f9b760a0214c87bfd49fe2c5464531b9bd1a933951d15a7f5"
+    },
+    {
+      "path": "llama-cli/comparison.json",
+      "bytes": 74203,
+      "sha256": "a726ec58e8eeac052a01b96d8cdfd22917174bd55f023f3b5cae196a76b66f32",
+      "original_sha256": "9e661ee6deb8e701362aaa6ab7458d8023b074f9ad9dbc2faf0a82a0a26be315"
+    },
+    {
+      "path": "llama-cli/compare_llama_cli.py",
+      "bytes": 8177,
+      "sha256": "4eea7dde2c882a5176001f52630350c08c256cc557dc2a0c3230b68f1ae87512",
+      "original_sha256": "4eea7dde2c882a5176001f52630350c08c256cc557dc2a0c3230b68f1ae87512"
+    },
+    {
+      "path": "llama-cli/gguf-audit.json",
+      "bytes": 55565,
+      "sha256": "be41a6519239b59b943784bb25fd3007aa1424ee4931f08272389f14de3ffa52",
+      "original_sha256": "8ee6b977ba38a7b99625eb700c5033acca6a83199c2a6c95c5be45b967288e9f"
+    },
+    {
+      "path": "llama-cli/decoder-32.provenance.json",
+      "bytes": 670,
+      "sha256": "71af88c6dbb56467d172c5cbefae640ea4b36f6317f49aeead3914d9c2621462",
+      "original_sha256": "a4f28eab4a2f59f112618c7e04e41f1790bb691311c7e74782402158fa806904"
     }
   ]
 }

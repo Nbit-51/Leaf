@@ -3,6 +3,7 @@
 #define LEAF_ACCUMULATION_INLINE_PARTIAL 1
 #include "../../benchmark/experiments/linear-accumulation/tree_sum.h"
 #include <cmath>
+#include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <random>
@@ -16,14 +17,14 @@ int main() {
         for (auto tokens : {1u, 7u, 8u, 15u, 16u, 17u, 33u})
             for (auto columns : {1u, 127u, 255u, 256u, 257u, 513u, 4097u}) {
                 const auto ws = columns + 3, ys = rows + 2;
-                std::vector<float> w(rows * ws), x(tokens * columns), bias(rows);
+                std::vector<float> w(std::size_t(rows) * ws), x(std::size_t(tokens) * columns), bias(rows);
                 for (auto& v : w) v = value(random);
                 for (auto& v : x) v = value(random);
                 for (auto& v : bias) v = value(random);
                 leaf::kernels::TokenPanelsF32 panels;
                 panels.pack(x.data(), tokens, columns, columns, vector);
                 for (bool has_bias : {false, true}) {
-                    std::vector<float> result(tokens * ys, 12345), reference(result.size(), 12345);
+                    std::vector<float> result(std::size_t(tokens) * ys, 12345), reference(result.size(), 12345);
                     auto b = has_bias ? bias.data() : nullptr;
                     leaf::kernels::gemm_token_panels_f32_accurate(w.data(), rows, columns, ws, panels, result.data(), ys, b, vector);
                     if (vector) {

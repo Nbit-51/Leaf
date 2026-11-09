@@ -227,6 +227,27 @@ Next, diagnose the remaining shared numerical differences before extending
 quality claims, then run audited matched competitor comparisons for these two
 models. The TinyLlama/Ollama timing result does not transfer to them.
 
+## Qwen cached CLI comparison — November 9, 2026
+
+Leaf and llama.cpp b11540 ran Qwen2.5-0.5B-Instruct on one Windows CPU thread in
+Better Battery mode. Both used artifacts audited against the same checkpoint
+values, FP32 weights and KV cache, and matching raw prompt token IDs. Each
+command started fresh processes with a warm OS file cache. Six interleaved
+pairs per prompt length retained the first visible text and total command
+times. Both runtimes produced matching text for the eight-token continuations.
+
+| Prompt tokens | First visible text, Leaf / llama.cpp | Total command, Leaf / llama.cpp |
+|---:|---:|---:|
+| 63 | 1,907.99 / 2,214.60 ms | 3,007.09 / 3,318.30 ms |
+| 127 | 2,505.48 / 2,842.25 ms | 3,628.55 / 3,948.04 ms |
+
+Both external metrics passed the 1.25× p90/p10 spread check. Leaf's total
+command time was 8.39% and 8.64% lower by median paired ratio. These timings
+cover two prompts, eight generated tokens and this exact CLI configuration.
+The comparison checked output text and generation length. Full-logit parity
+between the two runtimes was outside this run.
+[Retained samples, settings and hashes](../benchmark/validation/bf16-expansion/20261109/manifest.json)
+
 ## Dataset and individual-network scope
 
 Text dataset adapters and graph fusion/import/memory-planning checks pass (22
