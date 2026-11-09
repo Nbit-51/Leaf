@@ -19,7 +19,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.decoder_validation import run_native
-from tools.export_decoder import DESCRIPTOR, HEADER, export_decoder
+from tools.export_decoder import DESCRIPTOR, HEADER, OPERATOR_METADATA, export_decoder
 from tools.validate_decoder import digest, utc_now, write_record
 
 
@@ -27,9 +27,20 @@ def metadata(mapped):
     """Decode actual artifact bytes independently of exporter tensor selection."""
     header = HEADER.unpack_from(mapped)
     magic, version, count, base = header[:4]
-    if version not in (2, 3, 4, 5, 6) or magic != f'LEAFDC0{version}'.encode():
+    if version not in (2, 3, 4, 5, 6, 7) or magic != f'LEAFDC0{version}'.encode():
         raise ValueError('Unsupported artifact header')
     position, eos = HEADER.size, ([] if header[11] == 0xffffffff else [header[11]])
+    storage = version if version in (5, 6) else 0
+    operators = None
+    if version == 7:
+        storage, qk_norm, frequency_count = OPERATOR_METADATA.unpack_from(mapped, position)
+        position += OPERATOR_METADATA.size
+        if (storage not in (0, 5, 6) or qk_norm not in (0, 1) or not (qk_norm or frequency_count) or
+                frequency_count > (min(base, len(mapped)) - position) // 4):
+            raise ValueError('Invalid decoder operator metadata')
+        end = position + 4 * frequency_count
+        operators = qk_norm, mapped[position:end]
+        position = end
     if version >= 4:
         eos_count = struct.unpack_from('<I', mapped, position)[0]
         if eos_count > 1024:
@@ -52,7 +63,7 @@ def metadata(mapped):
         descriptors[name] = row
     if position > base or base > len(mapped) or base % 64:
         raise ValueError('Invalid artifact data base')
-    return header, eos, descriptors
+    return header, eos, descriptors, operators, storage
 
 
 def audit_payloads(before: Path, after: Path, exported: dict) -> dict:
@@ -61,11 +72,11 @@ def audit_payloads(before: Path, after: Path, exported: dict) -> dict:
     with before.open('rb') as a, after.open('rb') as b:
         with mmap.mmap(a.fileno(), 0, access=mmap.ACCESS_READ) as old:
             with mmap.mmap(b.fileno(), 0, access=mmap.ACCESS_READ) as new:
-                ah, aeos, ad = metadata(old)
-                bh, beos, bd = metadata(new)
+                ah, aeos, ad, ao, astorage = metadata(old)
+                bh, beos, bd, bo, bstorage = metadata(new)
                 if (ah[2] != bh[2] or old[24:HEADER.size] != new[24:HEADER.size] or
-                        aeos != beos or list(ad) != list(bd) or bh[1] != 6):
-                    raise ValueError('Configuration, EOS policy, descriptor set/order or expected v6 differs')
+                        aeos != beos or ao != bo or list(ad) != list(bd) or astorage != 0 or bstorage != 6):
+                    raise ValueError('Configuration, EOS policy, descriptor set/order or expected matrix storage differs')
                 for name, source in ad.items():
                     target = bd[name]
                     if (source[:3] != target[:3] or source[0] != 2 or source[3] != 32 or

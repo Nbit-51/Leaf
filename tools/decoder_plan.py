@@ -122,14 +122,52 @@ def generation_policy_identity(plan: dict, max_new_tokens: int) -> dict:
                 repetition_penalty=1.0, use_cache=False)
 
 
+def scaled_rotary_frequencies(rope: dict, kind: str, theta: float, dim: int) -> list[float]:
+    common = {"rope_type", "type", "rope_theta", "partial_rotary_factor"}
+    if kind not in ("linear", "llama3") or dim <= 0 or dim % 2 or not math.isfinite(theta) or theta < 1:
+        raise ValueError(f"Scaled RoPE variant or geometry is unsupported: {kind!r}")
+    extra = {"original_max_position_embeddings", "low_freq_factor", "high_freq_factor"} if kind == "llama3" else set()
+    if set(rope) - common - extra - {"factor"}:
+        raise ValueError("Unsupported Scaled RoPE parameters")
+
+    def positive(name):
+        value = rope.get(name)
+        if type(value) not in (float, int) or not math.isfinite(value) or value <= 0:
+            raise ValueError(f"Invalid Scaled RoPE parameter: {name}")
+        return value
+
+    factor = positive("factor")
+    if factor < 1:
+        raise ValueError("Scaled RoPE factor must be at least one")
+    frequencies = [theta ** (-i / dim) for i in range(0, dim, 2)]
+    if kind == "linear":
+        return [frequency / factor for frequency in frequencies]
+    low, high = positive("low_freq_factor"), positive("high_freq_factor")
+    original = positive("original_max_position_embeddings")
+    if high <= low or type(original) is not int:
+        raise ValueError("Invalid Llama 3 RoPE wavelength bounds")
+    scaled = []
+    for frequency in frequencies:
+        wavelength = math.tau / frequency
+        blend = min(1.0, max(0.0, (original / wavelength - low) / (high - low)))
+        scaled.append((1 - blend) * frequency / factor + blend * frequency)
+    return scaled
+
+
 def make_plan(source: dict) -> dict:
     kind = source.get("model_type")
     sliding_window = 0
-    rope = source.get("rope_parameters") or {}
-    if source.get("qk_layernorm") or source.get("use_qk_norm"):
+    modern_rope, legacy_rope = source.get("rope_parameters") or {}, source.get("rope_scaling") or {}
+    if not isinstance(modern_rope, dict) or not isinstance(legacy_rope, dict) or (modern_rope and legacy_rope):
+        raise ValueError("Expected one flat RoPE configuration")
+    rope = modern_rope or legacy_rope
+    rope_type = rope.get("rope_type", rope.get("type", None if legacy_rope else "default"))
+    if "type" in rope and rope["type"] != rope_type:
+        raise ValueError("Conflicting RoPE variants")
+    if rope_type == "default" and set(rope) - {"rope_type", "type", "rope_theta", "partial_rotary_factor"}:
+        raise ValueError("Unsupported default RoPE parameters")
+    if kind != "qwen3" and (source.get("qk_layernorm") or source.get("use_qk_norm")):
         raise ValueError("Query/key normalization needs additional native operators")
-    if rope and rope.get("rope_type", "default") != "default":
-        raise ValueError("Scaled RoPE is not implemented; refusing to change model semantics")
     if kind == "gpt2":
         h, heads = source["n_embd"], source["n_head"]
         layers, f = source["n_layer"], source.get("n_inner") or 4 * h
@@ -154,7 +192,7 @@ def make_plan(source: dict) -> dict:
         norm, act, position, gated, parallel = 1, source.get("activation_function", "relu"), 1, 0, 0
         eps, theta, kv, offset = source.get("layer_norm_eps", 1e-5), 10000, heads, 2
         final_norm = int(not source.get("_remove_final_layer_norm", False))
-    elif kind in {"llama", "qwen2", "mistral"}:
+    elif kind in {"llama", "qwen2", "qwen3", "mistral"}:
         h, heads, layers, f = (source[k] for k in ("hidden_size", "num_attention_heads", "num_hidden_layers", "intermediate_size"))
         maximum = source.get("max_position_embeddings", 2048)
         norm, act, position, gated, parallel = 0, source.get("hidden_act", "silu"), 0, 1, 0
@@ -166,12 +204,13 @@ def make_plan(source: dict) -> dict:
                 raise ValueError("Mistral sliding_window must be a positive integer")
             if source.get("layer_types") is not None and source["layer_types"] != ["sliding_attention"] * layers:
                 raise ValueError("Mixed per-layer sliding-window attention is not implemented")
-        elif source.get("sliding_window") and source.get("use_sliding_window"):
+        elif source.get("use_sliding_window") or (source.get("layer_types") is not None and
+                                                   source["layer_types"] != ["full_attention"] * layers):
             raise ValueError("Sliding-window attention is not implemented by the current native operators")
     else:
         raise ValueError(f"No import adapter for {kind!r}. Supply --plan with block semantics and tensor mappings.")
-    if source.get("rope_scaling"):
-        raise ValueError("Scaled RoPE is not implemented; refusing to change model semantics")
+    if rope_type != "default" and kind not in {"llama", "qwen2", "qwen3", "mistral"}:
+        raise ValueError("Scaled RoPE is unsupported by this import adapter")
     if act not in ACTIVATIONS:
         raise ValueError(f"Unsupported feed-forward activation {act!r}")
     eos_tokens = _parse_eos(source.get("eos_token_id", 2), source["vocab_size"])
@@ -187,6 +226,10 @@ def make_plan(source: dict) -> dict:
                   embedding_scale=h ** 0.5 if source.get("scale_embedding", False) else 1.0)
     if sliding_window:
         config["sliding_window"] = sliding_window
+    if rope_type != "default":
+        config["rope_frequencies"] = scaled_rotary_frequencies(rope, rope_type, theta, rotary_dim)
+    if kind == "qwen3":
+        config["qk_norm"] = 1
     _set_eos(config, eos_tokens)
     tensors = {}
 
@@ -195,7 +238,7 @@ def make_plan(source: dict) -> dict:
         if input_module:
             tensors[name]["input_module"] = input_module
 
-    if kind in {"llama", "qwen2", "mistral"}:
+    if kind in {"llama", "qwen2", "qwen3", "mistral"}:
         add("model.embed_tokens.weight")
         add("lm_head.weight", "model.embed_tokens.weight" if source.get("tie_word_embeddings") else None)
         add("model.norm.weight")
@@ -205,6 +248,9 @@ def make_plan(source: dict) -> dict:
                          "self_attn.q_proj.weight", "self_attn.k_proj.weight", "self_attn.v_proj.weight",
                          "self_attn.o_proj.weight", "mlp.gate_proj.weight", "mlp.up_proj.weight", "mlp.down_proj.weight"):
                 add(prefix + name)
+            if kind == "qwen3":
+                for p in ("q", "k"):
+                    add(prefix + f"self_attn.{p}_norm.weight")
             if source.get("attention_bias", kind == "qwen2"):
                 for p in ("q", "k", "v") + (("o",) if kind != "qwen2" else ()):
                     add(prefix + f"self_attn.{p}_proj.bias")
@@ -285,10 +331,13 @@ def config_values(config: dict) -> tuple:
     fields = {"hidden", "intermediate", "heads", "kv_heads", "layers", "vocab", "max_positions", "eos",
               "head_dim", "theta", "epsilon", "norm", "activation", "position", "gated", "parallel_residual",
               "rotary_dim", "position_offset", "final_norm", "embedding_scale", "sliding_window", "eos_tokens"}
-    if set(config) - fields:
-        raise ValueError(f"Unsupported plan configuration fields: {sorted(set(config) - fields)}")
+    extensions = {"qk_norm", "rope_frequencies"}
+    if set(config) - fields - extensions:
+        raise ValueError(f"Unsupported plan configuration fields: {sorted(set(config) - fields - extensions)}")
     h, heads, dim, kv = (int(config[k]) for k in ("hidden", "heads", "head_dim", "kv_heads"))
-    if not kv or not heads or not dim or h != heads * dim or heads % kv:
+    qk_norm = config.get("qk_norm", 0)
+    if (not kv or not heads or not dim or heads * dim > 0xffffffff or heads % kv or
+            (h != heads * dim and not qk_norm)):
         raise ValueError("Invalid decoder head geometry")
     missing = fields - {"embedding_scale", "sliding_window", "eos_tokens"} - set(config)
     if missing:
@@ -307,6 +356,13 @@ def config_values(config: dict) -> tuple:
     rotary = int(config["rotary_dim"])
     if rotary < 0 or rotary > dim or rotary % 2 or config["position"] == 0 and rotary == 0:
         raise ValueError("Invalid rotary dimension")
+    if type(qk_norm) is not int or qk_norm not in (0, 1) or (qk_norm and (config["norm"] != 0 or config["position"] != 0)):
+        raise ValueError("Q/K normalization requires rotary RMSNorm decoder blocks")
+    if "rope_frequencies" in config:
+        frequencies = config["rope_frequencies"]
+        if (config["position"] != 0 or not isinstance(frequencies, list) or len(frequencies) != rotary // 2 or
+                any(type(frequency) not in (int, float) or not 2.0 ** -126 <= frequency <= 1.0 for frequency in frequencies)):
+            raise ValueError("Invalid static RoPE frequency table")
     if config["norm"] not in (0, 1) or config["activation"] not in range(4) or config["position"] not in (0, 1, 2):
         raise ValueError("Unsupported plan operator")
     first = tuple(int(config[k]) for k in ("hidden", "intermediate", "heads", "kv_heads", "layers", "vocab", "max_positions", "eos", "head_dim"))
@@ -331,6 +387,8 @@ def validate_plan(plan: dict) -> None:
     config_values(plan["config"])
     expected = tensor_shapes(plan["config"])
     for name, specification in plan["tensors"].items():
+        if name.endswith((".self_attn.q_norm.bias", ".self_attn.k_norm.bias")):
+            raise ValueError(f"Q/K RMSNorm does not accept bias: {name}")
         partner = name.removesuffix(".bias") + ".weight" if name.endswith(".bias") else name
         if partner not in expected:
             raise ValueError(f"Unsupported plan tensor/operator: {name}")
@@ -349,6 +407,7 @@ def validate_plan(plan: dict) -> None:
 
 def tensor_shapes(config: dict) -> dict:
     h, f, kv, dim, layers, vocab = (config[k] for k in ("hidden", "intermediate", "kv_heads", "head_dim", "layers", "vocab"))
+    qwidth = config["heads"] * dim
     expected = {"model.embed_tokens.weight": (vocab, h), "lm_head.weight": (vocab, h)}
     if config["final_norm"]:
         expected["model.norm.weight"] = (1, h)
@@ -357,9 +416,12 @@ def tensor_shapes(config: dict) -> dict:
     for i in range(layers):
         prefix = f"model.layers.{i}."
         expected.update({prefix + "input_layernorm.weight": (1, h), prefix + "post_attention_layernorm.weight": (1, h),
-                         prefix + "self_attn.q_proj.weight": (h, h), prefix + "self_attn.k_proj.weight": (kv * dim, h),
-                         prefix + "self_attn.v_proj.weight": (kv * dim, h), prefix + "self_attn.o_proj.weight": (h, h),
+                         prefix + "self_attn.q_proj.weight": (qwidth, h), prefix + "self_attn.k_proj.weight": (kv * dim, h),
+                         prefix + "self_attn.v_proj.weight": (kv * dim, h), prefix + "self_attn.o_proj.weight": (h, qwidth),
                          prefix + "mlp.up_proj.weight": (f, h), prefix + "mlp.down_proj.weight": (h, f)})
         if config["gated"]:
             expected[prefix + "mlp.gate_proj.weight"] = (f, h)
+        if config.get("qk_norm"):
+            for p in ("q", "k"):
+                expected[prefix + f"self_attn.{p}_norm.weight"] = (1, dim)
     return expected

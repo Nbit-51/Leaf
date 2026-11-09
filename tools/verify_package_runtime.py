@@ -105,7 +105,7 @@ def isolated_environment(cache: Path) -> dict:
     return environment
 
 
-def run_process(command: list[str], environment: dict, cwd: Path) -> dict:
+def run_process(command: list[str], environment: dict, cwd: Path, *, require_package_check: bool = True) -> dict:
     """Observe unbuffered output while draining stderr without pipe deadlocks."""
     start = time.perf_counter()
     process = subprocess.Popen(command, cwd=cwd, env=environment, stdout=subprocess.PIPE,
@@ -129,14 +129,16 @@ def run_process(command: list[str], environment: dict, cwd: Path) -> dict:
     stderr = b"".join(error_chunks).decode("utf-8", errors="replace")
     if returncode:
         raise RuntimeError(f"Installed runtime process failed ({returncode}): {stderr.strip()}")
+    measured = {"external_wall_ms": wall_ms, "external_first_stdout_byte_ms": first_output_ms,
+                "external_first_visible_text_ms": first_visible_ms,
+                "stdout": b"".join(output_chunks).decode("utf-8", errors="replace")}
+    if not require_package_check:
+        return dict(measured, stderr=stderr)
     probe_lines = [line[len(MARKER):] for line in stderr.splitlines() if line.startswith(MARKER)]
     if len(probe_lines) != 1:
         raise RuntimeError("Installed runtime did not produce exactly one package provenance check")
-    return {"external_wall_ms": wall_ms, "external_first_stdout_byte_ms": first_output_ms,
-            "external_first_visible_text_ms": first_visible_ms,
-            "stdout": b"".join(output_chunks).decode("utf-8", errors="replace"),
-            "preparation_message_seen": "Preparing 32-bit native artifact..." in stderr,
-            "package_check": json.loads(probe_lines[0])}
+    return dict(measured, preparation_message_seen="Preparing 32-bit native artifact..." in stderr,
+                package_check=json.loads(probe_lines[0]))
 
 
 def validate_reference(model: Path, record: dict) -> dict:
