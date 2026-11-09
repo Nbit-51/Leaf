@@ -40,16 +40,22 @@ def test_generation_checks_both_token_identity_and_termination(expected, actual,
     assert result["exact_match"] == (index is None)
 
 
-def test_quality_mode_does_not_route_through_speed_optimizer(monkeypatch, tmp_path):
+@pytest.mark.parametrize('storage', [None, '--source-bf16', '--source-bf16-head'])
+def test_quality_mode_does_not_route_through_speed_optimizer(monkeypatch, tmp_path, storage):
     from leaf import evaluation
     seen = []
     monkeypatch.setattr(evaluation, "evaluate", lambda args: seen.append(args))
     monkeypatch.setattr(cli, "optimize", lambda args: pytest.fail("Quality invoked timing benchmark"))
-    monkeypatch.setattr(cli.sys, "argv", ["leaf", "evaluate", "example/model", "--dataset", "heldout.txt",
-                                        "--dataset-source", "test split", "--output", str(tmp_path / "report")])
+    argv = ["leaf", "evaluate", "example/model", "--dataset", "heldout.txt",
+            "--dataset-source", "test split", "--output", str(tmp_path / "report")]
+    if storage:
+        argv.append(storage)
+    monkeypatch.setattr(cli.sys, "argv", argv)
     assert cli.main() == 0
     assert seen[0].blocks == 32
     assert seen[0].sequence_length == 128
+    assert seen[0].source_bf16 == (storage == '--source-bf16')
+    assert seen[0].source_bf16_head == (storage == '--source-bf16-head')
 
 
 def test_logits_corruption_changes_accuracy_and_fidelity():

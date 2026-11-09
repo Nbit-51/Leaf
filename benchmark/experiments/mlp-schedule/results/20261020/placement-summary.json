@@ -1,0 +1,207 @@
+{
+  "scope": "Diagnostic worker placement, not a release gate or competitor speed claim",
+  "models": {
+    "smol": {
+      "raw_sha256": "bd903e1f9dbf7e02a2697e9c7e315ee4170f3e572d46702368e709e002dfdfbb",
+      "passes": [
+        {
+          "strict_affinity": false,
+          "prefill_p50_ms": 203.6318,
+          "decode_p50_ms": 51.0818,
+          "process_faults_total": 0,
+          "cores": {
+            "2": {
+              "median_busy_percent": 81.43860455552506,
+              "parked_fraction": 0.0
+            },
+            "4": {
+              "median_busy_percent": 1.0282374356337165,
+              "parked_fraction": 1.0
+            },
+            "6": {
+              "median_busy_percent": 92.33653818789017,
+              "parked_fraction": 0.0
+            },
+            "8": {
+              "median_busy_percent": 83.11528153930446,
+              "parked_fraction": 0.0
+            }
+          }
+        },
+        {
+          "strict_affinity": true,
+          "prefill_p50_ms": 168.3159,
+          "decode_p50_ms": 45.7024,
+          "process_faults_total": 0,
+          "cores": {
+            "2": {
+              "median_busy_percent": 96.909999203027,
+              "parked_fraction": 0.0
+            },
+            "4": {
+              "median_busy_percent": 78.3699516455943,
+              "parked_fraction": 0.0
+            },
+            "6": {
+              "median_busy_percent": 78.32475472540165,
+              "parked_fraction": 0.0
+            },
+            "8": {
+              "median_busy_percent": 78.41084473355873,
+              "parked_fraction": 0.0
+            }
+          }
+        },
+        {
+          "strict_affinity": true,
+          "prefill_p50_ms": 168.7956,
+          "decode_p50_ms": 46.2562,
+          "process_faults_total": 0,
+          "cores": {
+            "2": {
+              "median_busy_percent": 95.39374172772781,
+              "parked_fraction": 0.0
+            },
+            "4": {
+              "median_busy_percent": 70.61218611538445,
+              "parked_fraction": 0.0
+            },
+            "6": {
+              "median_busy_percent": 73.55482471634122,
+              "parked_fraction": 0.0
+            },
+            "8": {
+              "median_busy_percent": 70.82526095524,
+              "parked_fraction": 0.0
+            }
+          }
+        },
+        {
+          "strict_affinity": false,
+          "prefill_p50_ms": 169.2985,
+          "decode_p50_ms": 44.5364,
+          "process_faults_total": 0,
+          "cores": {
+            "2": {
+              "median_busy_percent": 75.07773935819237,
+              "parked_fraction": 0.0
+            },
+            "4": {
+              "median_busy_percent": 93.82818549698703,
+              "parked_fraction": 0.0
+            },
+            "6": {
+              "median_busy_percent": 79.8391856207941,
+              "parked_fraction": 0.0
+            },
+            "8": {
+              "median_busy_percent": 76.68394825451765,
+              "parked_fraction": 0.0
+            }
+          }
+        }
+      ]
+    },
+    "qwen": {
+      "raw_sha256": "9886a1f5360adea2b4edca2f95343c6e6d489e1a628f3cbe52102d35c3f93890",
+      "passes": [
+        {
+          "strict_affinity": false,
+          "prefill_p50_ms": 222.9989,
+          "decode_p50_ms": 58.8495,
+          "process_faults_total": 3997,
+          "cores": {
+            "2": {
+              "median_busy_percent": 81.57230195538811,
+              "parked_fraction": 0.0
+            },
+            "4": {
+              "median_busy_percent": 90.80400348006275,
+              "parked_fraction": 0.0
+            },
+            "6": {
+              "median_busy_percent": 87.65814869885608,
+              "parked_fraction": 0.0
+            },
+            "8": {
+              "median_busy_percent": 31.860394585304842,
+              "parked_fraction": 0.6875
+            }
+          }
+        },
+        {
+          "strict_affinity": true,
+          "prefill_p50_ms": 181.8285,
+          "decode_p50_ms": 53.2067,
+          "process_faults_total": 297,
+          "cores": {
+            "2": {
+              "median_busy_percent": 96.90453650860404,
+              "parked_fraction": 0.0
+            },
+            "4": {
+              "median_busy_percent": 79.862132036188,
+              "parked_fraction": 0.0
+            },
+            "6": {
+              "median_busy_percent": 76.7767150679531,
+              "parked_fraction": 0.0
+            },
+            "8": {
+              "median_busy_percent": 75.28027289068947,
+              "parked_fraction": 0.0
+            }
+          }
+        },
+        {
+          "strict_affinity": true,
+          "prefill_p50_ms": 182.3621,
+          "decode_p50_ms": 53.2002,
+          "process_faults_total": 297,
+          "cores": {
+            "2": {
+              "median_busy_percent": 96.90958909427039,
+              "parked_fraction": 0.0
+            },
+            "4": {
+              "median_busy_percent": 81.44820335732754,
+              "parked_fraction": 0.0
+            },
+            "6": {
+              "median_busy_percent": 81.42501558399104,
+              "parked_fraction": 0.0
+            },
+            "8": {
+              "median_busy_percent": 79.8955273385837,
+              "parked_fraction": 0.0
+            }
+          }
+        },
+        {
+          "strict_affinity": false,
+          "prefill_p50_ms": 181.8958,
+          "decode_p50_ms": 52.2084,
+          "process_faults_total": 1,
+          "cores": {
+            "2": {
+              "median_busy_percent": 81.36578175826813,
+              "parked_fraction": 0.0
+            },
+            "4": {
+              "median_busy_percent": 93.81255138258257,
+              "parked_fraction": 0.0
+            },
+            "6": {
+              "median_busy_percent": 86.0242211514672,
+              "parked_fraction": 0.0
+            },
+            "8": {
+              "median_busy_percent": 81.39265226023147,
+              "parked_fraction": 0.0
+            }
+          }
+        }
+      ]
+    }
+  }
+}

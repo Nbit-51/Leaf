@@ -1,0 +1,27 @@
+{
+  "model/placement.json": {
+    "complete": true,
+    "passed": false,
+    "sleep_events": []
+  },
+  "model/default.json": {
+    "complete": true,
+    "passed": true,
+    "sleep_events": []
+  },
+  "jobs-model/jobs.json": {
+    "complete": true,
+    "passed": false,
+    "sleep_events": []
+  },
+  "spin-model/synchronization.json": {
+    "complete": true,
+    "passed": true,
+    "sleep_events": []
+  },
+  "final-default-model/ordinary.json": {
+    "complete": true,
+    "passed": false,
+    "sleep_events": []
+  }
+}

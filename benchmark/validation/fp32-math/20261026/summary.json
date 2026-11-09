@@ -1,0 +1,42 @@
+{
+  "complete": true,
+  "passed": true,
+  "timing_qualified": false,
+  "default_fp32_math": "fast",
+  "available_math": [
+    "fast",
+    "accurate"
+  ],
+  "storage_format_unchanged": true,
+  "scope": "Native opt-in accurate-policy migration to retained complete trained qualification. No fresh PyTorch oracle or timing promotion.",
+  "unit_tests": {
+    "passed": 1204,
+    "skipped": 2
+  },
+  "native_kernel_outputs": 43456,
+  "trained_blocks": 16,
+  "trained_logit_values": 205914112,
+  "continuations": 12,
+  "controls": 10,
+  "default_trained_regressions": 8,
+  "reduced_architectures": 10,
+  "installed_combined_path_passed": true,
+  "wheel": {
+    "name": "leaf_cpu-0.2.0-py3-none-win_amd64.whl",
+    "bytes": 2049140,
+    "sha256": "d788ec4711bf5380a470f8d285f28d63277516df6f4efa03f7c4903770c35eb9"
+  },
+  "initial_failed_attempt": {
+    "passed": false,
+    "failures": 76,
+    "raw_report_sha256": "92f3a6b0504b1675ff63f1739c7743a9a8193909d3d0317ff4458c07f231e7d0",
+    "direct_permission_failures": 75,
+    "other_failure": "Missing metrics downstream of temporary-folder access denial",
+    "correction": "Workspace TEMP/TMP, fresh --basetemp, no pytest cache; original failed XML retained locally."
+  },
+  "limitations": [
+    "Accurate remains opt-in; ordinary fast strict misses are not relabeled fixed.",
+    "Performance qualification and default promotion remain open.",
+    "BF16 storage remains output head/tied embeddings; interior projections stay FP32."
+  ]
+}

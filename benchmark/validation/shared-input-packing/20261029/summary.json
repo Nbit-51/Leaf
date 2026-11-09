@@ -1,0 +1,82 @@
+{
+  "format": "leaf-shared-fp32-input-packing-v1",
+  "unit_tests_passed": 1372,
+  "unit_tests_skipped": 2,
+  "accurate_blocks": 16,
+  "fast_regression_blocks": 16,
+  "accurate_logit_values": 205914112,
+  "fast_logit_values": 205914112,
+  "accurate_continuations": 12,
+  "fast_old_new_continuations": 12,
+  "accuracy_scope": "Exact reference rebinding and old/new regression; not a new independent PyTorch evaluation. Fast strict tolerance misses remain unresolved.",
+  "timing_qualified": false,
+  "acceptance_timing": false,
+  "power_settings_changed": false,
+  "default_math_changed": false,
+  "storage_format_changed": false,
+  "models": {
+    "smol": {
+      "profile_before": {
+        "mean_ms_per_forward": 9.2116125,
+        "fresh_packs_per_forward": 224.0,
+        "reuses_per_forward": 0.0
+      },
+      "profile_after": {
+        "mean_ms_per_forward": 3.178875,
+        "fresh_packs_per_forward": 128.0,
+        "reuses_per_forward": 96.0
+      },
+      "observed_profile_packing_reduction": 0.6549056964782225,
+      "prefill": {
+        "medians_ms": {
+          "before": 491.07455000000004,
+          "after": 481.89840000000004
+        },
+        "pooled_ratio": 0.981314140592299,
+        "median_paired_ratio": 0.9828159041399194,
+        "stable": true
+      },
+      "decode": {
+        "medians_ms": {
+          "before": 79.99785,
+          "after": 78.76935
+        },
+        "pooled_ratio": 0.9846433372896897,
+        "median_paired_ratio": 0.9934360361984441,
+        "stable": true
+      }
+    },
+    "qwen": {
+      "profile_before": {
+        "mean_ms_per_forward": 8.693950000000001,
+        "fresh_packs_per_forward": 168.0,
+        "reuses_per_forward": 0.0
+      },
+      "profile_after": {
+        "mean_ms_per_forward": 3.29795,
+        "fresh_packs_per_forward": 96.0,
+        "reuses_per_forward": 72.0
+      },
+      "observed_profile_packing_reduction": 0.6206614944875459,
+      "prefill": {
+        "medians_ms": {
+          "before": 557.2561499999999,
+          "after": 553.8977
+        },
+        "pooled_ratio": 0.9939732383393167,
+        "median_paired_ratio": 0.9908308252610734,
+        "stable": true
+      },
+      "decode": {
+        "medians_ms": {
+          "before": 108.59635,
+          "after": 108.84225
+        },
+        "pooled_ratio": 1.0022643486636522,
+        "median_paired_ratio": 0.9963092594895477,
+        "stable": true
+      }
+    }
+  },
+  "inference": "Shared packing removes redundant preparation and preserves all tested bits. Short paired prefill reductions are modest and do not meet the 2% target/full acceptance protocol. MLP multiplication remains dominant."
+}

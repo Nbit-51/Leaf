@@ -133,10 +133,22 @@ def logit_diagnostics(actual: np.ndarray, expected: np.ndarray,
 
 def evaluate(args):
     from leaf import cli
+    from leaf.runtime_check import check_decoder_options
     from tools.datasets import token_prefix
     from tools.decoder_plan import generation_policy_identity, greedy_reference_tokens, load_snapshot_plan
     from tools.decoder_validation import quality, run_native
     from tools.validate_decoder import GATES, digest, utc_now
+    fp32_math = getattr(args, 'fp32_math', 'fast')
+    if fp32_math not in ('fast', 'accurate'):
+        raise ValueError('FP32 math must be fast or accurate')
+    source_bf16 = getattr(args, 'source_bf16', False)
+    source_bf16_head = getattr(args, 'source_bf16_head', False)
+    if source_bf16 and source_bf16_head:
+        raise ValueError('Select one source BF16 storage scope')
+    requested_storage = 'source_bf16' if source_bf16 else 'source_bf16_head' if source_bf16_head else 'fp32'
+    native_options = dict(threads=args.threads)
+    if fp32_math == 'accurate':
+        native_options['fp32_math'] = fp32_math
     try:
         import torch
         import transformers
@@ -155,6 +167,7 @@ def evaluate(args):
                   scope="Deterministic corpus prefix in independent fixed-length blocks; raw greedy prompts. "
                         "Measures model likelihood and runtime fidelity, not factual/chat task accuracy or speed.",
                   requested_blocks=args.blocks, sequence_length=args.sequence_length, threads=args.threads,
+                  fp32_math=fp32_math, storage=dict(requested=requested_storage),
                   dataset_source=args.dataset_source, dataset_sha256=digest(args.dataset), text_column=args.text_column,
                   torch=torch.__version__, transformers=transformers.__version__,
                   evaluator_sha256=digest(Path(__file__)),
@@ -164,15 +177,29 @@ def evaluate(args):
     try:
         torch.set_num_threads(args.threads)
         cache = cli.cache_root()
-        runtime = cli.executable(cache)
-        snapshot = cli.resolve_model(args.model, cache, args.offline)
-        cli.validate_model_generation(snapshot)
+        runtime = None
+
+        def prepare_runtime():
+            nonlocal runtime
+            runtime = cli.executable(cache)
+            check_decoder_options(runtime, source_bf16=source_bf16, source_bf16_head=source_bf16_head,
+                                  fp32_math=fp32_math)
+
+        snapshot = cli.resolve_model(args.model, cache, args.offline, before_weights=prepare_runtime)
         plan = load_snapshot_plan(snapshot)
         config = plan["config"]
         record["generation_policy"] = generation_policy_identity(plan, args.generate)
         if args.sequence_length > config["max_positions"]:
             raise ValueError("Evaluation sequence length exceeds model context")
-        artifact = cli.prepare(snapshot, cli.model_directory(snapshot, cache), 32)
+        artifact = cli.prepare(snapshot, cli.model_directory(snapshot, cache), 32,
+                               source_bf16=source_bf16, source_bf16_head=source_bf16_head)
+        with artifact.open('rb') as file:
+            magic = file.read(8)
+        storage_by_format = {b'LEAFDC02': 'fp32', b'LEAFDC03': 'fp32', b'LEAFDC04': 'fp32',
+                             b'LEAFDC05': 'source_bf16_head', b'LEAFDC06': 'source_bf16'}
+        if magic not in storage_by_format:
+            raise ValueError('Unrecognized decoder artifact format')
+        record['storage'].update(effective=storage_by_format[magic], artifact_format=magic.decode('ascii'))
         record.update(snapshot=str(snapshot), artifact_sha256=digest(artifact), executable_sha256=digest(runtime),
                       source_sha256={p.name: digest(p) for p in sorted(snapshot.iterdir())
                                      if p.is_file() and p.suffix in (".json", ".safetensors")})
@@ -190,7 +217,7 @@ def evaluate(args):
         with torch.inference_mode():
             for index, row in enumerate(sequences):
                 expected = model(torch.tensor([row]), use_cache=False).logits[0].numpy().copy()
-                actual, _ = run_native(runtime, artifact, [row], threads=args.threads)
+                actual, _ = run_native(runtime, artifact, [row], **native_options)
                 actual = actual.reshape(expected.shape)
                 measured = quality(actual, expected, [row])
                 targets = np.asarray(row[1:])
@@ -210,7 +237,7 @@ def evaluate(args):
                 if len(prompt_ids) + args.generate - 1 > config["max_positions"]:
                     raise ValueError("Generation check exceeds model context")
                 expected = greedy_reference_tokens(model, prompt_ids, plan, args.generate)
-                _, metrics = run_native(runtime, artifact, [prompt_ids], mode="generate", generate=args.generate, threads=args.threads)
+                _, metrics = run_native(runtime, artifact, [prompt_ids], mode="generate", generate=args.generate, **native_options)
                 compared = generation_comparison(expected, metrics["generated_tokens"])
                 record["generations"].append(dict(prompt=prompt, input_ids=prompt_ids, **compared,
                                                  reference_text=tokenizer.decode(expected),

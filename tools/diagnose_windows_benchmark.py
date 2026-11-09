@@ -196,6 +196,8 @@ def main():
     parser.add_argument("--high-qos-abba", action="store_true")
     parser.add_argument("--above-normal", action="store_true",
                         help="match the scoped child priority used by current acceptance runs")
+    parser.add_argument("--keep-display-awake", action="store_true",
+                        help="match acceptance display/system-awake guards on Modern Standby hosts")
     args = parser.parse_args()
     if os.name != "nt" or args.runs < 5 or args.warmup < 0:
         parser.error("Requires Windows, at least five samples and nonnegative warmup")
@@ -232,7 +234,7 @@ def main():
               "scope": "Instrumented diagnostic, not acceptance timing. 1 Hz telemetry includes load/warmup. No thermal/power-limit sensors; process totals cannot locate competitors on a core. Inaccessible/short-lived processes may be missed."}
     order = [False, True, True, False] if args.high_qos_abba else [False] * 4
     try:
-        with keep_awake(), tempfile.TemporaryDirectory(prefix="leaf_diag_") as temp:
+        with keep_awake(display=args.keep_display_awake), tempfile.TemporaryDirectory(prefix="leaf_diag_") as temp:
             root = Path(temp)
             request = root / "tokens.bin"
             request.write_bytes(struct.pack("<II", 1, len(ids)) + struct.pack(f"<{len(ids)}I", *ids))

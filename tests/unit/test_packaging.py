@@ -69,7 +69,7 @@ def test_token_panel_header_is_included_in_packaged_native_sources():
         tomllib = pytest.importorskip("tomli")
     config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     assert "engine/include/leaf/runtime/decoder_config.h" in config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/runtime"]
-    for name in ("host_support.h", "embedding.h"):
+    for name in ("host_support.h", "worker_affinity.h", "embedding.h"):
         assert "engine/include/leaf/runtime/" + name in config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/runtime"]
     headers = config["tool"]["setuptools"]["data-files"]["share/leaf/engine/include/leaf/kernels"]
     source = "engine/include/leaf/kernels/token_panel.h"

@@ -60,19 +60,28 @@ leaf run ./models/decoder --offline --prompt "Explain CPU inference." --max-toke
 Chat templates are applied when supplied by the tokenizer configuration; use
 `--raw` for an unformatted prompt. Generation is currently greedy.
 
-For checkpoints with an original BF16 output head, optional compact storage keeps
+For checkpoints originally stored in BF16, optional matrix storage keeps
 those source values while computing in FP32:
 
 ```sh
-leaf run HuggingFaceTB/SmolLM2-360M-Instruct --bits 32 --source-bf16-head --prompt "Explain CPU inference." --max-tokens 32
+leaf run HuggingFaceTB/SmolLM2-360M-Instruct --bits 32 --source-bf16 --prompt "Explain CPU inference." --max-tokens 32
 ```
 
-FP32 source weights stay FP32. This uses a separate prepared cache; see
+FP32 source weights stay FP32. This uses a separate prepared cache. On two
+cached Windows workloads with eight generated tokens, BF16 matrix storage cut
+total `leaf run` time by 14–19% while preserving the generated tokens. See
 [storage semantics, exact-output checks and measured scope](docs/source-bf16.md).
+
+For the explicit accurate FP32 accumulation policy, add `--fp32-math accurate`
+to `leaf run` or `leaf evaluate`. Both commands accept `--source-bf16` or
+`--source-bf16-head` with this policy. Weights remain unquantized, and
+`leaf run --bits auto` selects FP32 compute. See
+[accuracy checks and scope](docs/shared-accumulation.md#native-accuracy-option--october-26-2026).
 
 For output checks without timing benchmarks, install `.[validation]` and run
 `leaf evaluate MODEL_ID --dataset heldout.jsonl --dataset-source "name/test split" --output build/quality-run`.
-It records perplexity, next-token agreement and paired continuations. See
+It records perplexity, next-token agreement, paired continuations, and the requested
+and effective weight storage. See
 [setup and quality evidence](docs/model-onboarding.md), including the remaining
 strict-logit failures found by the larger Pythia checks.
 
@@ -104,6 +113,8 @@ workload. Explicit `--bits 8` or `--bits 4` overrides are experimental.
 
 See the [usage reference](docs/project-reference.md#2-install-and-run-with-one-command)
 for aliases, cache controls, metrics, CPU pinning and custom decoder plans.
+For controlled multi-core runs, [explicit worker placement](docs/worker-placement.md)
+assigns a distinct allowed CPU to each decoder thread on Windows/Linux.
 On Windows, use ASCII cache/artifact paths; arbitrary Unicode paths are a known
 native-loader limitation.
 
@@ -113,9 +124,10 @@ native-loader limitation.
 |---|---|
 | Decoder execution | Full native prefill, single-token decode, chunked evaluation and greedy generation with all declared end tokens |
 | Embedding execution | FP32 EmbeddingGemma: bidirectional local/full attention, Q/K normalization, mean pooling, dense projections and L2-normalized output |
-| CPU kernels | Windows FP32 packed GEMM with row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
-| Memory | Memory-mapped weights, reusable activation buffers, per-session KV caches with dynamic growth and reset/reuse |
-| Precision | FP32, optional source-preserving BF16 head storage with FP32 computation, weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
+| CPU kernels | Windows FP32 packed GEMM with shared SIMD input panels and row reuse, paired GEMV, vector GELU, vector attention/softmax, and FP32/W8A8 vector SiLU gating; AVX2/FMA checks and scalar fallback; optional VNNI quantized execution |
+| Memory | Memory-mapped weights, reusable activation/logit buffers, per-session KV caches with dynamic growth and reset/reuse |
+| Threading | Persistent workers; optional CPU placement with bounded waits and caller-affinity restoration on Windows/Linux |
+| Precision | FP32 with optional accurate accumulation; original BF16 matrix storage with FP32 computation; weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
 | Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
@@ -155,11 +167,12 @@ flowchart TB
     N --> V["Mean pooling · dense projections · L2 normalization"]
     V --> F["Document/query vectors"]
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
-    P --> D["Native decoder artifact<br/>Optional original BF16 head/tied embedding storage"]
+    P --> D["Native decoder artifact<br/>Optional original BF16 matrix storage"]
     G --> A["Native graph artifact"]
-    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable buffers and session KV cache<br/>Final-layer FP32 MLP row selection"]
+    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
-    R --> K["CPU-dispatched kernels<br/>Tiled GEMM · paired GEMV · exact BF16-to-FP32 expansion<br/>Vector GELU, attention and softmax<br/>FP32 SiLU prefill + decode · W8A8 SiLU prefill"]
+    R --> M["Compute policy<br/>FP32: fast default or accurate opt-in<br/>INT8/INT4: existing dispatch"]
+    M --> K["CPU-dispatched kernels<br/>Tiled GEMM · shared input panels<br/>Optional balanced FP32 sums and wider RMS<br/>Paired GEMV · SIMD BF16-to-FP32 expansion<br/>Vector GELU, attention, softmax and SiLU"]
     K --> T["Tokens and logits"]
     E --> U["Graph outputs"]
 ```
@@ -272,14 +285,15 @@ default; its probability tolerance miss remains open. A reproduced
 is fixed before further kernel changes or model downloads.
 An isolated [shared accumulation candidate](docs/shared-accumulation.md) now
 passes the full SmolLM2/Qwen2.5 fidelity checks without relaxed tolerances.
-It remains outside the default runtime while its performance cost is evaluated.
+It is available through `--fp32-math accurate`; it remains outside the default
+math policy while its performance cost is evaluated.
 Optional [original BF16 head storage](docs/source-bf16.md) preserves FP32 compute
 and exact tested outputs. Against that accurate candidate's FP32 storage, it
 reduces paired decode latency **5.12% on SmolLM2** and **11.65% on Qwen2.5**,
 with stable timings and prefill non-regression. These are incremental Leaf results.
 Quantized vector attention and broader matched runtime comparisons remain open.
 
-Further work includes broader quality datasets, complete-command latency,
+Further work includes broader quality datasets and complete-command measurements,
 independent CPU/Linux evaluation, and compatible small Qwen, Mistral, Granite
 and Gemma-family workloads. The [embedding validation plan](docs/embedding.md)
 starts with retrieval quality and matched CPU comparisons before expanding

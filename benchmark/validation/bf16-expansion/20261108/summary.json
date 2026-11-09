@@ -1,0 +1,86 @@
+{
+  "complete": true,
+  "scope": "Predeclared AVX2 expansion incremental gate vs prior six-row implementation; no competitor or universal-storage speed claim",
+  "gates": {
+    "prefill_max_ratio": 0.98,
+    "decode_max_ratio": 1.02,
+    "p90_p10_max": 1.25
+  },
+  "models": {
+    "smol": {
+      "passed": false,
+      "phases": {
+        "prefill": {
+          "passed": false,
+          "stable": true,
+          "medians_ms": {
+            "before": 521.22455,
+            "after": 513.1522
+          },
+          "pooled_ratio": 0.9845127210527592,
+          "median_paired_ratio": 0.9852706967489575
+        },
+        "decode": {
+          "passed": true,
+          "stable": true,
+          "medians_ms": {
+            "before": 49.04615,
+            "after": 48.824650000000005
+          },
+          "pooled_ratio": 0.9954838453171148,
+          "median_paired_ratio": 0.9987770364835518
+        }
+      },
+      "samples_per_runtime_per_phase": 186
+    },
+    "qwen": {
+      "passed": false,
+      "phases": {
+        "prefill": {
+          "passed": false,
+          "stable": true,
+          "medians_ms": {
+            "before": 590.5542,
+            "after": 587.6899
+          },
+          "pooled_ratio": 0.9951498101275038,
+          "median_paired_ratio": 0.9913008907617451
+        },
+        "decode": {
+          "passed": true,
+          "stable": true,
+          "medians_ms": {
+            "before": 63.911699999999996,
+            "after": 63.881600000000006
+          },
+          "pooled_ratio": 0.9995290377192284,
+          "median_paired_ratio": 0.992235180728338
+        }
+      },
+      "samples_per_runtime_per_phase": 186,
+      "timing_status": "provisional_power_interruption_reported",
+      "timing_eligible_for_claims": false,
+      "power_followup": "power-followup.json"
+    }
+  },
+  "hashes": {
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-timing-20261108\\trained\\quality.json": "52ae8e97f49afd902410fcf0afdc841a9fc15c16d0e77c08d6a44b5f69ee1844",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-timing-20261108\\smol-acceptance\\comparison.json": "adef31190a9879dad2a2666b0e69248b6c635c1713f00ae05294586a4f39e259",
+    "C:\\Users\\navaneeth\\leaf\\build\\source-bf16-timing-20261108\\qwen-acceptance\\comparison.json": "2869a2989cac8d50c8089b7089183b1df9bd86728d057c0926709bafd6aff1c7"
+  },
+  "overall_competitor_speed_claim": false,
+  "both_models_passed": false,
+  "native_expansion_value_guard_checks": 4292253,
+  "native_expansion_calls": 6609,
+  "unit_tests_passed": 1513,
+  "optional_tests_skipped": 2,
+  "trained_logit_values_exact": 411828224,
+  "installed_wheel_and_code_binding_passed": true,
+  "implementation_retained_scope": "Guarded bit-preserving operator improvement; both full model prefill gains remain below2%.",
+  "source_cache_key": "5647d6c4f8000528",
+  "system_power_settings_changed": false,
+  "post_run_power_review": {
+    "path": "power-followup.json",
+    "scope": "Qwen timing is provisional; original distributions/gate calculations and correctness records are preserved."
+  }
+}

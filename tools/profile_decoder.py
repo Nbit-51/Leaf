@@ -81,9 +81,12 @@ def main():
     parser.add_argument("--default-only", action="store_true",
                         help="profile two fresh runs of the shipped default policy")
     parser.add_argument("--activation-bits", type=int, choices=(8, 32), default=32)
+    parser.add_argument("--fp32-math", choices=("fast", "accurate"), default="fast")
     args = parser.parse_args()
     if args.runs < 1 or args.warmup < 0 or args.threads < 1:
         parser.error("runs/threads must be positive and warmup nonnegative")
+    if args.fp32_math == "accurate" and args.activation_bits != 32:
+        parser.error("Accurate math requires unquantized FP32 activations")
     if args.activation_bits != 32 and not args.default_only:
         parser.error("Quantized profiling requires --default-only")
     if args.output.exists():
@@ -101,7 +104,7 @@ def main():
               "logits": "last_token_only", "runs": args.runs, "warmup": args.warmup,
               "profile_includes_warmup": True, "profile_includes_first_use": True,
               "automatic_selection_authorized": False, "acceptance_timing": False,
-              "activation_bits": args.activation_bits,
+              "activation_bits": args.activation_bits, "fp32_math": args.fp32_math,
               "order": (["default", "default"] if args.default_only else
                         ["default", "token_panel", "token_panel", "default"]),
               "complete": False, "passes": []}
@@ -112,7 +115,7 @@ def main():
             with profile_policy(stage == "token_panel"):
                 _, measured = run_native(args.executable, args.artifact, [ids], mode="bench",
                                          threads=args.threads, runs=args.runs, warmup=args.warmup,
-                                         activation_bits=args.activation_bits, capture_profile=True,
+                                         activation_bits=args.activation_bits, fp32_math=args.fp32_math, capture_profile=True,
                                          windows_above_normal=sys.platform == "win32")
             phases = measured["diagnostic_profile"]["timings"]
             if not args.default_only and any(name.startswith("linear_w") for bucket in phases.values() for name in bucket):

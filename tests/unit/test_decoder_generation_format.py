@@ -70,7 +70,7 @@ def native_decoder():
         pytest.skip("Set LEAF_TEST_DECODER_BIN to exercise the native artifact reader and generation")
     runtime = Path(configured).resolve()
     result = subprocess.run([str(runtime), "--runtime-info"], capture_output=True, text=True, check=True)
-    assert json.loads(result.stdout)["artifact_versions"] == [2, 3, 4, 5]
+    assert json.loads(result.stdout)["artifact_versions"] == [2, 3, 4, 5, 6]
     return runtime
 
 
@@ -89,6 +89,23 @@ def test_native_generation_honors_all_terminators_and_no_eos(native_decoder, tmp
     assert metrics["generated_tokens"] == expected
     if len(expected) == 1:
         assert metrics["decode_samples_ms"] == []  # No forward pass after a terminator.
+
+
+@pytest.mark.parametrize("eos,expected", [([2, 3], [3]), (None, [3, 3, 3, 3])])
+def test_generation_benchmark_retains_only_measured_continuations(native_decoder, tmp_path, eos, expected):
+    artifact, _ = fixture_model(tmp_path / "model", eos)
+    # The repeated full-length case would exceed context if the KV cache were not reset.
+    prompt = [1] * 29
+    _, reference = run_native(native_decoder, artifact, [prompt], mode="generate", generate=4)
+    _, metrics = run_native(native_decoder, artifact, [prompt], mode="bench-generate", generate=4, runs=3, warmup=2)
+    assert metrics["generated_tokens"] == reference["generated_tokens"] == expected
+    assert len(metrics["prefill_samples_ms"]) == len(metrics["generation_samples_ms"]) == 3
+    steps = metrics["decode_steps_by_generation_ms"]
+    assert [len(row) for row in steps] == [len(expected) - 1] * 3
+    assert metrics["decode_samples_ms"] == [step for row in steps for step in row]
+    for prefill, decode, total in zip(metrics["prefill_samples_ms"], steps, metrics["generation_samples_ms"]):
+        assert prefill > 0 and all(step > 0 for step in decode)
+        assert total >= prefill + sum(decode)
 
 
 @pytest.mark.parametrize("mutation", ["zero_count", "singleton_count", "excessive_count", "huge_count",

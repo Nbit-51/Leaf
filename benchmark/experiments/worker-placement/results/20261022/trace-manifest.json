@@ -1,0 +1,26 @@
+{
+  "complete": true,
+  "release_ready": false,
+  "archive": "trace-evidence.zip",
+  "archive_sha256": "8bf0d22db3342295c63f25d9d39b040ff7bb42bec83987a1cd6b83b45d0630ee",
+  "entries": {
+    "trace-summary.json": "7b953c329b6b30e078e998fdbd30aa26540402f4c571d35dbbe340425dbb7cf4",
+    "owned-replay.json": "c509ed91a7d4cd87c829431db87eb3c5b1295d1b82a99a3f29118aedc4d2c061",
+    "owned-recording.json": "2e48772e508383c4a6558c6ae843471b17ff0807f5b70ac8c04a41798ddadf56",
+    "power-mode-preflight-before.json": "92a072c22065475ea443fa97e705dab3f02b804bf4735c874a844da7c3134ccd",
+    "power-modes-units.xml": "19640c769a861a7fb755a40a9f669f4ad78378d5fa5735f2179aff953fdad258",
+    "sources/Reader.csproj": "484deb8b383ed95f790b06c1a9c15612716f15bed06d585f48759587d8161cea",
+    "sources/NuGet.Config": "1082618e2865acd2b0399876ec131d9819d360254ef18992c6f5366f30a538f4",
+    "sources/Program.cs": "39b206b2730c1a68a72c31144ac791a385ed6b97a154fa50fbf96ceca0273468",
+    "sources/Extract.cs": "9c0e4bccfb45f0c9b73169c7f1f287d71d69beb5c256c068d41d372184a76da3",
+    "sources/analyze_trace.py": "07429ea29d11581e64ff5a7c64608407fb360774a8f1bf90e15564f7e2463929",
+    "sources/collect_trace.py": "df8b479d8ef341c7b883eed6d733473c6bed43699e0789fcec738ec06c535f4a",
+    "sources/power.py": "ee148e24e47b960b1fab6ba8fb987bae35f46fe42efd2e1a592c574c0666c8f3",
+    "sources/test_effective_power_mode.py": "bf0f62b0346d01a68ad86eec0862898ffe8e63a55a88e827150498e066245dea",
+    "sources/check_benchmark_power.py": "1ced5b40992ef2fa8373cfc59d2989c63fbda5776316b8e23405a270135d2785",
+    "sources/validate.py": "96a3a861b2cc0761249b453fe45d27640227da65cccb2ede5bc8d705319db337",
+    "sources/dependencies.json": "6d2240236b15087ad1f335decabd2cb1b8294c1fc513ed9d1836a10c7650f32b"
+  },
+  "omitted": "Raw ETL, decoded other-process metadata, private event catalogues/extractions, model weights, binaries, .NET packages. Raw trace is hash-bound in trace-summary.json.",
+  "prior_manifest_sha256": "9b49383458fa914b19093137bd841b9a5a7006301199e24cabc793c4eacf64f3"
+}

@@ -3,15 +3,22 @@
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
+#include <chrono>
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_X64) || defined(_M_IX86)
+#include <immintrin.h>
+#endif
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <future>
 #include <limits>
 #include <mutex>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
+#include "leaf/runtime/worker_affinity.h"
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -108,19 +115,27 @@ struct Reader {
 
 class Workers {
 public:
-    explicit Workers(unsigned threads) : threads_(threads) {
+    explicit Workers(unsigned threads, const std::vector<unsigned>& cpus = {}) : threads_(threads) {
         check(threads >= 1 && threads <= 64, "thread count must be 1..64");
+        validate_worker_cpus(cpus, threads);
+        if (!cpus.empty()) caller_cpu_ = cpus.front();
         try {
-        for (unsigned i = 1; i < threads_; ++i) workers_.emplace_back([this] {
-            std::size_t observed = 0;
-            for (;;) {
-                std::unique_lock<std::mutex> lock(mutex_);
-                ready_.wait(lock, [&] { return stop_ || epoch_ != observed; });
-                if (stop_) return;
-                observed = epoch_; lock.unlock(); drain(); lock.lock();
-                if (--pending_ == 0) finished_.notify_one();
+        for (unsigned i = 1; i < threads_; ++i) {
+            if (cpus.empty()) {
+                workers_.emplace_back([this] { worker_loop(); });
+            } else {
+                std::promise<void> startup;
+                auto ready = startup.get_future();
+                workers_.emplace_back([this, cpu=cpus[i], startup=std::move(startup)]() mutable {
+                    std::optional<AffinityScope> binding;
+                    try { binding.emplace(cpu); startup.set_value(); }
+                    catch (...) { startup.set_exception(std::current_exception()); return; }
+                    worker_loop();
+                });
+                // Fail construction cleanly if any owned thread cannot bind.
+                ready.get();
             }
-        });
+        }
         } catch (...) {
             { std::lock_guard<std::mutex> lock(mutex_); stop_ = true; }
             ready_.notify_all();
@@ -132,23 +147,66 @@ public:
         { std::lock_guard<std::mutex> lock(mutex_); stop_ = true; }
         ready_.notify_all(); for (auto& worker : workers_) worker.join();
     }
+    AffinityScope bind_caller() const { return AffinityScope(caller_cpu_); }
     void run(std::size_t count, std::function<void(std::size_t, std::size_t)> task) {
-        if (threads_ == 1) { task(0, count); return; }
+        AffinityScope caller(caller_cpu_);
+        if (threads_ == 1) { task(0, count); caller.restore(); return; }
         { std::lock_guard<std::mutex> lock(mutex_);
-          task_ = std::move(task); count_ = count; next_ = 0; pending_ = threads_ - 1; ++epoch_; }
+          task_ = std::move(task); task_error_ = nullptr;
+          count_ = count; next_ = 0; pending_ = threads_ - 1; ++epoch_;
+          if (spins()) visible_epoch_.store(epoch_, std::memory_order_release); }
         ready_.notify_all(); drain();
+        if (spins()) spin_until(completed_epoch_, epoch_, true);
         std::unique_lock<std::mutex> lock(mutex_);
         finished_.wait(lock, [&] { return pending_ == 0; });
+        const auto error = task_error_;
+        lock.unlock(); caller.restore();
+        if (error) std::rethrow_exception(error);
     }
 private:
+    void worker_loop() {
+        std::size_t observed = 0;
+        for (;;) {
+            std::unique_lock<std::mutex> lock(mutex_);
+            ready_.wait(lock, [&] { return stop_ || epoch_ != observed; });
+            if (stop_) return;
+            observed = epoch_; lock.unlock(); drain(); lock.lock();
+            if (--pending_ == 0) {
+                if (spins()) completed_epoch_.store(observed, std::memory_order_release);
+                finished_.notify_one();
+            }
+            lock.unlock();
+            if (spins()) spin_until(visible_epoch_, observed, false);
+        }
+    }
+    bool spins() const noexcept { return caller_cpu_ != unbound_cpu && threads_ > 1; }
+    static void spin_until(const std::atomic<std::size_t>& counter, std::size_t target, bool equal) {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::microseconds(50);
+        unsigned checks = 0;
+        for (;;) {
+            if ((counter.load(std::memory_order_acquire) == target) == equal) return;
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_X64) || defined(_M_IX86)
+            _mm_pause();
+#else
+            std::atomic_signal_fence(std::memory_order_seq_cst);
+#endif
+            if ((++checks & 63) == 0 && std::chrono::steady_clock::now() >= deadline) return;
+        }
+    }
     void drain() {
         for (;;) {
             const std::size_t first = next_.fetch_add(32, std::memory_order_relaxed);
             if (first >= count_) return;
-            task_(first, std::min(first + 32, count_));
+            try { task_(first, std::min(first + 32, count_)); }
+            catch (...) {
+                std::lock_guard<std::mutex> lock(mutex_);
+                if (!task_error_) task_error_ = std::current_exception();
+                return;
+            }
         }
     }
     unsigned threads_;
+    unsigned caller_cpu_ = unbound_cpu;
     std::vector<std::thread> workers_;
     std::mutex mutex_;
     std::condition_variable ready_, finished_;
@@ -157,6 +215,8 @@ private:
     unsigned pending_ = 0;
     std::atomic<std::size_t> next_{0};
     std::function<void(std::size_t, std::size_t)> task_;
+    std::exception_ptr task_error_;
+    std::atomic<std::size_t> visible_epoch_{0}, completed_epoch_{0};
 };
 
 } // namespace leaf::runtime::detail

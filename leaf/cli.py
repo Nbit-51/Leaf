@@ -160,11 +160,14 @@ def validate_model_generation(snapshot: Path, plan: Path | None = None) -> None:
 
 
 def select_configuration(directory: Path, runtime: Path, requested: str, threads: int = 1,
-                         activation_bits: str = "auto", cpu: int | None = None) -> tuple[int, int, Path | None]:
+                         activation_bits: str = "auto", cpu: int | None = None,
+                         worker_cpus: list[int] | None = None) -> tuple[int, int, Path | None]:
     fallback = (32 if requested == "auto" else int(requested),
                 32 if activation_bits == "auto" else int(activation_bits), None)
     if requested != "auto":
         return fallback
+    if worker_cpus is not None:
+        return fallback  # Existing auto-selection profiles do not bind per-worker placement.
     if (not isinstance(threads, int) or isinstance(threads, bool) or not 1 <= threads <= 64 or
             (cpu is not None and (not isinstance(cpu, int) or isinstance(cpu, bool) or cpu < 0))):
         return fallback
@@ -262,21 +265,25 @@ def select_configuration(directory: Path, runtime: Path, requested: str, threads
 
 
 def prepare(snapshot: Path, directory: Path, bits: int, plan: Path | None = None,
-            source_bf16_head: bool = False) -> Path:
-    if source_bf16_head and bits != 32:
+            source_bf16_head: bool = False, source_bf16: bool = False) -> Path:
+    if source_bf16 and source_bf16_head:
+        raise ValueError("Select one source BF16 storage scope")
+    if (source_bf16_head or source_bf16) and bits != 32:
         raise ValueError("Source-preserving BF16 storage requires FP32 computation")
-    if source_bf16_head:
-        from tools.export_decoder import source_bf16_head_available
-        if not source_bf16_head_available(snapshot, plan):
+    if source_bf16 or source_bf16_head:
+        from tools.export_decoder import source_bf16_available, source_bf16_head_available
+        available = source_bf16_available if source_bf16 else source_bf16_head_available
+        if not available(snapshot, plan):
             return prepare(snapshot, directory, bits, plan)
-    suffix = "-source-bf16" if source_bf16_head else ""
+    suffix = "-source-bf16-matrices" if source_bf16 else "-source-bf16" if source_bf16_head else ""
     artifact = directory / f"decoder-{bits}{suffix}.leaf"
     if not artifact.is_file():
         from tools.export_decoder import export_decoder
         print(f"Preparing {bits}-bit native artifact...", file=sys.stderr)
-        options = {"source_bf16_head": True} if source_bf16_head else {}
+        options = ({"source_bf16": True} if source_bf16 else
+                   {"source_bf16_head": True} if source_bf16_head else {})
         record = export_decoder(snapshot, artifact, bits, plan_path=plan, **options)
-        artifact.with_suffix('.json').write_text(json.dumps(record, indent=2) + "\n")
+        artifact.with_suffix('.json').write_text(json.dumps(record, indent=2) + "\n", encoding='utf-8')
     return artifact
 
 
@@ -347,29 +354,43 @@ def encode_prompt(snapshot: Path, prompt: str, raw: bool = False):
 
 
 def run(args):
-    from leaf.affinity import pin_cpu
+    from leaf.affinity import pin_cpu, validate_worker_cpus
+    from leaf.runtime_check import check_decoder_options
+    worker_cpus = validate_worker_cpus(getattr(args, 'worker_cpus', None), getattr(args, 'threads', 1), args.cpu)
     pin_cpu(args.cpu)
-    source_storage = getattr(args, 'source_bf16_head', False)
+    source_matrices = getattr(args, 'source_bf16', False)
+    source_head = getattr(args, 'source_bf16_head', False)
+    if source_matrices and source_head:
+        raise ValueError('Select one source BF16 storage scope')
+    source_storage = source_matrices or source_head
+    fp32_math = getattr(args, 'fp32_math', 'fast')
+    if fp32_math not in ('fast', 'accurate'):
+        raise ValueError('--fp32-math must be fast or accurate')
+    if fp32_math == 'accurate' and (args.bits not in ('auto','32') or args.activation_bits not in ('auto','32')):
+        raise ValueError('--fp32-math accurate requires unquantized weights and FP32 activations (auto or 32)')
     if source_storage and (args.bits not in ('auto','32') or args.activation_bits not in ('auto','32')):
-        raise ValueError("--source-bf16-head requires FP32 weights and activations (auto or 32)")
+        raise ValueError("Source BF16 storage requires FP32 weights and activations (auto or 32)")
     start = time.perf_counter()
     cache = cache_root()
     runtime = None
     def prepare_runtime():
         nonlocal runtime
         runtime = executable(cache)
-        if source_storage:
-            from leaf.runtime_check import check
-            check(runtime, 'leaf_decoder')
+        check_decoder_options(runtime, source_bf16=source_matrices, source_bf16_head=source_head,
+                              fp32_math=fp32_math, worker_cpus=worker_cpus)
     # Reject unsupported metadata before building, and setup failures before weights.
     snapshot = resolve_model(args.model, cache, args.offline, args.plan,
                              before_weights=prepare_runtime)
     directory = model_directory(snapshot, cache, args.plan)
     if source_storage:
         bits, activation_bits = 32, 32
-        artifact = prepare(snapshot, directory, bits, args.plan, source_bf16_head=True)
+        artifact = prepare(snapshot, directory, bits, args.plan, source_bf16_head=source_head, source_bf16=source_matrices)
+    elif fp32_math == 'accurate':
+        # Existing auto-quantization profiles do not qualify this math policy.
+        bits, activation_bits = 32, 32
+        artifact = prepare(snapshot, directory, bits, args.plan)
     else:
-        bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu)
+        bits, activation_bits, selected = select_configuration(directory, runtime, args.bits, args.threads, args.activation_bits, args.cpu, worker_cpus)
         artifact = selected or prepare(snapshot, directory, bits, args.plan)
     prompt = args.prompt if args.prompt is not None else input("Prompt: ")
     tokenizer, ids = encode_prompt(snapshot, prompt, args.raw)
@@ -384,6 +405,10 @@ def run(args):
         command = [str(runtime), str(artifact), str(request), str(folder / "logits.bin"),
                    str(folder / "metrics.json"), "generate", str(args.threads), "1", "0", str(args.max_tokens),
                    "0", "1", str(activation_bits)]
+        if worker_cpus is not None:
+            command.append(','.join(map(str, worker_cpus)))
+        if fp32_math == 'accurate':
+            command.append('--fp32-math=accurate')
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
         first_token_ms = None
         for line in process.stdout:
@@ -399,6 +424,8 @@ def run(args):
         if process.wait():
             raise RuntimeError(error.strip())
         metrics = json.loads((folder / "metrics.json").read_text())
+        if fp32_math == 'accurate' and metrics.get('fp32_math') != 'accurate':
+            raise RuntimeError('Native FP32 math policy differs from the requested accurate execution')
         final_text = tokenizer.decode(tokens, skip_special_tokens=True)
         if final_text.startswith(rendered):
             print(final_text[len(rendered):], end="", flush=True)
@@ -455,6 +482,14 @@ def optimize(args):
     print("Validation profile: " + str(directory / "validation.json"))
 
 
+def add_source_storage_options(parser):
+    storage = parser.add_mutually_exclusive_group()
+    storage.add_argument("--source-bf16", action="store_true",
+                         help="retain original BF16 matrix weights with FP32 compute; F32/F16 sources stay F32")
+    storage.add_argument("--source-bf16-head", action="store_true",
+                         help="retain original BF16 output/tied embedding storage with FP32 compute; F32 sources stay F32")
+
+
 def main():
     parser = argparse.ArgumentParser(prog="leaf", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -469,6 +504,9 @@ def main():
     evaluator.add_argument("--sequence-length", type=int, default=128)
     evaluator.add_argument("--generate", type=int, default=16)
     evaluator.add_argument("--threads", type=int, default=1)
+    evaluator.add_argument("--fp32-math", choices=("fast", "accurate"), default="fast",
+                           help="native FP32 accumulation policy to evaluate against the same reference")
+    add_source_storage_options(evaluator)
     evaluator.add_argument("--offline", action="store_true")
     evaluator.add_argument("--output", type=Path, required=True, help="fresh results directory; partial progress is retained")
     inspector = commands.add_parser("inspect", help="check decoder configuration and FP32 weight size without downloading weights")
@@ -492,11 +530,14 @@ def main():
     runner.add_argument("--max-tokens", type=int, default=64)
     runner.add_argument("--threads", type=int, default=1)
     runner.add_argument("--cpu", type=int, help="optional logical CPU pin matching a validation profile")
+    runner.add_argument("--worker-cpus", type=int, nargs='+',
+                        help="optional distinct logical CPU per thread, in thread order; Windows/Linux")
     runner.add_argument("--bits", choices=("auto", "32", "8", "4"), default="auto")
+    runner.add_argument("--fp32-math", choices=("fast", "accurate"), default="fast",
+                        help="accurate uses bounded FP32 projection sums and a wider RMS reduction; requires unquantized FP32 compute")
     runner.add_argument("--activation-bits", choices=("auto", "8", "32"), default="auto",
                         help="dynamic INT8 or floating activations in quantized linear kernels")
-    runner.add_argument("--source-bf16-head", action="store_true",
-                        help="retain original BF16 output/tied embedding storage with FP32 compute; F32 sources stay F32")
+    add_source_storage_options(runner)
     runner.add_argument("--raw", action="store_true", help="skip chat formatting")
     runner.add_argument("--offline", action="store_true")
     runner.add_argument("--plan", type=Path, help="custom decoder plan for a local snapshot")

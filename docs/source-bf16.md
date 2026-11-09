@@ -2,7 +2,7 @@
 
 `leaf run --source-bf16-head` retains the checkpoint's original BF16 vocabulary
 projection weights, plus the embedding when tied to the same source tensor.
-All other weights remain FP32. This is an optional storage policy, not a change
+In this head-only mode, all other weights remain FP32. This is an optional storage policy, not a change
 to the model's computation precision or an automatic quantization profile.
 
 ```sh
@@ -25,7 +25,7 @@ The existing FP32 artifact and precision-selection profiles remain separate.
 
 BF16 values expand into FP32 by shifting their bits; no source information is
 discarded. AVX2 paired GEMV preserves the FP32 kernel's accumulator and reduction
-order. Multi-token projection expands bounded 96-row blocks for the existing
+order. Multi-token projection expands bounded row blocks for the existing
 FP32 GEMM. Scalar and column-tail paths preserve their corresponding arithmetic.
 CPU feature checks still select the portable fallback where needed.
 
@@ -98,6 +98,17 @@ include the failed first attempt and exact original runner. The regular default
 arithmetic remains unchanged; these gains are scoped to the tested accurate
 candidate and original BF16 checkpoints.
 
+## Native accurate math compatibility
+
+The October 26 native accurate-math option composes with this storage format:
+`leaf run MODEL --bits 32 --source-bf16-head --fp32-math accurate --prompt "Hello"`.
+Storage retains original source values; accumulation controls computation.
+The combined offline installed-wheel path passes without compiler or binary
+overrides. [Accurate-policy migration checks](shared-accumulation.md#native-accuracy-option--october-26-2026)
+preserve the trained outputs. No fresh storage speedup is inferred from those
+correctness checks. These October 26 checks cover the output head and tied embedding; the broader
+optional matrix policy is described below.
+
 ## Benchmark sleep controls
 
 The first October 20 timing attempt overlapped Windows Modern Standby from
@@ -112,3 +123,193 @@ does not request this display policy. The requests use Microsoft's documented
 [SetThreadExecutionState flags](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-setthreadexecutionstate)
 and do not change the persistent power plan. Manual sleep can still override
 the request and would invalidate a timing run.
+
+
+## Broader matrix storage (October 30, 2026)
+
+`leaf run MODEL --bits 32 --source-bf16 --fp32-math accurate --prompt "Hello"`
+retains eligible attention, MLP and embedding matrix weights that were originally
+stored in BF16. Norms and biases remain FP32. The existing `--source-bf16-head`
+option keeps its narrower behavior; select one scope. Both are opt-in. Ordinary
+FP32 preparation and automatic quantization profiles retain their existing policy.
+
+The exporter reads original BF16 payloads as unsigned 16-bit values and applies
+layout transforms without rounding. It checks source/transformed finite values
+and shares identical transformed aliases; protecting one identical alias protects
+the entire group. F32/F16 sources stay FP32 even when numerically representable
+in BF16. If there is no eligible matrix, normal FP32 preparation is reused.
+
+Interior BF16 matrices require artifact version 6. Older readers reject its magic;
+the CLI verifies native capability before downloading weights. The new cache is
+`decoder-32-source-bf16-matrices.leaf`, separate from FP32 and head-only caches.
+Existing versions 2-5 remain readable. Integer activations, mixed quantized weights,
+calibration vectors, BF16 norms/biases and quantization metadata are rejected.
+
+Computation remains the selected FP32 policy. Single-token projection converts
+original BF16 values directly into FP32 registers and uses the existing reduction.
+Prefill expands six-row blocks into FP32 before the existing GEMM. It does
+not retain a full FP32 weight copy. Conversion and scratch-buffer costs can affect
+prefill; a smaller artifact does not itself establish a latency improvement.
+
+Use the same storage and math flags as `leaf run` to check output fidelity
+against the PyTorch FP32 reference. Install `.[validation]` from a source checkout.
+
+```sh
+leaf evaluate HuggingFaceTB/SmolLM2-360M-Instruct --source-bf16 --fp32-math accurate --dataset heldout.jsonl --dataset-source "name/test split" --output build/quality-smol-bf16
+```
+
+The report records the requested storage and the actual artifact format, including
+FP32 fallback when no eligible source BF16 tensors are present. The existing logit,
+perplexity, next-token agreement and greedy generation gates apply.
+
+An offline CLI smoke check with accurate math passed on SmolLM2-360M-Instruct
+with matrix and head-only storage and on Pythia-70M with FP32 fallback. Each
+run covered two 128-token WikiText-2 test blocks and six greedy continuations.
+
+The developer tool `tools/validate_source_bf16_matrices.py` separately audits
+storage against a bound, previously qualified FP32 runtime/artifact, including all
+tensor bits, full trained logits, generation and cache/scalar/thread controls.
+The audit requires bit-exact agreement with that reference. Ordinary fast math's
+previous strict-reference tolerance misses remain open.
+
+
+Current broader-storage validation: **1,513 unit checks** pass on the initial
+96-row version; **176 focused checks** and the complete trained audit pass on
+the selected six-row version. Both SmolLM2-360M and Qwen2.5-0.5B preserve all
+trained logit bits in fast/accurate policies, generation and cache/scalar/thread
+controls. Their artifacts occupy about half their original FP32 file sizes.
+The installed six-row wheel also passes compiler-free offline execution.
+
+The initial 96-row implementation's short, stable head-only-vs-matrix screens
+show 33-36% lower decode time with 9-12% higher prefill time. These are **initial
+candidate diagnostics**, not timing evidence for the selected six-row version.
+The smaller buffer's latency measurement is pending. No new default, competitor
+speed claim or full release timing qualification follows from these checks.
+
+[Source, raw diagnostics, test reports and qualification identities](../benchmark/validation/source-bf16-matrices/20261030/manifest.json)
+are retained with the [session checkpoint](checkpoint-2026-10-30-gemm-alignment.md).
+
+
+## November 8: prefill expansion follow-up
+
+The explicit BF16 storage path now uses guarded AVX2/FMA bulk expansion where
+available; the original portable function remains available and forced-scalar
+execution retains its policy. Eight original BF16 values widen by integer
+operations, shift into the FP32 bit layout and store without rounding.
+Single-token GEMV and the storage format are unchanged.
+
+The resumed six-row-versus-head-only screen passes stability on both models:
+Smol prefill 506.06->551.28ms/decode 76.40->51.09ms; Qwen 568.06->597.89ms/
+96.06->65.27ms. These short results describe the prior six-row implementation,
+not the subsequent AVX2 update. Smaller storage helps decode while conversion
+and GEMM still cost prefill time.
+
+Matched 96-row-versus 6-row accounting records approximately 7,700-14,900 process
+page faults per prefill sample for the large temporary and zero for the small
+one. These include soft/allocation faults; disk paging is not established.
+The generated portable expansion uses SSE2. Isolated production-layout AVX2
+checks lower copy time for 5,376/5,760/15,360 values, while 29,184 is neutral.
+
+For the actual AVX2 update, all native bit/guard checks pass (**4,292,253**),
+the full Python suite passes (**1,513**, two optional legacy skips), and the
+complete trained audit preserves **411,828,224** logit values across fast and
+accurate policies. Generation, cache/scalar/thread checks and actual installed
+wheel execution also pass. This preserves prior qualification, rather than
+constituting a new independent PyTorch reference run.
+
+A full serial comparison against the previous six-row implementation uses
+accurate/accurate math, identical BF16 values, CPU2, one thread, six balanced
+pairs, 31samples and 10warmups/pass. All individual and pooled phases are stable;
+AC/effective-mode audits pass and every sample is retained.
+
+| Model | Prefill before->AVX2 | Observed reduction | Decode before->AVX2 |
+|---|---:|---:|---:|
+| SmolLM2-360M |521.22455->513.15220ms|1.55%|49.04615->48.82465ms|
+| Qwen2.5-0.5B (provisional) |590.55420->587.68990ms|0.49% raw observation|63.91170->63.88160ms|
+
+The original calculations miss the declared 2% prefill improvement threshold
+and pass the numerical decode non-regression threshold. Qwen timing is now
+**provisional**: after publication, the owner confirmed unplugging or mains
+power loss during its run. The exact interruption time is unknown. Saved
+checks reported AC throughout, but this does not override that report. Do not
+use Qwen latency or non-regression as qualified evidence until a fresh controlled
+confirmation. Smol timing and all correctness results retain their prior status.
+The [power follow-up](../benchmark/validation/bf16-expansion/20261108/power-followup.json)
+preserves this amendment without changing the raw archive. The guarded SIMD expansion is retained with the verified
+operator-level scope. No qualified 2% whole-model or competitor win is claimed.
+The default storage policy remains opt-in; do not mix these incremental results
+with head-only or other-runtime measurements.
+
+[Raw records, sources, tests and hashes](../benchmark/validation/bf16-expansion/20261108/manifest.json)
+and the [resume checkpoint](checkpoint-2026-11-08-bf16-expansion.md) preserve the
+complete evidence. No unchanged acceptance run was repeated to seek a pass.
+
+## November 9: AC confirmation and greedy generation
+
+The fresh Qwen AC comparison passed the power and spread checks in Better
+Battery mode. With the same storage on both builds, AVX2 changed pooled prefill
+from 590.55 to 587.12 ms and decode from 61.90 to 62.68 ms. Decode passed the
+2% non-regression limit and prefill fell short of the 2% improvement target.
+The original power-interrupted run remains provisional.
+
+The native decoder now advertises `generation_benchmark_supported` and accepts
+`bench-generate` for a single tokenized prompt. Use it through
+`tools.decoder_validation.run_native` with `mode="bench-generate"`, `generate`
+set to the token budget, and `runs` and `warmup` set to the desired sample counts.
+It resets the KV cache for each continuation, verifies identical greedy token
+IDs across iterations, and honors every configured EOS token. Warmups are
+excluded from the reported samples.
+
+`prefill_samples_ms` measures each prompt forward. `decode_steps_by_generation_ms`
+groups the subsequent forward times by continuation. A first-token stop produces
+an empty row. `generation_samples_ms` measures each complete native greedy
+loop including argmax. It excludes artifact loading, cache reset, tokenization
+and stdout streaming. The `LEAF_BENCHMARK_REQUIRE_AC` guard applies to this mode.
+
+For each model below, both storage modes used the same rebuilt runtime, accurate
+math and one 63-token prompt from the trained audit. Every continuation matched
+the eight expected token IDs. On one Windows CPU thread in Better Battery mode,
+all four balanced pairs and pooled spread checks passed, with five measured
+continuations and two warmups per pass.
+
+| Model | Prefill, FP32 → BF16 | Seven decode forwards, FP32 → BF16 | Native generation, FP32 → BF16 |
+|---|---:|---:|---:|
+| Qwen2.5-0.5B | 567.45 → 588.81 ms | 763.11 → 442.23 ms | 1,331.80 → 1,031.69 ms (22.53% lower) |
+| SmolLM2-360M | 502.30 → 519.40 ms | 556.67 → 346.45 ms | 1,059.83 → 870.77 ms (17.84% lower) |
+
+The same prompts and eight-token continuations were also measured through
+cached, offline `leaf run`. Each of six balanced pairs started fresh CLI and
+decoder processes. The artifact was already prepared, and the OS file cache
+was warm from input verification and warmups. External timing includes Python
+startup, tokenization, native startup and text streaming. Every command matched
+the expected token IDs and streamed text.
+
+| Model | First visible text, FP32 → BF16 | Total command, FP32 → BF16 |
+|---|---:|---:|
+| Qwen2.5-0.5B | 1,898.04 → 1,691.32 ms | 2,997.77 → 2,432.93 ms |
+| SmolLM2-360M | 1,421.78 → 1,330.30 ms | 2,217.62 → 1,901.16 ms |
+
+Both external timing metrics passed their spread checks. The native decode p50
+sampled inside the CLI runs exceeded the spread limit on both models. The warmed
+native continuation results above use a separate measurement protocol.
+
+The BF16 metadata check now defers importing NumPy until an operation actually
+reads or writes tensor payloads. In a second six-pair comparison with the same
+BF16 artifact and runtime on both sides, first visible text improved from
+1,692.58 to 1,552.09 ms for Qwen and 1,314.08 to 1,225.50 ms for SmolLM2. Total
+command time fell from 2,367.78 to 2,212.86 ms and from 1,816.09 to 1,718.99 ms,
+respectively. Both external metrics passed their spread checks and every run
+matched the same token IDs and text.
+
+A separate instrumented Qwen check used four forwards per process with zero
+warmups. With a warm OS file cache, the first prefill incurred about 485,000
+process page faults with FP32 storage and 244,000 with BF16. Later forwards had
+0–28 faults. The counters include soft and hard faults. This diagnostic shows
+the first access cost of each mapped artifact in a new decoder process.
+
+The Windows wheel smoke check used its bundled decoder for the same cached
+Qwen continuation offline. It reproduced all eight tokens and streamed text
+with a compiler-free child environment and without importing NumPy on the
+cached generation path.
+
+[Retained samples, scripts and hashes](../benchmark/validation/bf16-expansion/20261109/manifest.json)

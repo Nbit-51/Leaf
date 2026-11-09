@@ -1,0 +1,2754 @@
+{
+  "complete": true,
+  "acceptance_timing": false,
+  "release_ready": false,
+  "scope": "Attribution of the captured unmodified one-core Smol timing swing only; not a speed promotion or attribution of every historical outlier.",
+  "events": 17431184,
+  "lost_events": 0,
+  "switch_chain_mismatches": {
+    "2": 0,
+    "3": 0
+  },
+  "raw_trace_sha256": "e64b8cc44d99ad1ccbea180fbf39a40866991b8e24194731b02277e050d9fbcd",
+  "raw_trace_bytes": 1043333120,
+  "power_mode_preflight": {
+    "passed": false,
+    "power_mode": {
+      "api_version": 2,
+      "passed": false,
+      "notifications": [
+        {
+          "mode": 1,
+          "name": "better-battery",
+          "elapsed_seconds": 0.00022630000057688449
+        }
+      ],
+      "system_power_plan_changed": false,
+      "initial_mode": "better-battery",
+      "final_mode": "better-battery",
+      "error": "Timing requires a known performance power mode; saving/unknown mode observed: better-battery"
+    },
+    "ac": {
+      "ac_line_status": 1,
+      "battery_saver": false
+    },
+    "error": "Timing requires a known performance power mode; saving/unknown mode observed: better-battery"
+  },
+  "profile_transitions": [
+    {
+      "trace_relative_ms": 11345.6391,
+      "previous": "Constrained",
+      "next": "LowLatency"
+    },
+    {
+      "trace_relative_ms": 14754.4823,
+      "previous": "LowLatency",
+      "next": "Constrained"
+    },
+    {
+      "trace_relative_ms": 183145.7411,
+      "previous": "Constrained",
+      "next": "LowLatency"
+    },
+    {
+      "trace_relative_ms": 183149.7335,
+      "previous": "LowLatency",
+      "next": "Constrained"
+    },
+    {
+      "trace_relative_ms": 183150.1177,
+      "previous": "Constrained",
+      "next": "LowLatency"
+    },
+    {
+      "trace_relative_ms": 183662.314,
+      "previous": "LowLatency",
+      "next": "Constrained"
+    }
+  ],
+  "passes": [
+    {
+      "index": 0,
+      "variant": "before",
+      "start": 4366.729,
+      "end": 24697.275999999998,
+      "elapsed_ms": 20330.547,
+      "scheduled_ms": 19742.071399999953,
+      "scheduled_fraction": 0.9710546105817986,
+      "sibling_busy_fraction": 2.8528499507749683e-07,
+      "prefill_ms": 398.4087,
+      "decode_ms": 69.2879,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 691,
+          "DeliveredPerformance": {
+            "p10": 150.0,
+            "median": 187.0,
+            "p90": 250.0
+          },
+          "DeliveredFrequency": {
+            "p10": 150.0,
+            "median": 187.0,
+            "p90": 250.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 678,
+          "Frequency": {
+            "p10": 150.0,
+            "median": 187.0,
+            "p90": 250.0
+          },
+          "DeliveredPerformance": {
+            "p10": 150.0,
+            "median": 187.0,
+            "p90": 250.0
+          },
+          "BusyTime": {
+            "p10": 295671.6,
+            "median": 300000.0,
+            "p90": 305427.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 4699,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 50.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": false,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 316.6977,
+          "p90_ms": 402.1541,
+          "p90_p10_ratio": 1.2698358718740301,
+          "reason": "timing_spread_exceeds_threshold"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 67.5544,
+          "p90_ms": 75.4167,
+          "p90_p10_ratio": 1.116384721054439,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 1,
+      "variant": "after",
+      "start": 138626.283,
+      "end": 162420.222,
+      "elapsed_ms": 23793.939000000013,
+      "scheduled_ms": 23452.953800000163,
+      "scheduled_fraction": 0.9856692412298842,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 481.9518,
+      "decode_ms": 78.5812,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 797,
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 793,
+          "Frequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 295590.6,
+            "median": 300003.0,
+            "p90": 305191.8
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 4700,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 480.7847,
+          "p90_ms": 487.1622,
+          "p90_p10_ratio": 1.0132647731926578,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 77.6341,
+          "p90_ms": 81.5668,
+          "p90_p10_ratio": 1.0506568634144016,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 2,
+      "variant": "after",
+      "start": 253923.763,
+      "end": 277359.685,
+      "elapsed_ms": 23435.92199999999,
+      "scheduled_ms": 23216.794100001367,
+      "scheduled_fraction": 0.9906499134107621,
+      "sibling_busy_fraction": 6.656448158626169e-07,
+      "prefill_ms": 481.1073,
+      "decode_ms": 78.0255,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 784,
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 781,
+          "Frequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 295988.0,
+            "median": 300015.0,
+            "p90": 304462.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 3718,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 479.8081,
+          "p90_ms": 483.6733,
+          "p90_p10_ratio": 1.0080557206099687,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 77.5286,
+          "p90_ms": 79.0182,
+          "p90_p10_ratio": 1.0192135547397991,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 3,
+      "variant": "before",
+      "start": 277362.892,
+      "end": 301026.148,
+      "elapsed_ms": 23663.255999999994,
+      "scheduled_ms": 23432.10799999954,
+      "scheduled_fraction": 0.9902317753735812,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 480.7744,
+      "decode_ms": 78.3934,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 789,
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 789,
+          "Frequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 297012.2,
+            "median": 299992.0,
+            "p90": 302063.8
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 3090,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 479.2177,
+          "p90_ms": 485.1374,
+          "p90_p10_ratio": 1.0123528408904763,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 77.7709,
+          "p90_ms": 79.6999,
+          "p90_p10_ratio": 1.0248036219202812,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 4,
+      "variant": "before",
+      "start": 301032.395,
+      "end": 324666.07399999996,
+      "elapsed_ms": 23633.678999999946,
+      "scheduled_ms": 23453.5775000031,
+      "scheduled_fraction": 0.9923794556066854,
+      "sibling_busy_fraction": 2.4837436437269373e-06,
+      "prefill_ms": 480.7798,
+      "decode_ms": 78.3768,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 788,
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 788,
+          "Frequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 296648.9,
+            "median": 300005.5,
+            "p90": 304571.8
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 2685,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 476.4978,
+          "p90_ms": 482.8528,
+          "p90_p10_ratio": 1.0133368926362305,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 77.8667,
+          "p90_ms": 79.9258,
+          "p90_p10_ratio": 1.0264439099127098,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 5,
+      "variant": "after",
+      "start": 324670.159,
+      "end": 348253.12,
+      "elapsed_ms": 23582.96100000001,
+      "scheduled_ms": 23386.751399997214,
+      "scheduled_fraction": 0.9916800269481514,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 480.1846,
+      "decode_ms": 77.8929,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 787,
+          "DeliveredPerformance": {
+            "p10": 124.60000000000001,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.60000000000001,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 786,
+          "Frequency": {
+            "p10": 124.5,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.5,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 296372.0,
+            "median": 300028.5,
+            "p90": 304557.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 3219,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 478.9031,
+          "p90_ms": 481.9684,
+          "p90_p10_ratio": 1.0064006685277251,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 77.2573,
+          "p90_ms": 78.787,
+          "p90_p10_ratio": 1.0198000706729333,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 6,
+      "variant": "after",
+      "start": 348256.793,
+      "end": 371894.515,
+      "elapsed_ms": 23637.72200000001,
+      "scheduled_ms": 23446.29349999712,
+      "scheduled_fraction": 0.9919015673336504,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 480.8065,
+      "decode_ms": 78.1229,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 788,
+          "DeliveredPerformance": {
+            "p10": 125.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 125.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 788,
+          "Frequency": {
+            "p10": 125.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 125.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 296168.3,
+            "median": 299983.5,
+            "p90": 305161.5
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 2981,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 478.9909,
+          "p90_ms": 482.0104,
+          "p90_p10_ratio": 1.0063038775893236,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 77.3551,
+          "p90_ms": 78.5883,
+          "p90_p10_ratio": 1.0159420645826844,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 7,
+      "variant": "before",
+      "start": 371897.83,
+      "end": 395552.56200000003,
+      "elapsed_ms": 23654.732000000018,
+      "scheduled_ms": 23447.455400000035,
+      "scheduled_fraction": 0.9912374149916396,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 481.3298,
+      "decode_ms": 78.4332,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 789,
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 789,
+          "Frequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 296076.0,
+            "median": 300009.0,
+            "p90": 304856.6
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 2940,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 479.0019,
+          "p90_ms": 482.7142,
+          "p90_p10_ratio": 1.0077500736427143,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 77.8914,
+          "p90_ms": 79.9036,
+          "p90_p10_ratio": 1.025833403944466,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 8,
+      "variant": "before",
+      "start": 395556.59500000003,
+      "end": 419227.353,
+      "elapsed_ms": 23670.757999999973,
+      "scheduled_ms": 23424.82950000046,
+      "scheduled_fraction": 0.9896104510045891,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 480.6924,
+      "decode_ms": 78.3929,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 789,
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 789,
+          "Frequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 296917.8,
+            "median": 299991.0,
+            "p90": 304046.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 3744,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 479.03,
+          "p90_ms": 484.5671,
+          "p90_p10_ratio": 1.0115589837797216,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 78.0538,
+          "p90_ms": 79.8388,
+          "p90_p10_ratio": 1.0228688417476153,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 9,
+      "variant": "after",
+      "start": 419230.976,
+      "end": 442950.536,
+      "elapsed_ms": 23719.559999999998,
+      "scheduled_ms": 23412.3031999988,
+      "scheduled_fraction": 0.9870462689863895,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 482.2398,
+      "decode_ms": 77.714,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 791,
+          "DeliveredPerformance": {
+            "p10": 125.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 125.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 791,
+          "Frequency": {
+            "p10": 125.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 125.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 296000.0,
+            "median": 299995.0,
+            "p90": 305166.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 4247,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 480.1942,
+          "p90_ms": 487.137,
+          "p90_p10_ratio": 1.014458317072551,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 76.8603,
+          "p90_ms": 78.5836,
+          "p90_p10_ratio": 1.0224211979396387,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 10,
+      "variant": "after",
+      "start": 442954.26300000004,
+      "end": 466638.37,
+      "elapsed_ms": 23684.10699999996,
+      "scheduled_ms": 23442.234100001806,
+      "scheduled_fraction": 0.9897875440269648,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 481.7498,
+      "decode_ms": 78.1133,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 790,
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 789,
+          "Frequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 296255.0,
+            "median": 300000.0,
+            "p90": 304966.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 3727,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 479.9659,
+          "p90_ms": 484.6897,
+          "p90_p10_ratio": 1.0098419491884736,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 77.3703,
+          "p90_ms": 79.4923,
+          "p90_p10_ratio": 1.0274265448111226,
+          "reason": "passed"
+        }
+      }
+    },
+    {
+      "index": 11,
+      "variant": "before",
+      "start": 466643.044,
+      "end": 490391.127,
+      "elapsed_ms": 23748.082999999984,
+      "scheduled_ms": 23530.641199999547,
+      "scheduled_fraction": 0.990843816740895,
+      "sibling_busy_fraction": 0.0,
+      "prefill_ms": 482.4667,
+      "decode_ms": 79.0929,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 791,
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 791,
+          "Frequency": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.0,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 295130.0,
+            "median": 300008.0,
+            "p90": 305099.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 2938,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      },
+      "stability": {
+        "prefill": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 480.9632,
+          "p90_ms": 484.5187,
+          "p90_p10_ratio": 1.0073924574686797,
+          "reason": "passed"
+        },
+        "decode": {
+          "passed": true,
+          "sample_count": 31,
+          "required_samples": 5,
+          "max_p90_p10_ratio": 1.25,
+          "p10_ms": 78.1818,
+          "p90_ms": 80.9021,
+          "p90_p10_ratio": 1.0347945429754752,
+          "reason": "passed"
+        }
+      }
+    }
+  ],
+  "first_pass_seconds": [
+    {
+      "second": 0,
+      "scheduled_fraction": 0.9693059000000048,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 35,
+          "DeliveredPerformance": {
+            "p10": 154.0,
+            "median": 155.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 154.0,
+            "median": 155.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 34,
+          "Frequency": {
+            "p10": 154.0,
+            "median": 155.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 154.0,
+            "median": 155.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 294546.7,
+            "median": 300164.5,
+            "p90": 304741.6
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 414,
+          "Performance": {
+            "p10": 261.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 261.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 60.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 1.0
+          }
+        }
+      }
+    },
+    {
+      "second": 1,
+      "scheduled_fraction": 0.9836158999999826,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 33,
+          "DeliveredPerformance": {
+            "p10": 125.4,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 125.4,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 125.4,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 125.4,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 294080.6,
+            "median": 299847.0,
+            "p90": 305806.6
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 162,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.5,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 2,
+      "scheduled_fraction": 0.9781692999999978,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 34,
+          "DeliveredPerformance": {
+            "p10": 123.10000000000001,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 123.10000000000001,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 122.4,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 122.4,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 295787.6,
+            "median": 299856.0,
+            "p90": 304156.8
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 129,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 3,
+      "scheduled_fraction": 0.9831141000000015,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 35,
+          "DeliveredPerformance": {
+            "p10": 124.4,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredFrequency": {
+            "p10": 124.4,
+            "median": 154.0,
+            "p90": 155.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 34,
+          "Frequency": {
+            "p10": 124.3,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "DeliveredPerformance": {
+            "p10": 124.3,
+            "median": 154.0,
+            "p90": 155.0
+          },
+          "BusyTime": {
+            "p10": 297258.2,
+            "median": 299902.5,
+            "p90": 300840.7
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 83,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 4,
+      "scheduled_fraction": 0.9575371000000087,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 36,
+          "DeliveredPerformance": {
+            "p10": 149.5,
+            "median": 155.0,
+            "p90": 187.0
+          },
+          "DeliveredFrequency": {
+            "p10": 149.5,
+            "median": 155.0,
+            "p90": 187.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 149.2,
+            "median": 155.0,
+            "p90": 185.4
+          },
+          "DeliveredPerformance": {
+            "p10": 149.2,
+            "median": 155.0,
+            "p90": 185.4
+          },
+          "BusyTime": {
+            "p10": 298136.2,
+            "median": 299826.0,
+            "p90": 301440.2
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 433,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 5,
+      "scheduled_fraction": 0.9413012000000144,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 34,
+          "DeliveredPerformance": {
+            "p10": 151.3,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 151.3,
+            "median": 188.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 154.4,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 154.4,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 296826.4,
+            "median": 300063.0,
+            "p90": 305875.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 992,
+          "Performance": {
+            "p10": 261.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 261.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 50.0,
+            "p90": 50.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 1.0
+          }
+        }
+      }
+    },
+    {
+      "second": 6,
+      "scheduled_fraction": 0.9857576000000244,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 35,
+          "DeliveredPerformance": {
+            "p10": 148.4,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 148.4,
+            "median": 188.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 34,
+          "Frequency": {
+            "p10": 150.5,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 150.5,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 297333.3,
+            "median": 299869.5,
+            "p90": 301120.5
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 137,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 50.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 7,
+      "scheduled_fraction": 0.8898783999999923,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 33,
+          "DeliveredPerformance": {
+            "p10": 246.0,
+            "median": 248.0,
+            "p90": 255.0
+          },
+          "DeliveredFrequency": {
+            "p10": 246.0,
+            "median": 248.0,
+            "p90": 255.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 246.0,
+            "median": 248.0,
+            "p90": 255.0
+          },
+          "DeliveredPerformance": {
+            "p10": 246.0,
+            "median": 248.0,
+            "p90": 255.0
+          },
+          "BusyTime": {
+            "p10": 295353.6,
+            "median": 300079.0,
+            "p90": 304277.2
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 0,
+          "Performance": {},
+          "MinPercent": {},
+          "MaxPercent": {},
+          "EppPercent": {},
+          "QosClass": {}
+        }
+      }
+    },
+    {
+      "second": 8,
+      "scheduled_fraction": 0.9332601999999351,
+      "sibling_busy_fraction": 5.8000000008178175e-06,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 34,
+          "DeliveredPerformance": {
+            "p10": 246.3,
+            "median": 248.5,
+            "p90": 255.0
+          },
+          "DeliveredFrequency": {
+            "p10": 246.3,
+            "median": 248.5,
+            "p90": 255.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 246.2,
+            "median": 248.0,
+            "p90": 255.0
+          },
+          "DeliveredPerformance": {
+            "p10": 246.2,
+            "median": 248.0,
+            "p90": 255.0
+          },
+          "BusyTime": {
+            "p10": 295926.6,
+            "median": 300063.0,
+            "p90": 304899.8
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 2,
+          "Performance": {
+            "p10": 261.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 14.4,
+            "median": 52.0,
+            "p90": 89.6
+          },
+          "MaxPercent": {
+            "p10": 261.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 10.0,
+            "median": 10.0,
+            "p90": 10.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        }
+      }
+    },
+    {
+      "second": 9,
+      "scheduled_fraction": 0.9674463000000051,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 35,
+          "DeliveredPerformance": {
+            "p10": 250.0,
+            "median": 254.0,
+            "p90": 255.0
+          },
+          "DeliveredFrequency": {
+            "p10": 250.0,
+            "median": 254.0,
+            "p90": 255.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 34,
+          "Frequency": {
+            "p10": 250.0,
+            "median": 253.5,
+            "p90": 255.0
+          },
+          "DeliveredPerformance": {
+            "p10": 250.0,
+            "median": 253.5,
+            "p90": 255.0
+          },
+          "BusyTime": {
+            "p10": 295494.8,
+            "median": 300984.0,
+            "p90": 306068.6
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 1,
+          "Performance": {
+            "p10": 261.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 99.0,
+            "median": 99.0,
+            "p90": 99.0
+          },
+          "MaxPercent": {
+            "p10": 261.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 10.0,
+            "median": 10.0,
+            "p90": 10.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        }
+      }
+    },
+    {
+      "second": 10,
+      "scheduled_fraction": 0.9270051999999978,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 34,
+          "DeliveredPerformance": {
+            "p10": 178.8,
+            "median": 188.0,
+            "p90": 254.0
+          },
+          "DeliveredFrequency": {
+            "p10": 178.8,
+            "median": 188.0,
+            "p90": 254.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 178.2,
+            "median": 188.0,
+            "p90": 254.0
+          },
+          "DeliveredPerformance": {
+            "p10": 178.2,
+            "median": 188.0,
+            "p90": 254.0
+          },
+          "BusyTime": {
+            "p10": 295850.4,
+            "median": 299871.0,
+            "p90": 306449.4
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 606,
+          "Performance": {
+            "p10": 166.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 166.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 50.0,
+            "p90": 60.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 1.5
+          }
+        }
+      }
+    },
+    {
+      "second": 11,
+      "scheduled_fraction": 0.9909488999999976,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 33,
+          "DeliveredPerformance": {
+            "p10": 155.6,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 155.6,
+            "median": 188.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 155.6,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 155.6,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 296381.2,
+            "median": 300005.0,
+            "p90": 305550.4
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 120,
+          "Performance": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 12,
+      "scheduled_fraction": 0.9899899000000186,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 34,
+          "DeliveredPerformance": {
+            "p10": 156.0,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 156.0,
+            "median": 188.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 34,
+          "Frequency": {
+            "p10": 156.0,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 156.0,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 297603.7,
+            "median": 299975.5,
+            "p90": 301337.5
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 125,
+          "Performance": {
+            "p10": 71.0,
+            "median": 71.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 71.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 70.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 2.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 13,
+      "scheduled_fraction": 0.988558299999997,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 33,
+          "DeliveredPerformance": {
+            "p10": 151.8,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 151.8,
+            "median": 187.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 151.8,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 151.8,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 296622.0,
+            "median": 299864.0,
+            "p90": 300831.6
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 136,
+          "Performance": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 14,
+      "scheduled_fraction": 0.9887405000000036,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 33,
+          "DeliveredPerformance": {
+            "p10": 148.8,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 148.8,
+            "median": 187.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 148.8,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 148.8,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 295740.2,
+            "median": 300036.0,
+            "p90": 305521.4
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 246,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 50.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.5,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 15,
+      "scheduled_fraction": 0.9841006999999845,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 34,
+          "DeliveredPerformance": {
+            "p10": 154.70000000000002,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 154.70000000000002,
+            "median": 187.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 34,
+          "Frequency": {
+            "p10": 154.70000000000002,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 154.70000000000002,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 295622.3,
+            "median": 300007.0,
+            "p90": 303909.3
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 306,
+          "Performance": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 16,
+      "scheduled_fraction": 0.9914224000000031,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 33,
+          "DeliveredPerformance": {
+            "p10": 155.2,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 155.2,
+            "median": 188.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 155.2,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 155.2,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 295601.8,
+            "median": 300011.0,
+            "p90": 304480.2
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 76,
+          "Performance": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 17,
+      "scheduled_fraction": 0.9917344999999914,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 33,
+          "DeliveredPerformance": {
+            "p10": 153.2,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 153.2,
+            "median": 188.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 153.2,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 153.2,
+            "median": 188.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 297077.2,
+            "median": 300049.0,
+            "p90": 301617.6
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 168,
+          "Performance": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 18,
+      "scheduled_fraction": 0.9877168999999921,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 34,
+          "DeliveredPerformance": {
+            "p10": 153.6,
+            "median": 187.5,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 153.6,
+            "median": 187.5,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 34,
+          "Frequency": {
+            "p10": 153.6,
+            "median": 187.5,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 153.6,
+            "median": 187.5,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 295581.1,
+            "median": 300008.5,
+            "p90": 304104.6
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 192,
+          "Performance": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 19,
+      "scheduled_fraction": 0.9853558999999914,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 33,
+          "DeliveredPerformance": {
+            "p10": 155.0,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "DeliveredFrequency": {
+            "p10": 155.0,
+            "median": 187.0,
+            "p90": 188.0
+          }
+        },
+        "RecordedUtility": {
+          "count": 33,
+          "Frequency": {
+            "p10": 155.0,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 155.0,
+            "median": 187.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 295527.0,
+            "median": 299989.0,
+            "p90": 305601.2
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 340,
+          "Performance": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 166.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 50.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 1.0,
+            "p90": 2.0
+          }
+        }
+      }
+    },
+    {
+      "second": 20,
+      "scheduled_fraction": 0.9896087394531241,
+      "sibling_busy_fraction": 0.0,
+      "power": {
+        "DeliveredPerfChange": {
+          "count": 13,
+          "DeliveredPerformance": {
+            "p10": 124.4,
+            "median": 150.0,
+            "p90": 187.8
+          },
+          "DeliveredFrequency": {
+            "p10": 124.4,
+            "median": 150.0,
+            "p90": 187.8
+          }
+        },
+        "RecordedUtility": {
+          "count": 11,
+          "Frequency": {
+            "p10": 122.0,
+            "median": 150.0,
+            "p90": 188.0
+          },
+          "DeliveredPerformance": {
+            "p10": 122.0,
+            "median": 150.0,
+            "p90": 188.0
+          },
+          "BusyTime": {
+            "p10": 298046.0,
+            "median": 300152.0,
+            "p90": 305661.0
+          },
+          "StallTime": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 0.0
+          }
+        },
+        "ProcessorPerfStateChange": {
+          "count": 31,
+          "Performance": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "MinPercent": {
+            "p10": 5.0,
+            "median": 5.0,
+            "p90": 5.0
+          },
+          "MaxPercent": {
+            "p10": 71.0,
+            "median": 261.0,
+            "p90": 261.0
+          },
+          "EppPercent": {
+            "p10": 60.0,
+            "median": 60.0,
+            "p90": 70.0
+          },
+          "QosClass": {
+            "p10": 0.0,
+            "median": 0.0,
+            "p90": 2.0
+          }
+        }
+      }
+    }
+  ],
+  "sleep_events": [],
+  "findings": [
+    "First BEFORE prefill spread 1.2698358718740301 fails the unchanged 1.25 gate; the other eleven passes have passing prefill and decode spreads. No samples excluded.",
+    "The faster first-pass band overlaps the Constrained-to-LowLatency PPM transition. CPU 2 delivered-performance event medians reach 248-254 in seconds 7-9, versus 154 in subsequent steady passes.",
+    "The first process is scheduled on CPU 2 for 97.10% of its elapsed window; subsequent processes receive 98.57-99.24%. Lost scheduling does not account for the faster band.",
+    "Read-only post-trace preflight reports Better battery although AC is online and GetSystemPowerStatus battery_saver is false. This is not proof the effective mode was identical throughout the earlier trace.",
+    "PPM profile changes and delivered-performance changes directly corroborate a power-management contribution to this captured swing. No claim of a thermal cause or attribution to a specific app/driver.",
+    "The new guard audits effective mode and rejects saving/unknown modes or any mode change. It does not lock CPU frequency or observe every PPM subprofile. Fresh uninstrumented acceptance remains required."
+  ],
+  "statistics_note": "Power quantiles are distributions of decoded events, not time-weighted frequency measurements or normalized benchmark scores."
+}

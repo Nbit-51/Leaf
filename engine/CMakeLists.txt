@@ -75,6 +75,17 @@ add_executable(leaf_native_tests ../tests/native/test_kernels.cpp)
 target_link_libraries(leaf_native_tests PRIVATE leaf_optimized_kernels)
 add_test(NAME leaf_native_tests COMMAND leaf_native_tests)
 
+add_executable(leaf_accurate_fp32_test ../tests/native/test_accurate_fp32.cpp)
+target_include_directories(leaf_accurate_fp32_test PRIVATE include)
+add_test(NAME leaf_accurate_fp32_test COMMAND leaf_accurate_fp32_test)
+
+add_executable(leaf_benchmark_counters_test ../tests/native/test_benchmark_counters.cpp)
+target_include_directories(leaf_benchmark_counters_test PRIVATE include)
+if(WIN32)
+  target_link_libraries(leaf_benchmark_counters_test PRIVATE psapi)
+endif()
+add_test(NAME leaf_benchmark_counters_test COMMAND leaf_benchmark_counters_test)
+
 add_executable(leaf_kernel_bench ../benchmark/native_benchmark.cpp)
 target_link_libraries(leaf_kernel_bench PRIVATE leaf_optimized_kernels)
 
@@ -146,6 +157,19 @@ if(WIN32)
   target_link_libraries(leaf_decoder_final_rows_tests PRIVATE psapi)
 endif()
 
+# Artifact-backed API check, invoked explicitly with a local decoder fixture.
+# It is not a fixture-free CTest; no model is downloaded by the test target.
+add_executable(leaf_decoder_output_buffer_tests ../tests/native/test_decoder_output_buffer.cpp
+  src/decoder.cpp src/kv_cache.cpp src/kernels/transformer.cpp)
+target_include_directories(leaf_decoder_output_buffer_tests PRIVATE include)
+target_link_libraries(leaf_decoder_output_buffer_tests PRIVATE Threads::Threads)
+if(NOT MSVC AND LEAF_ENABLE_AVX2)
+  target_compile_options(leaf_decoder_output_buffer_tests PRIVATE -mno-avx2 -mno-fma)
+endif()
+if(WIN32)
+  target_link_libraries(leaf_decoder_output_buffer_tests PRIVATE psapi)
+endif()
+
 # Header-only token-panel primitive exercises portable scalar execution and
 # runtime-dispatched AVX2/FMA without depending on whole-model artifacts.
 add_executable(leaf_token_panel_tests ../tests/native/test_token_panel.cpp)
@@ -159,6 +183,15 @@ if(NOT MSVC)
   target_compile_options(leaf_token_panel_tests PRIVATE -ffp-contract=off)
 endif()
 add_test(NAME leaf_token_panel_tests COMMAND leaf_token_panel_tests)
+
+# Packing is a bit-preserving transpose, including FP32 payloads that are not
+# valid arithmetic inputs. Keep SIMD runtime-dispatched in this standalone test.
+add_executable(leaf_token_pack_reuse_tests ../tests/native/test_token_pack_reuse.cpp)
+target_include_directories(leaf_token_pack_reuse_tests PRIVATE include)
+if(NOT MSVC AND LEAF_ENABLE_AVX2)
+  target_compile_options(leaf_token_pack_reuse_tests PRIVATE -mno-avx2 -mno-fma)
+endif()
+add_test(NAME leaf_token_pack_reuse_tests COMMAND leaf_token_pack_reuse_tests)
 
 add_executable(leaf_gelu_tests ../tests/native/test_gelu.cpp)
 target_include_directories(leaf_gelu_tests PRIVATE include)
@@ -187,6 +220,11 @@ add_test(NAME leaf_silu_gate_tests COMMAND leaf_silu_gate_tests)
 add_executable(leaf_source_bf16_tests ../tests/native/test_source_bf16.cpp)
 target_include_directories(leaf_source_bf16_tests PRIVATE include)
 add_test(NAME leaf_source_bf16_tests COMMAND leaf_source_bf16_tests)
+
+add_executable(leaf_worker_affinity_tests ../tests/native/test_worker_affinity.cpp)
+target_include_directories(leaf_worker_affinity_tests PRIVATE include)
+target_link_libraries(leaf_worker_affinity_tests PRIVATE Threads::Threads)
+add_test(NAME leaf_worker_affinity_tests COMMAND leaf_worker_affinity_tests)
 
 add_executable(leaf_attention_vector_tests ../tests/native/test_attention_vector.cpp src/kernels/transformer.cpp)
 target_include_directories(leaf_attention_vector_tests PRIVATE include)
