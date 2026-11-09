@@ -330,6 +330,20 @@ queries reproduced the FP32 reference's top-10 rankings and stayed within
 queries' known relevant documents, so it is a workflow and parity check.
 [SciFact pilot evidence](../benchmark/validation/trained-decoder-and-retrieval/20261109/manifest.json)
 
+For longer jobs, run `python -m tools.embed_dataset MODEL --offline --dataset documents.jsonl --directory build/document-index`.
+Use `--task raw` if the JSONL text already contains the document title and
+retrieval prefix. A query collection can use `--task query` with its own directory.
+The command writes an ordered `embeddings.npy` and `result.json` when the job
+completes. Pass `--max-new-chunks 1` to stop after one newly completed batch,
+then rerun with the same settings to continue. The job verifies the dataset,
+model, native runtime, and saved vector hashes before reusing checkpoints. A
+crash during a batch leaves the previous batches available for the next run.
+
+A paused and resumed SciFact pilot produced all 32 vectors bit-for-bit equal
+to the earlier single-command output. The full SciFact inputs contain 5,183
+documents and 300 judged queries. The longest formatted inputs are 1,901 and
+59 tokens respectively, within EmbeddingGemma's 2,048-token limit.
+
 The next dataset milestone is a complete document-embedding job with relevance
 labels, documents/second, peak memory and total time at matched output quality.
 The graph milestone is a supported trained image classifier and held-out labels.
