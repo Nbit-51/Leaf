@@ -1,6 +1,6 @@
 import pytest
 
-from tools.benchmark_llama_cli import TIMERS, continuation, llama_work, summarize
+from tools.benchmark_llama_cli import TIMERS, continuation, llama_work, summarize, verify_quality_report
 
 
 def test_continuation_removes_only_cli_framing():
@@ -33,3 +33,41 @@ def test_comparison_requires_balanced_pairs_and_preserves_unstable_samples():
     assert result['stability']['leaf']['sample_count'] == 6
     with pytest.raises(ValueError, match='Incomplete or out-of-order'):
         summarize(samples[:-1], 6)
+
+
+@pytest.mark.parametrize('invalid', [None, 'passed', 'fp32_math', 'threads', 'storage', 'gates', 'artifact_sha256',
+                                    'executable_sha256', 'tokens_sha256', 'source_sha256'])
+def test_accuracy_gate_requires_exact_measured_inputs(invalid):
+    report = dict(format='leaf-output-quality-v1', complete=True, passed=True, precision='FP32',
+                  fp32_math='accurate', threads=1, storage=dict(effective='fp32'), artifact_sha256='weights',
+                  executable_sha256='runtime', tokens_sha256='fixture', source_sha256={'config.json': 'config'},
+                  gates=dict(min_next_token_agreement=0.999, max_perplexity_ratio=1.001,
+                             logit_atol=2e-4, logit_rtol=2e-4, exact_generation_required=True))
+    args = dict(artifact_sha='weights', binary_sha='runtime', tokens_sha='fixture',
+                snapshot_hashes={'config.json': 'config'})
+    if invalid is None:
+        verify_quality_report(report, **args)
+    else:
+        report[invalid] = {}
+        with pytest.raises(ValueError, match='passing strict FP32 quality report'):
+            verify_quality_report(report, **args)
+
+
+def test_converter_stages_parameters_without_legacy_attention_buffers(tmp_path):
+    torch = pytest.importorskip('torch')
+    from safetensors.torch import load_file, save_file
+    from tools.prepare_ollama_comparison import stage_conversion_snapshot
+
+    snapshot, staging = tmp_path / 'snapshot', tmp_path / 'staging'
+    snapshot.mkdir()
+    staging.mkdir()
+    (snapshot / 'config.json').write_text('{"model_type":"gpt2"}', encoding='utf-8')
+    parameters = {'h.0.attn.c_attn.weight': torch.arange(6, dtype=torch.float32).reshape(2, 3),
+                  'h.0.attn.c_attn.bias': torch.ones(3)}
+    original = dict(parameters, **{'h.0.attn.bias': torch.ones((1, 1, 2, 2), dtype=torch.bool)})
+    save_file(original, snapshot / 'model.safetensors')
+    assert stage_conversion_snapshot(snapshot, staging) == staging
+    staged = load_file(staging / 'model.safetensors')
+    assert staged.keys() == parameters.keys()
+    assert all(torch.equal(staged[name], value) for name, value in parameters.items())
+    assert load_file(snapshot / 'model.safetensors').keys() == original.keys()

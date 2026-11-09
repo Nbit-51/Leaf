@@ -264,6 +264,13 @@ marks mismatched or unstable workloads unqualified. Each command starts a fresh
 process against staged cached files. Full-logit parity and peak memory are
 separate measurements.
 
+To require a passing Leaf reference check before collecting timings, pass its
+`--quality-report` and `tokens.json` from `leaf evaluate`. Use one thread and the
+same `--fp32-math` for both commands. The comparator verifies the original strict
+fidelity thresholds and binds the report to the exact checkpoint, Leaf artifact,
+runtime and token fixture. The GGUF audit checks the stored source parameters;
+matching llama.cpp continuation text remains a separate check.
+
 The reusable runner passed its workload and timing checks on Qwen2.5-0.5B
 at 63 and 127 prompt tokens and SmolLM2-360M at 127. These checks used the
 existing FP32 checkpoints and eight generated tokens.
@@ -282,8 +289,30 @@ and residual widths, full and chunked logits, greedy outputs and exact BF16
 storage parity. Sequence-length-dependent RoPE and mixed per-layer windows
 still require separate operator work.
 
-`leaf inspect` accepts the published Qwen3-0.6B configuration. Trained Qwen3
-weights and model latency are outside this validation.
+`leaf inspect` accepts the published Qwen3-0.6B configuration. A subsequent
+trained run at revision `c1899de289a04d12100db370d81485cdf75e47ca` passed the
+strict FP32 reference gate on eight held-out 128-token blocks. It matched all
+1,016 next-token predictions and all six greedy continuations, with zero logit
+tolerance violations. The source-BF16 artifact was 50.01% of the FP32 artifact
+size. It preserved every stored parameter value and all 155,582,464 tested
+logits bit-for-bit, and produced the same six continuations as Leaf FP32.
+
+### Accuracy-bound comparisons on additional small checkpoints
+
+Each run used one Windows CPU thread, llama.cpp b11540, FP32 artifacts,
+127 prompt tokens and eight generated tokens. Both runtimes produced matching
+continuation text on all four checkpoints. The percentages use median paired total
+command latency across six pairs per model.
+
+| Model | Leaf / llama.cpp total p50 | Paired result | Strict Leaf FP32 gate |
+|---|---:|---:|---|
+| Qwen3-0.6B | 4,400.97 / 4,876.30 ms | 10.03% lower, stable | Passed, bound to run |
+| SmolLM2-360M | 2,807.61 / 2,867.62 ms | 2.02% lower, stable | Passed, bound to run |
+| GPT-2 124M | 1,233.35 / 1,161.63 ms | Diagnostic, first-visible spread failed | Failed, 7 logits outside tolerance |
+| Pythia-70M | 734.61 / 538.61 ms | 35.76% higher, stable diagnostic | Failed, 131 logits outside tolerance |
+
+The two diagnostic models still matched all six greedy reference continuations.
+[Retained quality, timings and audited inputs](../benchmark/validation/trained-decoder-and-retrieval/20261109/manifest.json)
 
 ## Dataset and individual-network scope
 
@@ -292,6 +321,14 @@ focused tests). A seeded random-weight ResNet-18 ONNX graph matches native outpu
 within `8.6e-7` on one `1x3x32x32` input. This is operator correctness, not trained
 classification accuracy or throughput. Native embeddings already process a
 document collection with the model loaded once per invocation.
+
+`python -m tools.evaluate_retrieval --help` scores aligned JSONL rows and
+their `.npy` embeddings against BEIR-format judgments. It records per-query
+cosine rankings, nDCG and Recall. A SciFact pilot with 32 documents and four
+queries reproduced the FP32 reference's top-10 rankings and stayed within
+`3.28e-7` maximum absolute vector error. The pilot includes the selected
+queries' known relevant documents, so it is a workflow and parity check.
+[SciFact pilot evidence](../benchmark/validation/trained-decoder-and-retrieval/20261109/manifest.json)
 
 The next dataset milestone is a complete document-embedding job with relevance
 labels, documents/second, peak memory and total time at matched output quality.

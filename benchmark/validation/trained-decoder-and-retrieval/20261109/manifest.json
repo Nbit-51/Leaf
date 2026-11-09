@@ -1,0 +1,120 @@
+{
+  "archive": "evidence.zip",
+  "bytes": 68748,
+  "sha256": "38db883e07fa8bec6b2aa501a209aaa03f87070d2b0ea82111703a7711fbc01f",
+  "scope": "Retained trained decoder quality, paired Windows CLI timing and SciFact retrieval pilot. Checkout paths are normalized. Failed gates and raw samples are retained.",
+  "windows_unit_suite": {
+    "passed": 1538,
+    "skipped": 21
+  },
+  "entries": [
+    {
+      "path": "pythia-quality/quality.json",
+      "bytes": 41217,
+      "sha256": "ff92b9fe8826097eebb9e1f1757e28a061b6945db8bf6f764cc6888235225617",
+      "original_sha256": "f852e8b5aad7463dfa21da8b1680da1bcfef30562710fd2b676ddb7952548a11"
+    },
+    {
+      "path": "gpt2-quality/quality.json",
+      "bytes": 15679,
+      "sha256": "2b0e621948e6d272847f71d2ed78e546b101180f1c645c487ea91f9488cb5b03",
+      "original_sha256": "af48c38d6314fe07cb4508aa1ff57b50160bc2301c1285eebcc158e896c2ecbd"
+    },
+    {
+      "path": "gpt2-quality-fast/quality.json",
+      "bytes": 15697,
+      "sha256": "a0fd5d4df97af9d59c8c1b51c1964417aa0ccce4f72fa2d245e69d35b166361d",
+      "original_sha256": "312ec4dce9c3384a17192a876ff986c0f40f042b1f4ac19d846bd1622bb987b4"
+    },
+    {
+      "path": "smol-quality/quality.json",
+      "bytes": 16073,
+      "sha256": "6c5204a58af24b105b5b375f6075e7300f8d055fb7cf380109534efa7b486e85",
+      "original_sha256": "a31f67ab2eaa93a81cde93c41b43133d7205d187ba6b48c09a4f0c0c95cc7236"
+    },
+    {
+      "path": "qwen3-quality/quality.json",
+      "bytes": 15659,
+      "sha256": "1b75c5af7297136d9145c268105cb55ee09b3ed6daa577b41a30237e3e464866",
+      "original_sha256": "f55ca5c878effc0c2a7f23e25c81bd218ff65f9ffad22226f0854cd1ee6d41c3"
+    },
+    {
+      "path": "qwen3-storage-parity.json",
+      "bytes": 11835,
+      "sha256": "b1854d80f9fa239c39bfda1286f1f93bca283a5aeb0300f80241ff60fc7fa56e",
+      "original_sha256": "1cfd687d22eee2ba5be904991239fea4713fd4ac1ae2c78610b7909ff86cabdf"
+    },
+    {
+      "path": "pythia-artifacts/gguf-audit.json",
+      "bytes": 19272,
+      "sha256": "431a455f3095778c9e2cf3599376193c577207332c955ccbfb68897ccd26ec70",
+      "original_sha256": "f11ff7b117c9e495b9dcc0a9f14d96a726438dddb156602f88f8c17b9d0fb4d3"
+    },
+    {
+      "path": "gpt2-audited/gguf-audit.json",
+      "bytes": 34773,
+      "sha256": "3ac880f09046e09a45c931425cafea143f760a0495ceb57e6481f09d20b38f3b",
+      "original_sha256": "b4ca2d214e39a88cd7630270995d4d6a29860f2157968fbe36f2cf2934d60cd2"
+    },
+    {
+      "path": "qwen3-artifacts/gguf-audit.json",
+      "bytes": 77737,
+      "sha256": "1965142f1f9e32929225ae4478ba3444a3c4ce9f2a2300e022e0ed81d2f21988",
+      "original_sha256": "e943efaebaf5a3e4e13412baf2b7738993ec06c3e7e26f5f39d0c5e23ae26e46"
+    },
+    {
+      "path": "pythia-cli/comparison.json",
+      "bytes": 46305,
+      "sha256": "88aad20edf2ec5d3c14dcc5f59ed2ff76f3622af62c3fc6baac544ef0ef30554",
+      "original_sha256": "8f91495c8bc069486299a6bfd6656b37fd1e8dd0bd8c1448828da9a78652207c"
+    },
+    {
+      "path": "gpt2-cli/comparison.json",
+      "bytes": 46162,
+      "sha256": "6e06c68d5c823803db0e8255dc09f02e6bb8c6493211cd2a3fe7e1be7a8252f5",
+      "original_sha256": "415780874526095931ac7045856a7496c41bc4330bd975e0215cf04467e02017"
+    },
+    {
+      "path": "smol-cli/comparison.json",
+      "bytes": 48557,
+      "sha256": "3d0b92712a79aa1e278f7c42fa29d349d02d24b490159d5321772e21736b218d",
+      "original_sha256": "d5a4e8768ca27de55092b9512b53711c3b1955cdd5d2f5b212e91aeedfbed35d"
+    },
+    {
+      "path": "qwen3-cli/comparison.json",
+      "bytes": 47493,
+      "sha256": "b165ba665721073c69ad97dc93442b1968bec896d7b295a19b14979121358bb9",
+      "original_sha256": "d3e95a2e9e5018b3697c66e853a6d640778d77d129b26bbe716e1bc97bc2afa0"
+    },
+    {
+      "path": "scifact/pilot.json",
+      "bytes": 388,
+      "sha256": "e3dd4727a0d8bf8d72d2b734f615bbee803208eb7ad5ad74acdad155c5c70876",
+      "original_sha256": "8fdd129e33c52cec42afafa7f9b736d135eb23e71726ca0e01d06b375640fe15"
+    },
+    {
+      "path": "scifact/leaf-retrieval.json",
+      "bytes": 5213,
+      "sha256": "b544b934ae14013f8fa56a54aa89c21e0d83d3e2bffcd2a00cddb5544b854482",
+      "original_sha256": "fcd419c8475e13e3c66e0793e227f5c1cfbd1e79369f10cd46eacc7683626334"
+    },
+    {
+      "path": "scifact/reference-check.json",
+      "bytes": 383,
+      "sha256": "ed6a6a26db4dfee603331e9b5d6ae25ee9514043f43cc9c5a97757cc12a010ac",
+      "original_sha256": "d1e24f855400e629d6793873a0946619ac471384b9a9384d65583183d48a6fca"
+    },
+    {
+      "path": "scifact/leaf-documents.metrics.json",
+      "bytes": 1794,
+      "sha256": "b6c8319645552044275b8fa136243f8af3ba21593c750c9c746f4097e0047538",
+      "original_sha256": "f1b4cc0a256d0fb36e661b088588ba43374234988dfc79af0c53c320cca5c4ad"
+    },
+    {
+      "path": "scifact/leaf-queries.metrics.json",
+      "bytes": 1794,
+      "sha256": "a61835686152b8f1863cafbf3bfdd75c1555f663e03916deeb95792e02c06225",
+      "original_sha256": "ab51695a2f1e1eb2ccc19b5b7f3bacd22d6690fc1528d92923f9d0809347d885"
+    }
+  ]
+}
