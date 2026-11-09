@@ -67,7 +67,9 @@ those source values while computing in FP32:
 leaf run HuggingFaceTB/SmolLM2-360M-Instruct --bits 32 --source-bf16 --prompt "Explain CPU inference." --max-tokens 32
 ```
 
-FP32 source weights stay FP32. This uses a separate prepared cache; see
+FP32 source weights stay FP32. This uses a separate prepared cache. On two
+cached Windows workloads with eight generated tokens, BF16 matrix storage cut
+total `leaf run` time by 14–19% while preserving the generated tokens. See
 [storage semantics, exact-output checks and measured scope](docs/source-bf16.md).
 
 For the explicit accurate FP32 accumulation policy, add `--fp32-math accurate`
@@ -291,7 +293,7 @@ reduces paired decode latency **5.12% on SmolLM2** and **11.65% on Qwen2.5**,
 with stable timings and prefill non-regression. These are incremental Leaf results.
 Quantized vector attention and broader matched runtime comparisons remain open.
 
-Further work includes broader quality datasets, complete-command latency,
+Further work includes broader quality datasets and complete-command measurements,
 independent CPU/Linux evaluation, and compatible small Qwen, Mistral, Granite
 and Gemma-family workloads. The [embedding validation plan](docs/embedding.md)
 starts with retrieval quality and matched CPU comparisons before expanding

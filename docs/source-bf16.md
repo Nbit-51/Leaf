@@ -243,3 +243,73 @@ with head-only or other-runtime measurements.
 [Raw records, sources, tests and hashes](../benchmark/validation/bf16-expansion/20261108/manifest.json)
 and the [resume checkpoint](checkpoint-2026-11-08-bf16-expansion.md) preserve the
 complete evidence. No unchanged acceptance run was repeated to seek a pass.
+
+## November 9: AC confirmation and greedy generation
+
+The fresh Qwen AC comparison passed the power and spread checks in Better
+Battery mode. With the same storage on both builds, AVX2 changed pooled prefill
+from 590.55 to 587.12 ms and decode from 61.90 to 62.68 ms. Decode passed the
+2% non-regression limit and prefill fell short of the 2% improvement target.
+The original power-interrupted run remains provisional.
+
+The native decoder now advertises `generation_benchmark_supported` and accepts
+`bench-generate` for a single tokenized prompt. Use it through
+`tools.decoder_validation.run_native` with `mode="bench-generate"`, `generate`
+set to the token budget, and `runs` and `warmup` set to the desired sample counts.
+It resets the KV cache for each continuation, verifies identical greedy token
+IDs across iterations, and honors every configured EOS token. Warmups are
+excluded from the reported samples.
+
+`prefill_samples_ms` measures each prompt forward. `decode_steps_by_generation_ms`
+groups the subsequent forward times by continuation. A first-token stop produces
+an empty row. `generation_samples_ms` measures each complete native greedy
+loop including argmax. It excludes artifact loading, cache reset, tokenization
+and stdout streaming. The `LEAF_BENCHMARK_REQUIRE_AC` guard applies to this mode.
+
+For each model below, both storage modes used the same rebuilt runtime, accurate
+math and one 63-token prompt from the trained audit. Every continuation matched
+the eight expected token IDs. On one Windows CPU thread in Better Battery mode,
+all four balanced pairs and pooled spread checks passed, with five measured
+continuations and two warmups per pass.
+
+| Model | Prefill, FP32 → BF16 | Seven decode forwards, FP32 → BF16 | Native generation, FP32 → BF16 |
+|---|---:|---:|---:|
+| Qwen2.5-0.5B | 567.45 → 588.81 ms | 763.11 → 442.23 ms | 1,331.80 → 1,031.69 ms (22.53% lower) |
+| SmolLM2-360M | 502.30 → 519.40 ms | 556.67 → 346.45 ms | 1,059.83 → 870.77 ms (17.84% lower) |
+
+The same prompts and eight-token continuations were also measured through
+cached, offline `leaf run`. Each of six balanced pairs started fresh CLI and
+decoder processes. The artifact was already prepared, and the OS file cache
+was warm from input verification and warmups. External timing includes Python
+startup, tokenization, native startup and text streaming. Every command matched
+the expected token IDs and streamed text.
+
+| Model | First visible text, FP32 → BF16 | Total command, FP32 → BF16 |
+|---|---:|---:|
+| Qwen2.5-0.5B | 1,898.04 → 1,691.32 ms | 2,997.77 → 2,432.93 ms |
+| SmolLM2-360M | 1,421.78 → 1,330.30 ms | 2,217.62 → 1,901.16 ms |
+
+Both external timing metrics passed their spread checks. The native decode p50
+sampled inside the CLI runs exceeded the spread limit on both models. The warmed
+native continuation results above use a separate measurement protocol.
+
+The BF16 metadata check now defers importing NumPy until an operation actually
+reads or writes tensor payloads. In a second six-pair comparison with the same
+BF16 artifact and runtime on both sides, first visible text improved from
+1,692.58 to 1,552.09 ms for Qwen and 1,314.08 to 1,225.50 ms for SmolLM2. Total
+command time fell from 2,367.78 to 2,212.86 ms and from 1,816.09 to 1,718.99 ms,
+respectively. Both external metrics passed their spread checks and every run
+matched the same token IDs and text.
+
+A separate instrumented Qwen check used four forwards per process with zero
+warmups. With a warm OS file cache, the first prefill incurred about 485,000
+process page faults with FP32 storage and 244,000 with BF16. Later forwards had
+0–28 faults. The counters include soft and hard faults. This diagnostic shows
+the first access cost of each mapped artifact in a new decoder process.
+
+The Windows wheel smoke check used its bundled decoder for the same cached
+Qwen continuation offline. It reproduced all eight tokens and streamed text
+with a compiler-free child environment and without importing NumPy on the
+cached generation path.
+
+[Retained samples, scripts and hashes](../benchmark/validation/bf16-expansion/20261109/manifest.json)

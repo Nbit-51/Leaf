@@ -1,0 +1,102 @@
+{
+  "archive": "evidence.zip",
+  "bytes": 48381,
+  "sha256": "39b6010cbb49c97870aa2510e671bbaf803c09628c2c0252fad882ff4fe17b01",
+  "scope": "Native generation, cached CLI, startup A/B, Windows counters and package smoke. JSON serialization and absolute checkout paths are normalized; sample values are preserved.",
+  "windows_unit_suite": {
+    "passed": 1499,
+    "skipped": 21
+  },
+  "entries": [
+    {
+      "path": "ac-confirmation/comparison.json",
+      "bytes": 61267,
+      "sha256": "7eda81c7a7ef88a483055899b17fbb0ca3edb5df149e10e5d28099a7165a1fdc",
+      "original_sha256": "526257f24ba3734381552918e2441ccfa7913f44ba4acdd3c24715697b8a7db1"
+    },
+    {
+      "path": "ac-confirmation/gate.json",
+      "bytes": 1864,
+      "sha256": "9f60dce3c5909ff4a007cc898568af91999108dc72cccde3a45080393266d161",
+      "original_sha256": "1686baf5178b9e237ede915643d9bbfa3e67fc82be5d252a52026ff727ea0e2c"
+    },
+    {
+      "path": "ac-confirmation/power-events.json",
+      "bytes": 223,
+      "sha256": "15314612a4fd1679cb6d7394822a924c20d48790d0aec3c76f1b6fa7298e96f5",
+      "original_sha256": "4a85e3b62839a09a42e2b18f11d6f868d89cb602b5e9164bbcf1590b98322316"
+    },
+    {
+      "path": "check_wheel.py",
+      "bytes": 3507,
+      "sha256": "740dd50002ee1e3ad475f2782f2c4b274dd622bf2a312005cce39af6352888e4",
+      "original_sha256": "740dd50002ee1e3ad475f2782f2c4b274dd622bf2a312005cce39af6352888e4"
+    },
+    {
+      "path": "cli-baseline/qwen.json",
+      "bytes": 28708,
+      "sha256": "f9d25270d6725f24c00b3b5dc8dc3c04657c26fe8370230ae0043c90a963f12b",
+      "original_sha256": "9383ec0f4860876cd9600ddc19e9bfa7c53d479c15d036a08b6d67510e971676"
+    },
+    {
+      "path": "cli-baseline/smol.json",
+      "bytes": 28505,
+      "sha256": "ff688048f2e4b7864fc15c1df794922676678b72869aa1de56cd8116b14786d6",
+      "original_sha256": "0fe2ee56f53cdb19601703fb47de7ad88950e674587e3714997df34f72acb395"
+    },
+    {
+      "path": "cli-lazy-export/qwen.json",
+      "bytes": 28962,
+      "sha256": "c1a93659498697602b4943ad253e683e92c6698479c4f1c6b23188aabb6e7540",
+      "original_sha256": "c424314f175df93a74d16b28e25fa3ccb7369260f74878d49151814dad8b263b"
+    },
+    {
+      "path": "cli-lazy-export/smol.json",
+      "bytes": 28692,
+      "sha256": "419e6853faf5dc59249a603d3eddde01a5855b0096a8098bbd67199701851192",
+      "original_sha256": "b8e971b8a35d45f752c713b31ac88d1dd05284774b2fbf51941318497135566b"
+    },
+    {
+      "path": "compare_cli.py",
+      "bytes": 6343,
+      "sha256": "8753cde8231d803aa69ec7153eeb1bb3e9aecc28df4690505a8abb4b0d7f6baa",
+      "original_sha256": "8753cde8231d803aa69ec7153eeb1bb3e9aecc28df4690505a8abb4b0d7f6baa"
+    },
+    {
+      "path": "compare_qwen.py",
+      "bytes": 5205,
+      "sha256": "28a6686315d9f1d4a0e2995baeab753aa59fa755358d8ac8e34639e003a27b75",
+      "original_sha256": "28a6686315d9f1d4a0e2995baeab753aa59fa755358d8ac8e34639e003a27b75"
+    },
+    {
+      "path": "first-prefill.json",
+      "bytes": 17399,
+      "sha256": "111fb9924646422249c43d69efe3ee20a688580b8e6187e94f2c839a19b76b92",
+      "original_sha256": "b018c7b3c74886f4e141a1846de8a4a12dc3913b43fc9dfcbc93e214f01fbe58"
+    },
+    {
+      "path": "first_prefill.py",
+      "bytes": 2416,
+      "sha256": "e2850b1d8d6974dadc46f93915ff70fae6ecd7aea2156187a33e6c05674b7aa9",
+      "original_sha256": "e2850b1d8d6974dadc46f93915ff70fae6ecd7aea2156187a33e6c05674b7aa9"
+    },
+    {
+      "path": "qwen-storage-comparison.json",
+      "bytes": 40108,
+      "sha256": "f931641bccaf3ebeec4ddef865e73f1e2372b05958b86d3ba143591e042db958",
+      "original_sha256": "ab8028930d305a25bbc29dbc720ceeb15c5edbf3badebead8a970b1885e06d56"
+    },
+    {
+      "path": "smol-storage-comparison.json",
+      "bytes": 39745,
+      "sha256": "3f34d83af8b72bf3375481bff497213834efdde7b9c9db71f0ddf53118072254",
+      "original_sha256": "5768677c4f726b3162d0acda6aa80fbb74e5953f48fb458d7b76034e792da8d9"
+    },
+    {
+      "path": "wheel-check.json",
+      "bytes": 1950,
+      "sha256": "24af103b88776819a7bf9e7412f5df4f1753c3829504f150c3b0f7319546776b",
+      "original_sha256": "71db2b875f146b4f9b760a0214c87bfd49fe2c5464531b9bd1a933951d15a7f5"
+    }
+  ]
+}

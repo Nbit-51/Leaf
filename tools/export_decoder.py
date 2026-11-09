@@ -10,8 +10,10 @@ import json
 from pathlib import Path
 import struct
 import sys
+from typing import TYPE_CHECKING
 
-import numpy as np
+if TYPE_CHECKING:
+    import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -36,6 +38,8 @@ def tensor_index(filename: Path) -> tuple[int, dict]:
 
 
 def read_tensor(filename: Path, base: int, entry: dict) -> np.ndarray:
+    import numpy as np
+
     dtypes = {"F32": "<f4", "F16": "<f2", "BF16": "<u2"}
     if entry["dtype"] not in dtypes:
         raise ValueError(f"Unsupported source weight dtype {entry['dtype']}")
@@ -54,6 +58,8 @@ def read_tensor(filename: Path, base: int, entry: dict) -> np.ndarray:
 
 def read_source_bf16(filename: Path, base: int, entry: dict) -> np.ndarray:
     """Map original BF16 bits; never derive this storage by rounding F32."""
+    import numpy as np
+
     if entry["dtype"] != "BF16":
         raise ValueError("Source-preserving BF16 payload requires an original BF16 tensor")
     shape = tuple(entry["shape"])
@@ -82,6 +88,8 @@ def transform_array(array: np.ndarray, operations: list[dict]) -> np.ndarray:
 
 
 def quantize(array: np.ndarray, bits: int, group_size: int) -> tuple[np.ndarray, np.ndarray]:
+    import numpy as np
+
     rows, cols = array.shape
     if cols % group_size:
         raise ValueError(f"Input width {cols} is not divisible by group size {group_size}")
@@ -98,6 +106,8 @@ def quantize(array: np.ndarray, bits: int, group_size: int) -> tuple[np.ndarray,
 
 def channel_factors(weight: np.ndarray, activation_max: np.ndarray, alpha: float) -> np.ndarray:
     """Equivalent W*s and X/s rescaling before quantization (SmoothQuant)."""
+    import numpy as np
+
     if not 0 <= alpha <= 1 or activation_max.shape != (weight.shape[1],):
         raise ValueError("Invalid smoothing alpha or calibration width")
     if not np.isfinite(activation_max).all() or (activation_max < 0).any():
@@ -203,6 +213,8 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
                    plan_path: Path | None = None, calibration_path: Path | None = None,
                    alpha: float = 0.5, keep_fp32_tensors=None, int8_group_size: int = 0,
                    source_bf16_head: bool = False, source_bf16: bool = False) -> dict:
+    import numpy as np
+
     if bits not in (32, 8, 4):
         raise ValueError("Precision must be 32, 8, or 4 bits")
     if not isinstance(source_bf16_head, bool) or (source_bf16_head and (bits != 32 or calibration_path)):

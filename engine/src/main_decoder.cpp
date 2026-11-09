@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -90,6 +91,26 @@ template <class T> void array(std::ostream& output, const std::vector<T>& values
     for (std::size_t i = 0; i < values.size(); ++i) output << (i ? "," : "") << values[i];
     output << ']';
 }
+
+double generate_continuation(leaf::runtime::Decoder& decoder, const std::vector<std::uint32_t>& ids,
+                             unsigned limit, bool stream_tokens, std::vector<float>& logits,
+                             std::vector<std::uint32_t>& tokens, std::vector<double>& decodes) {
+    auto start = Clock::now();
+    decoder.forward_into(ids, logits);
+    const double prefill = elapsed(start);
+    for (unsigned token = 0; token < limit; ++token) {
+        const auto id = static_cast<std::uint32_t>(std::max_element(logits.begin(), logits.end()) - logits.begin());
+        tokens.push_back(id);
+        if (stream_tokens) std::cout << "TOKEN " << id << '\n' << std::flush;
+        if (decoder.is_eos_token(id)) break;
+        if (token + 1 < limit) {
+            start = Clock::now();
+            decoder.forward_into({id}, logits);
+            decodes.push_back(elapsed(start));
+        }
+    }
+    return prefill;
+}
 }
 
 int main(int argc, char** argv) {
@@ -99,6 +120,7 @@ int main(int argc, char** argv) {
                   << ",\"worker_spin_limit_us\":50"
                   << ",\"fp32_math_modes\":[\"fast\",\"accurate\"],\"fp32_math_default\":\"fast\""
                   << ",\"reusable_logits_supported\":true"
+                  << ",\"generation_benchmark_supported\":true"
 #ifdef LEAF_DIAGNOSTIC_TIMING
                   << ",\"benchmark_counters_supported\":false"
 #else
@@ -112,7 +134,7 @@ int main(int argc, char** argv) {
         return 0;
     }
     if (argc < 6 || argc > 16) {
-        std::cerr << "Usage: leaf_decoder artifact.leaf tokens.bin logits.bin metrics.json mode"
+        std::cerr << "Usage: leaf_decoder artifact.leaf tokens.bin logits.bin metrics.json mode (verify|chunked|bench|generate|bench-generate)"
                      " [threads=1] [runs=3] [warmup=1] [generate=16] [scalar=0] [chunk=1] [activation-bits=32] [worker-cpus=comma-list] [--fp32-math=fast|accurate] [--benchmark-counters]\n";
         return 1;
     }
@@ -129,8 +151,9 @@ int main(int argc, char** argv) {
         }
 #endif
         const std::string mode = argv[5];
-        const bool require_ac = mode == "bench" && std::getenv("LEAF_BENCHMARK_REQUIRE_AC");
-        if (mode != "verify" && mode != "chunked" && mode != "bench" && mode != "generate")
+        const bool generation_benchmark = mode == "bench-generate";
+        const bool require_ac = (mode == "bench" || generation_benchmark) && std::getenv("LEAF_BENCHMARK_REQUIRE_AC");
+        if (mode != "verify" && mode != "chunked" && mode != "bench" && mode != "generate" && !generation_benchmark)
             throw std::runtime_error("unknown decoder mode");
         const unsigned threads = argc > 6 ? std::stoul(argv[6]) : 1;
         const unsigned runs = argc > 7 ? std::stoul(argv[7]) : 3;
@@ -174,6 +197,8 @@ int main(int argc, char** argv) {
         if (!input) throw std::runtime_error("cannot open token request");
         const auto count = read_u32(input);
         if (count == 0 || count > 100000) throw std::runtime_error("invalid request count");
+        if (generation_benchmark && (count != 1 || generate == 0 || warmup > std::numeric_limits<unsigned>::max() - runs))
+            throw std::runtime_error("generation benchmark requires one prompt, a positive generation limit and valid iteration counts");
         std::vector<std::vector<std::uint32_t>> requests;
         for (unsigned i = 0; i < count; ++i) {
             const auto length = read_u32(input);
@@ -189,6 +214,8 @@ int main(int argc, char** argv) {
         std::ofstream outputs(argv[3], std::ios::binary);
         if (!outputs) throw std::runtime_error("cannot open logits output");
         std::vector<double> prefills, decodes;
+        std::vector<double> generation_times;
+        std::vector<std::vector<double>> generation_decode_steps;
         std::vector<float> logits;
         leaf::runtime::benchmark::Samples work_prefill, work_decode;
         if (benchmark_counters) {
@@ -248,17 +275,29 @@ int main(int argc, char** argv) {
                     check_benchmark_power(require_ac);
                     if (iteration >= warmup) { prefills.push_back(prefill); decodes.push_back(decode); }
                 }
-            } else {
-                auto start = Clock::now(); decoder.forward_into(ids, logits); prefills.push_back(elapsed(start));
-                for (unsigned token = 0; token < generate; ++token) {
-                    const auto id = static_cast<std::uint32_t>(std::max_element(logits.begin(), logits.end()) - logits.begin());
-                    generated.push_back(id);
-                    std::cout << "TOKEN " << id << '\n' << std::flush;
-                    if (decoder.is_eos_token(id)) break;
-                    if (token + 1 < generate) {
-                        start = Clock::now(); decoder.forward_into({id}, logits); decodes.push_back(elapsed(start));
+            } else if (generation_benchmark) {
+                std::vector<std::uint32_t> tokens;
+                std::vector<double> steps;
+                for (unsigned iteration = 0; iteration < runs + warmup; ++iteration) {
+                    check_benchmark_power(require_ac);
+                    decoder.reset();
+                    tokens.clear();
+                    steps.clear();
+                    const auto start = Clock::now();
+                    const double prefill = generate_continuation(decoder, ids, generate, false, logits, tokens, steps);
+                    const double duration = elapsed(start);
+                    check_benchmark_power(require_ac);
+                    if (iteration == 0) generated = tokens;
+                    if (tokens != generated) throw std::runtime_error("greedy generation differed between benchmark iterations");
+                    if (iteration >= warmup) {
+                        prefills.push_back(prefill);
+                        decodes.insert(decodes.end(), steps.begin(), steps.end());
+                        generation_times.push_back(duration);
+                        generation_decode_steps.push_back(steps);
                     }
                 }
+            } else {
+                prefills.push_back(generate_continuation(decoder, ids, generate, true, logits, generated, decodes));
             }
         }
         if (!outputs) throw std::runtime_error("failed to write logits");
@@ -302,6 +341,15 @@ int main(int argc, char** argv) {
         metrics << ",\"worker_cpus\":"; array(metrics, worker_cpus);
         metrics << ",\"worker_spin_us\":" << (worker_cpus.size() > 1 ? 50 : 0);
         metrics << ",\"generated_tokens\":"; array(metrics, generated);
+        if (generation_benchmark) {
+            metrics << ",\"generation_samples_ms\":"; array(metrics, generation_times);
+            metrics << ",\"decode_steps_by_generation_ms\":[";
+            for (std::size_t i = 0; i < generation_decode_steps.size(); ++i) {
+                if (i) metrics << ',';
+                array(metrics, generation_decode_steps[i]);
+            }
+            metrics << ']';
+        }
         if (benchmark_counters) leaf::runtime::benchmark::emit(metrics, work_prefill, work_decode);
 #ifdef LEAF_DIAGNOSTIC_TIMING
         leaf::diagnostics::emit(metrics, prefill_counters, decode_counters);

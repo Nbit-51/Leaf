@@ -1,6 +1,8 @@
 """Broader source storage must be explicit, cache-separated and runtime-gated."""
 import json
 from pathlib import Path
+import subprocess
+import sys
 from types import SimpleNamespace
 
 import pytest
@@ -23,6 +25,23 @@ def test_matrix_scope_has_separate_cache_and_f32_fallback(tmp_path):
     fallback = tmp_path/'f32-cache'
     assert cli.prepare(f32.parent, fallback, 32, source_bf16=True) == cli.prepare(f32.parent, fallback, 32)
     assert not (fallback/'decoder-32-source-bf16-matrices.leaf').exists()
+
+
+def test_cached_source_storage_check_does_not_import_numpy(tmp_path):
+    source, _, _ = fixture_model(tmp_path/'model')
+    directory = tmp_path/'cache'
+    artifact = cli.prepare(source.parent, directory, 32, source_bf16=True)
+    script = """
+import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from leaf.cli import prepare
+assert prepare(Path(sys.argv[2]), Path(sys.argv[3]), 32, source_bf16=True) == Path(sys.argv[4])
+assert 'numpy' not in sys.modules
+"""
+    root = Path(__file__).resolve().parents[2]
+    subprocess.run([sys.executable, '-I', '-c', script, str(root), str(source.parent), str(directory), str(artifact)],
+                   check=True)
 
 
 @pytest.mark.parametrize('bits,activations', [('8','auto'), ('4','32'), ('32','8')])
