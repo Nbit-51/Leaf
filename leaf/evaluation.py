@@ -195,11 +195,20 @@ def evaluate(args):
                                source_bf16=source_bf16, source_bf16_head=source_bf16_head)
         with artifact.open('rb') as file:
             magic = file.read(8)
+            storage_format = magic
+            if magic == b'LEAFDC07':
+                from tools.export_decoder import HEADER, OPERATOR_METADATA
+                file.seek(HEADER.size)
+                metadata = file.read(OPERATOR_METADATA.size)
+                if len(metadata) != OPERATOR_METADATA.size:
+                    raise ValueError('Truncated decoder operator metadata')
+                storage, _, _ = OPERATOR_METADATA.unpack(metadata)
+                storage_format = {0: b'LEAFDC02', 5: b'LEAFDC05', 6: b'LEAFDC06'}.get(storage)
         storage_by_format = {b'LEAFDC02': 'fp32', b'LEAFDC03': 'fp32', b'LEAFDC04': 'fp32',
                              b'LEAFDC05': 'source_bf16_head', b'LEAFDC06': 'source_bf16'}
-        if magic not in storage_by_format:
+        if storage_format not in storage_by_format:
             raise ValueError('Unrecognized decoder artifact format')
-        record['storage'].update(effective=storage_by_format[magic], artifact_format=magic.decode('ascii'))
+        record['storage'].update(effective=storage_by_format[storage_format], artifact_format=magic.decode('ascii'))
         record.update(snapshot=str(snapshot), artifact_sha256=digest(artifact), executable_sha256=digest(runtime),
                       source_sha256={p.name: digest(p) for p in sorted(snapshot.iterdir())
                                      if p.is_file() and p.suffix in (".json", ".safetensors")})

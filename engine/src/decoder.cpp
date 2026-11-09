@@ -729,7 +729,7 @@ struct Decoder::Impl {
     DecoderProfile profile;
     std::unordered_map<std::string, Weight> weights;
     std::vector<KVCache> caches;
-    std::size_t h, f, heads, kv_heads, layers, vocab, max_positions, eos, dim, sliding_window;
+    std::size_t h, f, heads, kv_heads, layers, vocab, max_positions, eos, dim, sliding_window, qwidth;
     std::vector<std::uint32_t> eos_tokens;
     float theta, epsilon;
     unsigned norm_kind, activation, position_kind, gated, parallel, rotary_dim, position_offset, final_norm;
@@ -737,6 +737,7 @@ struct Decoder::Impl {
     bool avx = false;
     bool float_tiles = false, optimized_fp32 = false, fp32_artifact = false;
     bool accurate_fp32 = false;
+    bool qk_norm = false;
     std::size_t source_bf16_tensors = 0, source_bf16_linear_calls = 0;
     bool vector_gelu = false, vector_attention = false, paired_gemv = false;
     bool vector_silu_gate = false;
@@ -779,40 +780,62 @@ struct Decoder::Impl {
         Reader reader{mapping}; reader.require(8);
         const bool window_format = std::memcmp(mapping.data, "LEAFDC03", 8) == 0;
         const bool multi_eos_format = std::memcmp(mapping.data, "LEAFDC04", 8) == 0;
-        const bool source_bf16_io_format = std::memcmp(mapping.data, "LEAFDC05", 8) == 0;
-        const bool source_bf16_matrix_format = std::memcmp(mapping.data, "LEAFDC06", 8) == 0;
-        const bool source_bf16_format = source_bf16_io_format || source_bf16_matrix_format;
-        check(source_bf16_format || multi_eos_format || window_format || std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
+        bool source_bf16_io_format = std::memcmp(mapping.data, "LEAFDC05", 8) == 0;
+        bool source_bf16_matrix_format = std::memcmp(mapping.data, "LEAFDC06", 8) == 0;
+        const bool operator_format = std::memcmp(mapping.data, "LEAFDC07", 8) == 0;
+        check(operator_format || source_bf16_io_format || source_bf16_matrix_format || multi_eos_format || window_format ||
+              std::memcmp(mapping.data, "LEAFDC02", 8) == 0, "unsupported artifact magic");
         reader.position = 8;
-        check(reader.u32() == (source_bf16_matrix_format ? 6u : source_bf16_io_format ? 5u :
+        check(reader.u32() == (operator_format ? 7u : source_bf16_matrix_format ? 6u : source_bf16_io_format ? 5u :
                               multi_eos_format ? 4u : window_format ? 3u : 2u), "unsupported decoder artifact version");
-        check(!source_bf16_format || activation_bits == 32, "source BF16 storage requires FP32 activations");
         const auto count = reader.u32(); const auto base = reader.u64();
         h = reader.u32(); f = reader.u32(); heads = reader.u32(); kv_heads = reader.u32();
         layers = reader.u32(); vocab = reader.u32(); max_positions = reader.u32(); eos = reader.u32();
         dim = reader.u32(); sliding_window = reader.u32();
-        check(source_bf16_format || multi_eos_format || (window_format ? sliding_window > 0 : sliding_window == 0),
+        check(operator_format || source_bf16_io_format || source_bf16_matrix_format || multi_eos_format ||
+              (window_format ? sliding_window > 0 : sliding_window == 0),
               "invalid sliding-window artifact configuration");
         theta = reader.f32(); epsilon = reader.f32();
         norm_kind = reader.u32(); activation = reader.u32(); position_kind = reader.u32();
         gated = reader.u32(); parallel = reader.u32(); rotary_dim = reader.u32();
         position_offset = reader.u32(); final_norm = reader.u32(); embedding_scale = reader.f32();
         check(h && f && heads && kv_heads && layers && vocab && dim && max_positions &&
-              heads % kv_heads == 0 && std::uint64_t(h) == std::uint64_t(heads) * dim &&
+              heads % kv_heads == 0 && std::uint64_t(heads) * dim <= std::numeric_limits<std::uint32_t>::max() &&
               norm_kind <= 1 && activation <= 3 && position_kind <= 2 && gated <= 1 && parallel <= 1 &&
               rotary_dim <= dim && rotary_dim % 2 == 0 && (position_kind != 0 || rotary_dim > 0) &&
               final_norm <= 1 && std::isfinite(embedding_scale) && embedding_scale > 0 &&
               std::isfinite(theta) && theta > 0 && std::isfinite(epsilon) && epsilon > 0,
               "invalid decoder configuration");
+        qwidth = heads * dim;
         check(max_positions <= std::numeric_limits<std::size_t>::max() - position_offset &&
-              max_positions <= std::numeric_limits<std::size_t>::max() / sizeof(float) / std::max({h, f, vocab, max_positions}),
+              max_positions <= std::numeric_limits<std::size_t>::max() / sizeof(float) / std::max({h, qwidth, f, vocab, max_positions}),
               "decoder workspace dimensions overflow address space");
         check(base % 64 == 0 && base <= mapping.size && count <= mapping.size / 56,
               "invalid tensor table");
         check(eos < vocab || eos == 0xffffffffu, "invalid EOS token");
-        if (multi_eos_format || source_bf16_format) {
+        if (operator_format) {
+            check(reader.position <= base && base - reader.position >= 12, "truncated decoder operator metadata");
+            const auto storage = reader.u32(), qk = reader.u32(), frequencies = reader.u32();
+            check(storage == 0 || storage == 5 || storage == 6, "invalid decoder storage policy");
+            check((qk || frequencies) && qk <= 1 && position_kind == 0 && (!qk || norm_kind == 0) &&
+                  (!frequencies || frequencies == rotary_dim / 2) && frequencies <= (base - reader.position) / 4,
+                  "invalid decoder operator metadata");
+            source_bf16_io_format = storage == 5;
+            source_bf16_matrix_format = storage == 6;
+            qk_norm = qk != 0;
+            for (std::uint32_t i = 0; i < frequencies; ++i) {
+                const float frequency = reader.f32();
+                check(std::isfinite(frequency) && frequency > 0 && frequency <= 1, "invalid static RoPE frequency");
+                rotary_frequencies.push_back(frequency);
+            }
+        }
+        check(qk_norm || qwidth == h, "invalid decoder head geometry");
+        const bool source_bf16_format = source_bf16_io_format || source_bf16_matrix_format;
+        check(!source_bf16_format || activation_bits == 32, "source BF16 storage requires FP32 activations");
+        if (multi_eos_format || source_bf16_format || operator_format) {
+            check(reader.position <= base && base - reader.position >= 4, "truncated EOS metadata");
             const auto eos_count = reader.u32();
-            check((source_bf16_format || eos_count >= 2) && eos_count <= 1024 && eos_count <= vocab &&
+            check((source_bf16_format || operator_format || eos_count >= 2) && eos_count <= 1024 && eos_count <= vocab &&
                   reader.position <= base && eos_count <= (base - reader.position) / 4,
                   "invalid multi-EOS token count");
             for (std::uint32_t i = 0; i < eos_count; ++i) {
@@ -882,16 +905,21 @@ struct Decoder::Impl {
             const auto prefix = "model.layers." + std::to_string(i) + ".";
             require_weight(prefix + "input_layernorm.weight", 1, h);
             require_weight(prefix + "post_attention_layernorm.weight", 1, h);
-            require_weight(prefix + "self_attn.q_proj.weight", h, h);
+            require_weight(prefix + "self_attn.q_proj.weight", qwidth, h);
             require_weight(prefix + "self_attn.k_proj.weight", kv_heads * dim, h);
             require_weight(prefix + "self_attn.v_proj.weight", kv_heads * dim, h);
-            require_weight(prefix + "self_attn.o_proj.weight", h, h);
+            require_weight(prefix + "self_attn.o_proj.weight", h, qwidth);
+            if (qk_norm) {
+                check(require_weight(prefix + "self_attn.q_norm.weight", 1, dim).bits == 32 &&
+                      require_weight(prefix + "self_attn.k_norm.weight", 1, dim).bits == 32,
+                      "Q/K normalization weights must use FP32 storage");
+            }
             if (gated) require_weight(prefix + "mlp.gate_proj.weight", f, h);
             require_weight(prefix + "mlp.up_proj.weight", f, h);
             require_weight(prefix + "mlp.down_proj.weight", h, f);
             caches.emplace_back(1, kv_heads, dim);
         }
-        if (position_kind == 0) {
+        if (position_kind == 0 && rotary_frequencies.empty()) {
             rotary_frequencies.resize(rotary_dim / 2);
             for (std::size_t i = 0; i < rotary_dim / 2; ++i)
                 rotary_frequencies[i] = 1.0f / std::pow(theta, static_cast<float>(2 * i) / rotary_dim);
@@ -1253,6 +1281,11 @@ struct Decoder::Impl {
             LEAF_TRACE(prefix + "q", q);
             LEAF_TRACE(prefix + "k", k);
             LEAF_TRACE(prefix + "v", v);
+            if (qk_norm) {
+                DecoderProfile::Scope scope(profile, DecoderProfile::Phase::RMSNorm, tokens);
+                norm(q, weights.at(prefix + "self_attn.q_norm.weight"), nullptr, epsilon, 0, q, dim, accurate_fp32);
+                norm(k, weights.at(prefix + "self_attn.k_norm.weight"), nullptr, epsilon, 0, k, dim, accurate_fp32);
+            }
             rotary(q, q_heads, heads, tokens); rotary(k, k_heads, kv_heads, tokens);
             LEAF_TRACE(prefix + "q_rotary", q_heads);
             LEAF_TRACE(prefix + "k_rotary", k_heads);
@@ -1267,7 +1300,7 @@ struct Decoder::Impl {
             }
             {
                 DecoderProfile::Scope scope(profile, DecoderProfile::Phase::Attention, tokens);
-                attention.resize(tokens * h);
+                attention.resize(tokens * qwidth);
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ATTENTION_AVX2)
                 if (vector_attention && tokens > 1) {
                     const auto& cache = caches[layer];

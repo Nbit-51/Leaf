@@ -21,6 +21,7 @@ from tools.decoder_plan import config_values, eos_token_ids, load_snapshot_plan,
 
 MAGIC = b"LEAFDC02"
 HEADER = struct.Struct("<8sIIQ10Iff8If")
+OPERATOR_METADATA = struct.Struct("<3I")  # storage version, Q/K RMSNorm flag, rotary frequency count
 DESCRIPTOR = struct.Struct("<5I4Q")
 
 
@@ -260,6 +261,13 @@ def export_decoder(snapshot: Path, output: Path, bits: int = 32, group_size: int
         magic = f"LEAFDC0{version}".encode("ascii")
         # Both source-storage versions explicitly encode the complete EOS set.
         generation_metadata = struct.pack(f"<{len(eos_tokens) + 1}I", len(eos_tokens), *eos_tokens)
+    frequencies = plan["config"].get("rope_frequencies", [])
+    qk_norm = plan["config"].get("qk_norm", 0)
+    if qk_norm or frequencies:
+        extensions = OPERATOR_METADATA.pack(version if compact else 0, qk_norm, len(frequencies))
+        version, magic = 7, b"LEAFDC07"
+        generation_metadata = (extensions + struct.pack(f"<{len(frequencies)}f", *frequencies) +
+                               struct.pack(f"<{len(eos_tokens) + 1}I", len(eos_tokens), *eos_tokens))
     expected = tensor_shapes(plan["config"])
     calibration = {}
     calibration_metadata = None

@@ -248,6 +248,43 @@ The comparison checked output text and generation length. Full-logit parity
 between the two runtimes was outside this run.
 [Retained samples, settings and hashes](../benchmark/validation/bf16-expansion/20261109/manifest.json)
 
+### Reuse the comparison on another checkpoint
+
+Run `python -m tools.benchmark_llama_cli --help` for the Windows runner. Supply
+the same local checkpoint, its held-out token fixture, an audited FP32 Leaf
+artifact and its provenance, and an audited FP32 GGUF with `llama-completion`
+and `llama-tokenize` from the same llama.cpp build. Choose the prompt lengths,
+generation budget, logical CPU and effective power mode explicitly. The
+checkpoint currently needs one safetensors shard for the GGUF audit binding.
+
+The runner checks checkpoint and artifact hashes, exact prompt IDs, reported
+work counts and continuation text. It retains every paired timing, applies
+the spread check separately to first visible text and total command time, and
+marks mismatched or unstable workloads unqualified. Each command starts a fresh
+process against staged cached files. Full-logit parity and peak memory are
+separate measurements.
+
+The reusable runner passed its workload and timing checks on Qwen2.5-0.5B
+at 63 and 127 prompt tokens and SmolLM2-360M at 127. These checks used the
+existing FP32 checkpoints and eight generated tokens.
+[Reusable comparison evidence](../benchmark/validation/decoder-operators/20261109/manifest.json)
+
+### Decoder operator coverage
+
+Decoder format v7 records static linear or Llama 3 inverse rotary frequencies,
+per-head Q/K RMSNorm for dense Qwen3, or both. Qwen3 may project into an attention
+width different from the residual width. This format supports FP32 and original
+BF16 storage. Existing artifacts remain readable and unchanged checkpoints keep
+their original format. Use a current native runtime to load v7.
+
+The reduced-model tests cover a Llama 3 context boundary, unequal Qwen3 attention
+and residual widths, full and chunked logits, greedy outputs and exact BF16
+storage parity. Sequence-length-dependent RoPE and mixed per-layer windows
+still require separate operator work.
+
+`leaf inspect` accepts the published Qwen3-0.6B configuration. Trained Qwen3
+weights and model latency are outside this validation.
+
 ## Dataset and individual-network scope
 
 Text dataset adapters and graph fusion/import/memory-planning checks pass (22

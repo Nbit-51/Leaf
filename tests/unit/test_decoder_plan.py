@@ -12,9 +12,10 @@ def test_unknown_architecture_requires_explicit_plan():
         make_plan({"model_type": "custom_decoder"})
 
 
-def test_scaled_rope_is_rejected_instead_of_dropped():
+def test_dynamic_rope_is_rejected_instead_of_dropped():
     with pytest.raises(ValueError, match="Scaled RoPE"):
-        make_plan({"model_type": "llama", "rope_parameters": {"rope_type": "linear", "factor": 2}})
+        make_plan(dict(model_type="llama", hidden_size=64, intermediate_size=128, num_attention_heads=4,
+                       num_hidden_layers=1, vocab_size=128, rope_parameters={"rope_type": "dynamic", "factor": 2}))
 
 
 def test_dense_mistral_plan_preserves_gqa_and_rope():

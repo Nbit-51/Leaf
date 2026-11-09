@@ -1,0 +1,26 @@
+{
+  "archive": "evidence.zip",
+  "bytes": 20192,
+  "sha256": "9f12acaa5a89c723e974f7b0c14b364ddca5b4126476b39f56c1dfb2fad3bafb",
+  "scope": "Reusable Windows CLI comparison on existing checkpoints and config-only Qwen3 inspection. Checkout paths are normalized; samples are retained.",
+  "entries": [
+    {
+      "path": "qwen-cli/comparison.json",
+      "bytes": 85554,
+      "sha256": "8577902908bdaf10294b088260b208df72b10e7e36d48013aee3abe9dfc3b410",
+      "original_sha256": "342577b56f8eaf43d0506849669999e9e19e57b4c2918fd26c6a2a62be12a3a0"
+    },
+    {
+      "path": "smol-cli/comparison.json",
+      "bytes": 47521,
+      "sha256": "a60746e9db256b780c974133c5e52c52b18d7931474ad0f884c29e93deb2b8ef",
+      "original_sha256": "b93fd2348104d3efd7945222d5e10e0877fd4f6ccf5eba8eb25925c7ba322d4e"
+    },
+    {
+      "path": "qwen3-inspect.json",
+      "bytes": 808,
+      "sha256": "008f5fffb19c4cdc030a441ad84800e9efdbca5326c7a5b1dea2d9e10d8848eb",
+      "original_sha256": "44bee68277bd23a818d2017806e9e3761bd9e52d4a465ae7331257a5f60b18fd"
+    }
+  ]
+}

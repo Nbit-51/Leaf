@@ -141,14 +141,14 @@ SmolLM2-360M-Instruct and Qwen2.5-0.5B-Instruct use the same shared decoder;
 their bounded output-quality checks and remaining strict numerical failures
 are recorded in the [onboarding report](docs/model-onboarding.md#smollm2-and-qwen25--october-17-2026).
 
-Import adapters cover supported configurations from Llama/Qwen2, GPT-2,
-GPT-NeoX, OPT and dense Mistral-style blocks. Compatibility depends on operators
-and tensor layouts—not just a model-family name. The causal decoder does not
-yet implement scaled RoPE or Q/K normalization. Uniform causal sliding windows
+Import adapters cover supported configurations from Llama, Qwen2, dense Qwen3,
+GPT-2, GPT-NeoX, OPT and dense Mistral-style blocks. The causal decoder supports
+static linear and Llama 3 RoPE scaling and per-head Q/K RMSNorm in dense Qwen3.
+The new operators have reduced-model parity checks. Uniform causal sliding windows
 are implemented and tested on reduced Mistral configurations, including a
 4096-token window boundary; trained Mistral 7B has not been executed here.
 The separate embedding runtime supports its bidirectional local/full attention
-and Q/K normalization. MoE, encoder-decoder models and general sampling
+and Q/K normalization. Dynamic RoPE scaling, MoE, encoder-decoder models and general sampling
 remain unsupported. Unsupported configurations fail explicitly.
 
 [Detailed compatibility and operator boundaries](docs/project-reference.md#3-coverage-and-explicit-boundaries)
