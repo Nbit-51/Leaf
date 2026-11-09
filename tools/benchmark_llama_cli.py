@@ -25,6 +25,7 @@ from leaf.power import WINDOWS_POWER_MODE_NAMES, benchmark_power_mode_guard, kee
 from tools.benchmark_cli import CHILD_PROGRAM, token_list
 from tools.decoder_plan import load_snapshot_plan
 from tools.decoder_validation import latency_stability
+from tools.validate_decoder import GATES
 from tools.verify_package_runtime import digest, isolated_environment, run_process
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -66,6 +67,20 @@ def summarize(samples: list[dict], pairs: int) -> dict:
     return result
 
 
+def verify_quality_report(report: dict, *, artifact_sha: str, binary_sha: str, tokens_sha: str,
+                          snapshot_hashes: dict, fp32_math: str = 'accurate') -> None:
+    """Bind the existing strict PyTorch fidelity result to the inputs being timed."""
+    gates = dict(**GATES['32'], logit_atol=2e-4, logit_rtol=2e-4, exact_generation_required=True)
+    if (not isinstance(report, dict) or report.get('format') != 'leaf-output-quality-v1' or
+            report.get('complete') is not True or report.get('gates') != gates or
+            report.get('passed') is not True or report.get('precision') != 'FP32' or
+            report.get('fp32_math') != fp32_math or report.get('threads') != 1 or
+            not isinstance(report.get('storage'), dict) or report['storage'].get('effective') != 'fp32' or
+            report.get('artifact_sha256') != artifact_sha or report.get('executable_sha256') != binary_sha or
+            report.get('tokens_sha256') != tokens_sha or report.get('source_sha256') != snapshot_hashes):
+        raise ValueError('Require a passing strict FP32 quality report for the exact benchmark inputs')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('snapshot', 'tokens', 'leaf-binary', 'leaf-artifact', 'leaf-provenance',
@@ -73,6 +88,9 @@ def main():
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--lengths', type=int, nargs='+', default=[63, 127])
     parser.add_argument('--generate', type=int, default=8)
+    parser.add_argument('--fp32-math', choices=('fast', 'accurate'), default='accurate')
+    parser.add_argument('--quality-report', type=Path,
+                        help='require a passing leaf evaluate report from the same inputs and use its token fixture')
     parser.add_argument('--pairs', type=int, default=6)
     parser.add_argument('--cpu', type=int, required=True)
     parser.add_argument('--required-power-mode', choices=WINDOWS_POWER_MODE_NAMES, required=True)
@@ -101,6 +119,15 @@ def main():
             provenance.get('artifact_sha256') != digest(paths['leaf_artifact']) or
             audit.get('gguf_sha256') != digest(paths['gguf'])):
         raise ValueError('Artifact audits must bind matching unquantized checkpoint values and configuration')
+    quality_reference = None
+    if args.quality_report:
+        quality_path = paths['quality_report']
+        quality = json.loads(quality_path.read_text(encoding='utf-8'))
+        verify_quality_report(quality, artifact_sha=provenance['artifact_sha256'],
+                              binary_sha=digest(paths['leaf_binary']), tokens_sha=digest(paths['tokens']),
+                              snapshot_hashes={p.name: digest(p) for p in snapshot.iterdir()
+                                               if p.is_file() and p.suffix in ('.json', '.safetensors')}, fp32_math=args.fp32_math)
+        quality_reference = dict(sha256=digest(quality_path), summary=quality['summary'])
     output.mkdir(parents=True, exist_ok=False)
     cache, scratch = output / 'cache', output / 'tmp'
     scratch.mkdir()
@@ -121,8 +148,8 @@ def main():
               Path(__file__).resolve(), ROOT / 'leaf/cli.py', ROOT / 'tools/benchmark_cli.py', ROOT / 'tools/verify_package_runtime.py']
     hashes = {str(path): digest(path) for path in inputs}
     report = dict(complete=False, scope=__doc__.strip(), snapshot=str(snapshot), model=plan.get('source_architecture'),
-                  hashes=hashes, cpu=args.cpu, threads=1, pairs=args.pairs, generated_tokens_requested=args.generate,
-                  power={}, workloads={})
+                  hashes=hashes, cpu=args.cpu, threads=1, pairs=args.pairs, fp32_math=args.fp32_math, generated_tokens_requested=args.generate,
+                  power={}, workloads={}, leaf_quality_reference=quality_reference)
     report_path = output / 'comparison.json'
     tokenizer, _ = encode_prompt(snapshot, 'Leaf', raw=True)
 
@@ -131,13 +158,13 @@ def main():
         if engine == 'leaf':
             metrics_path = output / f'leaf-{length}-{pair}.json'
             arguments = ['run', str(snapshot), '--offline', '--raw', '--prompt', prompt, '--max-tokens', str(args.generate),
-                         '--bits', '32', '--fp32-math', 'accurate', '--threads', '1', '--worker-cpus', str(args.cpu),
+                         '--bits', '32', '--fp32-math', args.fp32_math, '--threads', '1', '--worker-cpus', str(args.cpu),
                          '--metrics', str(metrics_path)]
             payload = json.dumps(dict(source_root=str(ROOT), arguments=arguments))
             sample = run_process([sys.executable, '-I', '-u', '-c', CHILD_PROGRAM, payload], environment, output)
             metrics = json.loads(metrics_path.read_text(encoding='utf-8'))
             if (sample['preparation_message_seen'] or metrics['source_bf16_tensors'] or
-                    metrics['fp32_math'] != 'accurate' or metrics['worker_cpus'] != [args.cpu] or
+                    metrics['fp32_math'] != args.fp32_math or metrics['worker_cpus'] != [args.cpu] or
                     metrics['weight_bits'] != 32 or metrics['activation_bits'] != 32):
                 raise ValueError('Leaf did not run the staged FP32 configuration')
             sample.update(metrics=metrics, generated_count=len(metrics['generated_tokens']))

@@ -1,16 +1,48 @@
-"""Prepare, audit and import a cached Llama/Qwen2 FP32 comparison checkpoint."""
+"""Prepare and audit a local FP32 checkpoint for llama.cpp or Ollama."""
 import argparse
 import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.validate_decoder import digest
 from tools.ollama_validation import api, local_server
+
+
+def derived_attention_buffer(kind, name):
+    patterns = {'gpt_neox': r'gpt_neox\.layers\.\d+\.attention\.(?:bias|masked_bias|rotary_emb\.inv_freq)',
+                'gpt2': r'(?:transformer\.)?h\.\d+\.attn\.(?:bias|masked_bias)'}
+    return kind in patterns and re.fullmatch(patterns[kind], name) is not None
+
+
+def stage_conversion_snapshot(snapshot, staging):
+    """Filter legacy attention buffers that the decoder rebuilds from its config."""
+    kind = json.loads((snapshot / 'config.json').read_text()).get('model_type')
+    if kind not in ('gpt2', 'gpt_neox'):
+        return snapshot
+    shards = list(snapshot.glob('*.safetensors'))
+    if len(shards) != 1 or shards[0].name != 'model.safetensors':
+        return snapshot  # Let the upstream converter handle sharded snapshots.
+    from safetensors import safe_open
+    from safetensors.torch import save_file
+
+    with safe_open(shards[0], framework='pt', device='cpu') as source:
+        keys = source.keys()
+        parameters = [name for name in keys if not derived_attention_buffer(kind, name)]
+        if parameters == keys:
+            return snapshot
+        for path in snapshot.iterdir():
+            if path.is_file() and (path.suffix == '.json' or path.name in ('merges.txt', 'tokenizer.model', 'README.md')):
+                shutil.copyfile(path, staging / path.name)
+        save_file({name: source.get_tensor(name) for name in parameters}, staging / 'model.safetensors',
+                  metadata=source.metadata())
+    return staging
 
 
 def audit(snapshot, gguf_path, source, output):
@@ -21,21 +53,30 @@ def audit(snapshot, gguf_path, source, output):
 
     config = json.loads((snapshot / 'config.json').read_text())
     kind = config.get('model_type')
-    if kind not in ('llama', 'qwen2'):
-        raise ValueError('Audit supports Llama and Qwen2 semantics only; no silent architecture guess')
-    arch = gguf.MODEL_ARCH.LLAMA if kind == 'llama' else gguf.MODEL_ARCH.QWEN2
+    architectures = {'llama': ('LLAMA', 'llama.py'), 'qwen2': ('QWEN2', 'qwen.py'),
+                     'qwen3': ('QWEN3', 'qwen.py'), 'gpt_neox': ('GPTNEOX', 'gptneox.py'),
+                     'gpt2': ('GPT2', 'gpt2.py')}
+    if kind not in architectures:
+        raise ValueError(f'No exact GGUF audit for {kind!r}')
+    name, converter = architectures[kind]
+    arch = getattr(gguf.MODEL_ARCH, name)
     reader = gguf.GGUFReader(gguf_path)
-    if reader.get_field('general.architecture').contents() != kind:
+    if reader.get_field('general.architecture').contents() != gguf.MODEL_ARCH_NAMES[arch]:
         raise ValueError('GGUF architecture differs from source config')
     tensors = {t.name: t for t in reader.tensors}
     remaining = set(tensors)
-    mapping = gguf.get_tensor_name_map(arch, config['num_hidden_layers'])
-    checks = []
+    blocks = config['n_layer'] if kind == 'gpt2' else config['num_hidden_layers']
+    mapping = gguf.get_tensor_name_map(arch, blocks)
+    checks, buffers = [], []
     weight_file = snapshot / 'model.safetensors'
+    tied = config.get('tie_word_embeddings', kind == 'gpt2')
     hashes = {str(p): digest(p) for p in (weight_file, snapshot/'config.json', gguf_path, Path(__file__),
-        source/'convert_hf_to_gguf.py', source/'conversion/llama.py', source/'conversion/qwen.py')}
+        source/'convert_hf_to_gguf.py', source/'conversion/base.py', source/'conversion'/converter)}
     with safe_open(weight_file, framework='pt', device='cpu') as weights:
         for name in weights.keys():
+            if derived_attention_buffer(kind, name):
+                buffers.append(name)
+                continue
             target = mapping.get_name(name, try_suffixes=('.weight', '.bias'))
             if target is None:
                 raise ValueError('Unmapped source parameter: ' + name)
@@ -44,16 +85,26 @@ def audit(snapshot, gguf_path, source, output):
             if permuted:
                 heads = config['num_attention_heads'] if name.endswith('q_proj.weight') else config['num_key_value_heads']
                 value = value.reshape(heads, 2, value.shape[0]//heads//2, *value.shape[1:]).swapaxes(1, 2).reshape(value.shape)
+            qkv_reordered = kind == 'gpt_neox' and name.endswith(('.attention.query_key_value.weight',
+                                                               '.attention.query_key_value.bias'))
+            if qkv_reordered:
+                heads = config['num_attention_heads']
+                width = config['hidden_size'] // heads
+                value = value.reshape(heads, 3, width, *value.shape[1:]).swapaxes(0, 1).reshape(value.shape)
+            transposed = kind == 'gpt2' and name.endswith(('.c_attn.weight', '.c_proj.weight', '.c_fc.weight'))
+            if transposed:
+                value = value.T
             alias = False
-            if target not in tensors and name == 'lm_head.weight' and config.get('tie_word_embeddings'):
+            if target not in tensors and name == 'lm_head.weight' and tied:
                 target, alias = 'token_embd.weight', True
             tensor = tensors[target]
             if (tensor.tensor_type != gguf.GGMLQuantizationType.F32 or tensor.data.shape != value.shape or
                     not np.array_equal(tensor.data.view(np.uint32), value.view(np.uint32))):
                 raise ValueError('FP32 parameter mismatch: ' + name)
             remaining.discard(target)
-            checks.append(dict(source=name, gguf=target, exact=True, rope_permuted=permuted, tied_alias=alias))
-        if remaining == {'output.weight'} and config.get('tie_word_embeddings'):
+            checks.append(dict(source=name, gguf=target, exact=True, rope_permuted=permuted,
+                               qkv_reordered=qkv_reordered, transposed=transposed, tied_alias=alias))
+        if remaining == {'output.weight'} and tied:
             tensor, embedding = tensors['output.weight'], tensors['token_embd.weight']
             if (tensor.tensor_type != gguf.GGMLQuantizationType.F32 or
                     not np.array_equal(tensor.data.view(np.uint32), embedding.data.view(np.uint32))):
@@ -65,7 +116,8 @@ def audit(snapshot, gguf_path, source, output):
     if any(digest(Path(p)) != h for p, h in hashes.items()):
         raise ValueError('Inputs changed during parameter audit')
     record = dict(complete=True, passed=True, architecture=kind, parameters=len(checks), checks=checks,
-                  scope='Every source parameter verified bit-for-bit as F32; Llama Q/K permutation and declared tied aliases only',
+                  excluded_nonparameter_buffers=buffers,
+                  scope='Every source parameter verified bit-for-bit as F32 after the declared layout transforms and tied aliases',
                   source_weight_sha256=hashes[str(weight_file)], config_sha256=hashes[str(snapshot/'config.json')],
                   gguf_sha256=hashes[str(gguf_path)], hashes=hashes)
     output.write_text(json.dumps(record, indent=2) + '\n')
@@ -91,8 +143,9 @@ def main():
         if gguf_path.exists():
             raise ValueError('Refuse to overwrite an existing GGUF; audit it or choose a fresh output')
         env = dict(os.environ, HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1')
-        with (directory/'conversion.log').open('x') as log:
-            subprocess.run([sys.executable, str(args.source/'convert_hf_to_gguf.py'), str(snapshot),
+        with tempfile.TemporaryDirectory(prefix='converter-', dir=directory) as staging, (directory/'conversion.log').open('x') as log:
+            conversion_snapshot = stage_conversion_snapshot(snapshot, Path(staging))
+            subprocess.run([sys.executable, str(args.source/'convert_hf_to_gguf.py'), str(conversion_snapshot),
                             '--outfile', str(gguf_path), '--outtype', 'f32'], check=True, env=env,
                            stdout=log, stderr=subprocess.STDOUT)
         print('Converted local snapshot:', gguf_path, flush=True)
