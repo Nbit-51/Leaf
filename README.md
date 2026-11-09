@@ -71,14 +71,15 @@ FP32 source weights stay FP32. This uses a separate prepared cache; see
 [storage semantics, exact-output checks and measured scope](docs/source-bf16.md).
 
 For the explicit accurate FP32 accumulation policy, add `--fp32-math accurate`
-to `leaf run` or `leaf evaluate`. For `leaf run`, it can be combined with
-`--source-bf16` or `--source-bf16-head`;
-weights remain unquantized and `--bits auto` selects FP32. The default math
-policy is unchanged. See [accuracy checks and scope](docs/shared-accumulation.md#native-accuracy-option--october-26-2026).
+to `leaf run` or `leaf evaluate`. Both commands accept `--source-bf16` or
+`--source-bf16-head` with this policy. Weights remain unquantized, and
+`leaf run --bits auto` selects FP32 compute. See
+[accuracy checks and scope](docs/shared-accumulation.md#native-accuracy-option--october-26-2026).
 
 For output checks without timing benchmarks, install `.[validation]` and run
 `leaf evaluate MODEL_ID --dataset heldout.jsonl --dataset-source "name/test split" --output build/quality-run`.
-It records perplexity, next-token agreement and paired continuations. See
+It records perplexity, next-token agreement, paired continuations, and the requested
+and effective weight storage. See
 [setup and quality evidence](docs/model-onboarding.md), including the remaining
 strict-logit failures found by the larger Pythia checks.
 

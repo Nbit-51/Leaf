@@ -22,6 +22,25 @@ def check(runtime: Path, name: str) -> dict:
     return dict(path=str(runtime.resolve()), **info)
 
 
+def check_decoder_options(runtime: Path, *, source_bf16=False, source_bf16_head=False,
+                          fp32_math='fast', worker_cpus=None):
+    if not (source_bf16 or source_bf16_head or worker_cpus is not None or fp32_math == 'accurate'):
+        return
+    info = check(runtime, 'leaf_decoder')
+    modes = info.get('fp32_math_modes')
+    unsupported = None
+    if worker_cpus is not None and info.get('worker_affinity_supported') is not True:
+        unsupported = '--worker-cpus'
+    elif source_bf16 and (info.get('source_bf16_matrices_supported') is not True or
+                          6 not in info.get('artifact_versions', [])):
+        unsupported = '--source-bf16'
+    elif fp32_math == 'accurate' and (not isinstance(modes, list) or 'accurate' not in modes):
+        unsupported = '--fp32-math accurate'
+    if unsupported:
+        raise RuntimeError(f'The selected native runtime does not support {unsupported}; '
+                           'reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
+
+
 def doctor(task: str):
     from leaf.cli import cache_root, executable
     from leaf.embedding import executable as embedding_executable

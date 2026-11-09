@@ -151,11 +151,25 @@ Prefill expands six-row blocks into FP32 before the existing GEMM. It does
 not retain a full FP32 weight copy. Conversion and scratch-buffer costs can affect
 prefill; a smaller artifact does not itself establish a latency improvement.
 
-`leaf evaluate` currently prepares ordinary FP32 artifacts. The separate developer
-`tools/validate_source_bf16_matrices.py` audits the new storage against a bound,
-previously qualified FP32 runtime/artifact, including all tensor bits, full trained
-logits, generation and cache/scalar/thread controls. This is an exact regression
-check, not a fresh PyTorch oracle or a relaxed accuracy gate. Ordinary fast math's
+Use the same storage and math flags as `leaf run` to check output fidelity
+against the PyTorch FP32 reference. Install `.[validation]` from a source checkout.
+
+```sh
+leaf evaluate HuggingFaceTB/SmolLM2-360M-Instruct --source-bf16 --fp32-math accurate --dataset heldout.jsonl --dataset-source "name/test split" --output build/quality-smol-bf16
+```
+
+The report records the requested storage and the actual artifact format, including
+FP32 fallback when no eligible source BF16 tensors are present. The existing logit,
+perplexity, next-token agreement and greedy generation gates apply.
+
+An offline CLI smoke check with accurate math passed on SmolLM2-360M-Instruct
+with matrix and head-only storage and on Pythia-70M with FP32 fallback. Each
+run covered two 128-token WikiText-2 test blocks and six greedy continuations.
+
+The developer tool `tools/validate_source_bf16_matrices.py` separately audits
+storage against a bound, previously qualified FP32 runtime/artifact, including all
+tensor bits, full trained logits, generation and cache/scalar/thread controls.
+The audit requires bit-exact agreement with that reference. Ordinary fast math's
 previous strict-reference tolerance misses remain open.
 
 

@@ -355,6 +355,7 @@ def encode_prompt(snapshot: Path, prompt: str, raw: bool = False):
 
 def run(args):
     from leaf.affinity import pin_cpu, validate_worker_cpus
+    from leaf.runtime_check import check_decoder_options
     worker_cpus = validate_worker_cpus(getattr(args, 'worker_cpus', None), getattr(args, 'threads', 1), args.cpu)
     pin_cpu(args.cpu)
     source_matrices = getattr(args, 'source_bf16', False)
@@ -375,17 +376,8 @@ def run(args):
     def prepare_runtime():
         nonlocal runtime
         runtime = executable(cache)
-        if source_storage or worker_cpus is not None or fp32_math == 'accurate':
-            from leaf.runtime_check import check
-            info = check(runtime, 'leaf_decoder')
-            if worker_cpus is not None and info.get('worker_affinity_supported') is not True:
-                raise RuntimeError('The selected native runtime does not support --worker-cpus; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
-            if source_matrices and (info.get('source_bf16_matrices_supported') is not True or
-                                    6 not in info.get('artifact_versions', [])):
-                raise RuntimeError('The selected native runtime does not support --source-bf16; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
-            modes = info.get('fp32_math_modes')
-            if fp32_math == 'accurate' and (not isinstance(modes, list) or 'accurate' not in modes):
-                raise RuntimeError('The selected native runtime does not support --fp32-math accurate; reinstall a current wheel or remove an outdated LEAF_DECODER_BIN override')
+        check_decoder_options(runtime, source_bf16=source_matrices, source_bf16_head=source_head,
+                              fp32_math=fp32_math, worker_cpus=worker_cpus)
     # Reject unsupported metadata before building, and setup failures before weights.
     snapshot = resolve_model(args.model, cache, args.offline, args.plan,
                              before_weights=prepare_runtime)
@@ -490,6 +482,14 @@ def optimize(args):
     print("Validation profile: " + str(directory / "validation.json"))
 
 
+def add_source_storage_options(parser):
+    storage = parser.add_mutually_exclusive_group()
+    storage.add_argument("--source-bf16", action="store_true",
+                         help="retain original BF16 matrix weights with FP32 compute; F32/F16 sources stay F32")
+    storage.add_argument("--source-bf16-head", action="store_true",
+                         help="retain original BF16 output/tied embedding storage with FP32 compute; F32 sources stay F32")
+
+
 def main():
     parser = argparse.ArgumentParser(prog="leaf", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -506,6 +506,7 @@ def main():
     evaluator.add_argument("--threads", type=int, default=1)
     evaluator.add_argument("--fp32-math", choices=("fast", "accurate"), default="fast",
                            help="native FP32 accumulation policy to evaluate against the same reference")
+    add_source_storage_options(evaluator)
     evaluator.add_argument("--offline", action="store_true")
     evaluator.add_argument("--output", type=Path, required=True, help="fresh results directory; partial progress is retained")
     inspector = commands.add_parser("inspect", help="check decoder configuration and FP32 weight size without downloading weights")
@@ -536,11 +537,7 @@ def main():
                         help="accurate uses bounded FP32 projection sums and a wider RMS reduction; requires unquantized FP32 compute")
     runner.add_argument("--activation-bits", choices=("auto", "8", "32"), default="auto",
                         help="dynamic INT8 or floating activations in quantized linear kernels")
-    storage = runner.add_mutually_exclusive_group()
-    storage.add_argument("--source-bf16", action="store_true",
-                         help="retain original BF16 matrix weights with FP32 compute; F32/F16 sources stay F32")
-    storage.add_argument("--source-bf16-head", action="store_true",
-                        help="retain original BF16 output/tied embedding storage with FP32 compute; F32 sources stay F32")
+    add_source_storage_options(runner)
     runner.add_argument("--raw", action="store_true", help="skip chat formatting")
     runner.add_argument("--offline", action="store_true")
     runner.add_argument("--plan", type=Path, help="custom decoder plan for a local snapshot")
