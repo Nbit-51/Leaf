@@ -344,7 +344,47 @@ to the earlier single-command output. The full SciFact inputs contain 5,183
 documents and 300 judged queries. The longest formatted inputs are 1,901 and
 59 tokens respectively, within EmbeddingGemma's 2,048-token limit.
 
-The next dataset milestone is a complete document-embedding job with relevance
-labels, documents/second, peak memory and total time at matched output quality.
+### Reproduce the SciFact test split
+
+Save the corpus and query Parquet files and the test judgments from the
+pinned BEIR revisions. [Corpus and queries](https://huggingface.co/datasets/BeIR/scifact/tree/b3b5335604bf5ee3c4447671af975ea25143d4f5)
+[Test judgments](https://huggingface.co/datasets/BeIR/scifact-qrels/blob/2938d17dc3b09882fdb8c12bbbe2e2dc0e75a029/test.tsv)
+
+From the repository root, with PyArrow available, pass those files to the
+preparation command. It verifies their hashes, preserves corpus order, and
+keeps the 300 queries with test judgments. The offline commands assume a cached
+EmbeddingGemma snapshot. A local snapshot path also works in place of the model ID.
+
+```text
+python -m benchmark.prepare_scifact --corpus corpus-00000-of-00001.parquet --queries queries-00000-of-00001.parquet --qrels test.tsv --output build/scifact
+python -m tools.embed_dataset google/embeddinggemma-300m --offline --dataset build/scifact/documents.jsonl --task raw --threads 4 --chunk-size 64 --directory build/scifact/documents
+python -m tools.embed_dataset google/embeddinggemma-300m --offline --dataset build/scifact/queries.jsonl --task query --threads 4 --chunk-size 128 --directory build/scifact/queries
+python -m tools.evaluate_retrieval --query-rows build/scifact/queries.jsonl --document-rows build/scifact/documents.jsonl --query-vectors build/scifact/queries/embeddings.npy --document-vectors build/scifact/documents/embeddings.npy --qrels build/scifact/test.tsv --k 10 --output build/scifact/retrieval.json
+```
+
+### Full SciFact test result
+
+Leaf embedded all 5,183 documents and 300 judged queries with EmbeddingGemma
+300M FP32 on Windows using four CPU threads. Resuming after the interruption
+reused 63 saved batches and computed the remaining 18. All 32 pilot document
+vectors and four pilot query vectors were bit-identical to the full run. A
+replay of the completed job reused all 81 batches.
+
+| nDCG@10 | Recall@10 | Queries with a relevant result in the top 10 |
+|---:|---:|---:|
+| 0.79209 | 0.92189 | 278 / 300 |
+
+An independent float64 cosine calculation reproduced all 300 top-10 rankings
+and both scores. The PyTorch FP32 reference used identical token IDs for all
+300 queries and 31 documents sampled across input lengths. The largest absolute
+vector difference was `4.99e-7`. Substituting the reference query vectors while
+keeping the Leaf document index produced the same 300 top-10 rankings.
+[Reference vector checks](../benchmark/validation/scifact/20261110/reference-parity.json)
+
+Document batch wall times totaled 51.62 minutes across the
+resumed sessions, or 1.67 documents per second. This includes per-batch model
+preparation and loading and excludes pauses and final assembly. A matched
+runtime comparison and peak-memory measurement are still needed.
+[Full retrieval results and batch measurements](../benchmark/validation/scifact/20261110/manifest.json)
+
 The graph milestone is a supported trained image classifier and held-out labels.
-Neither requires claiming arbitrary neural-network or training support.

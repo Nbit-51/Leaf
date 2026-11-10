@@ -136,6 +136,8 @@ Complete trained evaluations cover **GPT-2, TinyLlama-1.1B and ResNet-20**.
 qualified local before/after gain on one short input. The other measured inputs
 remain timing-unqualified, and llama.cpp had lower observed baseline medians.
 See the [full embedding results and limits](docs/embedding.md).
+The resumable dataset workflow indexed all 5,183 SciFact documents and scored
+0.7921 nDCG@10 across 300 judged queries. [SciFact test results](docs/model-onboarding.md#full-scifact-test-result)
 Reduced-model tests exercise six decoder architecture families.
 SmolLM2-360M-Instruct and Qwen2.5-0.5B-Instruct use the same shared decoder;
 their bounded output-quality checks and remaining strict numerical failures
