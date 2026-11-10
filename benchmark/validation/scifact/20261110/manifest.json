@@ -130,7 +130,7 @@
   },
   "reference_parity": {
     "path": "reference-parity.json",
-    "sha256": "c0d0f8ba89c264ed240ebf465d96e7c599fb7cde607e17084fbddf1e69f49339",
+    "sha256": "35498c5ae1c1a15629f5908ffe6fd4a07b23f13e6b9246cc8b598df84e49ef22",
     "queries": 300,
     "document_sample": 31,
     "max_abs_error": 4.991888999938965e-07,
