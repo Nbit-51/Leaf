@@ -314,6 +314,30 @@ command latency across six pairs per model.
 The two diagnostic models still matched all six greedy reference continuations.
 [Retained quality, timings and audited inputs](../benchmark/validation/trained-decoder-and-retrieval/20261109/manifest.json)
 
+### Match Ollama's CPU workload
+
+`python -m tools.benchmark_ollama_decoder --help` accepts prompts from 16
+to 1,024 tokens and can run across selected physical cores. Use
+`--prompt-tokens 256 --worker-cpus 0 2 4 6` on a Windows system where those
+CPU indices identify four distinct physical cores. The default remains a
+64-token prompt on CPU 2.
+
+The runner requires an audited FP32 GGUF and a Leaf artifact from the same
+checkpoint. It checks the Ollama backend's token IDs, thread count, context,
+batch sizes, CPU placement and FP32 KV cache. It verifies cached prompt work
+and the number of generated tokens for each measured request. Quality and
+timing gates apply independently to the comparison.
+
+The four-core SmolLM2-360M comparison used 256 uncached prompt tokens and one
+cached decode forward. Leaf and Ollama generated the same text in every
+measured pair. Leaf's observed median paired latency was 1.46× Ollama's for
+prefill and 1.22× for decode. Ollama's timing spread exceeded the limit in
+both phases, and two of eight quality checks failed. PyTorch reproduced
+Leaf's greedy tokens on those two prompts with selected log-probability
+errors of at most `6.58e-6`. Ollama omitted one probability and differed
+from PyTorch by up to `2.62e-4` on the other prompt.
+[SmolLM2 comparison and reference checks](../benchmark/validation/ollama-and-packing/20261111/manifest.json)
+
 ## Dataset and individual-network scope
 
 Text dataset adapters and graph fusion/import/memory-planning checks pass (22
@@ -419,3 +443,15 @@ priority with a 24.6% paired prefill reduction. Qwen's independent repeat
 showed a 22.5% paired prefill reduction and a 1.42× decode spread in one pass.
 Decoder adoption remains pending.
 [Raw samples, quality checks and operation profile](../benchmark/validation/parallel-attention/20261111/manifest.json)
+
+### Shared input packing experiment
+
+The candidate reused packed inputs across the Q/K/V and MLP gate/up
+projections and enabled the existing SIMD transpose. It reproduced all 331
+sampled SciFact vectors bit-for-bit. The isolated packing probe reduced
+paired latency by 73–80% and passed its spread limit at 129, 320 and 1,014
+tokens. End-to-end tests showed a 1.1% paired reduction on the 16-document
+batch and a 3.1% increase on the six-document batch of 711–1,334-token
+inputs. Both runs exceeded the spread limit, so the packing candidate
+remains experimental.
+[Packing samples and candidate patch](../benchmark/validation/ollama-and-packing/20261111/manifest.json)

@@ -27,8 +27,12 @@ def api(base, path, payload=None, timeout=300):
 
 
 @contextmanager
-def local_server(executable, models, directory, *, cpu=None):
+def local_server(executable, models, directory, *, cpu=None, cpus=None):
     """Own a separate localhost server; never modify an existing user service."""
+    if cpu is not None:
+        if cpus is not None:
+            raise ValueError('Use either cpu or cpus')
+        cpus = [cpu]
     directory=Path(directory).resolve()
     directory.mkdir(parents=True,exist_ok=True)
     with socket.socket() as probe:
@@ -46,8 +50,8 @@ def local_server(executable, models, directory, *, cpu=None):
         parent=None
         try:
             parent=psutil.Process(process.pid)
-            if cpu is not None:
-                parent.cpu_affinity([cpu])
+            if cpus is not None:
+                parent.cpu_affinity(cpus)
                 parent.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS)
             for _ in range(100):
                 if process.poll() is not None:
@@ -78,8 +82,8 @@ def local_server(executable, models, directory, *, cpu=None):
             process.wait(timeout=10)
 
 
-def generation_request(model,prompt,*,tokens=2,keep_alive='5m',logprobs=False):
+def generation_request(model,prompt,*,tokens=2,keep_alive='5m',logprobs=False,threads=1,context=256):
     return dict(model=model,prompt=prompt,raw=True,stream=False,keep_alive=keep_alive,
         logprobs=logprobs,top_logprobs=1 if logprobs else 0,
-        options=dict(num_gpu=0,num_thread=1,num_ctx=256,num_batch=256,num_predict=tokens,
+        options=dict(num_gpu=0,num_thread=threads,num_ctx=context,num_batch=context,num_predict=tokens,
             temperature=0,repeat_penalty=1.0,top_p=1.0,min_p=0.0,seed=0,stop=[]))

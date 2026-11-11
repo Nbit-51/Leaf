@@ -44,14 +44,18 @@ template<class T> void array(std::ostream& output,const std::vector<T>& values) 
 int main(int argc,char** argv) {
     try {
         if (argc==2 && std::string(argv[1])=="--runtime-info") {
-            std::cout << "{\"runtime\":\"leaf-generation-benchmark\",\"benchmark_power_guard\":true}\n";
+            std::cout << "{\"runtime\":\"leaf-generation-benchmark\",\"benchmark_power_guard\":true,"
+                         "\"configurable_workload\":true}\n";
             return 0;
         }
-        if (argc!=7) throw std::runtime_error("ARTIFACT REQUEST OUTPUT MAX_TOKENS QUALITY_0_OR_1 CACHED_PREFIX_TOKENS");
+        if (argc!=7 && argc!=8)
+            throw std::runtime_error("ARTIFACT REQUEST OUTPUT MAX_TOKENS QUALITY_0_OR_1 CACHED_PREFIX_TOKENS [THREADS]");
         const auto maximum=std::stoul(argv[4]);
         const bool quality=std::stoi(argv[5])!=0;
         const bool require_ac=!quality && std::getenv("LEAF_BENCHMARK_REQUIRE_AC");
         const auto cached=std::stoul(argv[6]);
+        const auto threads=argc==8 ? std::stoul(argv[7]) : 1;
+        if (!threads || threads>64) throw std::runtime_error("Invalid thread count");
         if (cached>1) throw std::runtime_error("This workload supports zero or one cached prefix token");
         if (!maximum || maximum>256) throw std::runtime_error("Invalid generation length");
         std::ifstream input(argv[2],std::ios::binary);
@@ -61,13 +65,13 @@ int main(int argc,char** argv) {
         std::vector<std::vector<std::uint32_t>> requests;
         for (unsigned sample=0;sample<count;++sample) {
             const auto length=read_u32(input);
-            if (length<2 || length>256) throw std::runtime_error("Invalid prefix length");
+            if (length<2 || length>1024) throw std::runtime_error("Invalid prefix length");
             std::vector<std::uint32_t> ids(length);
             for (auto& id:ids) id=read_u32(input);
             requests.push_back(std::move(ids));
         }
         if (input.peek()!=std::char_traits<char>::eof()) throw std::runtime_error("Trailing request bytes");
-        leaf::runtime::Decoder decoder(argv[1],1,false,32);
+        leaf::runtime::Decoder decoder(argv[1],static_cast<unsigned>(threads),false,32);
         std::ofstream output(argv[3]);
         if (!output) throw std::runtime_error("Cannot write results");
         output << std::setprecision(10);

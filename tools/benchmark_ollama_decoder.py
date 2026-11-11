@@ -23,6 +23,7 @@ sys.path.insert(0, str(ROOT))
 from leaf.evaluation import PROMPTS, write_record
 from leaf.power import keep_awake, require_benchmark_ac
 from tools.decoder_validation import latency_stability
+from tools.diagnose_windows_benchmark import cpu_sets
 from tools.ollama_validation import api, generation_request, local_server
 from tools.validate_decoder import digest, utc_now
 
@@ -35,15 +36,15 @@ def continuation(tokenizer, ids, generated):
     return full[len(prefix):]
 
 
-def prefix_workloads(tokenizer):
+def prefix_workloads(tokenizer, prompt_tokens=64):
     body = (' A careful engineer measured the program on a local computer. '
-            'The experiment used the same model, inputs and processor settings. ') * 10
+            'The experiment used the same model, inputs and processor settings. ') * max(10, prompt_tokens // 16)
     rows = []
     for lead in ('A', 'B'):
-        ids = tokenizer.encode(lead + body).ids[:64]
+        ids = tokenizer.encode(lead + body).ids[:prompt_tokens]
         text = tokenizer.decode(ids, skip_special_tokens=True)
-        if len(ids) != 64 or tokenizer.encode(text).ids != ids:
-            raise ValueError('Benchmark prompt does not roundtrip to the frozen 64 token IDs')
+        if len(ids) != prompt_tokens or tokenizer.encode(text).ids != ids:
+            raise ValueError(f'Benchmark prompt does not roundtrip to the frozen {prompt_tokens} token IDs')
         rows.append(dict(prompt=text, ids=ids))
     common = 0
     for left, right in zip(rows[0]['ids'], rows[1]['ids']):
@@ -69,11 +70,14 @@ def leaf_pass(args, rows, directory, *, maximum=2, quality=False, cached=1):
     if not quality:
         require_benchmark_ac()
         environment['LEAF_BENCHMARK_REQUIRE_AC'] = '1'
+    command = [str(args.leaf_executable.resolve()), str(args.leaf_artifact.resolve()),
+               str(request.resolve()), str(output.resolve()), str(maximum), str(int(quality)), str(cached)]
+    if args.threads > 1:
+        command.append(str(args.threads))
     with (directory / 'stderr.log').open('wb') as error:
         try:
-            parent.cpu_affinity([args.cpu])
-            process = subprocess.Popen([str(args.leaf_executable.resolve()), str(args.leaf_artifact.resolve()),
-                str(request.resolve()), str(output.resolve()), str(maximum), str(int(quality)), str(cached)],
+            parent.cpu_affinity(args.cpus)
+            process = subprocess.Popen(command,
                 stdout=subprocess.DEVNULL, stderr=error, env=environment,
                 creationflags=subprocess.ABOVE_NORMAL_PRIORITY_CLASS | subprocess.CREATE_NO_WINDOW)
         finally:
@@ -101,18 +105,23 @@ def unload(base, model, parent):
     raise TimeoutError('Ollama model did not unload before Leaf execution')
 
 
-def backend_port(process, cpu, *, configure=False):
+def backend_port(process, cpus, context, *, configure=False):
     workers = [p for p in psutil.Process(process.pid).children(recursive=True)
                if 'llama-server' in p.name().lower()]
     if len(workers) != 1:
         raise ValueError('Expected one local CPU backend')
     worker = workers[0]
     if configure:
-        worker.cpu_affinity([cpu])
+        worker.cpu_affinity(cpus)
         worker.nice(psutil.ABOVE_NORMAL_PRIORITY_CLASS)
-    if worker.cpu_affinity() != [cpu] or worker.nice() != psutil.ABOVE_NORMAL_PRIORITY_CLASS:
+    if worker.cpu_affinity() != cpus or worker.nice() != psutil.ABOVE_NORMAL_PRIORITY_CLASS:
         raise ValueError('Ollama backend affinity/priority differs from Leaf')
     command = worker.cmdline()
+    for flag, expected in (('-t', str(len(cpus))), ('-c', str(context)), ('-b', str(context)),
+                           ('-ub', str(context)), ('-ngl', '0'),
+                           ('--cache-type-k', 'f32'), ('--cache-type-v', 'f32')):
+        if flag not in command or command[command.index(flag) + 1] != expected:
+            raise ValueError(f'Ollama backend does not use the expected {flag} {expected}')
     port = command[command.index('--port') + 1]
     return f'http://127.0.0.1:{port}', dict(pid=worker.pid, command=command,
         affinity=worker.cpu_affinity(), priority='above_normal')
@@ -124,7 +133,11 @@ def main():
                  'snapshot', 'gguf-audit', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--ollama-model', required=True)
-    parser.add_argument('--cpu', type=int, default=2)
+    affinity = parser.add_mutually_exclusive_group()
+    affinity.add_argument('--cpu', type=int, default=2)
+    affinity.add_argument('--worker-cpus', type=int, nargs='+',
+                          help='Use one inference thread per selected physical CPU core')
+    parser.add_argument('--prompt-tokens', type=int, default=64)
     parser.add_argument('--pairs', type=int, default=6)
     parser.add_argument('--runs', type=int, default=11)
     parser.add_argument('--warmup', type=int, default=3)
@@ -134,6 +147,17 @@ def main():
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('This controlled Ollama comparison currently requires Windows')
+    if not 16 <= args.prompt_tokens <= 1024:
+        parser.error('Prompt length must be between 16 and 1024 tokens')
+    args.cpus = sorted(args.worker_cpus or [args.cpu])
+    topology = {row['logical_cpu']: row['core'] for row in cpu_sets() if row['group'] == 0}
+    allowed = set(psutil.Process().cpu_affinity()) & topology.keys()
+    if (not set(args.cpus) <= allowed or len(args.cpus) > 64 or
+            len({topology[cpu] for cpu in args.cpus}) != len(args.cpus)):
+        parser.error('Select distinct allowed physical CPU cores in processor group zero')
+    args.threads = len(args.cpus)
+    context = max(256, ((args.prompt_tokens + 8 + 255) // 256) * 256)
+    request_options = dict(threads=args.threads, context=context)
     require_benchmark_ac()
     if args.output.exists() or args.pairs < 6 or args.pairs % 2 or args.runs < 11 or args.warmup < 3:
         parser.error('Require fresh output, even >=6 pairs, >=11 measurements and >=3 warmups')
@@ -143,6 +167,8 @@ def main():
     adapter = json.loads(subprocess.check_output([str(args.leaf_executable.resolve()),'--runtime-info'],text=True))
     if adapter.get('benchmark_power_guard') is not True:
         parser.error('Rebuild the native generation adapter with the per-sample power guard')
+    if (args.threads > 1 or args.prompt_tokens > 256) and adapter.get('configurable_workload') is not True:
+        parser.error('Rebuild the native adapter for multiple threads or prompts over 256 tokens')
     audit = json.loads(args.gguf_audit.read_text())
     if audit.get('passed') is not True or audit.get('source_weight_sha256') != digest(args.snapshot / 'model.safetensors'):
         parser.error('Require exact source-to-F32-GGUF parameter audit')
@@ -157,9 +183,10 @@ def main():
         parser.error('Leaf and Ollama configuration provenance differs')
     args.output.mkdir(parents=True)
     tokenizer = Tokenizer.from_file(str(args.snapshot / 'tokenizer.json'))
-    workloads, cached = prefix_workloads(tokenizer)
+    workloads, cached = prefix_workloads(tokenizer, args.prompt_tokens)
     record = dict(format='leaf-ollama-cpu-generation-v1', measured_at_utc=utc_now(),
-        scope=__doc__, cpu=args.cpu, threads=1, weight_bits=32, kv_bits=32,
+        scope=__doc__, cpu=args.cpus[0], cpu_affinity=args.cpus, threads=args.threads,
+        prompt_tokens=args.prompt_tokens, context=context, weight_bits=32, kv_bits=32,
         cached_prompt_tokens=cached, generated_tokens_per_sample=2, cached_decode_forwards=1,
         runs_per_pass=args.runs, warmup_per_pass=args.warmup,
         workload=workloads, complete=False, overall_speed_claim=False,
@@ -170,7 +197,7 @@ def main():
     path = args.output / 'comparison.json'
     write_record(path, record)
     with keep_awake(), local_server(args.ollama_executable, args.ollama_models,
-                                   args.output / 'server', cpu=args.cpu) as (base, _, process):
+                                   args.output / 'server', cpus=args.cpus) as (base, _, process):
         record['ollama_version'] = api(base, '/api/version')
         shown = api(base, '/api/show', dict(model=args.ollama_model))
         if shown['details']['quantization_level'] != 'F32':
@@ -179,8 +206,8 @@ def main():
         if blob is None or blob.group(1) != audit['gguf_sha256']:
             raise ValueError('Imported Ollama blob does not match the audited GGUF')
         record['ollama_model_info'] = shown
-        api(base, '/api/generate', generation_request(args.ollama_model, 'Z', tokens=1))
-        backend, policy = backend_port(process, args.cpu, configure=True)
+        api(base, '/api/generate', generation_request(args.ollama_model, 'Z', tokens=1, **request_options))
+        backend, policy = backend_port(process, args.cpus, context, configure=True)
         record['backend_policy'] = policy
         for row in workloads:
             actual = api(backend, '/tokenize', dict(content=row['prompt'], add_special=True))['tokens']
@@ -195,8 +222,10 @@ def main():
             if any(old.get(p.resolve()) != digest(p) for p in required):
                 raise ValueError('Saved preflight does not match current execution inputs')
             if (saved['workload'] != workloads or saved['cached_prompt_tokens'] != cached
-                    or saved['ollama_version'] != record['ollama_version']):
-                raise ValueError('Saved preflight workload or Ollama version differs')
+                    or saved['ollama_version'] != record['ollama_version']
+                    or saved.get('cpu_affinity', [saved['cpu']]) != args.cpus
+                    or saved.get('context', 256) != context):
+                raise ValueError('Saved preflight workload, CPU policy or Ollama version differs')
             quality = saved['quality']
             if len(quality.get('checks', [])) != 8:
                 raise ValueError('Saved preflight is incomplete')
@@ -206,7 +235,7 @@ def main():
             quality_rows = [dict(prompt=text, ids=tokenizer.encode(text).ids) for text in PROMPTS]
             quality_rows += workloads
             ollama_quality = [api(base, '/api/generate', generation_request(args.ollama_model,
-                row['prompt'], tokens=8, logprobs=True)) for row in quality_rows]
+                row['prompt'], tokens=8, logprobs=True, **request_options)) for row in quality_rows]
             (args.output / 'ollama-quality.json').write_text(json.dumps(ollama_quality, indent=2)+'\n')
             unload(base, args.ollama_model, process)
             leaf_quality = leaf_pass(args, quality_rows, args.output / 'leaf-quality', maximum=8,
@@ -237,29 +266,32 @@ def main():
                     values = leaf_pass(args, rows, args.output / f'{index+1}-leaf', cached=cached)
                     for row, value in zip(rows, values):
                         value['response'] = continuation(tokenizer, row['ids'], value['generated_tokens'])
-                        if value['cached_decode_forwards'] != 1:
-                            raise ValueError('Leaf stopped before one cached decode step')
+                        if (value['input_tokens'] != args.prompt_tokens or value['cached_prompt_tokens'] != cached
+                                or value['uncached_prompt_tokens'] != args.prompt_tokens - cached
+                                or value['cached_decode_forwards'] != 1):
+                            raise ValueError('Unmatched Leaf prompt/decode work')
                 else:
                     values = []
                     with (args.output / f'{index+1}-ollama.jsonl').open('x') as raw:
                         for sample, row in enumerate(rows):
                             power_before = require_benchmark_ac()
                             start = time.perf_counter()
-                            value = api(base, '/api/generate', generation_request(args.ollama_model, row['prompt']))
+                            value = api(base, '/api/generate',
+                                        generation_request(args.ollama_model, row['prompt'], **request_options))
                             value['external_request_ms'] = (time.perf_counter()-start)*1000
                             if sample == 0:
-                                backend_port(process, args.cpu, configure=True)
+                                backend_port(process, args.cpus, context, configure=True)
                             value['prefill_ms'] = value['prompt_eval_duration']/1e6
                             value['generation_phase_ms'] = value['eval_duration']/1e6
                             values.append(value)
                             raw.write(json.dumps(value,allow_nan=False)+'\n')
                             raw.flush()
                             value['power_at_request_boundaries'] = dict(before=power_before, after=require_benchmark_ac())
-                            if (value['prompt_eval_count'] != 64 or value.get('prompt_eval_cached_count') != cached
+                            if (value['prompt_eval_count'] != args.prompt_tokens or value.get('prompt_eval_cached_count') != cached
                                     or value['eval_count'] != 2):
                                 if sample >= args.warmup:
                                     raise ValueError(f'Unmatched Ollama prompt/decode work: {value}')
-                    backend_port(process, args.cpu)
+                    backend_port(process, args.cpus, context)
                     ps = api(base, '/api/ps')
                     if len(ps['models']) != 1 or ps['models'][0].get('size_vram') != 0:
                         raise ValueError('Ollama CPU-only execution not confirmed')

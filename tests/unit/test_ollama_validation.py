@@ -3,11 +3,13 @@ import pytest
 from tools import ollama_validation as validation
 
 
-def test_generation_request_keeps_matched_greedy_cpu_work():
-    request = validation.generation_request('local-model','raw input')
+@pytest.mark.parametrize('settings,threads,context', [({}, 1, 256), ({'threads': 4, 'context': 512}, 4, 512)])
+def test_generation_request_keeps_matched_greedy_cpu_work(settings, threads, context):
+    request = validation.generation_request('local-model','raw input', **settings)
     assert request['raw'] is True and request['stream'] is False
     options = request['options']
-    assert (options['num_gpu'], options['num_thread'], options['num_predict']) == (0,1,2)
+    assert (options['num_gpu'], options['num_thread'], options['num_predict']) == (0, threads, 2)
+    assert options['num_ctx'] == options['num_batch'] == context
     assert options['temperature'] == 0 and options['repeat_penalty'] == 1
     assert options['stop'] == []
 
