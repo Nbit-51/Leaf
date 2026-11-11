@@ -123,6 +123,22 @@ int main() {
                             batch,heads,kv,queries,keys,stride,dim,shape,.5f,polarity,true);
                         if (actual.front()!=9876 || actual.back()!=9876) throw std::runtime_error("attention guard overwritten");
                         if (std::memcmp(old.data(),scalar.data(),old.size()*sizeof(float))) throw std::runtime_error("scalar fallback changed");
+                        for (bool vectorized : {false, true}) {
+                            std::vector<float> split(q.size(), 9876.0f);
+                            for (std::size_t head = 0; head < heads; ++head) {
+                                leaf::kernels::attention_f32_gqa_strided_vector(
+                                    q.data(), k.data(), v.data(), mask.data(), split.data(),
+                                    batch, heads, kv, queries, keys, stride, dim, shape, .5f,
+                                    polarity, vectorized, head, head + 1);
+                                for (std::size_t row = 0; row < batch * queries; ++row)
+                                    for (std::size_t h = head + 1; h < heads; ++h)
+                                        if (split[(row * heads + h) * dim] != 9876.0f)
+                                            throw std::runtime_error("attention wrote outside its head range");
+                            }
+                            const auto* expected = vectorized ? actual.data() + 1 : scalar.data();
+                            if (std::memcmp(split.data(), expected, split.size() * sizeof(float)))
+                                throw std::runtime_error("splitting attention heads changed output bits");
+                        }
                         for (std::size_t i=0;i<old.size();++i)
                             if (!std::isfinite(actual[i+1]) || std::abs(actual[i+1]-old[i])>3e-5f+3e-5f*std::abs(old[i]))
                                 throw std::runtime_error("vector attention exceeds tolerance");

@@ -108,12 +108,14 @@ LEAF_ATTENTION_TARGET inline void attend(
         const float* query, const float* key, const float* value, const float* mask, float* output,
         std::size_t batch, std::size_t heads, std::size_t kv_heads, std::size_t queries,
         std::size_t keys, std::size_t stride, std::size_t dim, const std::size_t* shape,
-        float scale, bool valid_nonzero) {
+        float scale, bool valid_nonzero, std::size_t first_head = 0,
+        std::size_t end_head = std::numeric_limits<std::size_t>::max()) {
     std::vector<float> scores(keys);
     std::vector<std::size_t> valid(keys);
     const bool trim_allowed = TrimFiniteValues && std::fegetround() == FE_TONEAREST;
+    end_head = std::min(end_head, heads);
     for (std::size_t b = 0; b < batch; ++b) {
-        for (std::size_t h = 0; h < heads; ++h) {
+        for (std::size_t h = first_head; h < end_head; ++h) {
             const auto kv = h / (heads / kv_heads);
             const auto* key_head = key + (b * kv_heads + kv) * stride * dim;
             const auto* value_head = value + (b * kv_heads + kv) * stride * dim;
@@ -196,17 +198,19 @@ inline void attention_f32_gqa_strided_vector(
         const float* query, const float* key, const float* value, const float* mask, float* output,
         std::size_t batch, std::size_t heads, std::size_t kv_heads, std::size_t queries,
         std::size_t keys, std::size_t stride, std::size_t dim, const std::size_t* shape,
-        float scale, bool valid_nonzero = true, bool use_avx2 = true) {
+        float scale, bool valid_nonzero = true, bool use_avx2 = true,
+        std::size_t first_head = 0,
+        std::size_t end_head = std::numeric_limits<std::size_t>::max()) {
 #if defined(__x86_64__) && defined(__GNUC__)
     if (use_avx2 && __builtin_cpu_supports("avx2")) {
         attention_vector_detail::attend(query, key, value, mask, output, batch, heads,
-            kv_heads, queries, keys, stride, dim, shape, scale, valid_nonzero);
+            kv_heads, queries, keys, stride, dim, shape, scale, valid_nonzero, first_head, end_head);
         return;
     }
 #else
     (void)use_avx2;
 #endif
     attention_f32_gqa_strided(query, key, value, mask, output, batch, heads, kv_heads,
-        queries, keys, stride, dim, shape, scale, valid_nonzero);
+        queries, keys, stride, dim, shape, scale, valid_nonzero, first_head, end_head);
 }
 } // namespace leaf::kernels

@@ -13,6 +13,7 @@ void exercise(unsigned threads, const std::vector<unsigned>& cpus, std::size_t& 
         Workers workers(threads, cpus);
         if (worker_affinity_supported()) require(allowed_worker_cpus()==before, "Construction changed caller affinity");
         for (std::size_t count : {0,1,31,32,33,63,64,65,95,96,97,127,128,129,383,384,385,1023}) {
+          for (std::size_t grain : {1, 3, 32}) {
             auto visits = std::make_unique<std::atomic<unsigned>[]>(count);
             for (std::size_t i=0; i<count; ++i) visits[i]=0;
             workers.run(count,[&](auto first, auto last) {
@@ -23,10 +24,11 @@ void exercise(unsigned threads, const std::vector<unsigned>& cpus, std::size_t& 
                             "Task did not execute on an assigned CPU");
                 }
                 for (auto i=first; i<last; ++i) ++visits[i];
-            });
+            }, grain);
             for (std::size_t i=0; i<count; ++i) require(visits[i]==1,"Lost or duplicate output row");
             if (worker_affinity_supported()) require(allowed_worker_cpus()==before,"Run leaked caller affinity");
             ++cases;
+          }
         }
         if (!cpus.empty()) {
             {

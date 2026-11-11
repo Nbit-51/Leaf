@@ -1,0 +1,139 @@
+{
+  "format": "leaf-scifact-evidence-v1",
+  "model": "google/embeddinggemma-300m",
+  "runtime": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "backend": "Leaf FP32 AVX2",
+    "threads": 4,
+    "numpy": "2.4.6"
+  },
+  "dataset": {
+    "corpus_revision": "b3b5335604bf5ee3c4447671af975ea25143d4f5",
+    "qrels_revision": "2938d17dc3b09882fdb8c12bbbe2e2dc0e75a029",
+    "documents": 5183,
+    "queries": 300,
+    "max_input_tokens": {
+      "documents": 1901,
+      "queries": 59
+    },
+    "sha256": {
+      "documents.jsonl": "b37464d68385aafccbd59ccbab7aac969ba79fbd67a291ac3d60db188b632315",
+      "queries.jsonl": "bdf61abbead241f81fee40bcdea84e6d5475eb7b3068e3f960ecc5b170383492",
+      "test.tsv": "0864bb985e0ca2367ba217977e72004d549054b2b06666ed9d4825ac7c21284c"
+    }
+  },
+  "metrics": {
+    "k": 10,
+    "queries": 300,
+    "documents": 5183,
+    "relevant_pairs": 339,
+    "ndcg": 0.7920910107797641,
+    "recall": 0.9218888888888889,
+    "queries_with_hits": 278,
+    "retrieved_relevant_pairs": 312
+  },
+  "independent_checks": {
+    "precision": "float64",
+    "top_10_order_differences": 0,
+    "relevance_sequence_differences": 0,
+    "per_query_metrics_match": true,
+    "exact_pilot_documents": 32,
+    "exact_pilot_queries": 4,
+    "max_unit_norm_error": 6.097586668918353e-08
+  },
+  "document_run": {
+    "initial_checkpoint_batches": 1,
+    "batches_after_initial_checkpoint": 80,
+    "all_batches": {
+      "documents": 5183,
+      "tokens": 1632679,
+      "preparation_ms": 231337.42179999535,
+      "tokenization_ms": 83141.9094000031,
+      "native_process_ms": 2781951.1885000053,
+      "output_write_ms": 642.3360999976921,
+      "end_to_end_ms": 3097072.8558000014,
+      "rows_per_batch_wall_second": 1.6735156844288008
+    },
+    "resumed_batches": {
+      "documents": 5119,
+      "tokens": 1612924,
+      "preparation_ms": 228384.2538999961,
+      "tokenization_ms": 82031.76180000276,
+      "native_process_ms": 2748378.6877000043,
+      "output_write_ms": 630.4879999986497,
+      "end_to_end_ms": 3059425.191400002,
+      "rows_per_batch_wall_second": 1.673190118977065
+    },
+    "last_resume": {
+      "reused_batches": 63,
+      "new_batches": 18
+    },
+    "completed_replay": {
+      "reused_batches": 81,
+      "new_batches": 0
+    }
+  },
+  "query_run": {
+    "all_batches": {
+      "documents": 300,
+      "tokens": 8059,
+      "preparation_ms": 8430.242700000235,
+      "tokenization_ms": 3030.86809999877,
+      "native_process_ms": 11592.939800002569,
+      "output_write_ms": 35.96609999840439,
+      "end_to_end_ms": 23090.01669999998,
+      "rows_per_batch_wall_second": 12.992628108406707
+    }
+  },
+  "timing_scope": "Descriptive sums of recorded embedding batch wall times. Documents and queries ran in separate sessions. No matched baseline or stable speed claim.",
+  "entries": [
+    {
+      "path": "retrieval.json",
+      "bytes": 320614,
+      "sha256": "20c1ba1addbed7f528332208017c16810b9b50c9bbe7c40e3a19dce64e28fa4a"
+    },
+    {
+      "path": "documents/job.json",
+      "bytes": 1582,
+      "sha256": "2a931f83ef4bfc1849288ecb2efe58244dc4fe87bc880cd04b88afa602c8fd5c"
+    },
+    {
+      "path": "documents/result.json",
+      "bytes": 253,
+      "sha256": "375391863b88a5853c8cd2ccd682e829e9e08be1d635b4d13210173c47330730"
+    },
+    {
+      "path": "documents/timings.json",
+      "bytes": 22459,
+      "sha256": "0bbf7705bbfb62c5e237813e3de0e71d27a07646249cd20b3d4346a42c03404c"
+    },
+    {
+      "path": "queries/job.json",
+      "bytes": 1585,
+      "sha256": "73d1fe42a362a40feeba4f2a89f51ccfa1fca389ed7fac08b9475e916104c7a1"
+    },
+    {
+      "path": "queries/result.json",
+      "bytes": 251,
+      "sha256": "6349ae530a8efc98cf8f2afdeb64ff701c8a663a388ad69b1a955122c2cc9e25"
+    },
+    {
+      "path": "queries/timings.json",
+      "bytes": 829,
+      "sha256": "c8174c5732f2e2d995d28ca19e9c18dc5c6099a5aaf39c4a6ad6a5052a798d2d"
+    }
+  ],
+  "archive": {
+    "path": "evidence.zip",
+    "bytes": 55702,
+    "sha256": "b9778c1d1e076b67813745107cb9c70d56d8797989e68854ea80170a8c3d2cd0"
+  },
+  "reference_parity": {
+    "path": "reference-parity.json",
+    "sha256": "35498c5ae1c1a15629f5908ffe6fd4a07b23f13e6b9246cc8b598df84e49ef22",
+    "queries": 300,
+    "document_sample": 31,
+    "max_abs_error": 4.991888999938965e-07,
+    "matching_top_10_rankings": 300
+  }
+}

@@ -132,10 +132,11 @@ native-loader limitation.
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
 Complete trained evaluations cover **GPT-2, TinyLlama-1.1B and ResNet-20**.
-**EmbeddingGemma 300M** passes trained-reference numerical checks and has a
-qualified local before/after gain on one short input. The other measured inputs
-remain timing-unqualified, and llama.cpp had lower observed baseline medians.
-See the [full embedding results and limits](docs/embedding.md).
+**EmbeddingGemma 300M** passes trained-reference numerical checks. On Windows,
+four-thread attention reduced paired end-to-end latency by 15.8% on a
+16-document SciFact batch with identical output vectors. [Embedding results](docs/model-onboarding.md#parallel-attention-heads)
+The resumable dataset workflow indexed all 5,183 SciFact documents and scored
+0.7921 nDCG@10 across 300 judged queries. [SciFact test results](docs/model-onboarding.md#full-scifact-test-result)
 Reduced-model tests exercise six decoder architecture families.
 SmolLM2-360M-Instruct and Qwen2.5-0.5B-Instruct use the same shared decoder;
 their bounded output-quality checks and remaining strict numerical failures
@@ -163,7 +164,7 @@ flowchart TB
     H["Model ID · automatic download and cache"] --> S["Safetensors snapshot"]
     S --> P["Validated decoder plan<br/>Complete end-token policy"]
     S --> B["Validated bidirectional embedding plan"]
-    B --> N["C++ encoder · local/full attention and Q/K norms<br/>Finite masked-span attention · shared RoPE · vector GELU"]
+    B --> N["C++ encoder · local/full attention and Q/K norms<br/>Parallel attention heads for longer inputs<br/>Finite masked-span attention · shared RoPE · vector GELU"]
     N --> V["Mean pooling · dense projections · L2 normalization"]
     V --> F["Document/query vectors"]
     O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]

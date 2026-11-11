@@ -6,6 +6,7 @@ LEAF_TEST_LEGACY_DECODER_BIN optionally checks rejection by an old v2/v3 reader.
 from __future__ import annotations
 
 import json
+import math
 import os
 from pathlib import Path
 import struct
@@ -105,7 +106,9 @@ def test_generation_benchmark_retains_only_measured_continuations(native_decoder
     assert metrics["decode_samples_ms"] == [step for row in steps for step in row]
     for prefill, decode, total in zip(metrics["prefill_samples_ms"], steps, metrics["generation_samples_ms"]):
         assert prefill > 0 and all(step > 0 for step in decode)
-        assert total >= prefill + sum(decode)
+        phase_time = prefill + sum(decode)
+        # The runtime serializes each duration independently to ten significant digits.
+        assert total >= phase_time or math.isclose(total, phase_time, rel_tol=1e-9)
 
 
 @pytest.mark.parametrize("mutation", ["zero_count", "singleton_count", "excessive_count", "huge_count",

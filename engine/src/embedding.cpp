@@ -34,14 +34,15 @@ struct EmbeddingEncoder::Impl {
     std::unordered_map<std::string, Matrix> weights;
     std::size_t h, f, heads, kv, layers, vocab, maximum, dim, radius, dense, output;
     float global_theta, local_theta, epsilon, embedding_scale, attention_scale;
-    bool avx;
+    bool avx, multi_threaded;
     std::vector<unsigned> local;
     kernels::TokenPanelsF32 panels;
     std::vector<float> hidden, normalized, q, k, v, qh, kh, vh, attention, projected, gate, up;
     std::vector<float> local_mask, global_mask, local_cosine, local_sine, global_cosine, global_sine;
 
     Impl(const std::string &path, unsigned threads, bool scalar)
-        : mapping(path), workers(threads), avx(!scalar && kernels::token_panel_f32_avx2_available()) {
+        : mapping(path), workers(threads), avx(!scalar && kernels::token_panel_f32_avx2_available()),
+          multi_threaded(threads > 1) {
         detail::Reader r{mapping};
         r.require(8);
         check(std::memcmp(mapping.data, "LEAFEM01", 8) == 0, "unsupported embedding artifact");
@@ -209,10 +210,18 @@ struct EmbeddingEncoder::Impl {
             attention.resize(tokens * heads * dim);
             const std::size_t mask_shape[] = {1, 1, tokens, tokens};
             // Existing attention API squares its scale; preserve model score scaling.
-            kernels::attention_f32_gqa_strided_vector(qh.data(), kh.data(), vh.data(),
-                                                      (local[i] ? local_mask : global_mask).data(),
-                                                      attention.data(), 1, heads, kv, tokens, tokens, tokens,
-                                                      dim, mask_shape, std::sqrt(attention_scale), true, avx);
+            const float scale = std::sqrt(attention_scale);
+            const auto *mask = (local[i] ? local_mask : global_mask).data();
+            auto attend_heads = [&](std::size_t first, std::size_t end) {
+                kernels::attention_f32_gqa_strided_vector(
+                    qh.data(), kh.data(), vh.data(), mask, attention.data(), 1, heads, kv,
+                    tokens, tokens, tokens, dim, mask_shape, scale, true, avx, first, end);
+            };
+            // Long sequences amortize a worker dispatch. Heads write disjoint output slices.
+            if (multi_threaded && heads > 1 && tokens >= 128)
+                workers.run(heads, attend_heads, 1);
+            else
+                attend_heads(0, heads);
             linear(attention, tokens, p + "self_attn.o_proj.weight", projected);
             normalize(projected, projected, tokens, h, p + "post_attention_layernorm.weight");
             for (std::size_t j = 0; j < hidden.size(); ++j)
