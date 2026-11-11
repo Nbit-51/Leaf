@@ -148,12 +148,14 @@ public:
         ready_.notify_all(); for (auto& worker : workers_) worker.join();
     }
     AffinityScope bind_caller() const { return AffinityScope(caller_cpu_); }
-    void run(std::size_t count, std::function<void(std::size_t, std::size_t)> task) {
+    void run(std::size_t count, std::function<void(std::size_t, std::size_t)> task,
+             std::size_t grain = 32) {
+        check(grain > 0, "worker grain must be positive");
         AffinityScope caller(caller_cpu_);
         if (threads_ == 1) { task(0, count); caller.restore(); return; }
         { std::lock_guard<std::mutex> lock(mutex_);
           task_ = std::move(task); task_error_ = nullptr;
-          count_ = count; next_ = 0; pending_ = threads_ - 1; ++epoch_;
+          count_ = count; grain_ = grain; next_ = 0; pending_ = threads_ - 1; ++epoch_;
           if (spins()) visible_epoch_.store(epoch_, std::memory_order_release); }
         ready_.notify_all(); drain();
         if (spins()) spin_until(completed_epoch_, epoch_, true);
@@ -195,9 +197,9 @@ private:
     }
     void drain() {
         for (;;) {
-            const std::size_t first = next_.fetch_add(32, std::memory_order_relaxed);
+            const std::size_t first = next_.fetch_add(grain_, std::memory_order_relaxed);
             if (first >= count_) return;
-            try { task_(first, std::min(first + 32, count_)); }
+            try { task_(first, first + std::min(grain_, count_ - first)); }
             catch (...) {
                 std::lock_guard<std::mutex> lock(mutex_);
                 if (!task_error_) task_error_ = std::current_exception();
@@ -211,7 +213,7 @@ private:
     std::mutex mutex_;
     std::condition_variable ready_, finished_;
     bool stop_ = false;
-    std::size_t epoch_ = 0, count_ = 0;
+    std::size_t epoch_ = 0, count_ = 0, grain_ = 32;
     unsigned pending_ = 0;
     std::atomic<std::size_t> next_{0};
     std::function<void(std::size_t, std::size_t)> task_;

@@ -97,10 +97,13 @@ void attention_impl(const float* query, const float* key, const float* value,
                     std::size_t query_tokens, std::size_t key_tokens,
                     std::size_t key_stride_tokens, std::size_t head_dim,
                     const std::size_t* mask_shape, float scale, bool mask_nonzero_is_valid,
-                    float (*dot)(const float*, const float*, std::size_t)) {
+                    float (*dot)(const float*, const float*, std::size_t),
+                    std::size_t first_head = 0,
+                    std::size_t end_head = std::numeric_limits<std::size_t>::max()) {
     std::vector<float> scores(key_tokens);
+    end_head = std::min(end_head, heads);
     for (std::size_t b = 0; b < batch; ++b) {
-        for (std::size_t h = 0; h < heads; ++h) {
+        for (std::size_t h = first_head; h < end_head; ++h) {
             const std::size_t kv_head = h / (heads / kv_heads);
             for (std::size_t q = 0; q < query_tokens; ++q) {
                 const float* query_row = query + ((b * heads + h) * query_tokens + q) * head_dim;
@@ -172,10 +175,11 @@ void attention_f32_gqa_strided(const float* query, const float* key,
                                std::size_t kv_heads, std::size_t query_tokens,
                                std::size_t key_tokens, std::size_t key_stride_tokens,
                                std::size_t head_dim, const std::size_t* mask_shape,
-                               float scale, bool mask_nonzero_is_valid) {
+                               float scale, bool mask_nonzero_is_valid,
+                               std::size_t first_head, std::size_t end_head) {
     attention_impl(query, key, value, mask, output, batch, query_heads, kv_heads,
                    query_tokens, key_tokens, key_stride_tokens, head_dim, mask_shape,
-                   scale, mask_nonzero_is_valid, fast_dot);
+                   scale, mask_nonzero_is_valid, fast_dot, first_head, end_head);
 }
 
 void rope_table_f32(const float* frequencies, const float* positions,

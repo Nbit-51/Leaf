@@ -43,7 +43,7 @@ def main():
             head_dim=16,
             query_pre_attn_scalar=16,
             sliding_window=16,
-            max_position_embeddings=96,
+            max_position_embeddings=160,
             use_bidirectional_attention=True,
             layer_types=["sliding_attention", "full_attention"],
         )
@@ -107,7 +107,7 @@ def main():
         export_embedding(snapshot, artifact)
         sequences = [
             [(7 * i + 3) % 127 + 1 for i in range(n)]
-            for n in (1, 7, 8, 9, 16, 17, 33, 64)
+            for n in (1, 7, 8, 9, 16, 17, 33, 64, 127, 128, 129)
         ]
         sequences += [sequences[0], list(reversed(sequences[-1]))]
         expected = []
@@ -117,10 +117,15 @@ def main():
                 vector = (hidden.mean(dim=1) @ first.T) @ second.T
                 expected.append(torch.nn.functional.normalize(vector, dim=1).numpy()[0])
         expected = np.array(expected)
-        for threads, scalar in ((1, False), (2, False), (1, True)):
+        serial = {}
+        for threads, scalar in ((1, False), (2, False), (1, True), (4, True)):
             actual, metrics = run_native(
                 args.executable, artifact, sequences, threads=threads, scalar=scalar
             )
+            if threads == 1:
+                serial[scalar] = actual.tobytes()
+            elif serial[scalar] != actual.tobytes():
+                raise AssertionError("Worker count changed embedding output bits")
             checks.append(
                 dict(
                     threads=threads,
@@ -132,7 +137,7 @@ def main():
         rejected = []
         for name, seqs in [
             ("empty", [[]]),
-            ("overlength", [[1] * 97]),
+            ("overlength", [[1] * 161]),
             ("bad_token", [[128]]),
         ]:
             try:

@@ -388,3 +388,34 @@ runtime comparison and peak-memory measurement are still needed.
 [Full retrieval results and batch measurements](../benchmark/validation/scifact/20261110/manifest.json)
 
 The graph milestone is a supported trained image classifier and held-out labels.
+
+### Parallel attention heads
+
+With multiple workers, the encoder distributes attention heads across those
+workers for inputs of at least 128 tokens. Each task writes a disjoint output
+slice and keeps the original order of dot products, softmax and value accumulation.
+
+On Windows with four physical P-cores, six paired offline `leaf embed` commands
+over 16 SciFact documents reduced median command time from 16.98 to 13.80 seconds.
+The median paired reduction was 15.8%, with before/after spread of 1.06×/1.14×
+against the 1.25× limit. Every output coordinate matched the earlier FP32 vectors.
+The native CLI also reproduced all 300 query vectors and 31 length-stratified
+document vectors bit-for-bit.
+
+The separate warm comparison against FP32 llama.cpp over six documents from
+71 to 1,014 tokens still favored llama.cpp by a paired ratio of 1.173.
+Short embedding queries of 14–59 tokens favored Leaf in the observed samples,
+but Leaf's 1.47× spread exceeded the timing limit.
+
+A four-thread operation profile of the 1,014-token input measured about 57%
+of Leaf time in projection and MLP GEMMs, 28% in attention, and 5% in input
+packing. Attributing the entire llama.cpp gap still requires matched
+measurements of both runtimes.
+
+The decoder prototype produced bit-identical logits at one, two and four
+threads on trained Qwen3-0.6B and SmolLM2-360M prompts. At 256 prefill tokens
+and four P-cores, Smol passed the raw-sample timing gate at above-normal process
+priority with a 24.6% paired prefill reduction. Qwen's independent repeat
+showed a 22.5% paired prefill reduction and a 1.42× decode spread in one pass.
+Decoder adoption remains pending.
+[Raw samples, quality checks and operation profile](../benchmark/validation/parallel-attention/20261111/manifest.json)
