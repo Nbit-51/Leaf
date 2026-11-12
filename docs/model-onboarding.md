@@ -455,3 +455,48 @@ batch and a 3.1% increase on the six-document batch of 711–1,334-token
 inputs. Both runs exceeded the spread limit, so the packing candidate
 remains experimental.
 [Packing samples and candidate patch](../benchmark/validation/ollama-and-packing/20261111/manifest.json)
+
+### Decoder costs by prompt length
+
+The instrumented four-core Windows FP32 baseline spent the following shares
+of prefill time in linear projections and attention.
+
+| Model | Tokens | Linear projections | Attention |
+|---|---:|---:|---:|
+| SmolLM2-360M | 64 | 92.2% | 3.4% |
+| SmolLM2-360M | 768 | 39.1% | 55.1% |
+| Qwen2.5-0.5B | 64 | 88.3% | 4.1% |
+| Qwen2.5-0.5B | 768 | 49.1% | 44.4% |
+
+The native profiler includes warmup and first use. Input packing was around
+1% of prefill. At a 768-token context, projections accounted for 63% and 74%
+of decode on SmolLM2 and Qwen respectively, including 34% and 41% in MLP
+projections. Cached attention accounted for 36% and 25%. Use `python -m tools.profile_decoder --help` with
+`--threads 4 --worker-cpus 0 2 4 6` to collect the same operation breakdown
+where those CPU indices are available.
+
+The token-panel scheduling prototype produced bit-identical logits on both
+trained models. It reduced paired 768-token prefill latency by 9.0% on SmolLM2
+and 8.3% on the Qwen repeat, with stable prefill samples in both. One Qwen
+baseline decode pass reached 1.261× spread against the 1.25× limit, so decoder
+adoption remains pending.
+
+In a separate five-sample Qwen decode counter replay per build, operation
+and token counts matched. Median wall time was 82.71 ms for the baseline
+and 86.22 ms for the candidate. Median process CPU time was 250 ms for both,
+median cycles fell from 550.5 million to 542.0 million, and every sample
+reported zero page faults. The earlier 112 ms sample did not recur. Hardware
+cache misses were not measured.
+
+A second prototype combined token-panel scheduling with parallel attention
+heads. On the matched FP32 SmolLM2-360M workload against Ollama 0.40.4,
+paired prefill was 5.3% faster (2,251 vs 2,377 ms median) and paired decode
+was 12.5% slower (56.36 vs 49.99 ms median). The screen used two balanced
+pairs with five samples per pass, a 768-token prompt and two generated tokens.
+Both phases met the spread limit. All timed generated text matched, and
+the combined build matched 37,797,888 prior Leaf logits bit-for-bit.
+The Ollama quality gate passed six of eight checks. This screen supports
+investigating the remaining decode gap before drawing an overall speed
+conclusion.
+
+[Profiles, kernel shapes and raw timing samples](../benchmark/validation/panel-scheduling/20261112/manifest.json)
