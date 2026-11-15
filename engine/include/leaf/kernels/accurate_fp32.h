@@ -57,11 +57,13 @@ __attribute__((target("avx2,fma"))) inline void tile(
 __attribute__((target("avx2,fma"))) inline void gemm(
         const float* weights, std::size_t rows, std::size_t columns,
         std::size_t weight_stride, const TokenPanelsF32& input,
-        float* output, std::size_t output_stride, const float* bias) {
+        float* output, std::size_t output_stride, const float* bias,
+        std::size_t first_panel = 0, std::size_t end_panel = std::numeric_limits<std::size_t>::max()) {
     alignas(32) float levels[std::numeric_limits<std::size_t>::digits * 96];
+    end_panel = std::min(end_panel, input.panels());
     for (std::size_t row = 0; row < rows;) {
         const auto live = std::min<std::size_t>(6, rows - row);
-        for (std::size_t panel = 0; panel < input.panels(); ++panel) {
+        for (std::size_t panel = first_panel; panel < end_panel; ++panel) {
             const auto first = panel * 16;
             const auto count = std::min<std::size_t>(16, input.tokens() - first);
             const auto* w = weights + row * weight_stride;

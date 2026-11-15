@@ -186,7 +186,7 @@ flowchart TB
     O["leaf infer · ONNX model"] --> G["Leaf IR · constant folding and fusions"]
     P --> D["Native decoder artifact<br/>Optional original BF16 matrix storage"]
     G --> A["Native graph artifact"]
-    D --> R["C++ decoder · causal full/windowed attention<br/>Parallel attention heads for long source-BF16 contexts<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
+    D --> R["C++ decoder · causal full/windowed attention<br/>Parallel token panels and attention heads for long FP32 contexts<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
     R --> M["Compute policy<br/>FP32: fast default or accurate opt-in<br/>INT8/INT4: existing dispatch"]
     M --> K["CPU-dispatched kernels<br/>Tiled GEMM · shared input panels<br/>Optional balanced FP32 sums and wider RMS<br/>Paired GEMV · SIMD BF16-to-FP32 expansion<br/>Vector GELU, attention, softmax and SiLU"]
@@ -281,6 +281,12 @@ reduced paired prefill by **41.7–49.7%** and cached decode by **32.6–45.0%**
 versus the previous Leaf build across SmolLM2-360M, Qwen2.5-0.5B and
 Qwen3-0.6B. The tested outputs matched bit-for-bit and timings passed the
 spread checks for 768-token prompts.
+
+With fully stored FP32 weights, the [four-core long-context path](docs/windows-fp32-long-context.md)
+reduced paired prefill **52.8% on OPT-125M** and **53.2% on SmolLM2-360M**
+versus the previous Leaf build. Cached decode fell **31.3%** and **30.5%**,
+respectively. Both passed timing stability and matched the previous Leaf logits
+bit-for-bit on the tested prompts.
 
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is

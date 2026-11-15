@@ -145,10 +145,18 @@ LEAF_ATTENTION_TARGET inline void attend(
                 float maximum = -std::numeric_limits<float>::infinity();
                 for (std::size_t c = 0; c < count; ++c) maximum = std::max(maximum, scores[valid[c]]);
                 if (!std::isfinite(maximum)) { std::fill_n(y, dim, 0.0f); continue; }
-                exp_scores(scores.data(), keys, maximum);
+                std::size_t exp_first = 0, exp_last = keys;
+                if (trim_allowed && count) {
+                    // Keep the original four-lane groups and scalar tail.
+                    // Everywhere else the masked exponential is exactly +0.
+                    exp_first = valid[0] & ~std::size_t(3);
+                    exp_last = std::min(keys, (valid[count - 1] | std::size_t(3)) + 1);
+                    std::fill_n(scores.data(), exp_first, 0.0f);
+                    std::fill(scores.data() + exp_last, scores.data() + keys, 0.0f);
+                }
+                exp_scores(scores.data() + exp_first, exp_last - exp_first, maximum);
                 float denominator = 0;
-                for (std::size_t k = 0; k < keys; ++k) denominator += scores[k];
-                for (std::size_t k = 0; k < keys; ++k) scores[k] = scores[k] / denominator;
+                for (std::size_t k = exp_first; k < exp_last; ++k) denominator += scores[k];
                 // Finite values and a finite softmax permit omitting leading/
                 // trailing masked zeros. Retain interior holes and key order.
                 // Nonfinite values keep the full path: 0 * NaN/Inf is observable.
@@ -162,6 +170,7 @@ LEAF_ATTENTION_TARGET inline void attend(
                     }
                     if (values_finite) { first = valid[0]; last = valid[count - 1] + 1; }
                 }
+                for (std::size_t k = first; k < last; ++k) scores[k] = scores[k] / denominator;
                 const auto* active_scores = scores.data() + first;
                 const auto* active_values = value_head + first * dim;
                 const auto active_keys = last - first;

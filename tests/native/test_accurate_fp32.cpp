@@ -30,6 +30,13 @@ int main() {
                     if (vector) {
                         leaf::experiments::gemm_tree_sum(w.data(), rows, columns, ws, panels, reference.data(), ys, b, true);
                         if (std::memcmp(result.data(), reference.data(), result.size() * sizeof(float))) return 1;
+#if defined(__x86_64__) && defined(__GNUC__)
+                        std::fill(reference.begin(), reference.end(), 12345.0f);
+                        for (std::size_t first = 0; first < panels.panels(); first += 2)
+                            leaf::kernels::accurate_fp32_detail::gemm(w.data(), rows, columns, ws, panels,
+                                reference.data(), ys, b, first, first + 2);
+                        if (std::memcmp(result.data(), reference.data(), result.size() * sizeof(float))) return 6;
+#endif
                     }
                     for (unsigned t = 0; t < tokens; ++t) {
                         for (unsigned r = 0; r < rows; ++r) {

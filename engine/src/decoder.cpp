@@ -80,8 +80,8 @@
 namespace leaf::runtime {
 namespace {
 
-constexpr std::size_t bf16_parallel_prefill_tokens = 768;
-constexpr std::size_t bf16_parallel_decode_context = 512;
+constexpr std::size_t parallel_prefill_tokens = 768;
+constexpr std::size_t parallel_decode_context = 512;
 constexpr std::size_t bf16_max_expanded_values = (32 * 1024 * 1024) / sizeof(float);
 void check(bool valid, const std::string& message) {
     if (!valid) throw std::runtime_error("Leaf decoder: " + message);
@@ -742,6 +742,7 @@ struct Decoder::Impl {
     bool float_tiles = false, optimized_fp32 = false, fp32_artifact = false;
     bool accurate_fp32 = false;
     bool parallel_bf16 = false;
+    bool parallel_fp32 = false;
     bool qk_norm = false;
     std::size_t source_bf16_tensors = 0, source_bf16_linear_calls = 0;
     bool vector_gelu = false, vector_attention = false, paired_gemv = false;
@@ -940,6 +941,7 @@ struct Decoder::Impl {
         if (accurate_fp32 && !avx) dot = dot_scalar_precise;
         optimized_fp32 = LEAF_OPTIMIZED_FP32 && avx && fp32_artifact;
         parallel_bf16 = optimized_fp32 && !accurate_fp32 && source_bf16_matrix_format && threads >= 4;
+        parallel_fp32 = optimized_fp32 && source_bf16_tensors == 0 && threads >= 4;
         if (optimized_fp32) {
             float_tiles = true;
             vector_gelu = vector_attention = paired_gemv = true;
@@ -1071,24 +1073,33 @@ struct Decoder::Impl {
         output.resize(tokens * weight.rows);
         used_vnni = used_vnni || vnni_integer;
 #if LEAF_OPTIMIZED_FP32 && defined(__x86_64__) && defined(__GNUC__)
-        if (parallel_bf16 && packed_float && weight.bits == 16 &&
-                tokens >= bf16_parallel_prefill_tokens && weight.rows <= bf16_max_expanded_values / weight.cols) {
-            // Expand this projection once. Token-panel jobs then write disjoint
-            // contiguous spans of output while sharing the read-only FP32 scratch.
-            const auto values = weight.rows * weight.cols;
-            if (expanded_prefill_weights.size() < values)
-                std::vector<float>(values).swap(expanded_prefill_weights);
-            const auto* stored = reinterpret_cast<const std::uint16_t*>(weight.data);
-            workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
-                const auto offset = first * weight.cols;
-                leaf::kernels::expand_source_bf16(stored + offset, expanded_prefill_weights.data() + offset,
-                                                  (last - first) * weight.cols, avx);
-            }, 32);
+        const bool expand = parallel_bf16 && weight.bits == 16 &&
+                            weight.rows <= bf16_max_expanded_values / weight.cols;
+        if (packed_float && tokens >= parallel_prefill_tokens &&
+                (expand || (parallel_fp32 && weight.bits == 32))) {
+            const auto* matrix = reinterpret_cast<const float*>(weight.data);
+            if (expand) {
+                const auto values = weight.rows * weight.cols;
+                if (expanded_prefill_weights.size() < values)
+                    std::vector<float>(values).swap(expanded_prefill_weights);
+                const auto* stored = reinterpret_cast<const std::uint16_t*>(weight.data);
+                workers.run(weight.rows, [&](std::size_t first, std::size_t last) {
+                    const auto offset = first * weight.cols;
+                    leaf::kernels::expand_source_bf16(stored + offset, expanded_prefill_weights.data() + offset,
+                                                      (last - first) * weight.cols, avx);
+                }, 32);
+                matrix = expanded_prefill_weights.data();
+            }
+            // Each job owns a disjoint token span. Keep the selected tile's
+            // accumulation order for each output, including the accurate tree.
+            const auto* offset = bias ? reinterpret_cast<const float*>(bias->data) : nullptr;
             workers.run(packed_float_input.panels(), [&](std::size_t first, std::size_t last) {
-                leaf::kernels::row_reuse_detail::gemm(
-                    expanded_prefill_weights.data(), weight.rows, weight.cols, weight.cols,
-                    packed_float_input, output.data(), weight.rows,
-                    bias ? reinterpret_cast<const float*>(bias->data) : nullptr, first, last);
+                if (accurate_fp32)
+                    leaf::kernels::accurate_fp32_detail::gemm(matrix, weight.rows, weight.cols, weight.cols,
+                        packed_float_input, output.data(), weight.rows, offset, first, last);
+                else
+                    leaf::kernels::row_reuse_detail::gemm(matrix, weight.rows, weight.cols, weight.cols,
+                        packed_float_input, output.data(), weight.rows, offset, first, last);
             }, 2);
             return;
         }
@@ -1335,17 +1346,18 @@ struct Decoder::Impl {
                 const float scale = 1.0f / std::sqrt(std::sqrt(static_cast<float>(dim)));
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ATTENTION_AVX2)
                 const auto& cache = caches[layer];
+                const bool parallel_attention = (parallel_bf16 || parallel_fp32) && heads > 1;
                 if (vector_attention && tokens > 1) {
                     auto attend_heads = [&](std::size_t first, std::size_t last) {
                         leaf::kernels::attention_f32_gqa_strided_vector(q_heads.data(), cache.keys_data(),
                             cache.values_data(), mask.data(), attention.data(), 1, heads, kv_heads, tokens,
                             total, cache.capacity(), dim, mask_shape, scale, true, true, first, last);
                     };
-                    if (parallel_bf16 && tokens >= bf16_parallel_prefill_tokens && heads > 1)
+                    if (parallel_attention && tokens >= parallel_prefill_tokens)
                         workers.run(heads, attend_heads, 1);
                     else
                         attend_heads(0, heads);
-                } else if (parallel_bf16 && tokens == 1 && total >= bf16_parallel_decode_context && heads > 1) {
+                } else if (parallel_attention && tokens == 1 && total >= parallel_decode_context) {
                     workers.run(heads, [&](std::size_t first, std::size_t last) {
                         leaf::kernels::attention_f32_gqa_strided(q_heads.data(), cache.keys_data(),
                             cache.values_data(), mask.data(), attention.data(), 1, heads, kv_heads, tokens,
