@@ -138,3 +138,69 @@ Paired decode latency stayed within the 2% non-regression margin on both, and
 decode spread again exceeded 1.25×. The two-worker optimization remains a
 candidate under the existing release gate.
 [Prefill-only candidate and raw timing](../benchmark/validation/windows-fp32-20261115/two-worker-prefill/manifest.json)
+
+## Run the budget-laptop check
+
+Install the Leaf platform wheel and `psutil` in the same environment. From the
+checkout, prepare the pinned OPT snapshot once, then run the benchmark offline.
+On a single-core machine pass `--threads 1`. On a dual-core machine collect both
+one- and two-worker results. A four-core machine can include `--threads 1 2 4`.
+Use the operating system's default scheduling for a normal-use result.
+
+```powershell
+$model = 'facebook/opt-125m'
+$revision = 'e3bf7e1695cb08c7963df13dbf144e0d1812717c'
+leaf run $model --revision $revision --bits 32 --fp32-math accurate --raw --prompt "Once upon a time, a small robot found" --max-tokens 16
+python -m tools.benchmark_budget_cpu $model --revision $revision --threads 1 2 --output build/older-laptop-opt
+```
+
+Each observation starts a fresh CLI and decoder process with cached weights.
+The report includes first visible text from process launch, native prefill,
+median cached decode step, decoder peak resident memory, and raw samples. The
+peak excludes Python and the rest of the system. The initial file checks and
+warmup touch the model on disk. Use the same prompt and revision on other
+machines. Pass `--prompt-file` for a fixed longer workload, including prompts
+with at least 768 tokens when evaluating the four-worker long-context path.
+The actual token count can be read from `prompt_token_ids` in the report.
+[Benchmark runner](../tools/benchmark_budget_cpu.py)
+
+### Constrained i7 reference run
+
+The installed Windows wheel ran six fresh processes per setting on an
+i7-14700HX with 16 GB RAM. Each one- and two-worker run could use the same two
+physical P-cores. The four-worker run used a separate mask with four physical
+P-cores. Windows scheduled workers inside the masks. All long-prompt runs used
+the same 970 input tokens and generated the same 16 output tokens.
+
+| Prompt | Workers | First visible text p50 | Prefill p50 | Decode step p50 | Max decoder peak memory |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 10 tokens | 1 | 1.06 s | 227 ms | 28.8 ms | 480 MiB |
+| 10 tokens | 2 | 1.04 s | 213 ms | 30.6 ms | 480 MiB |
+| 970 tokens | 1 | 4.39 s | 3.51 s | 40.0 ms | 609 MiB |
+| 970 tokens | 2 | 4.45 s | 3.62 s | 42.7 ms | 609 MiB |
+| 970 tokens | 4 | 2.59 s | 1.77 s | 26.6 ms | 609 MiB |
+
+The short two-worker prefill and decode timings exceeded the spread limit.
+The three long-prompt configurations passed it for first visible text, prefill,
+and decode. The four-worker run occurred separately and had a larger allowed
+core budget. These results describe the current machine. Use the same workload
+on an older physical laptop to establish its actual speed.
+[Raw installed-wheel results](../benchmark/validation/windows-fp32-20261115/budget-cpu/manifest.json)
+
+On the same two-core mask, a separate warmed native test forced the scalar
+backend for Pythia-70M. At 64 input tokens and 16 output tokens, median
+decode was 32.85 ms per step with one worker and 16.97 ms with two. Both
+decode configurations passed the spread check and generated the same tokens
+as the AVX2 backend. Scalar prefill medians were 829 ms and 426 ms, with
+the two-worker prefill exceeding the spread limit. Forcing scalar on this i7
+exercises the fallback code for CPUs without AVX2. An actual older CPU will
+have its own timings.
+[Raw forced-scalar results](../benchmark/validation/windows-fp32-20261115/budget-cpu/manifest.json)
+
+On one allowed P-core, the 10-token OPT prompt reached first visible text in
+0.56 s when Leaf opened the cached snapshot by local path and 1.09 s when
+Leaf resolved the pinned Hub ID offline. These were two separate six-run
+observations with matching prompt IDs, weights, decoder and output tokens.
+To use the local path, run `leaf inspect` with the cached model and revision,
+then pass its `snapshot` path to `leaf run --offline`.
+[Raw startup results](../benchmark/validation/windows-fp32-20261115/budget-cpu/manifest.json)

@@ -10,6 +10,7 @@ dependencies first; datasets and model weights are not part of the Python wheel.
 | `bench_cifar10.py` | Small untrained CNN: calibration, graph transformations and optional native comparison |
 | `bench_cifar10_resnet18.py` | Untrained ResNet-18 on CIFAR inputs: native graph parity and timing |
 | `bench_graph_onnxruntime.py` | Trained FP32 classification parity and paired single-core Leaf/ONNX Runtime timing |
+| `python -m tools.benchmark_budget_cpu` | Installed-wheel CPU and memory observations for cached, offline generation |
 | `bench_qwen25_cached.py` | Offline PyTorch decoder baseline with/without KV cache; not a Leaf comparison |
 | `bench_resnet18.py` | Legacy Python/NumPy graph executor; no native performance claim; optional explicit pretrained download |
 | `prepare_cifar10.py` | Convert an existing CIFAR Parquet file to a small offline NPZ fixture |

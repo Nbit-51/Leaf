@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-15",
+  "archive": "evidence.zip",
+  "archive_sha256": "1765d0b886769644813b135808efd6ee8a0abf00911f1748cf82fd55b0e8a205",
+  "files": {
+    "short-two/report.json": "51e2c38609f25d32eafc927855ab39d953bfeaab87ad95e6c996cd81387df720",
+    "long-two/report.json": "81c39095a1a1af37b324dcac8986a854e3bca20722d0e0d8186caad3481f9896",
+    "long-four/report.json": "afeea765ca33803f077f856c762f4e69ec01f47d27236c1d77b0b776c1bb0b2e",
+    "local-path-check/report.json": "21802c62417e4b201e8e3cec5902945bc86eb71bfb900716405d3553f1ad1ac6",
+    "hub-path-check/report.json": "b147bb5958a9b519a1421017c160806e1f4be7baa38f9fd071825b51a4218f53",
+    "long.txt": "686f7048d447a99fcbaa129cfb1591414f8a9dd2b78274ae4410f429677381f6",
+    "probe_scalar.py": "5a44c7acf0ac69185b566f958db9df02417ea2155fa0f35b949ae2c585b3b302",
+    "native-scalar.json": "27a311c61b63889a9f32e0b3061b109f374d03926022415b71f82e5d59cdfb30"
+  }
+}
