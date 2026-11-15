@@ -43,7 +43,8 @@ def test_mistral_config_check_reports_memory_without_claiming_weight_parity(tmp_
     assert json.loads(capsys.readouterr().out)["configuration_supported"] is True
 
 
-def test_decoder_download_uses_inspected_revision(tmp_path, monkeypatch):
+@pytest.mark.parametrize("revision", [None, "refs/pr/50", "b" * 40])
+def test_decoder_download_uses_inspected_revision(tmp_path, monkeypatch, revision):
     root = tmp_path / ("a" * 40)
     root.mkdir()
     (root / "config.json").write_text(json.dumps(dict(model_type="llama", hidden_size=16,
@@ -53,8 +54,14 @@ def test_decoder_download_uses_inspected_revision(tmp_path, monkeypatch):
         calls.append(kwargs)
         return str(root)
     monkeypatch.setitem(sys.modules, "huggingface_hub", SimpleNamespace(snapshot_download=download))
-    cli.resolve_model("owner/model", tmp_path)
+    cli.resolve_model("owner/model", tmp_path, revision=revision)
+    assert calls[0]["revision"] == revision
     assert calls[1]["revision"] == root.name
+
+
+def test_revision_rejects_local_snapshot(tmp_path):
+    with pytest.raises(ValueError, match="--revision applies to a Hub model ID"):
+        cli.resolve_model(str(tmp_path), tmp_path / "cache", revision="main")
 
 
 def test_inspection_counts_tied_payload_once_without_reading_weights(tmp_path, capsys):

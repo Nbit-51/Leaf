@@ -73,8 +73,10 @@ def executable(cache: Path) -> Path:
 
 
 def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | None = None,
-                  metadata_only: bool = False, before_weights=None) -> Path:
+                  metadata_only: bool = False, before_weights=None, *, revision: str | None = None) -> Path:
     def local_snapshot(path):
+        if revision is not None:
+            raise ValueError("--revision applies to a Hub model ID, not a local snapshot")
         if before_weights is not None:
             validate_model_generation(path, plan)
             before_weights()
@@ -91,7 +93,7 @@ def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | N
     from huggingface_hub import snapshot_download
     from tools.decoder_plan import load_snapshot_plan
     # Check configuration/capabilities before fetching large weight shards.
-    metadata = snapshot_download(model, cache_dir=cache / "hub", local_files_only=offline,
+    metadata = snapshot_download(model, revision=revision, cache_dir=cache / "hub", local_files_only=offline,
                                  allow_patterns=["config.json", "generation_config.json"])
     if metadata_only:
         return Path(metadata)
@@ -108,7 +110,8 @@ def inspect_model(args):
     import math
     from tools.decoder_plan import load_snapshot_plan, tensor_shapes
 
-    snapshot = resolve_model(args.model, cache_root(), args.offline, metadata_only=True)
+    snapshot = resolve_model(args.model, cache_root(), args.offline, metadata_only=True,
+                             revision=getattr(args, "revision", None))
     source = json.loads((snapshot / "config.json").read_text(encoding="utf-8"))
     record = dict(model=args.model, task="generation", architecture=source.get("model_type"),
                   configuration_supported=False, weights_verified=False, timing_qualified=False,
@@ -287,16 +290,50 @@ def prepare(snapshot: Path, directory: Path, bits: int, plan: Path | None = None
     return artifact
 
 
+def legacy_opt_tokenizer(snapshot: Path, config: dict):
+    """Load the byte-level BPE files shipped by older OPT snapshots."""
+    from tokenizers import AddedToken, Tokenizer, decoders, models, pre_tokenizers, processors
+
+    model_path = snapshot / "config.json"
+    vocab, merges = snapshot / "vocab.json", snapshot / "merges.txt"
+    if (not model_path.is_file() or not vocab.is_file() or not merges.is_file() or
+            json.loads(model_path.read_bytes()).get("model_type") != "opt" or
+            config.get("tokenizer_class", "GPT2Tokenizer") not in ("GPT2Tokenizer", "GPT2TokenizerFast")):
+        raise RuntimeError("A tokenizer.json is required for this decoder")
+    tokenizer = Tokenizer(models.BPE.from_file(str(vocab), str(merges)))
+    tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=config.get("add_prefix_space", False))
+    tokenizer.decoder = decoders.ByteLevel()
+    tokens = {}
+    for key in ("unk_token", "bos_token", "eos_token", "pad_token"):
+        value = config.get(key)
+        if isinstance(value, str):
+            value = AddedToken(value)
+        elif isinstance(value, dict):
+            value = AddedToken(**{k: v for k, v in value.items() if k != "__type"})
+        elif value is not None:
+            raise ValueError(f"Invalid OPT {key} tokenizer metadata")
+        if value is not None:
+            if tokenizer.token_to_id(value.content) is None:
+                raise ValueError(f"OPT {key} is missing from the tokenizer vocabulary")
+            tokens[key] = value
+    tokenizer.add_special_tokens(list(tokens.values()))
+    bos = tokens["bos_token"].content if config.get("add_bos_token") and "bos_token" in tokens else None
+    eos = tokens["eos_token"].content if config.get("add_eos_token") and "eos_token" in tokens else None
+    special = [(token, tokenizer.token_to_id(token)) for token in dict.fromkeys((bos, eos)) if token is not None]
+    if special:
+        tokenizer.post_processor = processors.TemplateProcessing(
+            single=[token for token in (bos, "$A", eos) if token is not None], special_tokens=special)
+    return tokenizer
+
+
 def encode_prompt(snapshot: Path, prompt: str, raw: bool = False):
     from tokenizers import Tokenizer
     from jinja2 import TemplateError
     from jinja2.sandbox import SandboxedEnvironment
     tokenizer_path = snapshot / "tokenizer.json"
-    if not tokenizer_path.is_file():
-        raise RuntimeError("A tokenizer.json is required for the lightweight tokenizer runtime")
-    tokenizer = Tokenizer.from_file(str(tokenizer_path))
     config_path = snapshot / "tokenizer_config.json"
     config = json.loads(config_path.read_text()) if config_path.is_file() else {}
+    tokenizer = Tokenizer.from_file(str(tokenizer_path)) if tokenizer_path.is_file() else legacy_opt_tokenizer(snapshot, config)
     if config.get("legacy") is False and tokenizer.pre_tokenizer is None and tokenizer.normalizer is not None:
         # Older SentencePiece-style JSON applies Prepend to every fragment
         # split around an added special token. Nonlegacy tokenization prepends
@@ -380,7 +417,7 @@ def run(args):
                               fp32_math=fp32_math, worker_cpus=worker_cpus)
     # Reject unsupported metadata before building, and setup failures before weights.
     snapshot = resolve_model(args.model, cache, args.offline, args.plan,
-                             before_weights=prepare_runtime)
+                             before_weights=prepare_runtime, revision=getattr(args, "revision", None))
     directory = model_directory(snapshot, cache, args.plan)
     if source_storage:
         bits, activation_bits = 32, 32
@@ -441,7 +478,8 @@ def run(args):
 
 def optimize(args):
     cache = cache_root()
-    snapshot = resolve_model(args.model, cache, args.offline, args.plan)
+    snapshot = resolve_model(args.model, cache, args.offline, args.plan,
+                             revision=getattr(args, "revision", None))
     validate_model_generation(snapshot, args.plan)
     directory = model_directory(snapshot, cache, args.plan)
     runtime = executable(cache)
@@ -578,6 +616,8 @@ def main():
     optimizer.add_argument("--protected-int8", action="store_true", help="also test FP32 embeddings/output with INT8 linear weights")
     optimizer.add_argument("--grouped-int8", action="store_true", help="also test 64-column grouped INT8 weights/activations")
     optimizer.add_argument("--grouped-int8-smooth", action="store_true", help="also test calibrated grouped INT8; requires calibration data")
+    for command in (inspector, runner, evaluator, optimizer):
+        command.add_argument("--revision", help="Hugging Face branch, tag or commit for a decoder model ID")
     alias = commands.add_parser("alias", help="register a short name for a snapshot or repository")
     alias.add_argument("name"); alias.add_argument("model")
     args = parser.parse_args()

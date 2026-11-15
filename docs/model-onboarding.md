@@ -554,3 +554,37 @@ The paired prefill reduction was 1.49%, below the 2% threshold. These
 conditions keep the direct comparison diagnostic.
 
 [Raw 64-token timings and weight checks](../benchmark/validation/cpu-demo/20261115/manifest.json)
+
+## OPT-125M on Windows CPU
+
+The default OPT-125M Hub revision provides configuration and tokenizer files.
+Use the pinned [safetensors revision](https://huggingface.co/facebook/opt-125m/commit/e3bf7e1695cb08c7963df13dbf144e0d1812717c)
+for Leaf. The runtime reads the published byte-level BPE vocabulary and merges
+and applies the configured beginning-of-sequence token.
+
+```powershell
+$rev = 'e3bf7e1695cb08c7963df13dbf144e0d1812717c'
+leaf inspect facebook/opt-125m --revision $rev
+leaf run facebook/opt-125m --revision $rev --bits 32 --fp32-math accurate --prompt "Once upon a time, a small robot found" --max-tokens 16
+```
+
+Add `--offline` after the first successful run to select the same cached
+revision. Leaf matched all 1,016 WikiText-2 next-token predictions and all
+six greedy reference continuations. All logits passed the existing tolerance,
+with a maximum absolute error of `7.82e-5`.
+
+The timing comparison used accurate FP32 Leaf and FP32 PyTorch SDPA on
+one pinned Windows CPU core in Better Battery mode. Each workload used six
+balanced pairs, five measurements per pass, and one cached decode forward.
+The prefill and decode boundary logits passed the tolerance at both lengths.
+
+| Prompt tokens | Prefill Leaf / PyTorch | Paired prefill result | Decode Leaf / PyTorch | Paired decode result |
+|---:|---:|---|---:|---|
+| 64 | 138.60 / 161.64 ms | 13.4% lower, stable | 27.43 / 30.17 ms | 10.1% lower, spread exceeded |
+| 768 | 2,375.98 / 1,821.28 ms | 30.2% higher, stable | 35.88 / 39.80 ms | 7.6% lower, stable |
+
+The instrumented Leaf run attributed 65.8% of long prefill to FP32 linear
+projections and 31.1% to attention. At 64 tokens those shares were 94.2% and
+2.6%. These percentages describe Leaf's own work and include warmup.
+
+[Small-model fidelity, paired timing samples and wheel checks](../benchmark/validation/cpu-model-suite/20261115/manifest.json)

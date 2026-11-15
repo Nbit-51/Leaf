@@ -185,7 +185,8 @@ def evaluate(args):
             check_decoder_options(runtime, source_bf16=source_bf16, source_bf16_head=source_bf16_head,
                                   fp32_math=fp32_math)
 
-        snapshot = cli.resolve_model(args.model, cache, args.offline, before_weights=prepare_runtime)
+        snapshot = cli.resolve_model(args.model, cache, args.offline, before_weights=prepare_runtime,
+                                     revision=getattr(args, "revision", None))
         plan = load_snapshot_plan(snapshot)
         config = plan["config"]
         record["generation_policy"] = generation_policy_identity(plan, args.generate)
@@ -211,7 +212,8 @@ def evaluate(args):
         record['storage'].update(effective=storage_by_format[storage_format], artifact_format=magic.decode('ascii'))
         record.update(snapshot=str(snapshot), artifact_sha256=digest(artifact), executable_sha256=digest(runtime),
                       source_sha256={p.name: digest(p) for p in sorted(snapshot.iterdir())
-                                     if p.is_file() and p.suffix in (".json", ".safetensors")})
+                                     if p.is_file() and
+                                     (p.suffix in (".json", ".safetensors") or p.name == "merges.txt")})
         tokenizer = AutoTokenizer.from_pretrained(snapshot, local_files_only=True, trust_remote_code=False)
         ids = token_prefix(tokenizer, args.dataset, args.blocks * args.sequence_length, args.text_column)
         sequences = [ids[start:start + args.sequence_length] for start in range(0, len(ids), args.sequence_length)]

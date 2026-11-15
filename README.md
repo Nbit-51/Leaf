@@ -50,8 +50,10 @@ leaf run openai-community/gpt2 --prompt "Local inference is" --max-tokens 32
 The first Hub run downloads and prepares the model; subsequent runs reuse the
 cache. `leaf inspect MODEL_ID` fetches decoder configuration only and reports
 operator compatibility plus a lower bound on FP32 weight memory before a large
-download. It does not certify checkpoint correctness or speed. To use a complete local snapshot containing configuration, safetensors
-weights and tokenizer files:
+download. It does not certify checkpoint correctness or speed. Pass
+`--revision COMMIT` to inspect, run, evaluate, or optimize a specific Hub
+snapshot. To use a complete local snapshot containing configuration,
+safetensors weights and tokenizer files:
 
 ```sh
 leaf run ./models/decoder --offline --prompt "Explain CPU inference." --max-tokens 32
@@ -275,9 +277,10 @@ All continuations matched. Ollama timing spread and probability checks kept
 the comparison diagnostic.
 
 The [qualified Windows long-context source-BF16 path](docs/source-bf16.md#long-context-windows-fast-path)
-reduced paired prefill by **49.7% on SmolLM2** and **41.7% on Qwen2.5** versus
-the previous Leaf build. Cached decode fell **45.0%** and **32.6%**,
-respectively, with stable timings and bit-identical tested outputs.
+reduced paired prefill by **41.7–49.7%** and cached decode by **32.6–45.0%**
+versus the previous Leaf build across SmolLM2-360M, Qwen2.5-0.5B and
+Qwen3-0.6B. The tested outputs matched bit-for-bit and timings passed the
+spread checks for 768-token prompts.
 
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is
