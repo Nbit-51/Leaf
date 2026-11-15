@@ -130,3 +130,11 @@ Both models matched all reference Leaf logits on the tested chunks and the same
 runs missed the spread limit. This experiment measures a two-core budget on the
 review machine. An older physical CPU will have its own latency and memory
 behavior. [Candidate source and complete raw samples](../benchmark/validation/windows-fp32-20261115/two-worker-pilot/manifest.json)
+
+A follow-up limited the two-worker change to prefill and retained the existing
+decode dispatch. Both models again passed prefill stability, with paired
+reductions of 30.56% on OPT and 29.69% on Pythia and bit-exact tested outputs.
+Paired decode latency stayed within the 2% non-regression margin on both, and
+decode spread again exceeded 1.25×. The two-worker optimization remains a
+candidate under the existing release gate.
+[Prefill-only candidate and raw timing](../benchmark/validation/windows-fp32-20261115/two-worker-prefill/manifest.json)
