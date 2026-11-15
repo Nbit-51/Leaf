@@ -34,8 +34,8 @@ speed; these results do not establish a win for every model or CPU.
 ## Quick start
 
 Requires **Python 3.10+**. Installing from source also requires a **C++17 compiler**.
-A platform wheel bundles the native decoder and embedding runtime; inference
-does not require a compiler.
+A platform wheel bundles the native decoder, embedding runtime and graph
+executor. The wheel runs inference without a compiler.
 
 ```sh
 git clone https://github.com/Nbit-51/Leaf.git
@@ -97,7 +97,20 @@ Gemma requires accepting its model access terms and signing in to Hugging Face
 once (`hf auth login`). Complete local folders work too. Outputs are normalized
 768-dimensional vectors in input order. The model is
 loaded once per invocation. See [embedding usage and validation](docs/embedding.md)
-for snapshot layout, limits and measured numerical accuracy.
+for snapshot layout, limits and measured numerical accuracy. For larger
+collections, `leaf index` saves verified batches and resumes interrupted jobs.
+
+For a supported FP32 ONNX network with one input and one output, install the
+graph extra and pass the input as a NumPy array. Leaf imports and optimizes the
+graph, then runs it with the native executor bundled in the wheel.
+
+```sh
+python -m pip install ".[graph]"
+leaf infer ./resnet20.onnx --input ./image.npy --output ./logits.npy
+```
+
+See the [CPU demo and reproduction guide](docs/cpu-demo.md) for graph inference,
+offline generation and resumable document retrieval.
 
 To evaluate precision candidates, install the validation tools and use separate
 calibration and held-out text:
@@ -128,7 +141,7 @@ native-loader limitation.
 | Memory | Memory-mapped weights, reusable activation/logit buffers, per-session KV caches with dynamic growth and reset/reuse |
 | Threading | Persistent workers; optional CPU placement with bounded waits and caller-affinity restoration on Windows/Linux |
 | Precision | FP32 with optional accurate accumulation; original BF16 matrix storage with FP32 computation; weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
-| Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
+| Graph execution | `leaf infer` for supported single-input FP32 ONNX networks, ONNX-to-Leaf IR, constant folding, graph fusions and native execution |
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
 Complete trained evaluations cover **GPT-2, TinyLlama-1.1B and ResNet-20**.

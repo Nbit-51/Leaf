@@ -38,6 +38,18 @@ class NativeBuild(build_py):
         if os.name == "nt":
             embed_command.extend(["-static", "-static-libgcc", "-static-libstdc++"])
         subprocess.run(embed_command, check=True)
+        graph_output = output.with_name("leaf_infer.exe" if os.name == "nt" else "leaf_infer")
+        graph_command = [compiler, "-std=c++17", "-O3", "-DNDEBUG", "-pthread",
+                         "-I", str(root / "engine/include"), "-I", str(root / "engine/kernels")]
+        graph_command.extend(str(root / "engine" / name) for name in (
+            "src/main_infer.cpp", "src/graph_parser.cpp", "src/executor.cpp",
+            "kernels/im2col.cpp", "kernels/gemm.cpp", "kernels/conv2d.cpp",
+            "src/kernels/gemm.cpp", "src/kernels/conv.cpp", "src/kernels/transformer.cpp", "src/kv_cache.cpp",
+        ))
+        graph_command.extend(["-o", str(graph_output)])
+        if os.name == "nt":
+            graph_command.extend(["-static", "-static-libgcc", "-static-libstdc++"])
+        subprocess.run(graph_command, check=True)
 
 
 class PlatformDistribution(Distribution):

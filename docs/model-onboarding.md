@@ -500,3 +500,36 @@ investigating the remaining decode gap before drawing an overall speed
 conclusion.
 
 [Profiles, kernel shapes and raw timing samples](../benchmark/validation/panel-scheduling/20261112/manifest.json)
+
+### SmolLM2 with a 64-token continuation
+
+The matched runner now accepts `--generated-tokens 64` and verifies 63 cached
+decode forwards per request. On four physical Windows CPU cores, the same
+FP32 prototype and Ollama ran six balanced pairs with 11 measured requests
+per pass. Each request processed a 768-token prompt and generated 64 tokens.
+All timed continuations matched.
+
+| Backend phase | Leaf FP32 prototype | Ollama FP32 | Paired Leaf / Ollama |
+|---|---:|---:|---:|
+| Prefill | 2,247 ms | 2,321 ms | 0.970× |
+| Cached decode | 3,569 ms | 3,206 ms | 1.111× |
+| Combined phase median | 5,816 ms | 5,540 ms | |
+
+One Ollama pass exceeded the spread limit in both phases, and six of eight
+Ollama probability checks passed. Those gates keep this comparison diagnostic.
+The longer response shows how the cached decode gap can outweigh the prefill
+gain. The combined phase excludes process startup, model loading and HTTP.
+
+The follow-up prototype keeps eligible weights in their original BF16 storage
+and computes with FP32. For long prefill, it expands at most 32 MiB of one
+projection into reusable FP32 scratch before distributing token panels across
+workers. Cached decode reads the original compact weights directly. An audit
+checked every stored value and found exact logits and 64-token continuations
+against the FP32 prototype on both trained checkpoints.
+
+| Model | FP32-storage artifact | Original-BF16 artifact | Bit-identical prompt logits |
+|---|---:|---:|---:|
+| SmolLM2-360M | 1,447,312,000 bytes | 723,794,560 bytes | 37,748,736 |
+| Qwen2.5-0.5B | 1,976,158,464 bytes | 988,236,032 bytes | 116,686,848 |
+
+[Raw 64-token timings and weight checks](../benchmark/validation/cpu-demo/20261115/manifest.json)

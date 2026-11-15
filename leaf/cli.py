@@ -490,6 +490,18 @@ def add_source_storage_options(parser):
                          help="retain original BF16 output/tied embedding storage with FP32 compute; F32 sources stay F32")
 
 
+def add_index_arguments(parser):
+    parser.add_argument("model", help="embedding model ID or local snapshot")
+    parser.add_argument("--dataset", required=True, type=Path, help="JSONL documents in output row order")
+    parser.add_argument("--directory", required=True, type=Path, help="checkpoint and output directory")
+    parser.add_argument("--text-column", default="text")
+    parser.add_argument("--task", choices=("document", "query", "raw"), default="document")
+    parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--chunk-size", type=int, default=128)
+    parser.add_argument("--max-new-chunks", type=int, help="pause after this many newly completed batches")
+    parser.add_argument("--offline", action="store_true")
+
+
 def main():
     parser = argparse.ArgumentParser(prog="leaf", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -524,6 +536,12 @@ def main():
     embedder.add_argument("--threads", type=int, default=1)
     embedder.add_argument("--output", type=Path, required=True, help="new .npy output matrix")
     embedder.add_argument("--metrics", type=Path)
+    indexer = commands.add_parser("index", help="embed a document collection in resumable batches")
+    add_index_arguments(indexer)
+    graph = commands.add_parser("infer", help="run a supported single-input FP32 ONNX graph")
+    graph.add_argument("model", type=Path, help="local ONNX model")
+    graph.add_argument("--input", type=Path, required=True, help="FP32 .npy input tensor")
+    graph.add_argument("--output", type=Path, required=True, help="new .npy output tensor")
     runner = commands.add_parser("run", help="prepare cached weights and generate with native CPU execution")
     runner.add_argument("model", help="local snapshot, Hugging Face repository ID, or registered alias")
     runner.add_argument("--prompt")
@@ -583,6 +601,12 @@ def main():
             if args.max_tokens < 1 or not 1 <= args.threads <= 64:
                 parser.error("max-tokens must be positive and threads must be 1..64")
             run(args)
+        elif args.command == "index":
+            from tools.embed_dataset import run_index
+            run_index(args)
+        elif args.command == "infer":
+            from leaf.graph import infer
+            infer(args.model, args.input, args.output)
         elif args.command == "optimize":
             if not 1 <= args.threads <= 64:
                 parser.error("threads must be 1..64")

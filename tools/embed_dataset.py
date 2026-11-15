@@ -14,7 +14,7 @@ from types import SimpleNamespace
 import numpy as np
 
 from leaf import embedding
-from leaf.cli import cache_root
+from leaf.cli import add_index_arguments, cache_root
 from leaf.evaluation import write_record
 from tools.verify_embeddinggemma_reference import digest, inspect_snapshot
 
@@ -142,22 +142,20 @@ def index_dataset(args) -> dict:
         return dict(result, new_chunks=new_chunks)
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('model')
-    parser.add_argument('--dataset', required=True, type=Path)
-    parser.add_argument('--directory', required=True, type=Path, help='checkpoint and output directory')
-    parser.add_argument('--text-column', default='text')
-    parser.add_argument('--task', choices=('document', 'query', 'raw'), default='document')
-    parser.add_argument('--threads', type=int, default=1)
-    parser.add_argument('--chunk-size', type=int, default=128)
-    parser.add_argument('--max-new-chunks', type=int, help='pause after this many newly completed batches')
-    parser.add_argument('--offline', action='store_true')
-    args = parser.parse_args()
+def run_index(args):
     if not 1 <= args.threads <= 64 or not 1 <= args.chunk_size <= 1_000_000 or (
             args.max_new_chunks is not None and args.max_new_chunks < 1):
-        parser.error('Use 1–64 threads, a chunk size from 1 to 1,000,000 and a positive batch limit')
+        raise ValueError('Use 1–64 threads, a chunk size from 1 to 1,000,000 and a positive batch limit')
     print(json.dumps(index_dataset(args), indent=2), flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    add_index_arguments(parser)
+    try:
+        run_index(parser.parse_args())
+    except (OSError, ValueError, RuntimeError) as error:
+        parser.error(str(error))
 
 
 if __name__ == '__main__':

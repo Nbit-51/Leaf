@@ -1,7 +1,7 @@
 """Serial Leaf/Ollama FP32 generation comparison with checked cache/output work.
 
-Scope: backend-reported uncached prefill and generation of two output tokens
-(one cached forward after the prefill token). HTTP/load time is separate. Six
+Scope: backend-reported uncached prefill and a fixed number of output tokens
+(two by default, with one cached forward after the prefill token). HTTP/load time is separate. Six
 balanced pairs, 3 warmups/11 measurements by default. No sample filtering.
 """
 import argparse
@@ -34,6 +34,19 @@ def continuation(tokenizer, ids, generated):
     if not full.startswith(prefix):
         raise ValueError('Continuation cannot be decoded independently of its prefix')
     return full[len(prefix):]
+
+
+def check_generation_work(value, engine, prompt_tokens, cached, generated):
+    if engine == 'leaf':
+        actual = (value['input_tokens'], value['cached_prompt_tokens'],
+                  value['uncached_prompt_tokens'], len(value['generated_tokens']),
+                  value['cached_decode_forwards'])
+        expected = (prompt_tokens, cached, prompt_tokens - cached, generated, generated - 1)
+    else:
+        actual = (value['prompt_eval_count'], value.get('prompt_eval_cached_count'), value['eval_count'])
+        expected = (prompt_tokens, cached, generated)
+    if actual != expected:
+        raise ValueError(f'Unmatched {engine} prompt/decode work: measured {actual}, expected {expected}')
 
 
 def prefix_workloads(tokenizer, prompt_tokens=64):
@@ -133,11 +146,15 @@ def main():
                  'snapshot', 'gguf-audit', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--ollama-model', required=True)
+    parser.add_argument('--leaf-fp32-reference', type=Path,
+                        help='audit a source-BF16 matrix artifact against the same checkpoint in FP32 storage')
     affinity = parser.add_mutually_exclusive_group()
     affinity.add_argument('--cpu', type=int, default=2)
     affinity.add_argument('--worker-cpus', type=int, nargs='+',
                           help='Use one inference thread per selected physical CPU core')
     parser.add_argument('--prompt-tokens', type=int, default=64)
+    parser.add_argument('--generated-tokens', type=int, default=2,
+                        help='Require exactly this many natural greedy output tokens per timed request')
     parser.add_argument('--pairs', type=int, default=6)
     parser.add_argument('--runs', type=int, default=11)
     parser.add_argument('--warmup', type=int, default=3)
@@ -149,6 +166,8 @@ def main():
         parser.error('This controlled Ollama comparison currently requires Windows')
     if not 16 <= args.prompt_tokens <= 1024:
         parser.error('Prompt length must be between 16 and 1024 tokens')
+    if not 2 <= args.generated_tokens <= 256:
+        parser.error('Generation length must be between 2 and 256 tokens')
     args.cpus = sorted(args.worker_cpus or [args.cpu])
     topology = {row['logical_cpu']: row['core'] for row in cpu_sets() if row['group'] == 0}
     allowed = set(psutil.Process().cpu_affinity()) & topology.keys()
@@ -156,7 +175,7 @@ def main():
             len({topology[cpu] for cpu in args.cpus}) != len(args.cpus)):
         parser.error('Select distinct allowed physical CPU cores in processor group zero')
     args.threads = len(args.cpus)
-    context = max(256, ((args.prompt_tokens + 8 + 255) // 256) * 256)
+    context = max(256, ((args.prompt_tokens + max(8, args.generated_tokens) + 255) // 256) * 256)
     request_options = dict(threads=args.threads, context=context)
     require_benchmark_ac()
     if args.output.exists() or args.pairs < 6 or args.pairs % 2 or args.runs < 11 or args.warmup < 3:
@@ -181,13 +200,31 @@ def main():
     if (audit['config_sha256'] != digest(args.snapshot/'config.json') or
             provenance['request']['model_config_sha256'] != audit['config_sha256']):
         parser.error('Leaf and Ollama configuration provenance differs')
+    storage_audit = None
+    storage = provenance['request'].get('source_bf16_storage')
+    if storage is not None or args.leaf_fp32_reference is not None:
+        if storage != 'matrices' or args.leaf_fp32_reference is None:
+            parser.error('Source-BF16 matrix storage requires its matching --leaf-fp32-reference')
+        from tools.validate_source_bf16_matrices import audit_payloads
+        reference = json.loads(args.leaf_fp32_reference.with_suffix('.provenance.json').read_text())
+        tensor_names = provenance['request'].get('source_bf16_tensors')
+        if (not isinstance(tensor_names, list) or not tensor_names or
+                not all(isinstance(name, str) for name in tensor_names) or
+                provenance['request'] != dict(reference['request'], source_bf16_storage=storage,
+                                        source_bf16_tensors=tensor_names) or
+                reference['artifact_sha256'] != digest(args.leaf_fp32_reference)):
+            parser.error('The FP32 reference does not bind the same Leaf export request')
+        storage_audit = audit_payloads(args.leaf_fp32_reference, args.leaf_artifact,
+                                       dict(source_bf16_tensors=tensor_names))
     args.output.mkdir(parents=True)
     tokenizer = Tokenizer.from_file(str(args.snapshot / 'tokenizer.json'))
     workloads, cached = prefix_workloads(tokenizer, args.prompt_tokens)
     record = dict(format='leaf-ollama-cpu-generation-v1', measured_at_utc=utc_now(),
         scope=__doc__, cpu=args.cpus[0], cpu_affinity=args.cpus, threads=args.threads,
         prompt_tokens=args.prompt_tokens, context=context, weight_bits=32, kv_bits=32,
-        cached_prompt_tokens=cached, generated_tokens_per_sample=2, cached_decode_forwards=1,
+        leaf_weight_storage='source-bf16-matrices' if storage_audit else 'f32', ollama_weight_storage='f32',
+        cached_prompt_tokens=cached, generated_tokens_per_sample=args.generated_tokens,
+        cached_decode_forwards=args.generated_tokens - 1,
         runs_per_pass=args.runs, warmup_per_pass=args.warmup,
         workload=workloads, complete=False, overall_speed_claim=False,
         criteria='Quality passed; each pass and pooled p90/p10 <=1.25; Leaf/Ollama median paired prefill <=0.98 and decode <=1.02',
@@ -195,6 +232,9 @@ def main():
             args.leaf_artifact, args.gguf_audit, Path(__file__), ROOT/'tools/ollama_validation.py',
             ROOT/'benchmark/decoder_generation_benchmark.cpp', args.snapshot/'tokenizer.json')})
     path = args.output / 'comparison.json'
+    if storage_audit:
+        record['leaf_storage_audit'] = storage_audit
+        record['hashes'][str(args.leaf_fp32_reference)] = reference['artifact_sha256']
     write_record(path, record)
     with keep_awake(), local_server(args.ollama_executable, args.ollama_models,
                                    args.output / 'server', cpus=args.cpus) as (base, _, process):
@@ -263,13 +303,11 @@ def main():
             rows = [workloads[i%2] for i in range(args.warmup+args.runs)]
             for engine in pair['order']:
                 if engine == 'leaf':
-                    values = leaf_pass(args, rows, args.output / f'{index+1}-leaf', cached=cached)
+                    values = leaf_pass(args, rows, args.output / f'{index+1}-leaf',
+                                       maximum=args.generated_tokens, cached=cached)
                     for row, value in zip(rows, values):
                         value['response'] = continuation(tokenizer, row['ids'], value['generated_tokens'])
-                        if (value['input_tokens'] != args.prompt_tokens or value['cached_prompt_tokens'] != cached
-                                or value['uncached_prompt_tokens'] != args.prompt_tokens - cached
-                                or value['cached_decode_forwards'] != 1):
-                            raise ValueError('Unmatched Leaf prompt/decode work')
+                        check_generation_work(value, 'leaf', args.prompt_tokens, cached, args.generated_tokens)
                 else:
                     values = []
                     with (args.output / f'{index+1}-ollama.jsonl').open('x') as raw:
@@ -277,7 +315,8 @@ def main():
                             power_before = require_benchmark_ac()
                             start = time.perf_counter()
                             value = api(base, '/api/generate',
-                                        generation_request(args.ollama_model, row['prompt'], **request_options))
+                                        generation_request(args.ollama_model, row['prompt'],
+                                                           tokens=args.generated_tokens, **request_options))
                             value['external_request_ms'] = (time.perf_counter()-start)*1000
                             if sample == 0:
                                 backend_port(process, args.cpus, context, configure=True)
@@ -287,10 +326,9 @@ def main():
                             raw.write(json.dumps(value,allow_nan=False)+'\n')
                             raw.flush()
                             value['power_at_request_boundaries'] = dict(before=power_before, after=require_benchmark_ac())
-                            if (value['prompt_eval_count'] != args.prompt_tokens or value.get('prompt_eval_cached_count') != cached
-                                    or value['eval_count'] != 2):
-                                if sample >= args.warmup:
-                                    raise ValueError(f'Unmatched Ollama prompt/decode work: {value}')
+                            if sample >= args.warmup:
+                                check_generation_work(value, 'Ollama', args.prompt_tokens, cached,
+                                                      args.generated_tokens)
                     backend_port(process, args.cpus, context)
                     ps = api(base, '/api/ps')
                     if len(ps['models']) != 1 or ps['models'][0].get('size_vram') != 0:

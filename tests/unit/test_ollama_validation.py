@@ -1,6 +1,7 @@
 import pytest
 
 from tools import ollama_validation as validation
+from tools.benchmark_ollama_decoder import check_generation_work
 
 
 @pytest.mark.parametrize('settings,threads,context', [({}, 1, 256), ({'threads': 4, 'context': 512}, 4, 512)])
@@ -12,6 +13,19 @@ def test_generation_request_keeps_matched_greedy_cpu_work(settings, threads, con
     assert options['num_ctx'] == options['num_batch'] == context
     assert options['temperature'] == 0 and options['repeat_penalty'] == 1
     assert options['stop'] == []
+
+
+def test_fixed_generation_work_rejects_early_eos_and_reused_prompt():
+    leaf = dict(input_tokens=768, cached_prompt_tokens=0, uncached_prompt_tokens=768,
+                generated_tokens=[42] * 64, cached_decode_forwards=63)
+    ollama = dict(prompt_eval_count=768, prompt_eval_cached_count=0, eval_count=64)
+    check_generation_work(leaf, 'leaf', 768, 0, 64)
+    check_generation_work(ollama, 'Ollama', 768, 0, 64)
+    with pytest.raises(ValueError, match='Unmatched leaf'):
+        check_generation_work(dict(leaf, generated_tokens=[42] * 63, cached_decode_forwards=62),
+                              'leaf', 768, 0, 64)
+    with pytest.raises(ValueError, match='Unmatched Ollama'):
+        check_generation_work(dict(ollama, prompt_eval_cached_count=64), 'Ollama', 768, 0, 64)
 
 
 def test_failed_server_policy_setup_still_cleans_owned_process(monkeypatch,tmp_path):

@@ -1,0 +1,144 @@
+{
+  "scope": "Windows CPU wheel smoke, direct SmolLM2 comparison and source-storage fidelity.",
+  "wheel": {
+    "wheel": "leaf_cpu-0.2.0-py3-none-win_amd64.whl",
+    "wheel_sha256": "36c798f0c01a806190277b038000757df84d7c169deff85ae910c8a890bf1fa2",
+    "graph": {
+      "shape": [
+        1,
+        10
+      ],
+      "predicted_class": 3,
+      "max_abs_error": 7.62939453125e-06
+    },
+    "retrieval": {
+      "document_count": 32,
+      "query_count": 4,
+      "ndcg": 1.0,
+      "recall": 1.0
+    }
+  },
+  "tests": {
+    "passed": 1553,
+    "skipped": 21
+  },
+  "comparison": {
+    "fp32_prototype": {
+      "prefill": {
+        "medians_ms": {
+          "leaf": 2247.4956,
+          "ollama": 2320.6325
+        },
+        "pooled_ratio": 0.9684840663051991,
+        "median_paired_ratio": 0.9701285437472034,
+        "pooled_stability": {
+          "leaf": {
+            "passed": true,
+            "sample_count": 66,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 2227.1675999999998,
+            "p90_ms": 2289.84395,
+            "p90_p10_ratio": 1.028141730330488,
+            "reason": "passed"
+          },
+          "ollama": {
+            "passed": true,
+            "sample_count": 66,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 2296.7625,
+            "p90_ms": 2482.7495,
+            "p90_p10_ratio": 1.0809778982371927,
+            "reason": "passed"
+          }
+        },
+        "every_pass_stable": false,
+        "passed": false
+      },
+      "decode": {
+        "medians_ms": {
+          "leaf": 3569.38625,
+          "ollama": 3205.696
+        },
+        "pooled_ratio": 1.1134512598824093,
+        "median_paired_ratio": 1.1105711575531338,
+        "pooled_stability": {
+          "leaf": {
+            "passed": true,
+            "sample_count": 66,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3518.8031,
+            "p90_ms": 3620.52975,
+            "p90_p10_ratio": 1.0289094465103774,
+            "reason": "passed"
+          },
+          "ollama": {
+            "passed": true,
+            "sample_count": 66,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3129.8135,
+            "p90_ms": 3461.9764999999998,
+            "p90_p10_ratio": 1.106128687859516,
+            "reason": "passed"
+          }
+        },
+        "every_pass_stable": false,
+        "passed": false
+      },
+      "total_phase_median_ms": {
+        "leaf": 5815.6906500000005,
+        "ollama": 5540.2015
+      },
+      "every_continuation_matches": true,
+      "quality_checks_passed": 6,
+      "quality_checks_total": 8,
+      "overall_speed_claim": false
+    }
+  },
+  "entries": [
+    {
+      "path": "smol-768-64-retry/comparison.json",
+      "bytes": 352569,
+      "sha256": "095c5280814f348b920bffb295013fa84e9815fb848bf24c3c120f38cecba74b",
+      "original_sha256": "9c9921927322cd64396aa03c7c9a6e3cffbfb1f16fd549ca504867f18624e167"
+    },
+    {
+      "path": "wheel-smoke.json",
+      "bytes": 2200,
+      "sha256": "45e2e420df045e5b5877fb84641f2daf981bcbb66570e302883d08c80cf6d1f6",
+      "original_sha256": "45e2e420df045e5b5877fb84641f2daf981bcbb66570e302883d08c80cf6d1f6"
+    },
+    {
+      "path": "verify_wheel.py",
+      "bytes": 4278,
+      "sha256": "35942e81a6ae77d094cfc718628d3f4a4ff5e4d1d9c2eaba9622bc0ecf03ab1e",
+      "original_sha256": "35942e81a6ae77d094cfc718628d3f4a4ff5e4d1d9c2eaba9622bc0ecf03ab1e"
+    },
+    {
+      "path": "storage-quality.json",
+      "bytes": 22886,
+      "sha256": "8a3f6227f6599d9fdf9f64d85991e388eb0a4f3b7a4696f66df7eef481936a5a",
+      "original_sha256": "8a3f6227f6599d9fdf9f64d85991e388eb0a4f3b7a4696f66df7eef481936a5a"
+    },
+    {
+      "path": "verify_storage.py",
+      "bytes": 4156,
+      "sha256": "1de685fb0cf1eda1c6bdb3782c4b4b477c967ac4a76651dbd0d3219c681e2979",
+      "original_sha256": "1de685fb0cf1eda1c6bdb3782c4b4b477c967ac4a76651dbd0d3219c681e2979"
+    },
+    {
+      "path": "build_compact_decoder.py",
+      "bytes": 3110,
+      "sha256": "0f92735c0c953a88f277734e8d7e79faf9b139234715b0d3c9c30d2d6a01166c",
+      "original_sha256": "0f92735c0c953a88f277734e8d7e79faf9b139234715b0d3c9c30d2d6a01166c"
+    }
+  ],
+  "archive": {
+    "path": "evidence.zip",
+    "bytes": 23390,
+    "sha256": "1e971358bf5b598f6f769c486ee8230b784ee3e65f8acfc4dd2dd39ffac11685"
+  }
+}
