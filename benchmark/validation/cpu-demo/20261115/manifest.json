@@ -187,9 +187,9 @@
     },
     {
       "path": "verify_wheel.py",
-      "bytes": 4278,
-      "sha256": "35942e81a6ae77d094cfc718628d3f4a4ff5e4d1d9c2eaba9622bc0ecf03ab1e",
-      "original_sha256": "35942e81a6ae77d094cfc718628d3f4a4ff5e4d1d9c2eaba9622bc0ecf03ab1e"
+      "bytes": 5431,
+      "sha256": "8bbc048f5f7ca05b4769208902cf97ef59b265bf79d7001158efa8892873b818",
+      "original_sha256": "8bbc048f5f7ca05b4769208902cf97ef59b265bf79d7001158efa8892873b818"
     },
     {
       "path": "storage-quality.json",
@@ -214,11 +214,131 @@
       "bytes": 363962,
       "sha256": "cea2a7bd23acf2d8d1312817c48c14b3e9dfd4357e3b28c710de7a8b2cc2da45",
       "original_sha256": "d57436d02fac2e242fb6788eb74b41f274ad215aa8f70b1306eda43737453d4c"
+    },
+    {
+      "path": "release-candidate/release-gates.json",
+      "bytes": 1285,
+      "sha256": "ef03db930cef5f73cffcc1d3bd07b4edfad7d85a835411de6c555b97d2f28d2c",
+      "original_sha256": "ef03db930cef5f73cffcc1d3bd07b4edfad7d85a835411de6c555b97d2f28d2c"
+    },
+    {
+      "path": "qualify_parallel_bf16.py",
+      "bytes": 4286,
+      "sha256": "a6132509e2e3707ce55cbeb6142ce327cf7812fae5b84a94a72ba1fdd2964f63",
+      "original_sha256": "a6132509e2e3707ce55cbeb6142ce327cf7812fae5b84a94a72ba1fdd2964f63"
+    },
+    {
+      "path": "adjudicate_production.py",
+      "bytes": 2316,
+      "sha256": "08bb14c4f2c38c7c9b59b62c6a198ddb00a04848831fb8379356e73811a2c512",
+      "original_sha256": "08bb14c4f2c38c7c9b59b62c6a198ddb00a04848831fb8379356e73811a2c512"
+    },
+    {
+      "path": "release-candidate/quality.json",
+      "bytes": 2959,
+      "sha256": "30388635ad066cd3a0eac7fa30a43e31b6a8402b201c3e3d06a90c6c55feb7db",
+      "original_sha256": "7443625edd689e75ec6b0bc38d347c8a5d16393b0eead02f61159061f12f27e8"
+    },
+    {
+      "path": "release-candidate/smol-paired/comparison.json",
+      "bytes": 51686,
+      "sha256": "87b41868c838e3c8da3ea1819e27485a62022c3257e918d4714f4e1532068602",
+      "original_sha256": "ac102a40e05e85a72369fc6bf8bbe0e2a4da6c89b9422c97bfce958fc5232519"
+    },
+    {
+      "path": "release-candidate/qwen-paired/comparison.json",
+      "bytes": 51785,
+      "sha256": "a5efadec6f19575f4520fd8bd5903649cef5b8afe302a2b76aa73023f73d1548",
+      "original_sha256": "d7d82912bf1d48d0c31ecc8a90a71b29ac40facfdd0e953cdbdbb3e8929ecf2d"
+    },
+    {
+      "path": "parallel-source-bf16.patch",
+      "bytes": 9777,
+      "sha256": "da5c93caa0f8d080c2b6cb21020287e306460ba716df695be7a788256fafe715",
+      "original_sha256": "da5c93caa0f8d080c2b6cb21020287e306460ba716df695be7a788256fafe715"
+    },
+    {
+      "path": "optimized-wheel-smoke.json",
+      "bytes": 4935,
+      "sha256": "8655c23bd0c3f5c15f60159b65c7462dfca5977569e6902032428804198d5f81",
+      "original_sha256": "8655c23bd0c3f5c15f60159b65c7462dfca5977569e6902032428804198d5f81"
     }
   ],
+  "parallel_source_bf16_release_gate": {
+    "passed": true,
+    "models": {
+      "smol": {
+        "prefill": {
+          "medians_ms": {
+            "before": 4559.978349999999,
+            "after": 2293.3602499999997
+          },
+          "stable": true,
+          "paired_ratio": 0.5026921136071016,
+          "pooled_ratio": 0.5029322672113126,
+          "passed": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 56.9111,
+            "after": 31.051949999999998
+          },
+          "stable": true,
+          "paired_ratio": 0.5497585291909994,
+          "pooled_ratio": 0.5456220315544771,
+          "passed": true
+        }
+      },
+      "qwen": {
+        "prefill": {
+          "medians_ms": {
+            "before": 4048.0182,
+            "after": 2357.64515
+          },
+          "stable": true,
+          "paired_ratio": 0.5829533683236264,
+          "pooled_ratio": 0.5824196022636459,
+          "passed": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 51.91235,
+            "after": 35.711349999999996
+          },
+          "stable": true,
+          "paired_ratio": 0.6737819012905613,
+          "pooled_ratio": 0.6879162665531419,
+          "passed": true
+        }
+      }
+    },
+    "scope": "Same source-BF16 artifact and fast FP32 math; candidate changes dispatch only."
+  },
+  "optimized_wheel": {
+    "wheel": "leaf_cpu-0.2.0-py3-none-win_amd64.whl",
+    "wheel_sha256": "1480adb1b3edb700224458bcb674d4ace4cd8e08826199017115865bef52b9f6",
+    "graph": {
+      "shape": [
+        1,
+        10
+      ],
+      "predicted_class": 3,
+      "max_abs_error": 7.62939453125e-06
+    },
+    "retrieval": {
+      "document_count": 32,
+      "query_count": 4,
+      "ndcg": 1.0,
+      "recall": 1.0
+    },
+    "tests": {
+      "passed": 1553,
+      "skipped": 21
+    }
+  },
   "archive": {
     "path": "evidence.zip",
-    "bytes": 40204,
-    "sha256": "54b9a343a83439967d2cc7e672630e5d469a84df83ed9a885304341d55cebadd"
+    "bytes": 60730,
+    "sha256": "ecd67508e3190b936a00188ee1f53c954be096862516acb64cc7f3cd7475d942"
   }
 }

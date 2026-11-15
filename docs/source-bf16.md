@@ -313,3 +313,30 @@ with a compiler-free child environment and without importing NumPy on the
 cached generation path.
 
 [Retained samples, scripts and hashes](../benchmark/validation/bf16-expansion/20261109/manifest.json)
+
+## Long-context Windows fast path
+
+The existing `--source-bf16` option now distributes whole token panels and
+attention heads across workers on supported Windows AVX2/FMA builds with at
+least four threads and fast FP32 math. With 768 or more prefill tokens,
+eligible projections share one reusable expansion buffer of at most 32 MiB.
+Single-token decode with at least 512 cached positions including the current
+token divides attention by head and directly reads BF16 projection weights.
+The source values and FP32 arithmetic order are preserved.
+
+The before and after builds used an identical source-BF16 artifact,
+four physical CPU cores in Windows Better Battery mode, a 768-token prompt,
+one cached decode forward and six balanced pairs with five measured samples
+per pass. Each pass and pooled distribution passed the spread gate.
+
+| Model | Prefill median before → after | Paired reduction | Decode median before → after | Paired reduction |
+|---|---:|---:|---:|---:|
+| SmolLM2-360M | 4,560.0 → 2,293.4 ms | 49.7% | 56.91 → 31.05 ms | 45.0% |
+| Qwen2.5-0.5B | 4,048.0 → 2,357.6 ms | 41.7% | 51.91 → 35.71 ms | 32.6% |
+
+Full logits matched bit-for-bit at the tested boundaries and at 781 prompt
+tokens, which leaves a partial token panel. Both models reproduced two
+64-token continuations and their selected-token probabilities exactly.
+The [separate Ollama prototype comparison](model-onboarding.md#source-bf16-smollm2-versus-ollama)
+used 64 generated tokens and remains diagnostic.
+[Release gates, tests and raw samples](../benchmark/validation/cpu-demo/20261115/manifest.json)

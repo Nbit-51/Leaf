@@ -180,10 +180,11 @@ flowchart TB
     B --> N["C++ encoder · local/full attention and Q/K norms<br/>Parallel attention heads for longer inputs<br/>Finite masked-span attention · shared RoPE · vector GELU"]
     N --> V["Mean pooling · dense projections · L2 normalization"]
     V --> F["Document/query vectors"]
-    O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
+    F --> I["leaf index · resumable document batches"]
+    O["leaf infer · ONNX model"] --> G["Leaf IR · constant folding and fusions"]
     P --> D["Native decoder artifact<br/>Optional original BF16 matrix storage"]
     G --> A["Native graph artifact"]
-    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
+    D --> R["C++ decoder · causal full/windowed attention<br/>Parallel attention heads for long source-BF16 contexts<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
     R --> M["Compute policy<br/>FP32: fast default or accurate opt-in<br/>INT8/INT4: existing dispatch"]
     M --> K["CPU-dispatched kernels<br/>Tiled GEMM · shared input panels<br/>Optional balanced FP32 sums and wider RMS<br/>Paired GEMV · SIMD BF16-to-FP32 expansion<br/>Vector GELU, attention, softmax and SiLU"]
@@ -272,6 +273,11 @@ the source-BF16 prototype decoded 64-token responses with **34.6% lower paired
 cached-decode latency** than Ollama. Prefill was 2.30 s versus 2.33 s.
 All continuations matched. Ollama timing spread and probability checks kept
 the comparison diagnostic.
+
+The [qualified Windows long-context source-BF16 path](docs/source-bf16.md#long-context-windows-fast-path)
+reduced paired prefill by **49.7% on SmolLM2** and **41.7% on Qwen2.5** versus
+the previous Leaf build. Cached decode fell **45.0%** and **32.6%**,
+respectively, with stable timings and bit-identical tested outputs.
 
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is

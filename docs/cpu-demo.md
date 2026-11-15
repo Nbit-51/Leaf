@@ -72,4 +72,6 @@ tokens offline and resumed a 32-document SciFact job, reusing the first batch
 and reproducing the saved rankings for all four pilot queries. On one
 CIFAR-10 test image, the trained ResNet-20 command returned class 3 like the
 PyTorch reference, with a maximum absolute logit difference of `7.63e-6`.
+The optimized wheel also reproduced the accepted 64-token response through
+the public `leaf run --source-bf16 --threads 4` command.
 [Wheel verification and retained results](../benchmark/validation/cpu-demo/20261115/manifest.json)

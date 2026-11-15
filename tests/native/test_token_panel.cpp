@@ -109,6 +109,26 @@ void check_matrix(std::size_t tokens, std::size_t rows, std::size_t columns, boo
             "row-reuse output is not bit-exact against full-K");
     require(std::memcmp(scalar.data(), blocked_scalar.data(), scalar.size() * sizeof(float)) == 0,
             "row-reuse scalar fallback changed");
+#if defined(__x86_64__) && defined(__GNUC__)
+    if (leaf::kernels::token_panel_f32_avx2_available()) {
+        std::fill(blocked.begin(), blocked.end(), sentinel);
+        if (panels.panels() > 1) {
+            leaf::kernels::row_reuse_detail::gemm(weights.data(), rows, columns, weight_stride, panels,
+                blocked.data(), output_stride, offset, 1, 2);
+            require(blocked[0] == sentinel, "panel range wrote an earlier token");
+            std::fill(blocked.begin(), blocked.end(), sentinel);
+        }
+        for (std::size_t first = 0; first < panels.panels(); first += 2) {
+            leaf::kernels::row_reuse_detail::gemm(weights.data(), rows, columns, weight_stride, panels,
+                blocked.data(), output_stride, offset, first, first + 2);
+            const auto next_token = (first + 2) * 16;
+            if (next_token < tokens)
+                require(blocked[next_token * output_stride] == sentinel, "panel range wrote a later token");
+        }
+        require(std::memcmp(output.data(), blocked.data(), output.size() * sizeof(float)) == 0,
+                "row-reuse token panel ranges changed output or padding");
+    }
+#endif
     std::fill(blocked.begin(), blocked.end(), sentinel);
     std::fill(blocked_scalar.begin(), blocked_scalar.end(), sentinel);
     leaf::kernels::gemm_token_panels_f32_mlp_panel(weights.data(), rows, columns, weight_stride, panels,
