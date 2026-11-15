@@ -532,4 +532,25 @@ against the FP32 prototype on both trained checkpoints.
 | SmolLM2-360M | 1,447,312,000 bytes | 723,794,560 bytes | 37,748,736 |
 | Qwen2.5-0.5B | 1,976,158,464 bytes | 988,236,032 bytes | 116,686,848 |
 
+### Source-BF16 SmolLM2 versus Ollama
+
+The source-BF16 prototype used the same 768-token prompt and 64-token
+continuation workload. The value audit verified that the compact weights
+expand to the same FP32 values as the audited Ollama checkpoint. The run used
+six balanced pairs and 66 measured requests per runtime on four physical
+Windows CPU cores.
+
+| Backend phase | Leaf source-BF16 prototype | Ollama FP32 | Paired Leaf / Ollama |
+|---|---:|---:|---:|
+| Prefill | 2,296 ms | 2,331 ms | 0.985× |
+| Cached decode | 2,138 ms | 3,250 ms | 0.654× |
+| Combined phase median | 4,437 ms | 5,606 ms | |
+
+All timed continuations matched. Leaf passed every timing spread check.
+Ollama exceeded the pooled spread limit in both phases and passed six of
+eight probability checks. One response omitted a probability, and one
+maximum absolute difference was `2.65e-4` against the `2e-4` limit.
+The paired prefill reduction was 1.49%, below the 2% threshold. These
+conditions keep the direct comparison diagnostic.
+
 [Raw 64-token timings and weight checks](../benchmark/validation/cpu-demo/20261115/manifest.json)

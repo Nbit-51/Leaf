@@ -96,6 +96,80 @@
       "quality_checks_passed": 6,
       "quality_checks_total": 8,
       "overall_speed_claim": false
+    },
+    "source_bf16_prototype": {
+      "prefill": {
+        "medians_ms": {
+          "leaf": 2296.15885,
+          "ollama": 2331.0855
+        },
+        "pooled_ratio": 0.9850170017358865,
+        "median_paired_ratio": 0.9851376987171225,
+        "pooled_stability": {
+          "leaf": {
+            "passed": true,
+            "sample_count": 66,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 2271.7729,
+            "p90_ms": 2387.4106,
+            "p90_p10_ratio": 1.0509019629558924,
+            "reason": "passed"
+          },
+          "ollama": {
+            "passed": false,
+            "sample_count": 66,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 2293.3469999999998,
+            "p90_ms": 3124.188,
+            "p90_p10_ratio": 1.3622831608125594,
+            "reason": "timing_spread_exceeds_threshold"
+          }
+        },
+        "every_pass_stable": false,
+        "passed": false
+      },
+      "decode": {
+        "medians_ms": {
+          "leaf": 2138.08545,
+          "ollama": 3250.4
+        },
+        "pooled_ratio": 0.6577914872015752,
+        "median_paired_ratio": 0.6542249389144696,
+        "pooled_stability": {
+          "leaf": {
+            "passed": true,
+            "sample_count": 66,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 2110.26885,
+            "p90_ms": 2269.1054999999997,
+            "p90_p10_ratio": 1.0752684426915555,
+            "reason": "passed"
+          },
+          "ollama": {
+            "passed": false,
+            "sample_count": 66,
+            "required_samples": 5,
+            "max_p90_p10_ratio": 1.25,
+            "p10_ms": 3099.7375,
+            "p90_ms": 3974.3559999999998,
+            "p90_p10_ratio": 1.2821588924868637,
+            "reason": "timing_spread_exceeds_threshold"
+          }
+        },
+        "every_pass_stable": false,
+        "passed": false
+      },
+      "total_phase_median_ms": {
+        "leaf": 4437.3157,
+        "ollama": 5606.3645
+      },
+      "every_continuation_matches": true,
+      "quality_checks_passed": 6,
+      "quality_checks_total": 8,
+      "overall_speed_claim": false
     }
   },
   "entries": [
@@ -134,11 +208,17 @@
       "bytes": 3110,
       "sha256": "0f92735c0c953a88f277734e8d7e79faf9b139234715b0d3c9c30d2d6a01166c",
       "original_sha256": "0f92735c0c953a88f277734e8d7e79faf9b139234715b0d3c9c30d2d6a01166c"
+    },
+    {
+      "path": "smol-source-bf16-vs-ollama/comparison.json",
+      "bytes": 363962,
+      "sha256": "cea2a7bd23acf2d8d1312817c48c14b3e9dfd4357e3b28c710de7a8b2cc2da45",
+      "original_sha256": "d57436d02fac2e242fb6788eb74b41f274ad215aa8f70b1306eda43737453d4c"
     }
   ],
   "archive": {
     "path": "evidence.zip",
-    "bytes": 23390,
-    "sha256": "1e971358bf5b598f6f769c486ee8230b784ee3e65f8acfc4dd2dd39ffac11685"
+    "bytes": 40204,
+    "sha256": "54b9a343a83439967d2cc7e672630e5d469a84df83ed9a885304341d55cebadd"
   }
 }

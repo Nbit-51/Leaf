@@ -267,6 +267,12 @@ cached decode** (222.91 vs 251.45 ms), with all timing stability checks passing.
 All continuations match, but one selected-logprob error narrowly exceeds the
 unchanged tolerance. These remain diagnostic timings, not an overall qualified win.
 
+In a [long-response SmolLM2 diagnostic](docs/model-onboarding.md#source-bf16-smollm2-versus-ollama),
+the source-BF16 prototype decoded 64-token responses with **34.6% lower paired
+cached-decode latency** than Ollama. Prefill was 2.30 s versus 2.33 s.
+All continuations matched. Ollama timing spread and probability checks kept
+the comparison diagnostic.
+
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is
 **1.10 GB versus 4.40 GB** for FP32. This is an artifact-size reduction from
