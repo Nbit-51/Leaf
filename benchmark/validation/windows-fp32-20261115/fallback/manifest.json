@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-15",
+  "archive": "evidence.zip",
+  "archive_sha256": "7cb486d54c6b430bad5c6c80382dc1e69c796d8e72667b3d988f24ab5af68d4f",
+  "files": {
+    "fallback.py": "104ca13f489dbb221a763b6c415df703b8b535a280ba559ee2078e077104fb93",
+    "opt-fallback.json": "57ba25a1d7586b47dd2fd777a20d567b289f7edc020a56c03e4235bffbd432c1",
+    "verify_wheel.py": "0de1c783b965be2e9ddefc2cdfd8fc839d070b8d4f21a9ed44b7869e75eff4c5",
+    "verify_wheel_long.py": "c4e945622218efb4a0211dadd9ba581843c23980295667740c8ed416a6e84112",
+    "wheel-opt-smoke.json": "d2d09a1d8d0663522cb1b2d7d7625e4567a5afe63b6122e69041fd2f6268a5e3",
+    "wheel-tests.json": "fc223256ae8b8194c872d758b906351468e2e54f975342ba02dad862c7197023",
+    "wheel-long-quality.json": "c9466652a10c1c64dba7d2189ab1129044a5abc461aae8c83a1734c65a5ed269"
+  }
+}

@@ -52,6 +52,35 @@ the requested FP32 math policy. Runtime feature checks select eligible AVX2/FMA
 kernels. A CPU without those instructions uses the portable path. Individual
 model weights and the KV cache still have to fit in available memory.
 
+We checked the fallback with the same OPT-125M FP32 artifact on the review laptop.
+One and two workers were bit-identical to four in the 64-token prompt plus one
+cached-step check. A forced-scalar one-worker run had a maximum absolute logit
+error of `2.48e-5` and passed the FP32 tolerance. All three modes matched the
+same 16-token greedy continuation. These are checks of the executable paths on
+the current i7. Absolute latency on a 2016 processor still needs a physical run.
+
+A clean Windows wheel install generated the same pinned OPT continuation using
+`--offline` and the bundled runtime with the compiler removed from `PATH`. Long-context
+logits in the installed wheel matched the previous build bit-for-bit on FP32 OPT
+and source-BF16 Qwen3 at 768 tokens plus one cached step. The local Python suite
+ran with the bundled decoder, embedding and graph binaries, with 1,557 passes
+and 21 skips.
+[Fallback and wheel evidence](../benchmark/validation/windows-fp32-20261115/fallback/manifest.json)
+
+In a separate 768-token observation on that i7, two pinned physical cores
+measured 1,655.53 ms prefill and 29.29 ms cached decode. One pinned core measured
+2,378.15 ms prefill and 38.08 ms cached decode. Each result pooled seven samples
+after two warmups. One-core decode missed the spread limit, and the observations
+were not interleaved, so this is a sizing reference rather than a speed claim.
+
+An older two-core machine can start with a small checkpoint and a short prompt.
+For example, the FP32 Pythia-70M weights alone take roughly 0.28 GB, with
+additional memory for the model state, KV cache and temporary buffers.
+
+```sh
+leaf run EleutherAI/pythia-70m --bits 32 --threads 2 --fp32-math accurate --prompt "Once upon a time" --max-tokens 16
+```
+
 An Intel Core i3-6100 exposes four hardware threads across two physical cores
 and supports AVX2. Its threads in each core share execution resources. An Intel
 Pentium G4400 or Celeron G3900E exposes two cores and two hardware threads, and
