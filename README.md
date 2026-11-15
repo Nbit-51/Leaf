@@ -288,6 +288,10 @@ versus the previous Leaf build. Cached decode fell **31.3%** and **30.5%**,
 respectively. Both passed timing stability and matched the previous Leaf logits
 bit-for-bit on the tested prompts.
 
+In the [trained CNN comparison](docs/windows-cnn-onnxruntime.md), Leaf matched
+the reference predictions on all 10,000 ResNet-20 and 512 VGG-11-BN test images.
+ONNX Runtime recorded lower warmed medians on both graphs in diagnostic tests.
+
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is
 **1.10 GB versus 4.40 GB** for FP32. This is an artifact-size reduction from
