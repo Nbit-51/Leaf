@@ -112,3 +112,21 @@ among its Windows respondents, summing the one-, two- and three-core rows.
 This is a sample of Steam users. For a university deployment, inventory the lab
 machines directly before estimating how many use these settings.
 [Steam Hardware Survey](https://store.steampowered.com/hwsurvey/cpus)
+
+## Two-worker performance experiment
+
+With the i7 process restricted to two physical P-cores, an experimental build
+enabled token-panel and attention-head scheduling for two workers. Both models
+ran the same FP32 artifacts and accurate math policy as the installed Leaf
+baseline. At 768 prompt tokens, both models passed the prefill spread gate.
+
+| Model | Warm prefill p50, previous → candidate | Paired reduction |
+| --- | ---: | ---: |
+| OPT-125M | 1,645.55 → 1,139.05 ms | 31.09% |
+| Pythia-70M | 807.41 → 565.72 ms | 29.56% |
+
+Both models matched all reference Leaf logits on the tested chunks and the same
+16-token greedy continuation. Cached decode medians were lower, but both decode
+runs missed the spread limit. This experiment measures a two-core budget on the
+review machine. An older physical CPU will have its own latency and memory
+behavior. [Candidate source and complete raw samples](../benchmark/validation/windows-fp32-20261115/two-worker-pilot/manifest.json)
