@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-15",
+  "archive": "evidence.zip",
+  "archive_sha256": "84dcb40f802ebd2121bc9ea7d4b7e1655fc1707fa6a635d76aef9965c473eeea",
+  "files": {
+    "pcore_scheduler.py": "184c831fe9c3bf578cb8fe3bb6214819a904d23a3fbf34a60417d388838e51b5",
+    "opt-pcore-scheduling.json": "37c7fe92a4703bae4a1608ce706841c531be740d1cf4afd2958f4413db13b1e3",
+    "graph_cycles.py": "48f0248bc9b1655ac9ee49a9ecb41307b614891b4738bc63b0bbecd517d262f0",
+    "graphs/dataset-counters.cpp": "ebb1743dc32e6bc8f64fef68b2094a08f911c87404792770901a3c436d95883e",
+    "graphs/cycle-diagnostics.json": "f74ef03276b3e994b278752495b465377477de068366b83377e4a7fe392d5a76"
+  }
+}

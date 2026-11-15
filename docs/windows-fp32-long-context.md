@@ -52,12 +52,29 @@ the requested FP32 math policy. Runtime feature checks select eligible AVX2/FMA
 kernels. A CPU without those instructions uses the portable path. Individual
 model weights and the KV cache still have to fit in available memory.
 
+`--threads` sets the worker count. Windows chooses where the workers run unless
+you pass `--worker-cpus` for a controlled experiment. The performance tests on
+the i7-14700HX used four distinct P-cores mapped to logical CPUs `0, 2, 4, 6` on
+that laptop. Other machines need their own affinity mapping. This processor
+has eight P-cores and twelve E-cores, while an i7-1365U laptop processor has two
+P-cores and eight E-cores. Four P-cores are a benchmark configuration.
+[14700HX specifications](https://www.intel.com/content/www/us/en/products/sku/235997/intel-core-i7-processor-14700hx-33m-cache-up-to-5-50-ghz/specifications.html)
+· [1365U specifications](https://www.intel.com/content/www/us/en/products/sku/232141/intel-core-i71365u-processor-12m-cache-up-to-5-20-ghz/specifications.html)
+· [Windows CPU topology](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-system_cpu_set_information)
+
 We checked the fallback with the same OPT-125M FP32 artifact on the review laptop.
 One and two workers were bit-identical to four in the 64-token prompt plus one
 cached-step check. A forced-scalar one-worker run had a maximum absolute logit
 error of `2.48e-5` and passed the FP32 tolerance. All three modes matched the
 same 16-token greedy continuation. These are checks of the executable paths on
 the current i7. Absolute latency on a 2016 processor still needs a physical run.
+
+We also restricted the installed wheel process to one or two physical P-cores
+and let Windows place its workers within those CPUs. Both cases matched all
+38,659,168 OPT logits from the four-P-core build at 768 prompt tokens plus one
+cached step. A one-P-core run with the scalar backend forced passed the shorter
+logit check, and every case matched the greedy continuation.
+[Restricted-CPU scheduler check](../benchmark/validation/windows-fp32-20261115/pcore-diagnostics/manifest.json)
 
 A clean Windows wheel install generated the same pinned OPT continuation using
 `--offline` and the bundled runtime with the compiler removed from `PATH`. Long-context

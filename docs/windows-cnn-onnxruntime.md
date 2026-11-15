@@ -51,3 +51,12 @@ both model comparisons. The production graph runtime still uses the prior code.
 | VGG-11-BN | 59.82 ms | 15.89 ms | 4.61 ms |
 
 [Candidate source, raw rounds and provenance](../benchmark/validation/windows-fp32-20261115/graph-dispatch/manifest.json)
+
+An instrumented follow-up on the same pinned P-core measured approximately
+73% fewer median caller-thread cycles per image on both models. ResNet-20 fell
+from 41.47 million to 11.30 million cycles. VGG-11-BN fell from 127.94 million to
+34.53 million. Process page-fault counts across the 202 inputs per runtime were
+essentially unchanged. Windows counts soft and hard faults together. This
+diagnostic supports the kernel improvement and leaves the wall-clock stability
+qualification open.
+[Cycle accounting and raw samples](../benchmark/validation/windows-fp32-20261115/pcore-diagnostics/manifest.json)
