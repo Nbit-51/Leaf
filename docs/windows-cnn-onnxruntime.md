@@ -32,3 +32,22 @@ reference logits, uint32 labels and the native `leaf_dataset` executable. Run
 NumPy, ONNX and the pinned ONNX Runtime wheel installed.
 [Runner](../benchmark/bench_graph_onnxruntime.py) ·
 [Raw samples and provenance](../benchmark/validation/windows-fp32-20261115/graphs/manifest.json)
+
+## Runtime-dispatched GEMM candidate
+
+The standard portable build leaves the existing AVX2/FMA convolution GEMM out.
+An experimental build enables that 4×8 tile after a CPU feature check, keeping
+the scalar fallback. The candidate passed the native GEMM checks and matched all
+held-out reference predictions and logit tolerances on both trained CNNs.
+
+On one P-core, six order-balanced rounds ran the previous Leaf build, candidate,
+and ONNX Runtime over the same 101 images. Each of the six possible orders ran
+once. Timings below are observed medians because the spread exceeded 1.25× in
+both model comparisons. The production graph runtime still uses the prior code.
+
+| Model | Previous Leaf | AVX2 candidate | ONNX Runtime |
+| --- | ---: | ---: | ---: |
+| ResNet-20 | 18.71 ms | 4.86 ms | 0.97 ms |
+| VGG-11-BN | 59.82 ms | 15.89 ms | 4.61 ms |
+
+[Candidate source, raw rounds and provenance](../benchmark/validation/windows-fp32-20261115/graph-dispatch/manifest.json)

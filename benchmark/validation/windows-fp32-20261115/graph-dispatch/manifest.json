@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-15",
+  "archive": "evidence.zip",
+  "archive_sha256": "cff52c75899f500c79975252a63ce160e39a8819c74df3b416ae826126c0387d",
+  "files": {
+    "compare_leaf_graphs.py": "06815604c4d3cb1beaff0a94ea6a550160a3d84a7a3d7eb2e0446fec7a736486",
+    "graphs/gemm-dispatch.cpp": "88b5e32622852e97e0d3fe9108ce2a55a8c736afa9a32e1d11d1cfca810b0ee0",
+    "graphs/resnet20-dispatch/comparison.json": "15ce29a869887cb7752349f19b20f5c18e9ed909cc83c7ee6605d417bccd40b7",
+    "graphs/vgg11-dispatch/comparison.json": "dd8cfa5d03de12c70f5c9d209c429c75bb5448aceedd8c3b51171d46bf85a57c"
+  }
+}
