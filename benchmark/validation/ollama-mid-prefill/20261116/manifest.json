@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-16",
+  "archive": "evidence.zip",
+  "files": {
+    "profile.json": "8c152a3529a5eb7f93868881a9ae947988b7c30ecdd2d2aae94906bd81eca05f",
+    "qualify.py": "4648940625440a55e9475c99ab9869d5f614ef6c89ab92ca2e6291c51a588348",
+    "leaf-comparison.json": "14cd91750484f512ff39b4d6abc5f3daca266d7ab6616223d02d8a903d533b02",
+    "rerun_ollama.py": "4e3da4b7add88af3343e3a877df13ca01fc385ece082e80cae9b212650e2184d",
+    "ollama-comparison/comparison.json": "d60ecad9fa5a1ea87bcddc8797abcff2f16eaad1930577278fd444d1a8cfd605",
+    "ollama-comparison/ollama-quality.json": "ae363e6bfaf742b28bd828bf66625d3ed2f4e19f2f57521006ce084e375c7515",
+    "ollama-power.json": "6399fe558dc1932247f74ce74ed9e1e4382e55340baca8bd15896e6c8c3748c9",
+    "probe_candidate.py": "7931262f051088671cba5d06152e07907b13185a3533c0e6a18f81ef5e634348",
+    "candidate-profile.json": "42c7c839e71f565d776d0eec19c80ce02f157359fb1daa12e3fff621762e5278",
+    "qualify_attention.py": "d20da7e09f0dc610fe19ea4d03de6f85d9634465fe9ff305218e195e1581e0ab",
+    "attention-only.json": "d5fe1f9de00e5b744a7c9b725325555e8e6e916f85c36907c4d614e5c8fab8df",
+    "combined.patch": "1e8156bb05d29f418d6b477833e55eecc2c5c864622c1720d012732cb8e60a72",
+    "attention-only.patch": "ba92a38bd7f57473831b0ac1e8da8997060903a451c0af6d525ce6c0d135d118",
+    "request-total.json": "80cd09e3c9d1130573073afc4bba1a2e7ed9a6d6d572bb2f45f3974a49c9c246"
+  },
+  "archive_sha256": "3c66dc01bdc5a1f9b1a7d25b2f5030f67e5ca24e441e39855212c4bff164606b"
+}

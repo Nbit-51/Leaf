@@ -62,3 +62,44 @@ prompts. One response reported seven probabilities for eight generated
 tokens, and another differed by `2.18e-4`.
 
 [Raw timings, backend token IDs and reference checks](../benchmark/validation/ollama-revalidation/20261116/manifest.json)
+
+## 256-token scheduling experiment
+
+The existing SmolLM2 path spent 70.8% of profiled prefill time in FP32
+projections and 21.5% in attention. A candidate enables the existing
+projection-panel and attention-head worker scheduling at 256 tokens for
+eligible source-BF16 artifacts. The default code still starts those paths at
+768 tokens. The candidate leaves FP32 storage and cached decode dispatch
+at their existing thresholds.
+
+Both SmolLM2 and Qwen2.5 matched the current Leaf logits bit-for-bit at
+255, 256 and 257 prompt tokens plus one cached step. Their tested continuations
+also matched. On four physical P-cores, paired prefill medians improved by
+13.3% on SmolLM2 and 18.1% on Qwen2.5, with a 256-token prompt. Neither complete
+timing comparison passed the existing spread gate.
+
+In the repeated SmolLM2 workload against Ollama, the candidate's prefill
+median was 664 ms versus 621 ms, with a paired Leaf/Ollama ratio of 1.053.
+Cached generation was 544 ms versus 724 ms. Adding the two phases per request
+gave medians of 1,210 ms for Leaf and 1,348 ms for Ollama and a paired ratio
+of 0.889. These timings exclude HTTP and model load.
+
+All 66 paired continuations matched. Both runtimes exceeded the pooled
+spread limit, and the public probability preflight again passed six of
+eight prompts. The experiment remains outside the production dispatch.
+
+A separate instrumented run found a tradeoff. Mean attention time fell from
+231 ms to 118 ms, while the linear projections rose from 820 ms to 954 ms.
+Total profiled prefill was 1,133 ms before and 1,153 ms after. Median
+process-cycle counts fell about 5% in this instrumented run. This identifies
+earlier attention scheduling as a candidate to test independently from
+earlier weight expansion.
+
+The attention-only candidate leaves weight expansion at the original
+threshold and starts parallel attention at 256 tokens. It matched SmolLM2
+logits bit-for-bit at 255, 256 and 257 tokens and reproduced the tested
+continuation. Across six Leaf-only timing pairs, pooled prefill went from
+1,284 ms to 1,174 ms, with a median paired ratio of 0.822. Both prefill
+and decode missed the spread gate. The attention-only candidate also remains
+outside production dispatch.
+[Candidate patch, profiles and raw samples](../benchmark/validation/ollama-mid-prefill/20261116/manifest.json)
