@@ -204,3 +204,23 @@ observations with matching prompt IDs, weights, decoder and output tokens.
 To use the local path, run `leaf inspect` with the cached model and revision,
 then pass its `snapshot` path to `leaf run --offline`.
 [Raw startup results](../benchmark/validation/windows-fp32-20261115/budget-cpu/manifest.json)
+
+### Cached offline startup improvement
+
+Leaf can now resolve a prepared FP32 model by its full Hub commit hash in
+`leaf run --offline`. The shortcut uses the documented snapshot layout and
+checks the local model config, tokenizer files, and matching native artifact.
+Other requests use the standard Hub resolver. [Hugging Face cache layout](https://huggingface.co/docs/hub/local-cache)
+
+On one pinned P-core under the same Windows power mode, six order-balanced
+pairs of fresh CLI processes used the same decoder executable, cached weights,
+prompt, FP32 policy, and 16-token continuation. Both startup comparisons passed
+the 1.25× spread check. All generated token IDs matched. The new wheel also
+passed a separate offline check with its own bundled decoder.
+
+| Model | First visible text p50, previous → current | Paired reduction |
+| --- | ---: | ---: |
+| OPT-125M | 1,101.81 → 536.67 ms | 50.93% |
+| Pythia-70M | 896.21 → 399.04 ms | 56.72% |
+
+[Interleaved startup samples and reproduction script](../benchmark/validation/offline-startup/20261116/manifest.json)

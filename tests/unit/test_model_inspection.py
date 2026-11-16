@@ -64,6 +64,60 @@ def test_revision_rejects_local_snapshot(tmp_path):
         cli.resolve_model(str(tmp_path), tmp_path / "cache", revision="main")
 
 
+@pytest.mark.parametrize("tokenizer_files", [("tokenizer.json",), ("vocab.json", "merges.txt")])
+def test_offline_pinned_run_reuses_prepared_snapshot(tmp_path, monkeypatch, tokenizer_files):
+    revision = "a" * 40
+    snapshot = tmp_path / "hub/models--owner--model/snapshots" / revision
+    snapshot.mkdir(parents=True)
+    for name in ("config.json", "tokenizer_config.json", "model.safetensors", *tokenizer_files):
+        (snapshot / name).write_text("{}")
+    artifact = cli.model_directory(snapshot, tmp_path) / "decoder-32.leaf"
+    artifact.parent.mkdir(parents=True)
+    artifact.touch()
+    calls = []
+    monkeypatch.setitem(sys.modules, "huggingface_hub", None)
+    monkeypatch.setattr(cli, "validate_model_generation", lambda path, plan: calls.append(path))
+
+    result = cli.resolve_model("owner/model", tmp_path, offline=True, revision=revision,
+                               before_weights=lambda: calls.append("runtime"), prefer_prepared_fp32=True)
+    assert result == snapshot
+    assert calls == [snapshot, "runtime"]
+
+
+@pytest.mark.parametrize("mode", ["uncached", "changed_weights", "missing_tokenizer", "branch", "online"])
+def test_prepared_snapshot_misses_use_hub_resolver(tmp_path, monkeypatch, mode):
+    revision = "a" * 40
+    snapshot = tmp_path / "hub/models--owner--model/snapshots" / revision
+    snapshot.mkdir(parents=True)
+    config = dict(model_type="llama", hidden_size=16, intermediate_size=32,
+                  num_hidden_layers=1, num_attention_heads=2, num_key_value_heads=1, vocab_size=64)
+    (snapshot / "config.json").write_text(json.dumps(config))
+    (snapshot / "tokenizer_config.json").write_text("{}")
+    (snapshot / "tokenizer.json").write_text("{}")
+    (snapshot / "model.safetensors").write_bytes(b"weights")
+    if mode != "uncached":
+        artifact = cli.model_directory(snapshot, tmp_path) / "decoder-32.leaf"
+        artifact.parent.mkdir(parents=True)
+        artifact.touch()
+    if mode == "changed_weights":
+        (snapshot / "model.safetensors").write_bytes(b"changed weights")
+    if mode == "missing_tokenizer":
+        (snapshot / "tokenizer.json").unlink()
+    calls = []
+
+    def download(model, **options):
+        calls.append((model, options))
+        return str(snapshot)
+
+    monkeypatch.setitem(sys.modules, "huggingface_hub", SimpleNamespace(snapshot_download=download))
+    result = cli.resolve_model("owner/model", tmp_path, offline=mode != "online",
+                               revision="main" if mode == "branch" else revision, prefer_prepared_fp32=True)
+    assert result == snapshot
+    assert len(calls) == 2
+    assert calls[0][1]["local_files_only"] is (mode != "online")
+    assert calls[1][1]["revision"] == revision
+
+
 def test_inspection_counts_tied_payload_once_without_reading_weights(tmp_path, capsys):
     config = dict(model_type="llama", hidden_size=16, intermediate_size=32,
                   num_attention_heads=2, num_hidden_layers=1, vocab_size=32,

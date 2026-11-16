@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import struct
 import subprocess
@@ -72,8 +73,33 @@ def executable(cache: Path) -> Path:
     return destination
 
 
+def prepared_pinned_snapshot(model: str, revision: str | None, cache: Path, plan: Path | None) -> Path | None:
+    # Use only immutable commits and unambiguous Hub cache directory names.
+    name = r"[A-Za-z0-9_]+(?:[.-][A-Za-z0-9_]+)*"
+    if revision is None or not re.fullmatch(r"[0-9a-f]{40}", revision):
+        return None
+    if (not re.fullmatch(f"{name}/{name}", model) or model.endswith(".git") or
+            any(len(part) > 96 for part in model.split("/"))):
+        return None
+    snapshot = cache / "hub" / ("models--" + model.replace("/", "--")) / "snapshots" / revision
+    if not all((snapshot / file).is_file() for file in ("config.json", "tokenizer_config.json")):
+        return None
+    if not ((snapshot / "tokenizer.json").is_file() or
+            all((snapshot / file).is_file() for file in ("vocab.json", "merges.txt"))):
+        return None
+    weights = list(snapshot.glob("*.safetensors"))
+    if not weights or not all(weight.is_file() for weight in weights):
+        return None
+    # The artifact key binds the config and the local weight inventory, so
+    # a partial download or changed snapshot goes through the usual resolver.
+    if (model_directory(snapshot, cache, plan) / "decoder-32.leaf").is_file():
+        return snapshot
+    return None
+
+
 def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | None = None,
-                  metadata_only: bool = False, before_weights=None, *, revision: str | None = None) -> Path:
+                  metadata_only: bool = False, before_weights=None, *, revision: str | None = None,
+                  prefer_prepared_fp32: bool = False) -> Path:
     def local_snapshot(path):
         if revision is not None:
             raise ValueError("--revision applies to a Hub model ID, not a local snapshot")
@@ -90,6 +116,13 @@ def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | N
         model = json.loads(aliases.read_text()).get(model, model)
         if Path(model).is_dir():
             return local_snapshot(Path(model))
+    if offline and prefer_prepared_fp32 and not metadata_only:
+        prepared = prepared_pinned_snapshot(model, revision, cache, plan)
+        if prepared is not None:
+            validate_model_generation(prepared, plan)
+            if before_weights is not None:
+                before_weights()
+            return prepared
     from huggingface_hub import snapshot_download
     from tools.decoder_plan import load_snapshot_plan
     # Check configuration/capabilities before fetching large weight shards.
@@ -416,8 +449,9 @@ def run(args):
         check_decoder_options(runtime, source_bf16=source_matrices, source_bf16_head=source_head,
                               fp32_math=fp32_math, worker_cpus=worker_cpus)
     # Reject unsupported metadata before building, and setup failures before weights.
-    snapshot = resolve_model(args.model, cache, args.offline, args.plan,
-                             before_weights=prepare_runtime, revision=getattr(args, "revision", None))
+    prepared_fp32 = not source_storage and (getattr(args, "bits", "auto") == "32" or fp32_math == "accurate")
+    snapshot = resolve_model(args.model, cache, args.offline, args.plan, before_weights=prepare_runtime,
+                             revision=getattr(args, "revision", None), prefer_prepared_fp32=prepared_fp32)
     directory = model_directory(snapshot, cache, args.plan)
     if source_storage:
         bits, activation_bits = 32, 32
