@@ -101,13 +101,25 @@ inline void gemm_token_panels_f32_accurate(const float* weights, std::size_t row
 #else
     (void)use_avx2;
 #endif
-    for (std::size_t token = 0; token < input.tokens(); ++token)
+    for (std::size_t panel = 0; panel < input.panels(); ++panel) {
+        const auto first = panel * 16;
+        const auto count = std::min<std::size_t>(16, input.tokens() - first);
+        const auto* packed = input.panel(panel);
         for (std::size_t row = 0; row < rows; ++row) {
-            double total = 0.0;
-            const auto* packed = input.panel(token / 16);
-            for (std::size_t col = 0; col < columns; ++col)
-                total += static_cast<double>(weights[row * weight_stride + col]) * packed[col * 16 + token % 16];
-            output[token * output_stride + row] = static_cast<float>(total) + (bias ? bias[row] : 0.0f);
+            // Each lane retains the original left-to-right FP64 reduction.
+            // Adjacent lanes share each weight load and read contiguous inputs.
+            double totals[16] = {};
+            const auto* weight = weights + row * weight_stride;
+            for (std::size_t col = 0; col < columns; ++col) {
+                const double coefficient = weight[col];
+                const float* values = packed + col * 16;
+                for (std::size_t lane = 0; lane < count; ++lane)
+                    totals[lane] += coefficient * values[lane];
+            }
+            const float offset = bias ? bias[row] : 0.0f;
+            for (std::size_t lane = 0; lane < count; ++lane)
+                output[(first + lane) * output_stride + row] = static_cast<float>(totals[lane]) + offset;
         }
+    }
 }
 } // namespace leaf::kernels

@@ -1042,7 +1042,9 @@ struct Decoder::Impl {
                         quant_input[t * weight.cols + col] = static_cast<std::int16_t>(std::max(-127L, std::min(127L, std::lrint(values[col] / quant_scales[t]))));
             }
         }
-        const bool packed_float = float_tiles && (weight.bits == 32 || weight.bits == 16) && tokens >= 8 &&
+        const bool portable_accurate = accurate_fp32 && !avx && weight.bits == 32;
+        const bool packed_float = (float_tiles || portable_accurate) &&
+                                  (weight.bits == 32 || weight.bits == 16) && tokens >= 8 &&
                                   (!bias || bias->bits == 32);
         bool vector_pack = optimized_fp32 && avx;
 #ifdef LEAF_EXPERIMENTAL_MLP_PACK
@@ -1058,7 +1060,7 @@ struct Decoder::Impl {
 #endif
             // Reuse requires an explicit unchanged-input promise within this
             // projection group; equal addresses alone are insufficient.
-            const bool plain = (accurate_fp32 || optimized_fp32) && avx && scaling == weights.end();
+            const bool plain = (accurate_fp32 || optimized_fp32) && scaling == weights.end();
             const bool reuse = plain && reuse_packed && packed_source == input &&
                                packed_tokens == tokens && packed_columns == weight.cols;
             if (!reuse) packed_float_input.pack(input, tokens, weight.cols, weight.cols, vector_pack);
@@ -1127,7 +1129,7 @@ struct Decoder::Impl {
                         leaf::kernels::gemm_token_panels_f32_accurate(
                             panel_weights, live, weight.cols, weight.cols, packed_float_input,
                             output.data() + begin, weight.rows,
-                            bias ? reinterpret_cast<const float*>(bias->data) + begin : nullptr);
+                            bias ? reinterpret_cast<const float*>(bias->data) + begin : nullptr, avx);
                     } else {
 #if LEAF_OPTIMIZED_FP32 || defined(LEAF_EXPERIMENTAL_ROW_REUSE)
                         leaf::kernels::gemm_token_panels_f32_row_reuse(

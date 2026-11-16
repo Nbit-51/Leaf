@@ -224,3 +224,30 @@ passed a separate offline check with its own bundled decoder.
 | Pythia-70M | 896.21 → 399.04 ms | 56.72% |
 
 [Interleaved startup samples and reproduction script](../benchmark/validation/offline-startup/20261116/manifest.json)
+
+### Portable FP32 prefill
+
+On one P-core with AVX2 disabled, FP32 projections accounted for 96.4% of
+Pythia-70M's 64-token prefill profile. In accurate FP32 mode, the portable
+decoder now packs prompt activations in groups of up to 16 tokens for eligible
+projections. It reuses each FP32 weight load across the group and preserves
+the left-to-right FP64 accumulation for each output. This path starts at
+eight tokens. Single-token decode follows the existing projection path.
+
+| Model | Prefill p50, previous → current | Paired reduction | Decode p50, previous → current |
+| --- | ---: | ---: | ---: |
+| Pythia-70M | 777.49 → 396.42 ms | 49.21% | 30.60 → 30.36 ms |
+| OPT-125M | 3,605.32 → 1,706.79 ms | 51.98% | 85.11 → 83.77 ms |
+
+The runs used the same FP32 artifacts and accurate math policy, one pinned
+P-core, 64 input tokens, and 16 generated tokens. Each accepted comparison
+used six order-balanced pairs with five samples and two warmups per pass.
+Both models passed prefill and decode stability and decode non-regression.
+Median peak decoder working set rose by 0.49 MiB on Pythia and 0.78 MiB on OPT.
+The first OPT run missed timing stability and is retained alongside its
+passing repeat. Forced-scalar logits at 64, 65, and 128 prompt tokens plus
+one cached step matched bit-for-bit. All test continuations matched.
+Both models also matched with two workers, and the freshly installed Windows
+wheel reproduced the two-worker Pythia logits and continuation.
+The timings describe the review laptop with AVX2 disabled in the decoder.
+[Profiles, interleaved samples and verification](../benchmark/validation/scalar-prefill/20261116/manifest.json)
