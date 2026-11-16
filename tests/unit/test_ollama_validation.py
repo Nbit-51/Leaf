@@ -1,7 +1,20 @@
 import pytest
 
 from tools import ollama_validation as validation
-from tools.benchmark_ollama_decoder import check_generation_work
+from tools.benchmark_ollama_decoder import check_generation_work, check_selected_logprobs
+
+
+@pytest.mark.parametrize("reported,expected", [
+    ([-0.1, -0.2], True),
+    ([-0.1], False),
+    ([], False),
+    ([-0.1, -0.2003], False),
+    ([-0.1, float("nan")], False),
+])
+def test_selected_logprobs_require_every_token_and_unchanged_tolerance(reported, expected):
+    leaf = {"selected_logprobs": [-0.1, -0.2]}
+    ollama = {"response": "answer", "eval_count": 2, "logprobs": [{"logprob": x} for x in reported]}
+    assert check_selected_logprobs(leaf, ollama, "answer")["passed"] is expected
 
 
 @pytest.mark.parametrize('settings,threads,context', [({}, 1, 256), ({'threads': 4, 'context': 512}, 4, 512)])

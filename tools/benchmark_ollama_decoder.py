@@ -6,6 +6,7 @@ balanced pairs, 3 warmups/11 measurements by default. No sample filtering.
 """
 import argparse
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -34,6 +35,19 @@ def continuation(tokenizer, ids, generated):
     if not full.startswith(prefix):
         raise ValueError('Continuation cannot be decoded independently of its prefix')
     return full[len(prefix):]
+
+
+def check_selected_logprobs(leaf, ollama, leaf_text):
+    expected = leaf['selected_logprobs']
+    logs = [v['logprob'] for v in (ollama.get('logprobs') or [])]
+    count_matches = len(logs) == len(expected) == ollama.get('eval_count')
+    aligned = (count_matches and bool(expected) and leaf_text == ollama['response']
+               and all(math.isfinite(value) for value in [*logs, *expected]))
+    error = max((abs(a-b) for a,b in zip(logs, expected)), default=None) if aligned else None
+    return dict(leaf_text=leaf_text, ollama_text=ollama['response'], leaf_logprob_count=len(expected),
+                ollama_logprob_count=len(logs), ollama_eval_count=ollama.get('eval_count'),
+                complete_logprobs=count_matches and bool(expected), selected_logprob_max_abs_error=error,
+                logprob_abs_limit=2e-4, passed=error is not None and error <= 2e-4)
 
 
 def check_generation_work(value, engine, prompt_tokens, cached, generated):
@@ -159,9 +173,12 @@ def main():
     parser.add_argument('--runs', type=int, default=11)
     parser.add_argument('--warmup', type=int, default=3)
     parser.add_argument('--diagnostic-timing', action='store_true')
+    parser.add_argument('--quality-only', action='store_true', help='Run and retain only a fresh numerical preflight')
     parser.add_argument('--preflight-record', type=Path,
                         help='reuse completed quality checks bound to identical runtimes, model and request policy')
     args = parser.parse_args()
+    if args.quality_only and args.preflight_record:
+        parser.error('A quality-only run requires a fresh preflight')
     if os.name != 'nt':
         parser.error('This controlled Ollama comparison currently requires Windows')
     if not 16 <= args.prompt_tokens <= 1024:
@@ -256,7 +273,7 @@ def main():
         if args.preflight_record:
             saved = json.loads(args.preflight_record.read_text())
             required = (args.ollama_executable, args.leaf_executable, args.leaf_artifact,
-                        args.gguf_audit, args.snapshot/'tokenizer.json',
+                        args.gguf_audit, Path(__file__), args.snapshot/'tokenizer.json',
                         ROOT/'tools/ollama_validation.py', ROOT/'benchmark/decoder_generation_benchmark.cpp')
             old = {Path(p).resolve(): h for p,h in saved.get('hashes', {}).items()}
             if any(old.get(p.resolve()) != digest(p) for p in required):
@@ -269,11 +286,16 @@ def main():
             quality = saved['quality']
             if len(quality.get('checks', [])) != 8:
                 raise ValueError('Saved preflight is incomplete')
+            if any('complete_logprobs' not in row for row in quality['checks']):
+                raise ValueError('Saved preflight predates the complete probability coverage check')
             record['reused_preflight'] = dict(path=str(args.preflight_record), sha256=digest(args.preflight_record))
             unload(base, args.ollama_model, process)
         else:
             quality_rows = [dict(prompt=text, ids=tokenizer.encode(text).ids) for text in PROMPTS]
             quality_rows += workloads
+            for row in quality_rows:
+                if api(backend, '/tokenize', dict(content=row['prompt'], add_special=True))['tokens'] != row['ids']:
+                    raise ValueError('Ollama backend tokenization differs from Leaf on a quality prompt')
             ollama_quality = [api(base, '/api/generate', generation_request(args.ollama_model,
                 row['prompt'], tokens=8, logprobs=True, **request_options)) for row in quality_rows]
             (args.output / 'ollama-quality.json').write_text(json.dumps(ollama_quality, indent=2)+'\n')
@@ -283,18 +305,19 @@ def main():
             checks = []
             for row, leaf, ollama in zip(quality_rows, leaf_quality, ollama_quality):
                 text = continuation(tokenizer, row['ids'], leaf['generated_tokens'])
-                logs = [v['logprob'] for v in ollama.get('logprobs', [])]
-                expected = leaf['selected_logprobs'][:len(logs)]
-                error = max((abs(a-b) for a,b in zip(logs, expected)), default=None)
-                passed = (text == ollama['response'] and len(logs)>0 and len(logs)==len(expected)
-                          and error is not None and error<=2e-4)
-                checks.append(dict(prompt=row['prompt'], leaf_text=text, ollama_text=ollama['response'],
-                    selected_logprob_max_abs_error=error, logprob_abs_limit=2e-4, passed=passed))
+                checks.append(dict(prompt=row['prompt'], **check_selected_logprobs(leaf, ollama, text)))
             quality = dict(scope='Eight greedy continuations and selected-token log probabilities; not full-logit/perplexity qualification',
                            checks=checks, passed=all(c['passed'] for c in checks))
         record['quality'] = quality
         write_record(path, record)
         print('Quality', quality['passed'], flush=True)
+        if args.quality_only:
+            if any(digest(Path(p)) != h for p, h in record['hashes'].items()):
+                raise ValueError('Inputs changed during preflight')
+            record['quality_only'] = True
+            record['complete'] = True
+            write_record(path, record)
+            return
         if not quality['passed'] and not args.diagnostic_timing:
             raise ValueError('Numerical preflight failed; explicit --diagnostic-timing required for unqualified measurements')
         for index in range(args.pairs):
@@ -356,7 +379,10 @@ def main():
                 passed=every_pass and all(v['passed'] for v in stable.values()) and paired<=limit)
         text_matches = all(all(p['leaf']['samples'][i]['response']==p['ollama']['samples'][i]['response']
                            for i in range(args.runs)) for p in record['pairs'])
+        comparison_validated = quality['passed'] and text_matches and all(p['every_pass_stable'] and
+            all(row['passed'] for row in p['pooled_stability'].values()) for p in summary.values())
         record.update(complete=True, gate=summary, timed_generated_text_matches=text_matches,
+            comparison_validated=comparison_validated,
             overall_speed_claim=quality['passed'] and text_matches and all(p['passed'] for p in summary.values()))
         if any(digest(Path(p))!=h for p,h in record['hashes'].items()):
             raise ValueError('Inputs changed during comparison')

@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-16",
+  "archive": "evidence.zip",
+  "targeted_tests_passed": 9,
+  "engine_main_commit": "3122d480df85c53f896567247b7d3112fe0ac285",
+  "ollama_blob_sha256": {
+    "SmolLM2": "a289e189925d14ede184e4d9e139e3c4e8f0b9d155f98870de7b66cd38567b0f",
+    "Qwen2.5": "58e60737ce01f8103e4a501c4919593e0d9384880ed8c963c6d92fd54abb3a74",
+    "TinyLlama": "b65e0c636eeaee6a97ba102580249e0214c9ee5f4c3f2adad4171747ba655700"
+  },
+  "files": {
+    "matrix.json": "91d28f8fa669c1a7aceb1d40f6b61106c3d4bdb1002308b86cd0bf32ea093020",
+    "run_matrix.py": "7d0b22e621658909581d499e1e81f6b26e1fd3ff658091195f807927971d8386",
+    "probe_backend.py": "89b02222c7798fbb07892dbf838e828ae0396cf1408ee8481e53159f9344f3f6",
+    "backend-quality.json": "be8c6ccce857af41639a0f968343d13f7bc0a2621dc74588c7215037380eda7b",
+    "smol-reference.json": "0f5c05bec13483f9ab83f1f5efc34dfe3154a798c7144971b0f6abfd6c43f280",
+    "qwen-reference.json": "4cd8ff0b9be6219cc3e0ba4417a8b79e38a19f2aca3ddd35dbdaed27e3896e92",
+    "latest/runtime-provenance.json": "453c9558cbe736e835f076e5d26919b0935043961b1948895447c65d7babc56e",
+    "smol-64-2-latest/comparison.json": "3295f4c551d4a9008516a5d36f6593c2aedc534ba7b6aedc8343d863ceda7eca",
+    "smol-64-2-latest/ollama-quality.json": "45d1c7fcd1d6b32cb54d960b50ea0a10e74acbfd9fc4f835c2a9b94067aa2e54",
+    "smol-64-2-latest/leaf-quality/results.jsonl": "c7a7c0554494f1abbbb6896dd3055bcd2f0c6901bef18100826c30241c18c166",
+    "qwen-64-2-latest/comparison.json": "c45c43b566a07fbc4d83ab0331cf0254861f886af8f092e039d5b6aba1a149cc",
+    "qwen-64-2-latest/ollama-quality.json": "a5ec16730a509c240260adb331b6c28a46e69c4504d6588ab2c581a9652a37b2",
+    "qwen-64-2-latest/leaf-quality/results.jsonl": "9598682ab1134d1350eac1c9affb5704e5742001595717f657b6c3cb11f8c92a",
+    "smol-256-16-latest/comparison.json": "5c392fafad0e010c0309fab8df900dcd8811552d754c03539029a760c97c9a9b",
+    "smol-256-16-latest/ollama-quality.json": "f8acacaa5cfcbc28e3b71d8cacb1d77429fbb3a26d8b6489e0658f694a037adc",
+    "smol-256-16-latest/leaf-quality/results.jsonl": "19093cf4f8a12093f6a5f314c6500fdaf483c6f574d4adea419322ee4c94c997",
+    "tiny-64-quality-latest/comparison.json": "bcf99fa7c316163fb2fc12ecf26a709ad2024ce5c8e3632bdb784f30a9b978e6",
+    "tiny-64-quality-latest/ollama-quality.json": "f2adff20e791ad0f325601de4268eabc050d8f8613cffd7caabbc1d6cf372340",
+    "tiny-64-quality-latest/leaf-quality/results.jsonl": "74c17ea4ccf4e567b9cd641d2bbef534a8240d314fc4fa3ee1f14865baa9f95a"
+  },
+  "archive_sha256": "ae94d9c4a7206a45daaeeb1e54d30930fccbd67d1a7fef53e4666693060e1f23"
+}

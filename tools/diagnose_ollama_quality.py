@@ -70,17 +70,21 @@ def main():
                 probabilities.append(float(logits[token] - torch.logsumexp(logits, dim=-1)))
                 past, sequence = result.past_key_values, [token]
             native = leaf[i]['selected_logprobs']
-            reported = [row['logprob'] for row in ollama[i].get('logprobs', [])]
+            reported = [row['logprob'] for row in (ollama[i].get('logprobs') or [])]
             leaf_errors = [abs(a-b) for a,b in zip(native, probabilities)]
-            ollama_errors = [abs(a-b) for a,b in zip(reported, probabilities)]
+            # A missing position need not be at the end of the response.
+            # Compare numerical errors only when every position is available.
+            covers_sequence = (len(reported) == len(probabilities) == ollama[i].get('eval_count') and
+                               check['leaf_text'] == ollama[i]['response'])
+            ollama_errors = [abs(a-b) for a,b in zip(reported, probabilities)] if covers_sequence else []
             row = dict(index=i, prompt=check['prompt'], reference_greedy_tokens=expected,
                 leaf_generated_tokens=leaf[i]['generated_tokens'], reference_logprobs=probabilities,
                 leaf_logprobs=native, ollama_logprobs=reported,
                 leaf_greedy_matches_reference=expected == leaf[i]['generated_tokens'],
                 leaf_max_abs_error=max(leaf_errors),
                 ollama_reported_max_abs_error=max(ollama_errors) if ollama_errors else None,
-                ollama_unreported_positions=len(probabilities)-len(reported),
-                ollama_note='Errors use aligned visible-token positions; unreported terminal EOS cannot be scored')
+                ollama_unreported_positions=max(0, len(probabilities)-len(reported)),
+                ollama_complete_sequence=covers_sequence)
             record['checks'].append(row)
             write_record(args.output, record)
             print(i, 'Leaf/reference', row['leaf_max_abs_error'],

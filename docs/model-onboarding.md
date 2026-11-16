@@ -555,6 +555,10 @@ conditions keep the direct comparison diagnostic.
 
 [Raw 64-token timings and weight checks](../benchmark/validation/cpu-demo/20261115/manifest.json)
 
+[Follow-up tests on Ollama 0.40.16](ollama-validation-20261116.md) cover short
+requests and a 256-token prompt with 16 generated tokens. They also trace the
+missing terminal-token probability through Ollama's bundled backend.
+
 ## OPT-125M on Windows CPU
 
 The default OPT-125M Hub revision provides configuration and tokenizer files.
