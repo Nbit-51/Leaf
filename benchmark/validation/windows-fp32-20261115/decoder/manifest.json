@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-15",
+  "archive": "evidence.zip",
+  "archive_sha256": "126dc962a2ef551aa153d8073de68b52f096991710e6b52e21052617d36d695f",
+  "files": {
+    "qualify_span.py": "37d24a7da44fb7226855be489737b1433607ca2dd2e3214d81dfd52eece8f4c6",
+    "competitor.py": "e14a1e27a475e09a047433245b3ebeaba1ed11e3c3473c3668e15d62ba358c26",
+    "quality.json": "92685ea46dd203b78ff7bde7f3685c003934efdac11b4730f68e953ac60ed012",
+    "parallel-quality.json": "a4d096e2f25ed25298d27c244366a5c1999a9670b5735fc54ade9ea17b500fa8",
+    "opt-paired/comparison.json": "c16f36a336638613564f295643c545d9bbe5c128b22290432bdebd85a4d9d30e",
+    "smol-paired/comparison.json": "1768a28137e0cc5bff3cbcfc4f613190c75e5dcdd9cd72f8937b9047fc173035",
+    "parallel-opt-paired/comparison.json": "b5651592dd65241e7c1f5aaa72e12cdfb4318c64e9d17f2f5c19e9d0b476404e",
+    "parallel-smol-paired/comparison.json": "61addd92abc3da09e1213cd8f8f66bd94b245b3bafc59152d095ed1fcda3afd9",
+    "opt-four-core-competitor.json": "374f76b7a417b3db92906d6ce91282ca4fbcaf887bc5f32a264814a070b41f68",
+    "opt-accurate-quality/quality.json": "159908c7f2e7f57a7ca3b736e8562b29c8e23ccfe569f8bf08a0978e3be55618",
+    "opt-accurate-quality/tokens.json": "83c46bd953988fc61e80370d0d6026b64c0acb087e7567ff0e77bf3d648e3ab9",
+    "parallel-opt-tokens.json": "f0e070dee40807fb5063b134a40f10155d32e98d4f0fd9cd0fbc8ef13ef5365f",
+    "parallel-smol-tokens.json": "4ad80ffe41f516f8da42d0374b79645ced390a8b512ff4a0842b855efa10b335"
+  }
+}

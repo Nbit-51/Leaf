@@ -37,6 +37,21 @@ def update_config(snapshot, **changes):
     path.write_text(json.dumps(config))
 
 
+def test_opt_legacy_byte_bpe_preserves_merged_spaces_and_bos(tmp_path):
+    (tmp_path / "config.json").write_text('{"model_type":"opt"}')
+    (tmp_path / "tokenizer_config.json").write_text(json.dumps({
+        "bos_token": {"content": "</s>", "normalized": True, "__type": "AddedToken"},
+        "eos_token": "</s>", "pad_token": "<pad>", "add_bos_token": True,
+    }))
+    (tmp_path / "vocab.json").write_text(json.dumps({"<pad>": 0, "a": 1, "</s>": 2, "\u0120": 3, "\u0120a": 4}))
+    (tmp_path / "merges.txt").write_text("#version: 0.2\n\u0120 a\n", encoding="utf-8")
+
+    tokenizer, ids = cli.encode_prompt(tmp_path, "a a", raw=True)
+    assert ids == [2, 1, 4]
+    assert tokenizer.decode(ids, skip_special_tokens=True) == "a a"
+    assert tokenizer.encode("a a", add_special_tokens=False).ids == [1, 4]
+
+
 def test_nonlegacy_special_token_does_not_prepend_another_space(snapshot):
     before = set(sys.modules)
     tokenizer, ids = cli.encode_prompt(snapshot, "a")

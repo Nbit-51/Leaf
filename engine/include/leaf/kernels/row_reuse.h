@@ -1,5 +1,6 @@
 #pragma once
 #include "leaf/kernels/token_panel.h"
+#include <limits>
 
 namespace leaf::kernels {
 #if defined(__x86_64__) && defined(__GNUC__)
@@ -46,10 +47,12 @@ template <bool NarrowTail = false>
 __attribute__((target("avx2,fma"))) inline void gemm(
         const float* weights, std::size_t rows, std::size_t columns,
         std::size_t weight_stride, const TokenPanelsF32& input, float* output,
-        std::size_t output_stride, const float* bias) {
+        std::size_t output_stride, const float* bias, std::size_t first_panel = 0,
+        std::size_t end_panel = std::numeric_limits<std::size_t>::max()) {
+    end_panel = std::min(end_panel, input.panels());
     for (std::size_t row = 0; row < rows;) {
         const auto count_rows = std::min<std::size_t>(6, rows - row);
-        for (std::size_t panel = 0; panel < input.panels(); ++panel) {
+        for (std::size_t panel = first_panel; panel < end_panel; ++panel) {
             const auto first = panel * 16;
             const auto count = std::min<std::size_t>(16, input.tokens() - first);
             const auto* packed = input.panel(panel);

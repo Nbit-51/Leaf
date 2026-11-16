@@ -624,7 +624,7 @@ def test_invalid_optimize_threads_fail_cleanly_before_model_preparation(tmp_path
 def test_optimize_forwards_general_flags_and_restores_process_arguments(tmp_path, monkeypatch):
     from tools import validate_decoder
     snapshot, directory, runtime = tmp_path / "snapshot", tmp_path / "cache", tmp_path / "runtime"
-    monkeypatch.setattr(cli, "resolve_model", lambda *args: snapshot)
+    monkeypatch.setattr(cli, "resolve_model", lambda *args, **kwargs: snapshot)
     monkeypatch.setattr(cli, "validate_model_generation", lambda *args: None)
     monkeypatch.setattr(cli, "model_directory", lambda *args: directory)
     monkeypatch.setattr(cli, "executable", lambda *args: runtime)
@@ -665,7 +665,7 @@ def test_optimize_rejects_invalid_dimensions_before_preparing_model(flag, value,
 
 def test_optimize_rejects_calibrating_on_the_held_out_dataset(tmp_path, monkeypatch):
     from tools import validate_decoder
-    monkeypatch.setattr(cli, "resolve_model", lambda *args: tmp_path / "snapshot")
+    monkeypatch.setattr(cli, "resolve_model", lambda *args, **kwargs: tmp_path / "snapshot")
     monkeypatch.setattr(cli, "validate_model_generation", lambda *args: None)
     monkeypatch.setattr(cli, "model_directory", lambda *args: tmp_path / "cache")
     monkeypatch.setattr(cli, "executable", lambda *args: tmp_path / "runtime")

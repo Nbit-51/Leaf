@@ -34,8 +34,8 @@ speed; these results do not establish a win for every model or CPU.
 ## Quick start
 
 Requires **Python 3.10+**. Installing from source also requires a **C++17 compiler**.
-A platform wheel bundles the native decoder and embedding runtime; inference
-does not require a compiler.
+A platform wheel bundles the native decoder, embedding runtime and graph
+executor. The wheel runs inference without a compiler.
 
 ```sh
 git clone https://github.com/Nbit-51/Leaf.git
@@ -50,8 +50,10 @@ leaf run openai-community/gpt2 --prompt "Local inference is" --max-tokens 32
 The first Hub run downloads and prepares the model; subsequent runs reuse the
 cache. `leaf inspect MODEL_ID` fetches decoder configuration only and reports
 operator compatibility plus a lower bound on FP32 weight memory before a large
-download. It does not certify checkpoint correctness or speed. To use a complete local snapshot containing configuration, safetensors
-weights and tokenizer files:
+download. It does not certify checkpoint correctness or speed. Pass
+`--revision COMMIT` to inspect, run, evaluate, or optimize a specific Hub
+snapshot. To use a complete local snapshot containing configuration,
+safetensors weights and tokenizer files:
 
 ```sh
 leaf run ./models/decoder --offline --prompt "Explain CPU inference." --max-tokens 32
@@ -97,7 +99,20 @@ Gemma requires accepting its model access terms and signing in to Hugging Face
 once (`hf auth login`). Complete local folders work too. Outputs are normalized
 768-dimensional vectors in input order. The model is
 loaded once per invocation. See [embedding usage and validation](docs/embedding.md)
-for snapshot layout, limits and measured numerical accuracy.
+for snapshot layout, limits and measured numerical accuracy. For larger
+collections, `leaf index` saves verified batches and resumes interrupted jobs.
+
+For a supported FP32 ONNX network with one input and one output, install the
+graph extra and pass the input as a NumPy array. Leaf imports and optimizes the
+graph, then runs it with the native executor bundled in the wheel.
+
+```sh
+python -m pip install ".[graph]"
+leaf infer ./resnet20.onnx --input ./image.npy --output ./logits.npy
+```
+
+See the [CPU demo and reproduction guide](docs/cpu-demo.md) for graph inference,
+offline generation and resumable document retrieval.
 
 To evaluate precision candidates, install the validation tools and use separate
 calibration and held-out text:
@@ -128,7 +143,7 @@ native-loader limitation.
 | Memory | Memory-mapped weights, reusable activation/logit buffers, per-session KV caches with dynamic growth and reset/reuse |
 | Threading | Persistent workers; optional CPU placement with bounded waits and caller-affinity restoration on Windows/Linux |
 | Precision | FP32 with optional accurate accumulation; original BF16 matrix storage with FP32 computation; weight-only INT8/INT4, dynamic W8A8, smoothing and optional FP32 protection |
-| Graph execution | ONNX-to-Leaf IR, constant folding, supported CNN/Transformer fusions, native operators and an optional liveness-planned arena |
+| Graph execution | `leaf infer` for supported single-input FP32 ONNX networks, ONNX-to-Leaf IR, constant folding, graph fusions and native execution |
 | Validation | Held-out quality, reference logits, generation/cache parity, matched latency workloads and retained timing samples |
 
 Complete trained evaluations cover **GPT-2, TinyLlama-1.1B and ResNet-20**.
@@ -167,10 +182,11 @@ flowchart TB
     B --> N["C++ encoder · local/full attention and Q/K norms<br/>Parallel attention heads for longer inputs<br/>Finite masked-span attention · shared RoPE · vector GELU"]
     N --> V["Mean pooling · dense projections · L2 normalization"]
     V --> F["Document/query vectors"]
-    O["ONNX model"] --> G["Leaf IR · constant folding and fusions"]
+    F --> I["leaf index · resumable document batches"]
+    O["leaf infer · ONNX model"] --> G["Leaf IR · constant folding and fusions"]
     P --> D["Native decoder artifact<br/>Optional original BF16 matrix storage"]
     G --> A["Native graph artifact"]
-    D --> R["C++ decoder · causal full/windowed attention<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
+    D --> R["C++ decoder · causal full/windowed attention<br/>Parallel token panels and attention heads for long FP32 contexts<br/>Reusable activations/logits and session KV cache<br/>Final-layer FP32 MLP row selection<br/>Persistent workers · optional placement and bounded waits"]
     A --> E["C++ graph executor · reusable buffers or planned arena"]
     R --> M["Compute policy<br/>FP32: fast default or accurate opt-in<br/>INT8/INT4: existing dispatch"]
     M --> K["CPU-dispatched kernels<br/>Tiled GEMM · shared input panels<br/>Optional balanced FP32 sums and wider RMS<br/>Paired GEMV · SIMD BF16-to-FP32 expansion<br/>Vector GELU, attention, softmax and SiLU"]
@@ -253,6 +269,28 @@ measures **9.10% lower prefill** (1,391.42 vs 1,530.64 ms) and **11.35% lower
 cached decode** (222.91 vs 251.45 ms), with all timing stability checks passing.
 All continuations match, but one selected-logprob error narrowly exceeds the
 unchanged tolerance. These remain diagnostic timings, not an overall qualified win.
+
+In a [long-response SmolLM2 diagnostic](docs/model-onboarding.md#source-bf16-smollm2-versus-ollama),
+the source-BF16 prototype decoded 64-token responses with **34.6% lower paired
+cached-decode latency** than Ollama. Prefill was 2.30 s versus 2.33 s.
+All continuations matched. Ollama timing spread and probability checks kept
+the comparison diagnostic.
+
+The [qualified Windows long-context source-BF16 path](docs/source-bf16.md#long-context-windows-fast-path)
+reduced paired prefill by **41.7–49.7%** and cached decode by **32.6–45.0%**
+versus the previous Leaf build across SmolLM2-360M, Qwen2.5-0.5B and
+Qwen3-0.6B. The tested outputs matched bit-for-bit and timings passed the
+spread checks for 768-token prompts.
+
+With fully stored FP32 weights, the [four-core long-context path](docs/windows-fp32-long-context.md)
+reduced paired prefill **52.8% on OPT-125M** and **53.2% on SmolLM2-360M**
+versus the previous Leaf build. Cached decode fell **31.3%** and **30.5%**,
+respectively. Both passed timing stability and matched the previous Leaf logits
+bit-for-bit on the tested prompts.
+
+In the [trained CNN comparison](docs/windows-cnn-onnxruntime.md), Leaf matched
+the reference predictions on all 10,000 ResNet-20 and 512 VGG-11-BN test images.
+ONNX Runtime recorded lower warmed medians on both graphs in diagnostic tests.
 
 TinyLlama W8A8 is a quality tradeoff: **95.08% next-token agreement**, **1.24%
 higher held-out perplexity**, and non-identical generated text. Its artifact is

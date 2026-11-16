@@ -38,12 +38,18 @@ def test_wheel_build_bundles_portable_native_runtime(setup_module, monkeypatch, 
     build.build_lib = str(tmp_path / "package")
     build.run()
     command, options = captured[0]
-    assert len(captured) == 2
+    assert len(captured) == 3
     embed_command, embed_options = captured[1]
     assert embed_options == {"check": True}
     assert Path(embed_command[embed_command.index("-o") + 1]).name == ("leaf_embed.exe" if target == "nt" else "leaf_embed")
     assert {Path(value).name for value in embed_command if value.endswith(".cpp")} == {"embedding.cpp", "main_embed.cpp", "transformer.cpp"}
     assert "-ffp-contract=off" in embed_command
+    graph_command, graph_options = captured[2]
+    assert graph_options == {"check": True}
+    assert Path(graph_command[graph_command.index("-o") + 1]).name == (
+        "leaf_infer.exe" if target == "nt" else "leaf_infer")
+    assert str(ROOT / "engine/kernels") in graph_command
+    assert str(ROOT / "engine/src/executor.cpp") in graph_command
     output = tmp_path / "package" / "leaf" / "bin" / filename
     assert command[0] == "test-cxx"
     assert command[command.index("-o") + 1] == str(output)

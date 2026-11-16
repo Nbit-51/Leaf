@@ -1,0 +1,249 @@
+{
+  "qwen3": {
+    "storage_bytes": 1192260352,
+    "fidelity": {
+      "64": {
+        "exact_logits": 9875840,
+        "logit_hashes": {
+          "before": "80ed23cf60ceb5f266d1869b4feb9af0d8e1f889b32c8e0f40c8492131067732",
+          "after": "80ed23cf60ceb5f266d1869b4feb9af0d8e1f889b32c8e0f40c8492131067732"
+        },
+        "greedy_matches": true,
+        "generated_token_counts": [
+          64,
+          64
+        ]
+      },
+      "768": {
+        "exact_logits": 116838784,
+        "logit_hashes": {
+          "before": "83a23880e9d04ab771b1cd85edf10a7eebee5f8934e755ccde20d5f4c68e6e35",
+          "after": "83a23880e9d04ab771b1cd85edf10a7eebee5f8934e755ccde20d5f4c68e6e35"
+        },
+        "greedy_matches": true,
+        "generated_token_counts": [
+          64,
+          64
+        ]
+      }
+    },
+    "timing": {
+      "64": {
+        "prefill": {
+          "medians_ms": {
+            "before": 244.35829999999999,
+            "after": 244.46785
+          },
+          "median_paired_ratio": 0.9946805457055308,
+          "stable": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 38.55605,
+            "after": 38.48635
+          },
+          "median_paired_ratio": 0.9859317322465819,
+          "stable": false
+        }
+      },
+      "768": {
+        "prefill": {
+          "medians_ms": {
+            "before": 5843.0183,
+            "after": 3065.8412
+          },
+          "median_paired_ratio": 0.5233851578884123,
+          "stable": true
+        },
+        "decode": {
+          "medians_ms": {
+            "before": 82.9336,
+            "after": 48.4042
+          },
+          "median_paired_ratio": 0.5875120080180658,
+          "stable": true
+        }
+      }
+    }
+  },
+  "opt125m": {
+    "revision": "e3bf7e1695cb08c7963df13dbf144e0d1812717c",
+    "fp32_artifact_bytes": 500975552,
+    "heldout_quality": {
+      "evaluated_tokens": 1016,
+      "perplexity": 66.97385361927735,
+      "pytorch_perplexity": 66.97385619094582,
+      "perplexity_ratio": 0.9999999616019054,
+      "next_token_agreement": 1.0,
+      "leaf_next_token_accuracy": 0.3021653543307087,
+      "pytorch_next_token_accuracy": 0.3021653543307087,
+      "max_abs_logit_error": 7.82012939453125e-05,
+      "all_logits_close": true,
+      "diagnostics": {
+        "logit_tolerance_violations": 0,
+        "max_probability_error": 5.469248993306142e-06,
+        "max_total_variation": 1.0377928935954403e-05,
+        "max_kl_reference_to_leaf": 2.8633598270592445e-10,
+        "mean_kl_reference_to_leaf": 3.6282540247215458e-12
+      }
+    },
+    "timing": {
+      "64": {
+        "prefill": {
+          "stable": true,
+          "paired_ratio": 0.8658749377977304,
+          "medians_ms": {
+            "leaf": 138.60469999999998,
+            "pytorch": 161.64264999997613
+          },
+          "speed_qualified": true
+        },
+        "decode": {
+          "stable": false,
+          "paired_ratio": 0.8994135114880659,
+          "medians_ms": {
+            "leaf": 27.4253,
+            "pytorch": 30.17134999981863
+          },
+          "speed_qualified": false
+        },
+        "boundary_logits_close": true
+      },
+      "768": {
+        "prefill": {
+          "stable": true,
+          "paired_ratio": 1.301870070977341,
+          "medians_ms": {
+            "leaf": 2375.9762,
+            "pytorch": 1821.2808000002951
+          },
+          "speed_qualified": false
+        },
+        "decode": {
+          "stable": true,
+          "paired_ratio": 0.9238901821852525,
+          "medians_ms": {
+            "leaf": 35.87965,
+            "pytorch": 39.79664999997112
+          },
+          "speed_qualified": true
+        },
+        "boundary_logits_close": true
+      }
+    },
+    "prefill_profile_percent": {
+      "64": {
+        "linear_fp32": 94.22520731436566,
+        "attention": 2.6251509630481524
+      },
+      "768": {
+        "linear_fp32": 65.79803133321917,
+        "attention": 31.146637647224274
+      }
+    }
+  },
+  "wheel": {
+    "wheel": "leaf_cpu-0.2.0-py3-none-win_amd64.whl",
+    "wheel_sha256": "103011bcde5cbe310a496f26e393fe7c6bcadc5ba7142051a2c88401347f7831",
+    "cached_pin_generation_matches": true,
+    "compiler_on_path": false,
+    "generated_tokens": 16,
+    "revision": "e3bf7e1695cb08c7963df13dbf144e0d1812717c",
+    "artifact_bytes": 500975552
+  },
+  "tests": {
+    "passed": 1557,
+    "skipped": 21
+  },
+  "entries": [
+    {
+      "path": "check_qwen3.py",
+      "size": 3006,
+      "sha256": "cfd36534c9708706a92900835144f2c9eab8ab3f0c377e97e089b677e2322d78",
+      "original_sha256": "cfd36534c9708706a92900835144f2c9eab8ab3f0c377e97e089b677e2322d78"
+    },
+    {
+      "path": "qwen3-quality.json",
+      "size": 1807,
+      "sha256": "daa6fd98c27a8bc6b4c257ac42c2a51c75c723822f239e2b1bfda2016cb88b7a",
+      "original_sha256": "0f1b7162236a63be76399190de68b3879b59d158c7559aea4b9533bf03371ea8"
+    },
+    {
+      "path": "qwen3-64-paired/comparison.json",
+      "size": 51576,
+      "sha256": "7ce9ef943ede7a2834aebfa95bedb95f40bea51d9afa733dc36de34e93b3e6ea",
+      "original_sha256": "8bb569b90096e733da54937f168bf27595b389cbec97e3c0036f472c96a60208"
+    },
+    {
+      "path": "qwen3-768-paired/comparison.json",
+      "size": 51754,
+      "sha256": "93086b0e5159ee5a5ee3b8ebab9f8e3912f13ff03a91e60c6aff36b4bc0518e7",
+      "original_sha256": "856bf64d7a1fe96cb90452d505f22ff16ac20ec24b699f2490f0c10390e91975"
+    },
+    {
+      "path": "opt125m-quality/quality.json",
+      "size": 1400,
+      "sha256": "9a222f1c40bdd8999e71d0c0e362fbf6ad21828390c061338fa48737409cf467",
+      "original_sha256": "9a222f1c40bdd8999e71d0c0e362fbf6ad21828390c061338fa48737409cf467"
+    },
+    {
+      "path": "opt125m-inspect.json",
+      "size": 806,
+      "sha256": "51576c84af49890230eaab48aeeab6bb2462aed075beb1c8b6d0907045755f1c",
+      "original_sha256": "e02d3bcba10f6bdbac2752b27ff982b89c52ecd9b6ebc6ce9e81bda7b94f576e"
+    },
+    {
+      "path": "opt125m-pinned-quality-retry/quality.json",
+      "size": 18009,
+      "sha256": "6a1e08e88e0d46ade8b8748df8bb95a2b7b00af9f25d5881dce9a535e17c1bbb",
+      "original_sha256": "44710c37342b6605d3fb32c3c7c91779706b3087d09afd71699feaf3a9a249c0"
+    },
+    {
+      "path": "benchmark_opt.py",
+      "size": 5536,
+      "sha256": "5a473f8365f3815878ae8e324237e59e30ee5034eb000ecace0c61a6c08de26c",
+      "original_sha256": "5a473f8365f3815878ae8e324237e59e30ee5034eb000ecace0c61a6c08de26c"
+    },
+    {
+      "path": "opt125m-paired.json",
+      "size": 27685,
+      "sha256": "f30ab777d52a477a71070e17f1ac9455194a45eab58380cca042312d250c6e14",
+      "original_sha256": "bf13bfc0be2c965e31a7e152fc03bceba1548ef6bac5f101fb55ede539fe2d93"
+    },
+    {
+      "path": "opt125m-public-run.json",
+      "size": 1114,
+      "sha256": "adf7935e7562c9965c86c3d0baf247ea2b04160767fe6406495b054d992654cf",
+      "original_sha256": "adf7935e7562c9965c86c3d0baf247ea2b04160767fe6406495b054d992654cf"
+    },
+    {
+      "path": "opt125m-64-profile-final.json",
+      "size": 19125,
+      "sha256": "e7277a7acf45fec24bf88c34a7b455182d5036f20ae955ea75175e58feb5d06d",
+      "original_sha256": "e7277a7acf45fec24bf88c34a7b455182d5036f20ae955ea75175e58feb5d06d"
+    },
+    {
+      "path": "opt125m-768-profile-final.json",
+      "size": 19205,
+      "sha256": "e61627e2998d3a35cd61441eebc47272b7556d8bfdd987fb084ec8b265d195d2",
+      "original_sha256": "e61627e2998d3a35cd61441eebc47272b7556d8bfdd987fb084ec8b265d195d2"
+    },
+    {
+      "path": "wheel-opt-smoke.json",
+      "size": 335,
+      "sha256": "91ddc5a13acf7b3f47ac15fade30bfca81fcf1395b57cb314b6f06330919c914",
+      "original_sha256": "91ddc5a13acf7b3f47ac15fade30bfca81fcf1395b57cb314b6f06330919c914"
+    },
+    {
+      "path": "verify_wheel.py",
+      "size": 2565,
+      "sha256": "932726b4fab77131c0d6898cb28a9607f728f6b9c0645cfe18b17e020ca9d05b",
+      "original_sha256": "932726b4fab77131c0d6898cb28a9607f728f6b9c0645cfe18b17e020ca9d05b"
+    }
+  ],
+  "archive": {
+    "path": "evidence.zip",
+    "bytes": 34043,
+    "sha256": "52edadd43aae2b8574c97ca7371dc2ab3f84cf699661482e5863a41e90ed2b5e"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-16",
+  "archive": "evidence.zip",
+  "targeted_tests": {
+    "tests": 68,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 1,
+    "passed": 67
+  },
+  "native_gemm_outputs_checked": 43456,
+  "files": {
+    "profile.json": "c1953e9023c2f1815074a7db46e7ac577bb6a53cac8a3fdb1114877af07dd6b1",
+    "qualify.py": "f134830d851d44f90dc3753a3cf59c37685c005cf6a47fcb842ab0ea3ce9ff0c",
+    "results.json": "d317164f28b520fe1613accf2df81f8fc992725f98b636a4d19682d6b48b6f3d",
+    "opt_repeat.py": "d19e1c5c76c16cf8f38adb5ceb4a4f037918e08f8cf211ed101c409e7d3939b5",
+    "opt-repeat.json": "072cc18fb343a388d9ad5743daead1d0f71d3f4d9298974e27be440dc6e21973",
+    "verify_two.py": "6839a9be589739460c72251366acaf7c1ea6618387a397e71bdf8f5d871fb2c8",
+    "two-worker-quality.json": "97f5cc1292c9f56952ec9493b31b517670ff7f6886227b9c32523dee2eacaf1c",
+    "verify_bundle.py": "cf80f84cbe12800b506bb33131d1657cc1e7527d2f435049b196a54e00e7ac0d",
+    "wheel-check.json": "2259af9286d82a86d044d4603944b868b0d625e1f56f3241e0e8a9eae79e0750"
+  },
+  "archive_sha256": "f20c8cd8b25d602cba64662b1eaa6371aade2424bdd4a53b6746d5854699f73e"
+}

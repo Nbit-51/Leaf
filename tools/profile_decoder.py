@@ -17,7 +17,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from leaf.affinity import pin_cpu
+from leaf.affinity import pin_cpu, validate_worker_cpus
 from leaf.power import keep_awake
 from tools.decoder_validation import run_native
 from tools.validate_decoder import digest, utc_now, write_record
@@ -74,7 +74,10 @@ def main():
     parser.add_argument("--artifact", type=Path, required=True, help="decoder artifact")
     parser.add_argument("--tokens", type=Path, required=True, help="frozen tokens.json with benchmark_ids")
     parser.add_argument("--threads", type=int, default=1)
-    parser.add_argument("--cpu", type=int)
+    affinity = parser.add_mutually_exclusive_group()
+    affinity.add_argument("--cpu", type=int)
+    affinity.add_argument("--worker-cpus", type=int, nargs="+",
+                          help="Bind each inference worker to its selected CPU")
     parser.add_argument("--runs", type=int, default=11)
     parser.add_argument("--warmup", type=int, default=5)
     parser.add_argument("--output", type=Path, required=True)
@@ -85,6 +88,10 @@ def main():
     args = parser.parse_args()
     if args.runs < 1 or args.warmup < 0 or args.threads < 1:
         parser.error("runs/threads must be positive and warmup nonnegative")
+    try:
+        worker_cpus = validate_worker_cpus(args.worker_cpus, args.threads)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
     if args.fp32_math == "accurate" and args.activation_bits != 32:
         parser.error("Accurate math requires unquantized FP32 activations")
     if args.activation_bits != 32 and not args.default_only:
@@ -99,7 +106,8 @@ def main():
     hashes = {name: digest(path) for name, path in paths.items()}
     record = {"benchmark": "decoder-phase-diagnostics-v1", "measured_at_utc": utc_now(),
               "platform": platform.platform(), "cpu": platform.processor(),
-              "threads": args.threads, "pinned_cpu": args.cpu, "sha256": hashes,
+              "threads": args.threads, "pinned_cpu": args.cpu, "worker_cpus": worker_cpus,
+              "sha256": hashes,
               "prefill_tokens": len(ids) - 1, "decode_tokens": 1,
               "logits": "last_token_only", "runs": args.runs, "warmup": args.warmup,
               "profile_includes_warmup": True, "profile_includes_first_use": True,
@@ -116,7 +124,7 @@ def main():
                 _, measured = run_native(args.executable, args.artifact, [ids], mode="bench",
                                          threads=args.threads, runs=args.runs, warmup=args.warmup,
                                          activation_bits=args.activation_bits, fp32_math=args.fp32_math, capture_profile=True,
-                                         windows_above_normal=sys.platform == "win32")
+                                         windows_above_normal=sys.platform == "win32", worker_cpus=worker_cpus)
             phases = measured["diagnostic_profile"]["timings"]
             if not args.default_only and any(name.startswith("linear_w") for bucket in phases.values() for name in bucket):
                 raise ValueError("Phase comparison requires an FP32 artifact")

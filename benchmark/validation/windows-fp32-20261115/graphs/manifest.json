@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-15",
+  "archive": "evidence.zip",
+  "archive_sha256": "efd4da7a8328891e4a2d74bc1f1261e0a4b003b12a7b0195d0d12b9c53278dcb",
+  "files": {
+    "prepare_vgg.py": "17347bf9494efd78b0dd1c5395962ff5e1f6520cd6fdcfb818005eafb94a67d6",
+    "graphs/vgg-fixture.json": "adf60eaaa683381effe798d18ef523de2c887dc5add2eec3acf49f53629ed37b",
+    "graphs/resnet20/comparison.json": "39d498ac4829cfac5dcdd1b50f7da895e170c0852771ddfe8f442fe55fdbf077",
+    "graphs/vgg11/comparison.json": "ccd774cc0459cc0b32a8c2f96ab7876df8b2b18f6fb93e67a7e1fa4e71a5c655"
+  }
+}

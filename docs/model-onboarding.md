@@ -314,6 +314,30 @@ command latency across six pairs per model.
 The two diagnostic models still matched all six greedy reference continuations.
 [Retained quality, timings and audited inputs](../benchmark/validation/trained-decoder-and-retrieval/20261109/manifest.json)
 
+### Match Ollama's CPU workload
+
+`python -m tools.benchmark_ollama_decoder --help` accepts prompts from 16
+to 1,024 tokens and can run across selected physical cores. Use
+`--prompt-tokens 256 --worker-cpus 0 2 4 6` on a Windows system where those
+CPU indices identify four distinct physical cores. The default remains a
+64-token prompt on CPU 2.
+
+The runner requires an audited FP32 GGUF and a Leaf artifact from the same
+checkpoint. It checks the Ollama backend's token IDs, thread count, context,
+batch sizes, CPU placement and FP32 KV cache. It verifies cached prompt work
+and the number of generated tokens for each measured request. Quality and
+timing gates apply independently to the comparison.
+
+The four-core SmolLM2-360M comparison used 256 uncached prompt tokens and one
+cached decode forward. Leaf and Ollama generated the same text in every
+measured pair. Leaf's observed median paired latency was 1.46× Ollama's for
+prefill and 1.22× for decode. Ollama's timing spread exceeded the limit in
+both phases, and two of eight quality checks failed. PyTorch reproduced
+Leaf's greedy tokens on those two prompts with selected log-probability
+errors of at most `6.58e-6`. Ollama omitted one probability and differed
+from PyTorch by up to `2.62e-4` on the other prompt.
+[SmolLM2 comparison and reference checks](../benchmark/validation/ollama-and-packing/20261111/manifest.json)
+
 ## Dataset and individual-network scope
 
 Text dataset adapters and graph fusion/import/memory-planning checks pass (22
@@ -419,3 +443,148 @@ priority with a 24.6% paired prefill reduction. Qwen's independent repeat
 showed a 22.5% paired prefill reduction and a 1.42× decode spread in one pass.
 Decoder adoption remains pending.
 [Raw samples, quality checks and operation profile](../benchmark/validation/parallel-attention/20261111/manifest.json)
+
+### Shared input packing experiment
+
+The candidate reused packed inputs across the Q/K/V and MLP gate/up
+projections and enabled the existing SIMD transpose. It reproduced all 331
+sampled SciFact vectors bit-for-bit. The isolated packing probe reduced
+paired latency by 73–80% and passed its spread limit at 129, 320 and 1,014
+tokens. End-to-end tests showed a 1.1% paired reduction on the 16-document
+batch and a 3.1% increase on the six-document batch of 711–1,334-token
+inputs. Both runs exceeded the spread limit, so the packing candidate
+remains experimental.
+[Packing samples and candidate patch](../benchmark/validation/ollama-and-packing/20261111/manifest.json)
+
+### Decoder costs by prompt length
+
+The instrumented four-core Windows FP32 baseline spent the following shares
+of prefill time in linear projections and attention.
+
+| Model | Tokens | Linear projections | Attention |
+|---|---:|---:|---:|
+| SmolLM2-360M | 64 | 92.2% | 3.4% |
+| SmolLM2-360M | 768 | 39.1% | 55.1% |
+| Qwen2.5-0.5B | 64 | 88.3% | 4.1% |
+| Qwen2.5-0.5B | 768 | 49.1% | 44.4% |
+
+The native profiler includes warmup and first use. Input packing was around
+1% of prefill. At a 768-token context, projections accounted for 63% and 74%
+of decode on SmolLM2 and Qwen respectively, including 34% and 41% in MLP
+projections. Cached attention accounted for 36% and 25%. Use `python -m tools.profile_decoder --help` with
+`--threads 4 --worker-cpus 0 2 4 6` to collect the same operation breakdown
+where those CPU indices are available.
+
+The token-panel scheduling prototype produced bit-identical logits on both
+trained models. It reduced paired 768-token prefill latency by 9.0% on SmolLM2
+and 8.3% on the Qwen repeat, with stable prefill samples in both. One Qwen
+baseline decode pass reached 1.261× spread against the 1.25× limit, so decoder
+adoption remains pending.
+
+In a separate five-sample Qwen decode counter replay per build, operation
+and token counts matched. Median wall time was 82.71 ms for the baseline
+and 86.22 ms for the candidate. Median process CPU time was 250 ms for both,
+median cycles fell from 550.5 million to 542.0 million, and every sample
+reported zero page faults. The earlier 112 ms sample did not recur. Hardware
+cache misses were not measured.
+
+A second prototype combined token-panel scheduling with parallel attention
+heads. On the matched FP32 SmolLM2-360M workload against Ollama 0.40.4,
+paired prefill was 5.3% faster (2,251 vs 2,377 ms median) and paired decode
+was 12.5% slower (56.36 vs 49.99 ms median). The screen used two balanced
+pairs with five samples per pass, a 768-token prompt and two generated tokens.
+Both phases met the spread limit. All timed generated text matched, and
+the combined build matched 37,797,888 prior Leaf logits bit-for-bit.
+The Ollama quality gate passed six of eight checks. This screen supports
+investigating the remaining decode gap before drawing an overall speed
+conclusion.
+
+[Profiles, kernel shapes and raw timing samples](../benchmark/validation/panel-scheduling/20261112/manifest.json)
+
+### SmolLM2 with a 64-token continuation
+
+The matched runner now accepts `--generated-tokens 64` and verifies 63 cached
+decode forwards per request. On four physical Windows CPU cores, the same
+FP32 prototype and Ollama ran six balanced pairs with 11 measured requests
+per pass. Each request processed a 768-token prompt and generated 64 tokens.
+All timed continuations matched.
+
+| Backend phase | Leaf FP32 prototype | Ollama FP32 | Paired Leaf / Ollama |
+|---|---:|---:|---:|
+| Prefill | 2,247 ms | 2,321 ms | 0.970× |
+| Cached decode | 3,569 ms | 3,206 ms | 1.111× |
+| Combined phase median | 5,816 ms | 5,540 ms | |
+
+One Ollama pass exceeded the spread limit in both phases, and six of eight
+Ollama probability checks passed. Those gates keep this comparison diagnostic.
+The longer response shows how the cached decode gap can outweigh the prefill
+gain. The combined phase excludes process startup, model loading and HTTP.
+
+The follow-up prototype keeps eligible weights in their original BF16 storage
+and computes with FP32. For long prefill, it expands at most 32 MiB of one
+projection into reusable FP32 scratch before distributing token panels across
+workers. Cached decode reads the original compact weights directly. An audit
+checked every stored value and found exact logits and 64-token continuations
+against the FP32 prototype on both trained checkpoints.
+
+| Model | FP32-storage artifact | Original-BF16 artifact | Bit-identical prompt logits |
+|---|---:|---:|---:|
+| SmolLM2-360M | 1,447,312,000 bytes | 723,794,560 bytes | 37,748,736 |
+| Qwen2.5-0.5B | 1,976,158,464 bytes | 988,236,032 bytes | 116,686,848 |
+
+### Source-BF16 SmolLM2 versus Ollama
+
+The source-BF16 prototype used the same 768-token prompt and 64-token
+continuation workload. The value audit verified that the compact weights
+expand to the same FP32 values as the audited Ollama checkpoint. The run used
+six balanced pairs and 66 measured requests per runtime on four physical
+Windows CPU cores.
+
+| Backend phase | Leaf source-BF16 prototype | Ollama FP32 | Paired Leaf / Ollama |
+|---|---:|---:|---:|
+| Prefill | 2,296 ms | 2,331 ms | 0.985× |
+| Cached decode | 2,138 ms | 3,250 ms | 0.654× |
+| Combined phase median | 4,437 ms | 5,606 ms | |
+
+All timed continuations matched. Leaf passed every timing spread check.
+Ollama exceeded the pooled spread limit in both phases and passed six of
+eight probability checks. One response omitted a probability, and one
+maximum absolute difference was `2.65e-4` against the `2e-4` limit.
+The paired prefill reduction was 1.49%, below the 2% threshold. These
+conditions keep the direct comparison diagnostic.
+
+[Raw 64-token timings and weight checks](../benchmark/validation/cpu-demo/20261115/manifest.json)
+
+## OPT-125M on Windows CPU
+
+The default OPT-125M Hub revision provides configuration and tokenizer files.
+Use the pinned [safetensors revision](https://huggingface.co/facebook/opt-125m/commit/e3bf7e1695cb08c7963df13dbf144e0d1812717c)
+for Leaf. The runtime reads the published byte-level BPE vocabulary and merges
+and applies the configured beginning-of-sequence token.
+
+```powershell
+$rev = 'e3bf7e1695cb08c7963df13dbf144e0d1812717c'
+leaf inspect facebook/opt-125m --revision $rev
+leaf run facebook/opt-125m --revision $rev --bits 32 --fp32-math accurate --prompt "Once upon a time, a small robot found" --max-tokens 16
+```
+
+Add `--offline` after the first successful run to select the same cached
+revision. Leaf matched all 1,016 WikiText-2 next-token predictions and all
+six greedy reference continuations. All logits passed the existing tolerance,
+with a maximum absolute error of `7.82e-5`.
+
+The timing comparison used accurate FP32 Leaf and FP32 PyTorch SDPA on
+one pinned Windows CPU core in Better Battery mode. Each workload used six
+balanced pairs, five measurements per pass, and one cached decode forward.
+The prefill and decode boundary logits passed the tolerance at both lengths.
+
+| Prompt tokens | Prefill Leaf / PyTorch | Paired prefill result | Decode Leaf / PyTorch | Paired decode result |
+|---:|---:|---|---:|---|
+| 64 | 138.60 / 161.64 ms | 13.4% lower, stable | 27.43 / 30.17 ms | 10.1% lower, spread exceeded |
+| 768 | 2,375.98 / 1,821.28 ms | 30.2% higher, stable | 35.88 / 39.80 ms | 7.6% lower, stable |
+
+The instrumented Leaf run attributed 65.8% of long prefill to FP32 linear
+projections and 31.1% to attention. At 64 tokens those shares were 94.2% and
+2.6%. These percentages describe Leaf's own work and include warmup.
+
+[Small-model fidelity, paired timing samples and wheel checks](../benchmark/validation/cpu-model-suite/20261115/manifest.json)

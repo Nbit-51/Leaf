@@ -1,10 +1,12 @@
 import json
+import sys
 from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 from tools import embed_dataset
+from leaf import cli
 
 
 @pytest.fixture
@@ -42,6 +44,19 @@ def test_resumes_in_row_order_and_reuses_finished_batches(job):
     assert result['complete'] and result['rows'] == 5 and result['new_chunks'] == 2
     np.testing.assert_array_equal(np.load(args.directory / 'embeddings.npy'), [[n, n + 1] for n in range(5)])
     assert embed_dataset.index_dataset(args)['new_chunks'] == 0
+    assert calls == [[0, 1], [2, 3], [4]]
+
+
+def test_public_index_command_resumes_the_existing_checkpoint(job, monkeypatch, capsys):
+    args, calls, _ = job
+    base = ["leaf", "index", args.model, "--offline", "--dataset", str(args.dataset),
+            "--directory", str(args.directory), "--task", "raw", "--chunk-size", "2"]
+    monkeypatch.setattr(sys, "argv", [*base, "--max-new-chunks", "1"])
+    assert cli.main() == 0
+    assert json.loads(capsys.readouterr().out)["complete"] is False
+    monkeypatch.setattr(sys, "argv", base)
+    assert cli.main() == 0
+    assert json.loads(capsys.readouterr().out)["new_chunks"] == 2
     assert calls == [[0, 1], [2, 3], [4]]
 
 

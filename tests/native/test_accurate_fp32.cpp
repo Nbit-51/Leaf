@@ -30,6 +30,13 @@ int main() {
                     if (vector) {
                         leaf::experiments::gemm_tree_sum(w.data(), rows, columns, ws, panels, reference.data(), ys, b, true);
                         if (std::memcmp(result.data(), reference.data(), result.size() * sizeof(float))) return 1;
+#if defined(__x86_64__) && defined(__GNUC__)
+                        std::fill(reference.begin(), reference.end(), 12345.0f);
+                        for (std::size_t first = 0; first < panels.panels(); first += 2)
+                            leaf::kernels::accurate_fp32_detail::gemm(w.data(), rows, columns, ws, panels,
+                                reference.data(), ys, b, first, first + 2);
+                        if (std::memcmp(result.data(), reference.data(), result.size() * sizeof(float))) return 6;
+#endif
                     }
                     for (unsigned t = 0; t < tokens; ++t) {
                         for (unsigned r = 0; r < rows; ++r) {
@@ -43,13 +50,15 @@ int main() {
                     }
                     // Exercise the portable numerical fallback independently.
                     leaf::kernels::gemm_token_panels_f32_accurate(w.data(), rows, columns, ws, panels, result.data(), ys, b, false);
-                    for (unsigned t = 0; t < tokens; ++t)
+                    for (unsigned t = 0; t < tokens; ++t) {
                         for (unsigned r = 0; r < rows; ++r) {
                             double dot = 0;
                             for (unsigned k = 0; k < columns; ++k) dot += double(w[r * ws + k]) * x[t * columns + k];
                             float expected = static_cast<float>(dot) + (b ? b[r] : 0);
-                            if (result[t * ys + r] != expected) return 4;
+                            if (std::memcmp(&result[t * ys + r], &expected, sizeof(float))) return 4;
                         }
+                        if (result[t * ys + rows] != 12345 || result[t * ys + rows + 1] != 12345) return 7;
+                    }
                 }
             }
     const float rms[] = {10000.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};

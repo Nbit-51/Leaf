@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import struct
 import subprocess
@@ -72,9 +73,36 @@ def executable(cache: Path) -> Path:
     return destination
 
 
+def prepared_pinned_snapshot(model: str, revision: str | None, cache: Path, plan: Path | None) -> Path | None:
+    # Use only immutable commits and unambiguous Hub cache directory names.
+    name = r"[A-Za-z0-9_]+(?:[.-][A-Za-z0-9_]+)*"
+    if revision is None or not re.fullmatch(r"[0-9a-f]{40}", revision):
+        return None
+    if (not re.fullmatch(f"{name}/{name}", model) or model.endswith(".git") or
+            any(len(part) > 96 for part in model.split("/"))):
+        return None
+    snapshot = cache / "hub" / ("models--" + model.replace("/", "--")) / "snapshots" / revision
+    if not all((snapshot / file).is_file() for file in ("config.json", "tokenizer_config.json")):
+        return None
+    if not ((snapshot / "tokenizer.json").is_file() or
+            all((snapshot / file).is_file() for file in ("vocab.json", "merges.txt"))):
+        return None
+    weights = list(snapshot.glob("*.safetensors"))
+    if not weights or not all(weight.is_file() for weight in weights):
+        return None
+    # The artifact key binds the config and the local weight inventory, so
+    # a partial download or changed snapshot goes through the usual resolver.
+    if (model_directory(snapshot, cache, plan) / "decoder-32.leaf").is_file():
+        return snapshot
+    return None
+
+
 def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | None = None,
-                  metadata_only: bool = False, before_weights=None) -> Path:
+                  metadata_only: bool = False, before_weights=None, *, revision: str | None = None,
+                  prefer_prepared_fp32: bool = False) -> Path:
     def local_snapshot(path):
+        if revision is not None:
+            raise ValueError("--revision applies to a Hub model ID, not a local snapshot")
         if before_weights is not None:
             validate_model_generation(path, plan)
             before_weights()
@@ -88,10 +116,17 @@ def resolve_model(model: str, cache: Path, offline: bool = False, plan: Path | N
         model = json.loads(aliases.read_text()).get(model, model)
         if Path(model).is_dir():
             return local_snapshot(Path(model))
+    if offline and prefer_prepared_fp32 and not metadata_only:
+        prepared = prepared_pinned_snapshot(model, revision, cache, plan)
+        if prepared is not None:
+            validate_model_generation(prepared, plan)
+            if before_weights is not None:
+                before_weights()
+            return prepared
     from huggingface_hub import snapshot_download
     from tools.decoder_plan import load_snapshot_plan
     # Check configuration/capabilities before fetching large weight shards.
-    metadata = snapshot_download(model, cache_dir=cache / "hub", local_files_only=offline,
+    metadata = snapshot_download(model, revision=revision, cache_dir=cache / "hub", local_files_only=offline,
                                  allow_patterns=["config.json", "generation_config.json"])
     if metadata_only:
         return Path(metadata)
@@ -108,7 +143,8 @@ def inspect_model(args):
     import math
     from tools.decoder_plan import load_snapshot_plan, tensor_shapes
 
-    snapshot = resolve_model(args.model, cache_root(), args.offline, metadata_only=True)
+    snapshot = resolve_model(args.model, cache_root(), args.offline, metadata_only=True,
+                             revision=getattr(args, "revision", None))
     source = json.loads((snapshot / "config.json").read_text(encoding="utf-8"))
     record = dict(model=args.model, task="generation", architecture=source.get("model_type"),
                   configuration_supported=False, weights_verified=False, timing_qualified=False,
@@ -287,16 +323,50 @@ def prepare(snapshot: Path, directory: Path, bits: int, plan: Path | None = None
     return artifact
 
 
+def legacy_opt_tokenizer(snapshot: Path, config: dict):
+    """Load the byte-level BPE files shipped by older OPT snapshots."""
+    from tokenizers import AddedToken, Tokenizer, decoders, models, pre_tokenizers, processors
+
+    model_path = snapshot / "config.json"
+    vocab, merges = snapshot / "vocab.json", snapshot / "merges.txt"
+    if (not model_path.is_file() or not vocab.is_file() or not merges.is_file() or
+            json.loads(model_path.read_bytes()).get("model_type") != "opt" or
+            config.get("tokenizer_class", "GPT2Tokenizer") not in ("GPT2Tokenizer", "GPT2TokenizerFast")):
+        raise RuntimeError("A tokenizer.json is required for this decoder")
+    tokenizer = Tokenizer(models.BPE.from_file(str(vocab), str(merges)))
+    tokenizer.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=config.get("add_prefix_space", False))
+    tokenizer.decoder = decoders.ByteLevel()
+    tokens = {}
+    for key in ("unk_token", "bos_token", "eos_token", "pad_token"):
+        value = config.get(key)
+        if isinstance(value, str):
+            value = AddedToken(value)
+        elif isinstance(value, dict):
+            value = AddedToken(**{k: v for k, v in value.items() if k != "__type"})
+        elif value is not None:
+            raise ValueError(f"Invalid OPT {key} tokenizer metadata")
+        if value is not None:
+            if tokenizer.token_to_id(value.content) is None:
+                raise ValueError(f"OPT {key} is missing from the tokenizer vocabulary")
+            tokens[key] = value
+    tokenizer.add_special_tokens(list(tokens.values()))
+    bos = tokens["bos_token"].content if config.get("add_bos_token") and "bos_token" in tokens else None
+    eos = tokens["eos_token"].content if config.get("add_eos_token") and "eos_token" in tokens else None
+    special = [(token, tokenizer.token_to_id(token)) for token in dict.fromkeys((bos, eos)) if token is not None]
+    if special:
+        tokenizer.post_processor = processors.TemplateProcessing(
+            single=[token for token in (bos, "$A", eos) if token is not None], special_tokens=special)
+    return tokenizer
+
+
 def encode_prompt(snapshot: Path, prompt: str, raw: bool = False):
     from tokenizers import Tokenizer
     from jinja2 import TemplateError
     from jinja2.sandbox import SandboxedEnvironment
     tokenizer_path = snapshot / "tokenizer.json"
-    if not tokenizer_path.is_file():
-        raise RuntimeError("A tokenizer.json is required for the lightweight tokenizer runtime")
-    tokenizer = Tokenizer.from_file(str(tokenizer_path))
     config_path = snapshot / "tokenizer_config.json"
     config = json.loads(config_path.read_text()) if config_path.is_file() else {}
+    tokenizer = Tokenizer.from_file(str(tokenizer_path)) if tokenizer_path.is_file() else legacy_opt_tokenizer(snapshot, config)
     if config.get("legacy") is False and tokenizer.pre_tokenizer is None and tokenizer.normalizer is not None:
         # Older SentencePiece-style JSON applies Prepend to every fragment
         # split around an added special token. Nonlegacy tokenization prepends
@@ -379,8 +449,9 @@ def run(args):
         check_decoder_options(runtime, source_bf16=source_matrices, source_bf16_head=source_head,
                               fp32_math=fp32_math, worker_cpus=worker_cpus)
     # Reject unsupported metadata before building, and setup failures before weights.
-    snapshot = resolve_model(args.model, cache, args.offline, args.plan,
-                             before_weights=prepare_runtime)
+    prepared_fp32 = not source_storage and (getattr(args, "bits", "auto") == "32" or fp32_math == "accurate")
+    snapshot = resolve_model(args.model, cache, args.offline, args.plan, before_weights=prepare_runtime,
+                             revision=getattr(args, "revision", None), prefer_prepared_fp32=prepared_fp32)
     directory = model_directory(snapshot, cache, args.plan)
     if source_storage:
         bits, activation_bits = 32, 32
@@ -441,7 +512,8 @@ def run(args):
 
 def optimize(args):
     cache = cache_root()
-    snapshot = resolve_model(args.model, cache, args.offline, args.plan)
+    snapshot = resolve_model(args.model, cache, args.offline, args.plan,
+                             revision=getattr(args, "revision", None))
     validate_model_generation(snapshot, args.plan)
     directory = model_directory(snapshot, cache, args.plan)
     runtime = executable(cache)
@@ -490,6 +562,18 @@ def add_source_storage_options(parser):
                          help="retain original BF16 output/tied embedding storage with FP32 compute; F32 sources stay F32")
 
 
+def add_index_arguments(parser):
+    parser.add_argument("model", help="embedding model ID or local snapshot")
+    parser.add_argument("--dataset", required=True, type=Path, help="JSONL documents in output row order")
+    parser.add_argument("--directory", required=True, type=Path, help="checkpoint and output directory")
+    parser.add_argument("--text-column", default="text")
+    parser.add_argument("--task", choices=("document", "query", "raw"), default="document")
+    parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--chunk-size", type=int, default=128)
+    parser.add_argument("--max-new-chunks", type=int, help="pause after this many newly completed batches")
+    parser.add_argument("--offline", action="store_true")
+
+
 def main():
     parser = argparse.ArgumentParser(prog="leaf", description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -524,6 +608,12 @@ def main():
     embedder.add_argument("--threads", type=int, default=1)
     embedder.add_argument("--output", type=Path, required=True, help="new .npy output matrix")
     embedder.add_argument("--metrics", type=Path)
+    indexer = commands.add_parser("index", help="embed a document collection in resumable batches")
+    add_index_arguments(indexer)
+    graph = commands.add_parser("infer", help="run a supported single-input FP32 ONNX graph")
+    graph.add_argument("model", type=Path, help="local ONNX model")
+    graph.add_argument("--input", type=Path, required=True, help="FP32 .npy input tensor")
+    graph.add_argument("--output", type=Path, required=True, help="new .npy output tensor")
     runner = commands.add_parser("run", help="prepare cached weights and generate with native CPU execution")
     runner.add_argument("model", help="local snapshot, Hugging Face repository ID, or registered alias")
     runner.add_argument("--prompt")
@@ -560,6 +650,8 @@ def main():
     optimizer.add_argument("--protected-int8", action="store_true", help="also test FP32 embeddings/output with INT8 linear weights")
     optimizer.add_argument("--grouped-int8", action="store_true", help="also test 64-column grouped INT8 weights/activations")
     optimizer.add_argument("--grouped-int8-smooth", action="store_true", help="also test calibrated grouped INT8; requires calibration data")
+    for command in (inspector, runner, evaluator, optimizer):
+        command.add_argument("--revision", help="Hugging Face branch, tag or commit for a decoder model ID")
     alias = commands.add_parser("alias", help="register a short name for a snapshot or repository")
     alias.add_argument("name"); alias.add_argument("model")
     args = parser.parse_args()
@@ -583,6 +675,12 @@ def main():
             if args.max_tokens < 1 or not 1 <= args.threads <= 64:
                 parser.error("max-tokens must be positive and threads must be 1..64")
             run(args)
+        elif args.command == "index":
+            from tools.embed_dataset import run_index
+            run_index(args)
+        elif args.command == "infer":
+            from leaf.graph import infer
+            infer(args.model, args.input, args.output)
         elif args.command == "optimize":
             if not 1 <= args.threads <= 64:
                 parser.error("threads must be 1..64")

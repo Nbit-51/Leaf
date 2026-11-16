@@ -174,6 +174,33 @@ int main() {
         if(!std::isnan(y[0])) throw std::runtime_error("masked nonfinite value behavior changed");
 #if defined(__x86_64__) && defined(__GNUC__)
         if (__builtin_cpu_supports("avx2")) {
+            // A sliding window can begin or end at any SIMD lane. Keep
+            // the exp grouping and final scalar tail exactly as before.
+            for (std::size_t keys : {19, 64}) {
+                constexpr std::size_t dim = 64, queries = 8;
+                std::vector<float> query(queries * dim), key(keys * dim), value(key.size());
+                for (auto* x : {&query, &key, &value}) for (auto& f : *x) f = draw(random);
+                const std::size_t shape[4] = {1, 1, queries, keys};
+                std::vector<float> before(query.size()), after(query.size());
+                for (std::size_t window : {1, 4, 7, 16, 64}) {
+                    for (std::size_t offset : {0, 4, 11}) {
+                        std::vector<float> mask(queries * keys);
+                        for (std::size_t q = 0; q < queries; ++q) {
+                            const auto end = std::min(keys, offset + q + 1);
+                            const auto begin = end - std::min(window, end);
+                            std::fill_n(mask.data() + q * keys + begin, end - begin, 1.0f);
+                        }
+                        leaf::kernels::attention_vector_detail::attend<false>(
+                            query.data(), key.data(), value.data(), mask.data(), before.data(),
+                            1, 1, 1, queries, keys, keys, dim, shape, .125f, true);
+                        leaf::kernels::attention_vector_detail::attend(
+                            query.data(), key.data(), value.data(), mask.data(), after.data(),
+                            1, 1, 1, queries, keys, keys, dim, shape, .125f, true);
+                        if (std::memcmp(before.data(), after.data(), after.size() * sizeof(float)))
+                            throw std::runtime_error("causal/window softmax span changed output bits");
+                    }
+                }
+            }
             for (float special : {-0.0f, std::numeric_limits<float>::denorm_min(), INFINITY, -INFINITY, NAN}) {
                 for (int rounding : {FE_TONEAREST, FE_DOWNWARD, FE_UPWARD, FE_TOWARDZERO}) {
                     const int saved_rounding = std::fegetround();

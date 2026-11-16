@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-16",
+  "archive": "evidence.zip",
+  "archive_sha256": "22900ffed529aed7e376775fa9cce026f7d500c389a8adc701148c349dbb7c68",
+  "targeted_tests_passed": 209,
+  "files": {
+    "comparison.json": "32ea3d18ec92e686ddb327e8ae8c8bbdbfa4266d4b2df5b2a93f18bd1876c1e0",
+    "compare.py": "683aa31be2c2a0e3c9d5685aafdcaa0b1708f6a2f7207b5140b51e19c686a477"
+  }
+}
