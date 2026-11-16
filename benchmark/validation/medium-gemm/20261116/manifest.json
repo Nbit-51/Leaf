@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-16",
+  "archive": "evidence.zip",
+  "files": {
+    "comparison.json": "60353be369f8a42935f1a3fbac398532ee4eb375974383aa842bd350cdd5a44e",
+    "length-sweep.json": "7736abc538480c555ee869277738b490af62eb887c2e933d34006d0e48affa8e",
+    "narrow.json": "600752b96adeb6d9f33c8148d526e94ea39d8eadce2be1b7c364cc653a262645",
+    "compare.py": "5802e58532467a73765e56d842b54fce495171b461bd9e7ca3262d4ecd80ad16",
+    "sweep.py": "e991b9465914589b5367c1267c21a692ccad118d031b57790f7e679a7ef9e6ff",
+    "confirm.py": "1b07cc12533f8f9222451dd9a528c38d406102eb58c1ed938bca7d86c5644d23",
+    "narrow.py": "c2c57c98269adbdbdc2e56e2e077ef5d7bdf2001168358c034f950b8c85f3e21",
+    "batched.patch": "a3b563a82d13f74a730fd8234de2180280ff92f737bd000ebb5846d48f6befdb",
+    "kblocked.patch": "a802c7031c83796fd4da568e9b0eafc03b1174291fa66dee74742938a361cf12",
+    "narrow.patch": "a40f177059462eeda7e3a3dcbc57b7417e5118808321691b8d9d5a5df10ae995"
+  },
+  "archive_sha256": "d48f16bf7ce356e9c6d91154072f9aed51b39aa49e614aedcf34f0d189a78322"
+}

@@ -103,3 +103,85 @@ continuation. Across six Leaf-only timing pairs, pooled prefill went from
 and decode missed the spread gate. The attention-only candidate also remains
 outside production dispatch.
 [Candidate patch, profiles and raw samples](../benchmark/validation/ollama-mid-prefill/20261116/manifest.json)
+
+## MLP GEMM across prompt lengths
+
+Two candidates keep the existing attention policy and cached single-token
+kernel. They change only fast AVX2/FMA MLP projections with source-BF16
+matrices at 128–767 prompt tokens on the four-worker policy. Both expand
+up to 48 output rows into worker-local FP32 scratch. **Batched** keeps
+the full-K row-reuse kernel. **K-blocked** uses the existing 256-column tile
+and carries its accumulators across tiles in the original FMA order. This
+isolates the effect of blocking from larger conversion batches.
+
+The native token-panel test passed. The two candidates matched over
+103 million full logits against the unchanged Leaf build, spanning
+127, 128 and 256 prompt tokens plus one cached step on SmolLM2 and Qwen.
+The tested greedy continuations also matched. Timing used AC power,
+the existing Better Battery mode, and the same four physical P-cores.
+The runs below compare Leaf builds with profiling disabled.
+
+### Six balanced rounds at 256 tokens
+
+| Model | Existing Leaf prefill p50 | Batched p50 / paired ratio | K-blocked p50 / paired ratio |
+| --- | ---: | ---: | ---: |
+| SmolLM2-360M | 979.68 ms | 953.01 ms / 0.978 | 954.88 ms / 0.976 |
+| Qwen2.5-0.5B | 1,092.01 ms | 1,319.34 ms / 0.947 | 1,119.86 ms / 0.990 |
+
+Each ordering of the three binaries ran once, with two warmups and five
+samples per pass. A paired ratio is the median of the candidate-to-baseline
+ratios within rounds. The Qwen batched result changes direction between
+that metric and pooled p50, and neither candidate passes the existing
+prefill or decode gates. The reported decode ratios ranged from 0.984
+to 1.127 despite unchanged single-token dispatch.
+
+### Prompt-length sweep
+
+Each model used prefixes of the same recorded token stream. Every length
+had two opposite-order rounds with one warmup and five measured samples
+per pass. The table reports paired prefill ratios relative to unchanged
+Leaf. Asterisks mark comparisons where both phases met the spread check.
+
+| Prompt tokens | SmolLM2 batched | SmolLM2 K-blocked | Qwen batched | Qwen K-blocked |
+| ---: | ---: | ---: | ---: | ---: |
+| 64 (inactive) | 0.813 | 1.147 | 1.196 | 1.193 |
+| 128 | 0.948* | 0.998* | 0.949* | 0.950* |
+| 256 | 0.986 | 0.995 | 0.957* | 0.943* |
+| 384 | 1.330 | 1.061 | 0.732 | 0.624 |
+| 512 | 1.186 | 0.837 | 0.868 | 1.158 |
+| 768 (inactive) | 1.195 | 1.001* | 1.218 | 0.905 |
+
+Both models showed about 5% lower prefill with batching at 128 tokens,
+where the spread checks passed. All active comparisons at 384 and 512
+tokens missed the spread check. Timing moved at 64 and 768 tokens as
+well, where the candidate dispatch was inactive. The sweep alone cannot
+attribute the longer-length differences to GEMM.
+
+### Narrow batching confirmation
+
+The final candidate restricts batching to 128–192 tokens and caps the
+FP32 scratch at 1 MiB per worker. Both models matched full baseline logits
+at 127, 128, 160, 192 and 193 tokens plus a cached step. Each also matched the
+greedy continuation from a 160-token prefix.
+
+Each cell used four balanced pairs, with two warmups and five samples per
+pass. AC and Better Battery checks passed throughout. Neither phase passed
+the all-pass and pooled spread checks in any cell, using the existing
+p90/p10 limit of 1.25.
+
+| Model | Prompt tokens | Prefill p50 before → after | Paired prefill ratio | Paired decode ratio |
+| --- | ---: | ---: | ---: | ---: |
+| SmolLM2-360M | 128 | 426.89 → 390.83 ms | 0.969 | 1.003 |
+| SmolLM2-360M | 160 | 494.05 → 453.81 ms | 0.971 | 0.995 |
+| SmolLM2-360M | 192 | 689.61 → 667.81 ms | 0.977 | 0.989 |
+| Qwen2.5-0.5B | 128 | 646.21 → 622.34 ms | 0.969 | 1.023 |
+| Qwen2.5-0.5B | 160 | 826.87 → 791.22 ms | 0.961 | 1.011 |
+| Qwen2.5-0.5B | 192 | 1,009.56 → 714.52 ms | 0.653 | 0.800 |
+
+The 128-token case showed lower paired prefill in both campaigns and both
+models, but its confirmation missed the gate. The large observed Qwen
+difference at 192 tokens also included a large change in cached decode, where
+dispatch was identical. All three candidates stay outside production. No
+fresh Ollama comparison or cross-runtime speed claim follows from these runs.
+
+[Candidate patches, harnesses and raw samples](../benchmark/validation/medium-gemm/20261116/manifest.json)
