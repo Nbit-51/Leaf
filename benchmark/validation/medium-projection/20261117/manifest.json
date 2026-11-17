@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-17",
+  "archive": "evidence.zip",
+  "files": {
+    "projection-comparison.json": "3c0ab760282186d414cababae93c431bd2fe09d9364c226f931a20536af6085f",
+    "aa-counters.json": "0eb2e5c7b75c6d8d193200cece4fde5f3d8721049aac7bdfd76f92128546f59a",
+    "warmup-faults.json": "eff46b38d72638071d51ba821a622fd788653057e16d1115c5760c512b131862",
+    "placement-counters.json": "c2790f70a9c5ca546e23aa332fe286bc7f9218d48a44f806122050ba9b6668a4",
+    "compare.py": "a8b0a14321c7cc62afaf3e50c45244d28dce53f7326253378eb815dde338ca2c",
+    "aa_counters.py": "3f7972ed7b48789fa9732b470b51a2f385fee240d18fce4510036de9944b50bc",
+    "warmup_faults.py": "2d61643709f0292d77d8d3f103312dd393786d03966c7748b5fd0a01e5b2de57",
+    "placement_counters.py": "6ef2c70592df95ca5c16d62f702e942d4e55e769aa4a9c2da88d1e67a561825d",
+    "projection-384.patch": "f9094a0641eec5a15dd29c41fecc1b4fe3b8a0d497aee679447b9404a97189fc",
+    "summarize.py": "0f3169c6228fa8579cfba9272ffa38544cd82e1bf3d6b139aa875dc6c22a122a"
+  },
+  "archive_sha256": "90526bde6a1bb20d673f29d35830c6c05127d7972ebdfa6cf25e8d94e9d5511d"
+}

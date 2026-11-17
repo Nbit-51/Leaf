@@ -185,3 +185,105 @@ dispatch was identical. All three candidates stay outside production. No
 fresh Ollama comparison or cross-runtime speed claim follows from these runs.
 
 [Candidate patches, harnesses and raw samples](../benchmark/validation/medium-gemm/20261116/manifest.json)
+
+## November 17 projection-only scheduling and timing control
+
+This candidate starts the existing BF16 weight-expansion and token-panel
+worker path at 384 tokens instead of 768. Attention retains its existing
+768-token cutoff, and cached one-token decode retains its existing kernel.
+SmolLM2-360M and Qwen2.5-0.5B matched 463,708,928 full logits bit-for-bit
+across 383, 384, 767 and 768 prompt tokens plus one cached token, and matched
+the tested greedy continuation.
+
+Each round launched the same baseline executable under two labels and ran
+the candidate once. The three launches shared the source-BF16 artifact,
+input and process affinity (logical CPUs 0, 2, 4 and 6). Each launch used
+one warmup and five measured samples. The 384- and 767-token tests used
+two reversed orders, and the 512-token test used four orders. AC and
+Better Battery checks passed. Every sample was retained.
+
+| Model | Prompt tokens | Candidate / first baseline | Candidate / baseline repeat | Largest same-binary prefill swing |
+| --- | ---: | ---: | ---: | ---: |
+| SmolLM2-360M | 384 | 1.310 | 1.035 | 1.809× |
+| SmolLM2-360M | 512 | 0.952 | 0.960 | 1.320× |
+| SmolLM2-360M | 767 | 0.841 | 0.987 | 1.595× |
+| Qwen2.5-0.5B | 384 | 0.958 | 1.097 | 1.163× |
+| Qwen2.5-0.5B | 512 | 1.346 | 1.272 | 1.325× |
+| Qwen2.5-0.5B | 767 | 0.846 | 0.914 | 1.608× |
+
+Candidate ratios are medians of within-round prefill ratios. The same-binary
+column reports the largest slower/faster ratio between the two baseline
+launches in a round. For example, the first 384-token SmolLM2 round timed
+the same executable at 1,695 and 3,067 ms. Same-binary cached decode reached
+a 2.061× swing at 767 tokens. Neither phase met the existing spread check at
+any tested length. Production dispatch stays at 768. These were Leaf-only
+comparisons.
+
+### Page-fault follow-up
+
+A separate instrumented run launched the same SmolLM2 baseline three
+times at 384 tokens. Prefill medians were 1,418.96, 1,417.10 and 1,427.33 ms.
+All 15 measured prefills fell between 1,409.13 and 1,442.15 ms. Process cycle
+medians were 7.909, 7.891 and 7.893 billion. Each launch recorded 11 faults
+on its first measured prefill and zero faults in every later prefill.
+All measured decode samples recorded zero faults. These process counters
+include both soft and hard faults.
+
+The earlier slowdown did not recur in the instrumented window. The
+counter run shows a repeatable first-sample fault pattern and supplies no
+fault attribution for the earlier timing swing. A previous Windows trace
+observed changes in processor power-management profiles during a timing
+swing under a different workload. The unchanged Better Battery mode in
+this run alone cannot identify which processor policy or wait contributed.
+For future comparisons, retain the two baseline launches within each
+candidate round and report their drift alongside any candidate ratio.
+An attribution trace must capture an actual slow sample.
+
+[Raw samples, harness and candidate patch](../benchmark/validation/medium-projection/20261117/manifest.json)
+
+### Warmup isolates startup faults, while latency still varies
+
+A second SmolLM2 diagnostic used the same baseline binary, 384-token
+prompt, source-BF16 artifact and four-CPU mask. It rotated zero, one and
+three warmups across nine fresh launches. Each launch executed nine total
+iterations. AC and the existing Better Battery mode checks passed.
+
+| Warmups | Prefill faults observed by absolute iteration | Zero-fault measured prefills | Zero-fault prefill range |
+| ---: | --- | ---: | ---: |
+| 0 | Iteration 1: 193,922–193,932. Iteration 2: 5–11. Iteration 3: 0–1. | 19 of 27 | 1,403–3,502 ms |
+| 1 | Iteration 2: 5–11. Later iterations: zero. | 21 of 24 | 1,548–2,234 ms |
+| 3 | Zero in every measured iteration. | 18 of 18 | 1,447–3,545 ms |
+
+The aggregate Windows fault count does not separate demand-zero and other
+soft faults from hard faults. Three warmups moved the observed startup
+faults outside the measured window. The same-binary prefill slowdown still
+reproduced with zero faults. In one launch, a 1,945.9 ms sample used about
+3,422 ms of aggregate process CPU time, while a 3,545.0 ms sample used
+3,375 ms. The overlap indicated by process CPU time divided by wall time
+fell from about 1.76 to 0.95 CPU-equivalents. That is consistent with lower
+worker concurrency. Process-wide counters do not identify which threads
+were waiting or why.
+
+### Explicit worker placement stabilizes prefill in this run
+
+Four balanced pairs compared the ordinary four-CPU process mask with
+Leaf's existing explicit binding of the caller and workers to those same
+CPUs. The binding policy also enables the existing 50 µs spin window.
+Both sides used the same executable, artifact and 384-token prompt with
+three warmups and five samples per launch. AC and Better Battery checks
+passed. This was a separate instrumented diagnostic.
+
+| Phase | Process-mask p50 | Explicit-binding p50 | Process-mask p90/p10 | Explicit-binding p90/p10 |
+| --- | ---: | ---: | ---: | ---: |
+| Prefill | 1,679.42 ms | 1,426.86 ms | 2.485 | 1.088 |
+| Cached decode | 47.58 ms | 40.44 ms | 1.940 | 1.396 |
+
+Every measured sample had zero faults on both sides. Every explicit-binding
+prefill pass met the 1.25 spread limit, and prefill ranged from 1,401 to
+1,546 ms. With the process mask alone, prefill ranged from 1,413 to
+3,658 ms. The bound prefill occupied about 2.17–2.64 equivalent CPUs on
+average within a sample, compared with 0.94–2.49 under the mask alone.
+Decode still failed the gate. The comparison tests binding and spinning
+together, so it cannot attribute the improvement to either separately.
+This experiment does not change production defaults or qualify a speed
+claim against Ollama.
