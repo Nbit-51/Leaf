@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-17",
+  "archive": "evidence.zip",
+  "files": {
+    "factorial.json": "502c41e51363cc7dfcc1776f66453794f47fec3726155561db273583ffbafbf5",
+    "bound-confirm.json": "5e39e58722d545514880bdf4888a75869e5ccc79b648a6a67c356809a365fc7a",
+    "factorial.py": "d97d91938546bf3dd975a0896e62d4c8f2d3c50c39158f6cbdee7a8864a2fc30",
+    "confirm.py": "7a375b61d9aba8578f2bf78e86879f26f2ae338306acad90702cc7086f6df9ec",
+    "spin-policy.patch": "942e7e4e9d634d2ea9b049fb4a0e62facb47c370e9b2ab2ac57eb1b2d958b9ce"
+  },
+  "archive_sha256": "92c518103f1c6cfe6501f4c5e9ca69692ce964515c32dcd06e132ed285622ed2"
+}

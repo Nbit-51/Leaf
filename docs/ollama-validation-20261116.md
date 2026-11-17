@@ -287,3 +287,57 @@ Decode still failed the gate. The comparison tests binding and spinning
 together, so it cannot attribute the improvement to either separately.
 This experiment does not change production defaults or qualify a speed
 claim against Ollama.
+
+### Binding and spin wait tested independently
+
+A diagnostic build lets the benchmark select a 0 or 50 µs spin wait
+independently of binding the caller and workers. All four combinations
+used the same executable. The native worker test passed 346 range,
+affinity, restoration and exception checks under each spin setting.
+Compared with the baseline binary, all policies matched 90,489,600 full
+logits at 64 and 384 tokens plus one cached step on SmolLM2 and Qwen.
+They also matched the tested continuations at one, two and four threads.
+
+The instrumented four-thread comparison used two reversed-order rounds,
+three warmups and five samples per pass per model and length. Both power
+checks passed. At 384 tokens the median within-round ratios below compare
+only the effect of binding or spinning. The spread column is pooled
+p90/p10 for binding without spin.
+
+| Model | Binding vs mask, spin off | Binding vs mask, spin on | Spin on/off, bound | Bound no-spin prefill spread |
+| --- | ---: | ---: | ---: | ---: |
+| SmolLM2-360M | 0.943 | 0.959 | 1.016 | 1.034 |
+| Qwen2.5-0.5B | 0.818 | 0.809 | 1.005 | 1.025 |
+
+Binding without spin passed all 384-token prefill spreads on both models.
+Adding spin to binding raised median accounted prefill CPU time from
+3,391 to 3,477 ms on SmolLM2 and from 3,727 to 3,773 ms on Qwen.
+SmolLM2 decode missed the gate under all four policies at this length.
+All measured 384-token samples had zero process faults.
+
+At 64 tokens the jointly passing policy differed by model. Qwen passed
+both phase spread checks only with binding and spin enabled. SmolLM2 had
+no policy that passed both. On Qwen, both bound policies recorded faults
+in all 20 measured prefills, in multiples of 139, even after three
+warmups. The same counts were absent at 384 tokens. These process fault
+counts do not identify the memory region or whether a fault required I/O.
+
+The counter-free confirmation used two more balanced rounds at 384 tokens,
+with both policies explicitly bound. It retained the same three warmups
+and five measured samples per pass. All per-pass and pooled prefill spread
+checks passed for both policies and models. All model/policy combinations
+missed at least one decode spread check.
+
+| Model | Prefill p50, spin off → on | Prefill spread, spin off → on | Decode spread, spin off → on |
+| --- | ---: | ---: | ---: |
+| SmolLM2-360M | 1,451.08 → 1,428.56 ms | 1.165 → 1.080 | 2.583 → 1.245 |
+| Qwen2.5-0.5B | 1,388.80 → 1,366.56 ms | 1.241 → 1.013 | 1.757 → 1.349 |
+
+The paired prefill ratios with spin enabled were 0.966 and 0.973 in
+this repeat. The instrumented experiment had the opposite direction
+for this isolated comparison (1.016 and 1.005). The short campaigns
+support a bounded 384-token binding result, without a reproducible spin
+speed claim across measurement modes. The experiment does not change the
+runtime defaults or qualify a cross-runtime speed claim.
+
+[Raw comparison, harnesses and diagnostic patch](../benchmark/validation/worker-spin/20261117/manifest.json)
